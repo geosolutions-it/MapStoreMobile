@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+   	   <include layout="@layout/button_location_merge" />
+       <include layout="@layout/button_info_merge" />
+       <include layout="@layout/button_marker_merge" />
+</merge>

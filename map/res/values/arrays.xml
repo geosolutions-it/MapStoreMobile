@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string-array name="array_zoom_levels" tools:ignore="MissingTranslation">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>13</item>
+        <item>14</item>
+        <item>15</item>
+        <item>16</item>
+        <item>17</item>
+        <item>18</item>
+        <item>19</item>
+        <item>20</item>
+        <item>21</item>
+        <item>22</item>
+        <item>23</item>
+        <item>24</item>
+        <item>25</item>
+        <item>26</item>
+        <item>27</item>
+        <item>28</item>
+        <item>29</item>
+        <item>30</item>
+    </string-array>
+    <string-array name="preferences_text_scale_keys">
+		<item>0.85</item>
+		<item>1.0</item>
+		<item>1.3</item>
+		<item>1.6</item>
+		<item>2.0</item>
+	</string-array>
+	<string name="preferences_text_scale_default">1.6</string>
+	<string-array name="preferences_line_joins_stroke_keys">
+		<item >ROUND</item>
+		<item >MITER</item>
+		<item >BEVEL</item>
+	</string-array>
+	<string name="preferences_line_joins_stroke_default">BEVEL</string>
+	<string-array name="array_dashes">
+        <item>No</item>
+        <item>Ok</item>
+    </string-array>
+</resources>

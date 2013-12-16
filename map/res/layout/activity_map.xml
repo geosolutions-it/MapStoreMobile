@@ -1,0 +1,57 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="match_parent"
+    tools:context="it.geosolutions.android.map.MapsActivity" >
+   
+    <LinearLayout android:id="@+id/map_buttonbar"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" 
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:background="@drawable/map_control_bg"
+        android:orientation="horizontal"
+        
+        >
+       <include layout="@layout/map_control_buttons_merge" />
+
+      
+    </LinearLayout>
+    
+	<it.geosolutions.android.map.view.AdvancedMapView
+	    android:id="@+id/advancedMapView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" 
+        android:layout_alignParentTop="true"
+        android:layout_above="@id/map_buttonbar" />
+     
+	 <ImageButton 
+         	android:contentDescription="@string/button_confirm_marker_position"
+         	android:visibility="invisible"
+         	android:padding="15dip" 
+            android:clickable="true"
+	        android:id="@+id/button_confirm_marker_position"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"     
+	        android:background="@drawable/map_toggle_control"
+	        android:layout_alignParentBottom="true"
+	        android:layout_alignParentRight="true"
+	        android:layout_below="@id/advancedMapView"
+        	android:src="@drawable/ic_navigation_accept"
+        	
+        />
+	  <LinearLayout
+        android:id="@+id/secondary_map_controls"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="10dip"
+        android:background="@android:color/transparent"
+        android:layout_marginTop="10dip"
+        android:orientation="horizontal"
+        android:visibility="gone" >
+	     <include layout="@layout/marker_info_button" />
+	      
+	  </LinearLayout>
+</RelativeLayout>

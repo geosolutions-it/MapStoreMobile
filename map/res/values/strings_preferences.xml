@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>	
+    <string name="preferences_debug">Debug settings</string>
+	<string name="preferences_general">General settings</string>
+	<string name="preferences_cache_persistence">Cache persistence</string>
+	<string name="preferences_cache_persistence_desc">Keep cached images on exit</string>
+	<string name="preferences_cache_size">External storage</string>
+	<string name="preferences_cache_size_desc">Adjust the size of the cache</string>
+	<string name="preferences_cache_size_value">%.1f MB</string>
+	<string name="preferences_fullscreen">Full screen mode</string>
+	<string name="preferences_fullscreen_desc">Hide the status bar</string>
+	<string name="preferences_map">Map settings</string>
+	<string name="preferences_move_speed">Move speed</string>
+	<string name="preferences_move_speed_desc">Adjust the move speed of the map</string>
+	<string name="preferences_move_speed_value">%d %% move speed</string>
+	<string name="preferences_scale_bar_unit">Scale bar unit</string>
+	<string name="preferences_scale_bar_unit_desc">Select the unit for the map scale bar</string>
+	<string name="preferences_show_fps_counter">Frame rate</string>
+	<string name="preferences_show_fps_counter_desc">Enable frames per second counter</string>
+	<string name="preferences_show_scale_bar">Map scale bar</string>
+	<string name="preferences_show_scale_bar_desc">Show the scale of the map</string>
+	<string name="preferences_show_tile_coordinates">Tile coordinates</string>
+	<string name="preferences_show_tile_coordinates_desc">Show coordinates on tiles</string>
+	<string name="preferences_show_tile_frames">Tile boundaries</string>
+	<string name="preferences_show_tile_frames_desc">Draw tile boundaries</string>
+	<string name="preferences_show_water_tiles">Water tiles</string>
+	<string name="preferences_show_water_tiles_desc">Highlight tiles which have the water flag set</string>
+	<string name="preferences_text_scale">Font size</string>
+	<string name="preferences_text_scale_desc">Select the text size of map labels</string>
+	<string name="preferences_wake_lock">Stay awake</string>
+	<string name="preferences_wake_lock_desc">Stop the screen from dimming</string>
+	<string-array name="preferences_text_scale_values">
+		<item>tiny</item>
+		<item>small</item>
+		<item>normal</item>
+		<item>large</item>
+		<item>huge</item>
+	</string-array>
+	<string name="preferences_advanced">Advanced settings</string>
+	<string name="preferences_fill_color">Color</string>
+	<string name="preferences_fill_color_desc">Change fill color of the selected area</string>
+	<string name="preferences_fill_alpha">Opacity</string>
+	<string name="preferences_fill_alpha_desc">Change opacity of the selected area</string>
+	<string name="preferences_stroke_color">Color</string>
+	<string name="preferences_stroke_color_desc">Change border color</string>
+	<string name="preferences_stroke_alpha">Opacity</string>
+	<string name="preferences_stroke_alpha_desc">Change opacity of border</string>
+	<string name="preferences_stroke_width">Width</string>
+	<string name="preferences_stroke_width_desc">Change border width</string>
+	<string name="preferences_selector_style">Map information selector</string>
+	<string name="preferences_selector_style_desc">Set style of selection on map</string>
+	<string name="preferences_advanced_desc">Settings of map info selector</string>
+	<string name="preferences_line_joins_stroke">Corners</string>
+	<string name="preferences_line_joins_stroke_desc">Set border corners style</string>
+	<string-array name="preferences_line_joins_stroke_values">
+		<item >Rounded</item>
+		<item >Squared</item>
+		<item >Beveled</item>
+	</string-array>
+	<string name="preferences_dashed_stroke">Dashed border</string>
+	<string name="preferences_dashed_stroke_desc">Click here if you want dashed border</string>
+	<string name="preferences_stroke_spaces">Spacing</string>
+	<string name="preferences_stroke_spaces_desc">Set value for spacing between dashes</string>
+	<string name="preferences_stroke_shape_dimension">Dashes size</string>
+	<string name="preferences_stroke_shape_dimension_desc">Set dashes size</string>
+	<string name="preferences_fill_category">Fill style</string>
+	<string name="preferences_stroke_category">Border style</string>
+	<string name="preferences_dashed_stroke_screen">Style of dashed border</string>
+	<string name="preferences_dashed_stroke_screen_desc">Set style of dashed border</string>
+</resources>

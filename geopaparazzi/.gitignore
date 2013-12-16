@@ -1,0 +1,12 @@
+
+geopaparazzilibrary/bin
+geopaparazzilibrary/gen
+
+geopaparazzispatialitelibrary/bin
+geopaparazzispatialitelibrary/gen
+
+*.swp
+*~
+*.class
+.directory
+

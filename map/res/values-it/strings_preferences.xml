@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>	
+    <string name="preferences_debug">Impostazioni di Debug</string>
+	<string name="preferences_general">Impostazioni generali</string>
+	<string name="preferences_cache_persistence">Persistenza cache</string>
+	<string name="preferences_cache_persistence_desc">Mantieni le immagini nella cache all\'uscita</string>
+	<string name="preferences_cache_size">Memoria esterna</string>
+	<string name="preferences_cache_size_desc">Imposta le dimensioni della cache</string>
+	<string name="preferences_cache_size_value">%.1f MB</string>
+	<string name="preferences_fullscreen">Modalità schermo intero</string>
+	<string name="preferences_fullscreen_desc">Nascondi la barra di stato</string>
+	<string name="preferences_map">Impostazioni mappa</string>
+<!-- <string name="preferences_move_speed">Velocit&agrave; movimento</string>
+	<string name="preferences_move_speed_desc">Adjust the move speed of the map</string>
+	<string name="preferences_move_speed_value">%d %% move speed</string>
+	 -->	
+	<string name="preferences_scale_bar_unit">Unità barra della scala</string>
+	<string name="preferences_scale_bar_unit_desc">Seleziona l\'unità di misura per la mappa</string>
+	<string name="preferences_show_fps_counter">Frame rate</string>
+	<string name="preferences_show_fps_counter_desc">Enable frames per second counter</string>
+	<string name="preferences_show_scale_bar">Barra di scala</string>
+	<string name="preferences_show_scale_bar_desc">Mostra la scala</string>
+<!-- 	<string name="preferences_show_tile_coordinates">Tile coordinates</string>
+	<string name="preferences_show_tile_coordinates_desc">Show coordinates on tiles</string>
+	<string name="preferences_show_tile_frames">Tile boundaries</string>
+	<string name="preferences_show_tile_frames_desc">Draw tile boundaries</string>
+	
+	<string name="preferences_show_water_tiles">Water tiles</string>
+	<string name="preferences_show_water_tiles_desc">Highlight tiles which have the water flag set</string>
+	 -->
+	<string name="preferences_text_scale">Dimensione Caratteri</string>
+	<string name="preferences_text_scale_desc">Seleziona la dimensione delle etichette sulla mappa</string>
+<!-- 	<string name="preferences_wake_lock">Stay awake</string>
+	<string name="preferences_wake_lock_desc">Stop the screen from dimming</string>
+	 -->
+	<string-array name="preferences_text_scale_values">
+		<item>molto piccolo</item>
+		<item>piccolo</item>
+		<item>normale</item>
+		<item>grande</item>
+		<item>molto grande</item>
+	</string-array>
+	<string name="preferences_advanced">Impostazioni avanzate</string>
+	<string name="preferences_fill_color">Colore</string>
+	<string name="preferences_fill_color_desc">Varia il colore di riempimento della selezione</string>
+	<string name="preferences_fill_alpha">Opacità</string>
+	<string name="preferences_fill_alpha_desc">Varia l\'opacità della selezione</string>
+	<string name="preferences_stroke_color">Colore</string>
+	<string name="preferences_stroke_color_desc">Varia il colore del bordo</string>
+	<string name="preferences_stroke_alpha">Opacità</string>
+	<string name="preferences_stroke_alpha_desc">Varia l\'opacità del bordo</string>
+	<string name="preferences_stroke_width">Larghezza</string>
+	<string name="preferences_stroke_width_desc">Varia la larghezza del bordo</string>
+	<string name="preferences_selector_style">Selettore informazioni mappa</string>
+	<string name="preferences_selector_style_desc">Imposta lo stile del selettore del tool di informazioni</string>
+	<string name="preferences_advanced_desc">Impostazioni per la selezione sulla mappa</string>
+	<string name="preferences_line_joins_stroke">Angoli</string>
+	<string name="preferences_line_joins_stroke_desc">Imposta lo stile per gli angoli del bordo</string>
+	<string-array name="preferences_line_joins_stroke_values">
+		<item >Arrotondati</item>
+		<item >Quadrati</item>
+		<item >Smussati</item>
+	</string-array>
+	<string name="preferences_dashed_stroke">Bordo tratteggiato</string>
+	<string name="preferences_dashed_stroke_desc">Clicca qui se vuoi il bordo tratteggiato</string>
+	<string name="preferences_stroke_spaces">Spaziatura</string>
+	<string name="preferences_stroke_spaces_desc">Imposta il valore della spaziatura tra i tratti del bordo</string>
+	<string name="preferences_stroke_shape_dimension">Dimensione dei tratti</string>
+	<string name="preferences_stroke_shape_dimension_desc">Imposta la dimensione dei tratti</string>
+	<string name="preferences_fill_category">Stile del riempimento</string>
+	<string name="preferences_stroke_category">Stile del bordo</string>
+	<string name="preferences_dashed_stroke_screen">Stile del bordo tratteggiato</string>
+	<string name="preferences_dashed_stroke_screen_desc">Imposta lo stile del bordo tratteggiato</string>
+</resources>

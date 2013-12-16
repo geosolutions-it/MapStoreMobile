@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="map_name">Mappa</string>
+    <string name="action_settings">Impostazioni</string>
+    <string name="data">Dati</string>
+    <string name="styles">Stili</string>
+    <string name="data">Sedi Tecniche</string>
+    <string name="markers">Segnalazioni</string>
+    <string name="min_zoom">Minimo zoom level</string>
+    <string name="max_zoom">Massimo zoom Level</string>
+    <string name="style_point">Punto</string>
+    <string name="style_line">Tratto</string>
+    <string name="style_fill">Riempimento</string>
+    <string name="style_visibility">Visibilità</string>
+    <string name="error_saving_style">Salvataggio stile fallito</string>
+    <string name="error_reading_style">Lettura stile fallito</string>
+    <string name="error_unable_getfeature_db">Sede tecnica non trovata nel database locale</string>
+    <string name="error_getting_data_from_database">Errore nel prelevare la sede tecnica dal database</string>
+    <string name="use_this_feature">Modifica sede tecnica</string>
+    <string name="use_this_feature_description">Vuoi utilizzare questa sede tecnica per la segnalazione corrente?</string>
+    <string name="menu_preferences">Impostazioni Mappa</string>
+    <string name="dialog_title">Avviso</string>
+	<string name="dialog_message">Vuoi scaricare l\'archivio dei dati di prova?</string>
+	<string name="button_download">Si</string>
+	<string name="button_undownload">Non ora</string>
+	<string name="progress_dialog_title">Attendere prego</string>
+	<string name="progress_dialog_message">Scaricamento dei dati</string>
+	<string name="progress_dialog_unzipping">Decompressione in corso</string>
+</resources>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <!-- **************************************** -->	
+	<!-- **  Visibility                        ** -->	
+    <!-- **************************************** -->	
+	<TextView
+        
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
+        android:text="@string/style_visibility"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textStyle="bold" />
+    <!-- Min Zoom -->
+     <TextView
+        android:id="@+id/textView4"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:padding="5dp"
+        android:text="@string/min_zoom"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/main_text_color_neutral" />
+    <Spinner
+        android:id="@+id/minzoom_spinner"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/array_zoom_levels"
+        android:padding="5dp" />
+    <!-- Max Zoom -->
+	 <TextView
+        android:id="@+id/textView5"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:padding="5dp"
+        android:text="@string/max_zoom"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/main_text_color_neutral" />
+
+    <Spinner
+        android:id="@+id/maxzoom_spinner"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+
+        android:entries="@array/array_zoom_levels"
+        android:padding="5dp" />
+    
+</merge>

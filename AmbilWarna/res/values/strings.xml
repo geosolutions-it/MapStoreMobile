@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rgb_R_text">R</string>
+    <string name="rgb_B_text">B</string>
+    <string name="rgb_G_text">G</string>  
+</resources>

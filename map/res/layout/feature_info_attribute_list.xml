@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/featureinfo_list"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+ 	<RelativeLayout
+ 	    android:id="@+id/attributeButtonBar"
+ 	    android:layout_width="match_parent"
+ 	    android:layout_height="wrap_content"
+ 	    android:layout_alignParentBottom="true"
+ 	    android:layout_alignParentRight="true"
+ 	    android:layout_alignParentLeft="true"
+ 	    android:background="@drawable/map_control_bg"
+ 	    android:visibility="gone" >
+
+        <ImageButton
+            android:id="@+id/previousButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="15dip" 
+            android:background="@drawable/map_control_bg"
+            android:src="@drawable/ic_navigation_previous_item"
+            android:layout_alignParentLeft="true"
+            android:visibility="invisible"
+            />
+ 		<ImageButton
+            android:id="@+id/use_for_marker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="15dip" 
+            android:background="@drawable/map_control_bg"
+            android:src="@drawable/ic_location_place"
+            android:layout_centerInParent="true"
+            android:visibility="visible" />
+             />
+        <ImageButton
+            android:id="@+id/nextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            
+            android:padding="15dip" 
+            android:background="@drawable/map_control_bg"
+            android:src="@drawable/ic_navigation_next_item"
+            android:text="next"
+            android:layout_alignParentRight="true"
+            android:visibility="invisible" />
+    </RelativeLayout>
+
+    <ListView
+        android:id="@android:id/list"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/attributeButtonBar"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/buttonsLayout"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
+        android:drawSelectorOnTop="true" >
+
+    </ListView>
+   	<LinearLayout
+	    android:id="@android:id/empty"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:layout_alignParentRight="true"
+	    android:layout_alignParentLeft="true"
+	    android:layout_alignParentTop="true"
+	    android:layout_alignParentBottom="true"
+		android:gravity="center"
+	    android:visibility="gone">
+        <ImageView 
+           android:id="@+id/Image" 
+			android:layout_width="wrap_content" 
+			android:layout_height="wrap_content"
+			android:src="@drawable/ic_action_info" />
+	    <TextView android:id="@+id/empty_text"
+	               android:layout_width="match_parent"
+	               android:layout_height="match_parent"
+	               android:layout_gravity="center"
+	               android:text="@string/feature_info_extracting_information"/><!-- TODO make it visible once load ends -->
+         
+  	</LinearLayout>
+</RelativeLayout>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="map_name">map</string>
+    <string name="action_settings">Settings</string>
+    <string name="data">Data</string>
+    <string name="styles">Styles</string>
+    <string name="markers">Markers</string>
+    <string name="menu_layers">Layers</string>
+    <string name="min_zoom">Minimum zoom level</string>
+    <string name="max_zoom">Maximum zoom Level</string>
+    <string name="style_point">Point</string>
+    <string name="style_line">Line</string>
+    <string name="style_fill">Fill</string>
+    <string name="style_visibility">Visibility</string>
+    <string name="error_saving_style">Couldn\'t save Style</string>
+    <string name="error_reading_style">Couldn\'t read Style</string>
+    <string name="error_unable_getfeature_db">Unable to get the feature from the local database</string>
+    <string name="error_getting_data_from_database">Error getting data from database</string>
+    <string name="use_this_feature">Use This Feature</string>
+    <string name="use_this_feature_description">Do you want to place a marker on this feature?</string>
+    <string name="menu_preferences">Map Preferences</string>
+   	<string name="dialog_title">Advertise</string>
+	<string name="dialog_message">Do you want to download data files test archive?</string>
+	<string name="button_download">OK</string>
+	<string name="button_undownload">Not now</string>
+	<string name="progress_dialog_title">Wait please</string>
+	<string name="progress_dialog_message">Download data</string>
+	<string name="progress_dialog_unzipping">Unzipping ongoing</string>
+	<string name="url_data_test_archive">http://demo.geo-solutions.it/share/mapstoremobile/MapStoreMobile-test-data.zip</string>
+</resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="button_info_content">Infomazioni sulla sede tecnica</string>
+    <string name="feature_info_title">Informazioni</string>
+    <string name="feature_info_extracting_information">Sto cercando informazioni sulla zona selezionata</string>
+    <string name="feature_info_extracting_too_many_results">Troppi risultati nell\'area selezionata. Alcuni non verranno mostrati</string>
+    <string name="feature_info_extracting_no_result">Nessuna sede tecnica nell\'area selezionata</string>
+    <string name="button_confirm_marker_position">Confermi La posizione della Segnalazione</string>
+    <string name="button_confirm_marker_position_title">Confermi?</string>
+    <string name="map_marker_enable_suggestion">Tocca una segnalazione per selezionarla.\n Premi a lungo su di essa per spostarla.</string>
+    <string name="map_marker_drag_suggestion">Muovi il dito per spostare la segnalazione.</string>
+    <!--  GeoLocation  -->
+    <string name="location_unavailable_message">Nessun servizio di localizzazione rilevato sul dispositivo.</string>
+	<string name="location_deactivated_message">Localizzazione sulla mappa disattivata.</string>
+	<string name="location_activated_message">Localizzazione sulla mappa attivata.\nPremi a lungo il pulsante per agganciare la mappa alla tua posizione.</string>
+	<string name="location_snap_activated_message">Adesso la mappa seguirà la tua posizione</string>
+	<string name="location_snap_deactivated_message">Modalità di inseguimento della posizione disattivate</string>
+	<string name="location_promt_gps_acrivation">Il Ricevitore GPS è disattivato. Vuoi attivarlo?</string>
+</resources>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent" android:layout_height="fill_parent">
+<LinearLayout 
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/main_background"
+    android:orientation="vertical"
+    android:padding="5dp" >
+	<!-- **************************************** -->	
+	<!-- Point                                    -->
+	<!-- **************************************** -->	
+	
+	<!-- Title -->
+	<TextView
+        
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
+        android:text="@string/style_point"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textStyle="bold" />
+	
+	<!-- Shape -->
+    <TextView
+        android:id="@+id/textView0"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:padding="5dp"
+        android:text="@string/point_shape_"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/main_text_color_neutral" />
+
+    <Spinner
+        android:id="@+id/shape_spinner"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/array_shapes"
+        android:padding="5dp" />
+	<!-- Size -->
+    <TextView
+        android:id="@+id/textView01"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:padding="5dp"
+        android:text="@string/point_size"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/main_text_color_neutral" />
+
+    <Spinner
+        android:id="@+id/size_spinner"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/array_sizes"
+        android:padding="5dp" />
+    
+	<!-- Line -->
+    <include layout="@layout/style_form_line_merge" />
+	<!-- Fill -->
+	<include layout="@layout/style_form_fill_merge" />
+    <!-- MAX and MIN ZOOM -->
+    <include layout="@layout/style_form_zoom_merge" />
+
+	<!-- Buttons OK CANCEL -->
+	<include layout="@layout/ok_cancel_merge" />
+</LinearLayout>
+</ScrollView>
