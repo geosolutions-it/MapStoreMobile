@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="it.geosolutions.android.mapstoremobile"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <!-- Map Specific permission -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- endo of Map Specific permission -->
+    <uses-sdk
+        android:minSdkVersion="8"
+        android:targetSdkVersion="17" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <!-- Map -->
+        <activity
+            android:name="it.geosolutions.android.mapstoremobile.StartupActivity"
+            android:label="@string/app_name"
+            android:configChanges="orientation|screenSize" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="it.geosolutions.android.map.DataListActivity"
+            android:label="@string/app_name" >
+        </activity>
+         <activity 
+             android:name="it.geosolutions.android.map.MapsActivity" 
+             android:label="@string/app_name">
+        </activity>
+        <activity
+            android:name="it.geosolutions.android.map.activities.style.LinesDataPropertiesActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="it.geosolutions.android.map.activities.style.PointsDataPropertiesActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="it.geosolutions.android.map.activities.style.PolygonsDataPropertiesActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="it.geosolutions.android.map.activities.GetFeatureInfoActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="it.geosolutions.android.map.activities.GetFeatureInfoLayerListActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="it.geosolutions.android.map.activities.GetFeatureInfoAttributeActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity android:name="it.geosolutions.android.map.activities.FeatureDetailsActivity" >
+        </activity>
+        <activity android:name="it.geosolutions.android.map.preferences.EditPreferences" >
+        </activity>
+        <!-- End Map -->
+    </application>
+
+</manifest>
