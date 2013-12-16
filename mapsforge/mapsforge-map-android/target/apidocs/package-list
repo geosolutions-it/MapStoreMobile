@@ -1,0 +1,5 @@
+org.mapsforge.map.android
+org.mapsforge.map.android.graphics
+org.mapsforge.map.android.input
+org.mapsforge.map.android.layer
+org.mapsforge.map.android.view
