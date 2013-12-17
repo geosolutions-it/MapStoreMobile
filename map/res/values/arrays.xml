@@ -32,21 +32,21 @@
         <item>29</item>
         <item>30</item>
     </string-array>
-    <string-array name="preferences_text_scale_keys">
+    <string-array name="preferences_text_scale_keys" translatable="false">
 		<item>0.85</item>
 		<item>1.0</item>
 		<item>1.3</item>
 		<item>1.6</item>
 		<item>2.0</item>
 	</string-array>
-	<string name="preferences_text_scale_default">1.6</string>
-	<string-array name="preferences_line_joins_stroke_keys">
+	<string name="preferences_text_scale_default" translatable="false">1.6</string>
+	<string-array name="preferences_line_joins_stroke_keys" translatable="false">
 		<item >ROUND</item>
 		<item >MITER</item>
 		<item >BEVEL</item>
 	</string-array>
-	<string name="preferences_line_joins_stroke_default">BEVEL</string>
-	<string-array name="array_dashes">
+	<string name="preferences_line_joins_stroke_default" translatable="false">BEVEL</string>
+	<string-array name="array_dashes" translatable="false">
         <item>No</item>
         <item>Ok</item>
     </string-array>
