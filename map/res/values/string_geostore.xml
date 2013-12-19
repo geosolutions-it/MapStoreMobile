@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="geostore_loading_resources">Loading Resources</string>
+    <string name="geostore_resource_name">Name</string>
+    <string name="geostore_resource_description">Description</string>
+    <string name="geostore_resource_last_updated">Last Updated</string>
+    <string name="geostore_resource_creation">Creation</string>
+    <string name="geostore_resource_id">ID</string>
+	
+</resources>

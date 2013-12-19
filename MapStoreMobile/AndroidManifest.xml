@@ -70,6 +70,12 @@
         <activity android:name="it.geosolutions.android.map.preferences.EditPreferences" >
         </activity>
         <!-- End Map -->
+        <!-- GeoStore -->
+         <activity android:name="it.geosolutions.android.map.geostore.activities.GeoStoreResourcesActivity" >
+        </activity>
+         <activity android:name="it.geosolutions.android.map.geostore.activities.GeoStoreResourceDetailActivity">
+        </activity>
+        <!-- End GeoStore -->
     </application>
 
 </manifest>

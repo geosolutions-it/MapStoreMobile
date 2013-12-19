@@ -25,10 +25,12 @@ import it.geosolutions.android.map.control.MapInfoControl;
 import it.geosolutions.android.map.control.MarkerControl;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
 import it.geosolutions.android.map.dto.MarkerDTO;
+import it.geosolutions.android.map.geostore.activities.GeoStoreResourcesActivity;
 import it.geosolutions.android.map.model.Attribute;
 import it.geosolutions.android.map.model.Feature;
 import it.geosolutions.android.map.overlay.MarkerOverlay;
 import it.geosolutions.android.map.overlay.SpatialiteOverlay;
+import it.geosolutions.android.map.overlay.WMSOverlay;
 import it.geosolutions.android.map.overlay.items.DescribedMarker;
 import it.geosolutions.android.map.preferences.EditPreferences;
 import it.geosolutions.android.map.style.StyleManager;
@@ -36,6 +38,8 @@ import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.android.map.utils.MarkerUtils;
 import it.geosolutions.android.map.utils.SpatialDbUtils;
 import it.geosolutions.android.map.view.AdvancedMapView;
+import it.geosolutions.android.map.wms.WMSLayer;
+import it.geosolutions.android.map.wms.WMSSource;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -127,9 +131,10 @@ public class MapsActivity extends MapActivity {
 	
 	private boolean markerActivated;
 	private boolean spatialActivated;
-        //------------------------------------------------------
+    //------------------------------------------------------
 	// CONSTANTS
-        //------------------------------------------------------
+    //------------------------------------------------------
+	private static final int MAPSTORE_REQUEST_CODE = 1;
 	/** FEATURE_DEFAULT_ID */
 	private static final String FEATURE_DEFAULT_ID = "OGC_FID";
 	
@@ -174,6 +179,8 @@ public class MapsActivity extends MapActivity {
 		        if(savedInstanceState.getBoolean(DATA_ENABLED_FLAG,true)){
 		            mapView.getOverlays().add(spatialiteOverlay);
 		        }
+		        
+		        
 		}else{
 		    mapView.getOverlays().add(spatialiteOverlay);
 		}
@@ -352,9 +359,15 @@ public class MapsActivity extends MapActivity {
 		    Intent pref = new Intent(this,EditPreferences.class);
 		    startActivity(pref);
 		    return true;
-	        }else{
-	            return super.onOptionsItemSelected(item);
-		}
+        }else if(itemId == R.id.menu_geostore){
+		    Intent pref = new Intent(this,GeoStoreResourcesActivity.class);
+		    pref.putExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL,"http://sit.comune.bolzano.it/geostore/rest/");
+		    startActivityForResult(pref, GeoStoreResourcesActivity.GET_MAP_CONFIG);
+		    return true;
+	        
+		}else{
+            return super.onOptionsItemSelected(item);
+		} 
 	}
 
 	/**
