@@ -70,6 +70,9 @@ public class GeoStoreResourcesActivity extends SherlockFragmentActivity {
 		super.onActivityResult(request_code, result_code, result);
 		if(request_code==GeoStoreResourcesActivity.GET_MAP_CONFIG){
 			if(result_code==RESULT_OK){
+				Bundle extras = getIntent().getExtras();
+			    String geoStoreUrl =  extras.getString(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL);
+			    result.putExtra(PARAMS.GEOSTORE_URL, geoStoreUrl);
 				setResult(Activity.RESULT_OK,result); 
 				finish();
 			}

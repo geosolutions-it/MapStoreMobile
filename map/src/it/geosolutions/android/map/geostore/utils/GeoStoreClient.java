@@ -6,8 +6,10 @@ import it.geosolutions.android.map.geostore.model.GeoStoreAttributeTypeAdapter;
 import it.geosolutions.android.map.geostore.model.GeoStoreResourceTypeAdapter;
 import it.geosolutions.android.map.geostore.model.Resource;
 import it.geosolutions.android.map.geostore.model.ResourceList;
+import it.geosolutions.android.map.geostore.model.SearchResult;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.HttpEntity;
@@ -74,12 +76,55 @@ public class GeoStoreClient {
 				Log.d("GeoStore", "remote service response:");
 				Log.d("GeoStore", responseText);
 				Gson gson = new GsonBuilder()
-						// .setDateFormat("yyyy-mm-ddTHH:mm:ss.zzz") //TODO
-						// implement date format
-						.registerTypeAdapter(Resource[].class,
-								new GeoStoreResourceTypeAdapter())
-						.registerTypeAdapter(Attribute[].class,
-								new GeoStoreAttributeTypeAdapter()).create();
+				// .setDateFormat("yyyy-mm-ddTHH:mm:ss.zzz") //TODO
+				// implement date format
+				.registerTypeAdapter(Resource[].class,
+						new GeoStoreResourceTypeAdapter())
+				.registerTypeAdapter(Attribute[].class,
+						new GeoStoreAttributeTypeAdapter()).create();
+				SearchResult c = gson.fromJson(responseText, SearchResult.class);
+				if(c== null) {return null;}
+				if(!c.success) {return null;}
+				return c.results;
+			}
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			Log.e("GeoStore", "HTTP Protocol error");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			Log.e("GeoStore", "IOException during HTTP request");
+		}
+		return new ArrayList<Resource>();
+	}
+	
+	public List<Resource> searchResources() {
+		HttpClient httpclient = new DefaultHttpClient();
+		HttpGet get = new HttpGet(url + "extjs/search/*");
+		if (url == null)
+			;
+		{
+			Log.w("GeoStore", "URL Not Present. Unable to submit the request");
+		}
+		get.addHeader("Accept", "application/json");
+		HttpResponse response;
+		// TODO support pagination, filtering, account
+		try {
+			response = httpclient.execute(get);
+
+			HttpEntity resEntity = response.getEntity();
+			String responseText;
+			if (resEntity != null) {
+				// parse response.
+				responseText = EntityUtils.toString(resEntity);
+				Log.d("GeoStore", "remote service response:");
+				Log.d("GeoStore", responseText);
+				Gson gson = new GsonBuilder()
+				// .setDateFormat("yyyy-mm-ddTHH:mm:ss.zzz") //TODO
+				// implement date format
+				.registerTypeAdapter(Resource[].class,
+						new GeoStoreResourceTypeAdapter())
+				.registerTypeAdapter(Attribute[].class,
+						new GeoStoreAttributeTypeAdapter()).create();
 				Container ctnrl = gson.fromJson(responseText, Container.class);
 				ResourceList rl = ctnrl.resourceList;
 				return rl.list;
@@ -95,12 +140,13 @@ public class GeoStoreClient {
 		}
 		return null;
 	}
-
 	
 
-	public List<Resource> getData(int id) {
+	public String getData(Long id) {
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpGet get = new HttpGet(url + "data/" + id);
+		get.addHeader("Accept", "application/json");
+
 		if (url == null)
 			;
 		{
@@ -119,24 +165,14 @@ public class GeoStoreClient {
 				responseText = EntityUtils.toString(resEntity);
 				Log.d("GeoStore", "remote service response:");
 				Log.d("GeoStore", responseText);
-				Gson gson = new GsonBuilder()
-						// .setDateFormat("yyyy-mm-ddTHH:mm:ss.zzz") //TODO
-						// implement date format
-						.registerTypeAdapter(Resource[].class,
-								new GeoStoreResourceTypeAdapter())
-						.registerTypeAdapter(Attribute[].class,
-								new GeoStoreAttributeTypeAdapter()).create();
-				Container ctnrl = gson.fromJson(responseText, Container.class);
-				ResourceList rl = ctnrl.resourceList;
-				return rl.list;
+				
+				return responseText;
 
 			}
 
 		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
 			Log.e("GeoStore", "HTTP Protocol error");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			Log.e("GeoStore", "IOException during HTTP request");
 		}
 		return null;

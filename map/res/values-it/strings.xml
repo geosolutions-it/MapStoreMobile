@@ -18,6 +18,7 @@
     <string name="use_this_feature">Modifica sede tecnica</string>
     <string name="use_this_feature_description">Vuoi utilizzare questa sede tecnica per la segnalazione corrente?</string>
     <string name="menu_preferences">Impostazioni Mappa</string>
+    <string name="menu_geostore">MapStore</string>
     <string name="dialog_title">Avviso</string>
 	<string name="dialog_message">Vuoi scaricare l\'archivio dei dati di prova?</string>
 	<string name="button_download">Si</string>

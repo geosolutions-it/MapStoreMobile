@@ -144,6 +144,7 @@ public class WMSRequest {
 		}
 		currentParams.put(PARAMS.STYLES,styleStringWriter.toString());
 		currentParams.put(PARAMS.LAYERS,layerStringWriter.toString());
+		Log.v("WMS","created request params for layer:"+layerStringWriter.toString());
 		
 		return currentParams;
 	}

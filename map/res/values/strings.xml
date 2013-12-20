@@ -20,6 +20,7 @@
     <string name="use_this_feature">Use This Feature</string>
     <string name="use_this_feature_description">Do you want to place a marker on this feature?</string>
     <string name="menu_preferences">Map Preferences</string>
+    <string name="menu_geostore">MapStore</string>
    	<string name="dialog_title">Advertise</string>
 	<string name="dialog_message">Do you want to download data files test archive?</string>
 	<string name="button_download">OK</string>

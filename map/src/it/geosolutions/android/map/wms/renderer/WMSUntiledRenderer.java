@@ -47,7 +47,11 @@ public  class WMSUntiledRenderer implements WMSRenderer {
 	
 	//public ArrayList<WMSLayer> layers =new ArrayList<WMSLayer>();
 	public void render(Canvas c, BoundingBox boundingBox, byte zoomLevel){
-		;
+		if(requests ==null){
+			Log.d("WMS","request is missing, draw skipped");
+			return;
+		}
+	
 		for(WMSRequest r :requests){
 			draw(c, r.getURL(createParameters(c,boundingBox)));
 		}
@@ -104,5 +108,7 @@ public  class WMSUntiledRenderer implements WMSRenderer {
 	@Override
 	public void setLayers(ArrayList<WMSLayer> layers) {
 		requests = WMSLayerChunker.createChunkedRequests(layers);
+		Log.v("WMS","request models created:"+ requests.size());
+		
 	}
 }

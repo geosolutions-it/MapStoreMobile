@@ -21,6 +21,8 @@ import it.geosolutions.android.map.activities.style.LinesDataPropertiesActivity;
 import it.geosolutions.android.map.activities.style.PointsDataPropertiesActivity;
 import it.geosolutions.android.map.activities.style.PolygonsDataPropertiesActivity;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
+import it.geosolutions.android.map.mapstore.activities.MapStoreLayerListActivity;
+import it.geosolutions.android.map.mapstore.model.MapStoreConfiguration;
 import it.geosolutions.android.map.renderer.LegendRenderer;
 import it.geosolutions.android.map.style.AdvancedStyle;
 import it.geosolutions.android.map.style.StyleManager;
@@ -35,6 +37,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
@@ -66,7 +69,7 @@ ImageView legend ;
 
 
 public class DataListActivity extends SherlockListActivity {
-
+	private MapStoreConfiguration mapStoreConfig;
     private List<SpatialVectorTable> spatialTables = new ArrayList<SpatialVectorTable>();;
 
     public void onCreate( Bundle icicle ) {
@@ -77,16 +80,48 @@ public class DataListActivity extends SherlockListActivity {
         
         //set checkboxes
         Bundle bundle = getIntent().getExtras();
+        boolean mapstore = bundle.getBoolean("mapstore", false);
         boolean markers = bundle.getBoolean("markers", false);
         boolean data = bundle.getBoolean("data",false);
         CheckBox m = (CheckBox)findViewById(R.id.markers);
+        CheckBox ms = (CheckBox)findViewById(R.id.mapstore);
         CheckBox d = (CheckBox)findViewById(R.id.data);
+        ms.setChecked(mapstore);
         m.setChecked(markers);
         d.setChecked(data);
+        final DataListActivity ac = this; 
+        //start intent on click on 
+        if(bundle.containsKey(MapsActivity.MAPSTORE_CONFIG)){
+        			mapStoreConfig =(MapStoreConfiguration) bundle.getSerializable(MapsActivity.MAPSTORE_CONFIG);
+        	    
+        			ImageButton msdet = (ImageButton) findViewById(R.id.mapstore_detail);
+        			msdet.setVisibility(ImageButton.VISIBLE);
+        		msdet.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						Intent i  = new Intent(ac,MapStoreLayerListActivity.class);
+						
+						i.putExtra(MapsActivity.MAPSTORE_CONFIG	, ac.getMapStoreConfig());
+						startActivityForResult(i, 0);
+						
+						
+					}
+
+				});
+        	
+        }else{
+        	
+        }
         
     }
 
-    @Override
+    protected MapStoreConfiguration getMapStoreConfig() {
+		// TODO Auto-generated method stub
+		return mapStoreConfig;
+	}
+
+	@Override
     protected void onResume() {
         super.onResume();
         refreshList(true);
@@ -253,14 +288,31 @@ public class DataListActivity extends SherlockListActivity {
         Intent mIntent = new Intent();
         CheckBox m = (CheckBox)findViewById(R.id.markers);
         CheckBox d = (CheckBox)findViewById(R.id.data);
+        CheckBox ms = (CheckBox)findViewById(R.id.mapstore);
         Bundle bundle = new Bundle();
         bundle.putBoolean("markers", m.isChecked());
-        bundle.putBoolean("data",d.isChecked());        
+        bundle.putBoolean("data",d.isChecked());
+        bundle.putBoolean("mapstore",ms.isChecked());  
+        bundle.putSerializable(MapsActivity.MAPSTORE_CONFIG, mapStoreConfig);//TODO return only if changed
         mIntent.putExtras(bundle);
         setResult(RESULT_OK, mIntent);
         
     }
-
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    	// TODO Auto-generated method stub
+    	super.onActivityResult(requestCode, resultCode, data);
+    	mapStoreConfig = (MapStoreConfiguration) data.getSerializableExtra(MapsActivity.MAPSTORE_CONFIG);
+    	
+    }
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+    	// TODO Auto-generated method stub
+    	super.onSaveInstanceState(outState);
+    	outState.putSerializable(MapsActivity.MAPSTORE_CONFIG	, mapStoreConfig) ;
+    	
+    }
 }
 
 

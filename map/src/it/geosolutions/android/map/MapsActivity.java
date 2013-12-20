@@ -25,7 +25,11 @@ import it.geosolutions.android.map.control.MapInfoControl;
 import it.geosolutions.android.map.control.MarkerControl;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
 import it.geosolutions.android.map.dto.MarkerDTO;
+import it.geosolutions.android.map.geostore.activities.GeoStoreResourceDetailActivity;
 import it.geosolutions.android.map.geostore.activities.GeoStoreResourcesActivity;
+import it.geosolutions.android.map.geostore.model.Resource;
+import it.geosolutions.android.map.mapstore.model.MapStoreConfiguration;
+import it.geosolutions.android.map.mapstore.utils.MapStoreUtils;
 import it.geosolutions.android.map.model.Attribute;
 import it.geosolutions.android.map.model.Feature;
 import it.geosolutions.android.map.overlay.MarkerOverlay;
@@ -39,7 +43,6 @@ import it.geosolutions.android.map.utils.MarkerUtils;
 import it.geosolutions.android.map.utils.SpatialDbUtils;
 import it.geosolutions.android.map.view.AdvancedMapView;
 import it.geosolutions.android.map.wms.WMSLayer;
-import it.geosolutions.android.map.wms.WMSSource;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -50,6 +53,8 @@ import org.mapsforge.android.maps.mapgenerator.TileCache;
 import org.mapsforge.android.maps.overlay.Overlay;
 import org.mapsforge.core.model.GeoPoint;
 import org.mapsforge.core.model.MapPosition;
+
+import com.actionbarsherlock.view.Window;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -131,6 +136,7 @@ public class MapsActivity extends MapActivity {
 	
 	private boolean markerActivated;
 	private boolean spatialActivated;
+	private boolean mapstoreActivated;
     //------------------------------------------------------
 	// CONSTANTS
     //------------------------------------------------------
@@ -146,16 +152,23 @@ public class MapsActivity extends MapActivity {
     
     /** DATA_ENABLED_FLAG */
     private static final String DATA_ENABLED_FLAG = "data";
-    
+    /** MAPSTORE_ENABLED_FLAG */
+	private static final String MAPSTORE_ENABLED_FLAG = "mapstore";
+
     /** DATAPROPERTIES_REQUEST_CODE */
     private static final int DATAPROPERTIES_REQUEST_CODE = 671;
     
     private static final String  FEATUREIDFIELD_FLAG = "fidField";
     /** choosen featureID field */
 	private String featureIdField;
+	private WMSOverlay wmsOverlay;
+	private MapStoreConfiguration mapStoreConfig;
+
 	
 	/** CANCONFRIM_FLAG */
 	private static final String CANCONFRIM_FLAG = "canConfirm_flag";
+	private static final String MAPSTORE_LAYER_CONFIG = "MAPSTORE_LAYER_CONFIG";
+	public static final String MAPSTORE_CONFIG = "MAPSTORE_CONFIG";
 	private static boolean canConfirm;
 
 	@Override
@@ -163,7 +176,8 @@ public class MapsActivity extends MapActivity {
 		super.onCreate(savedInstanceState);
 		//ProgressDialog pd = ProgressDialog.show(this,"This is the title","This is the detail text",true,false,null);
 		// create map view and db
-		
+		requestWindowFeature((int) Window.FEATURE_INDETERMINATE_PROGRESS);
+        requestWindowFeature((int) Window.FEATURE_PROGRESS);
 		boolean mapLoaded = initMap(savedInstanceState);
 		dbLoaded = initDb();
 		//if something went wrong durind db and map initialization,
@@ -175,22 +189,27 @@ public class MapsActivity extends MapActivity {
 		//add spatialite overlay
 		this.spatialiteOverlay = new SpatialiteOverlay();
 		spatialiteOverlay.setProjection(mapView.getProjection());
+		wmsOverlay = new WMSOverlay();
+		
 		if(savedInstanceState !=null){
 		        if(savedInstanceState.getBoolean(DATA_ENABLED_FLAG,true)){
 		            mapView.getOverlays().add(spatialiteOverlay);
+		        }
+		        mapStoreConfig = (MapStoreConfiguration) savedInstanceState.getSerializable(MAPSTORE_CONFIG);
+		        if(mapStoreConfig!=null){
+		        	loadMapStoreConfig(mapStoreConfig);
 		        }
 		        
 		        
 		}else{
 		    mapView.getOverlays().add(spatialiteOverlay);
 		}
-
 		this.registerForContextMenu(mapView);
 		
 		
 		mapView.getMapScaleBar().setShowMapScaleBar(true);// TODO preferences;
 		createMarkers(savedInstanceState);
-
+		
 		String action = getIntent().getAction();
 		if(Intent.ACTION_VIEW.equals(action)){
 			// prevent editing
@@ -300,7 +319,10 @@ public class MapsActivity extends MapActivity {
         savedInstanceState.putParcelableArrayList(MapsActivity.PARAMETERS.MARKERS,MarkerUtils.getMarkersDTO(markers));
         savedInstanceState.putBoolean(MARKERS_ENABLED_FLAG, mapView.getOverlays().contains(markerOverlay));
         savedInstanceState.putBoolean(DATA_ENABLED_FLAG, mapView.getOverlays().contains(markerOverlay));
-		
+        savedInstanceState.putBoolean(MAPSTORE_ENABLED_FLAG, mapView.getOverlays().contains(wmsOverlay));
+        if(mapView.getOverlays().contains(wmsOverlay)){
+        	savedInstanceState.putSerializable(MAPSTORE_CONFIG, mapStoreConfig);
+        }
         for(MapControl mc : mapView.getControls()){
 		    mc.saveState(savedInstanceState);
 		}
@@ -362,7 +384,8 @@ public class MapsActivity extends MapActivity {
         }else if(itemId == R.id.menu_geostore){
 		    Intent pref = new Intent(this,GeoStoreResourcesActivity.class);
 		    pref.putExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL,"http://sit.comune.bolzano.it/geostore/rest/");
-		    startActivityForResult(pref, GeoStoreResourcesActivity.GET_MAP_CONFIG);
+		    //pref.putExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL,"http://mapstore.geo-solutions.it/geostore/rest/");
+		    startActivityForResult(pref, MAPSTORE_REQUEST_CODE);
 		    return true;
 	        
 		}else{
@@ -378,7 +401,7 @@ public class MapsActivity extends MapActivity {
 	 * @param enabled
 	 *            true to set the layer visible, false to make it not visible
 	 */
-	private void toggleOverlayVisibility(int itemId, boolean enabled) {
+	private void toggleOverlayVisibility(int itemId, boolean enable) {
 		boolean present = false;
 		Overlay overlay = null;
 		Log.v("LAYERS", mapView.getOverlays().size() + " overays found");
@@ -389,6 +412,12 @@ public class MapsActivity extends MapActivity {
 				overlay = o;
 				break;
 			}
+			if (o.equals(wmsOverlay) && itemId == R.id.mapstore) {
+				present = true;
+				Log.v("LAYERS", "marker layer is visible");
+				overlay = o;
+				break;
+			}
 			if (o.equals(markerOverlay) && itemId == R.id.markers) {
 				present = true;
 				Log.v("LAYERS", "marker layer is visible");
@@ -396,22 +425,27 @@ public class MapsActivity extends MapActivity {
 				break;
 			}
 		}
-		if (present && !enabled) {
-			mapView.getOverlays().remove(overlay);;
+		if (present && !enable) {
+			mapView.getOverlays().remove(overlay);
 			mapView.redraw();
 			Log.v("LAYERS", "removing layer");
-		} else if (!present && enabled) {
+		} else if (!present && enable) {
 			if (itemId == R.id.data) {
 			        //data layer is always at level 0
 				mapView.getOverlays().add(0, spatialiteOverlay);
 				Log.v("LAYERS", "add data layer");
+			}else if(itemId == R.id.mapstore){
+				if(mapView.getOverlays().size()>0){
+					mapView.getOverlays().add(1,wmsOverlay );
+				}else{
+					mapView.getOverlays().add(0, wmsOverlay);
+				}
+				
 			} else if (itemId == R.id.markers) {
-			        //marker overlay goes always over the data overlay
-			        if(mapView.getOverlays().contains(spatialiteOverlay)){
-			            mapView.getOverlays().add(1, markerOverlay);
-			        }else{
-			            mapView.getOverlays().add(0,markerOverlay);
-			        }
+			        //marker overlay goes always over the data and marker overlay
+					int index = (mapView.getOverlays().contains(spatialiteOverlay) ? 1 :0 ) +
+							(mapView.getOverlays().add(markerOverlay) ? 1 : 0 );
+					mapView.getOverlays().add(index, markerOverlay);
 			        Log.v("LAYERS", "add marker layer");
 
 			}
@@ -518,7 +552,7 @@ public class MapsActivity extends MapActivity {
 
 		// TODO parametrize these zoom levels
 		mapView.getMapZoomControls().setZoomLevelMax((byte) 24);
-		mapView.getMapZoomControls().setZoomLevelMin((byte) 8);
+		mapView.getMapZoomControls().setZoomLevelMin((byte) 1);
 
 		// TODO d get this path on initialization
 		
@@ -612,7 +646,7 @@ public class MapsActivity extends MapActivity {
         	 byte zoom_level = intent.getByteExtra(PARAMETERS.ZOOM_LEVEL, (byte) 13);
         	 /*ArrayList<MarkerDTO> list_marker = intent.getParcelableArrayListExtra(PARAMETERS.MARKERS);
         	 MarkerDTO mark = list_marker.get(0);*/
-        	 mp = new MapPosition(new GeoPoint(lat,lon),zoom_level);
+        	 new MapPosition(new GeoPoint(lat,lon),zoom_level);
         	 mapView.getMapViewPosition().setMapPosition(mp);
    	 	}
    	 	else{
@@ -625,22 +659,54 @@ public class MapsActivity extends MapActivity {
         }
 	}
 
+	/**
+	 * Center the map to a point and zoomLevel
+	 * @param pp
+	 * @param zoomlevel
+	 */
+	public void setPosition(GeoPoint pp, byte zoomlevel ){
+		
+		mapView.getMapViewPosition().setMapPosition(new MapPosition(pp,zoomlevel));
+	}
+	public void addWMSLayers(ArrayList<WMSLayer> layers){
+		if(wmsOverlay == null){
+			wmsOverlay=new WMSOverlay();
+		}
+		wmsOverlay.setLayers(layers);
+		toggleOverlayVisibility(R.id.mapstore, true);
+		
+		Log.v("WMS","TOTAL LAYERS:"+wmsOverlay.getLayers().size());
+	}
+	
+	/**
+	 * Opena the Data List activity
+	 * @param item
+	 * @return
+	 */
 	public boolean showDataList(MenuItem item) {
 		Intent datalistIntent = new Intent(this, DataListActivity.class);
 		boolean spatialiteEnabled = false;
-                boolean markerEnabled = false;
-                for (Overlay o : mapView.getOverlays()) {
-                        if (o.equals(spatialiteOverlay)) {
-                                spatialiteEnabled = true;
-                        }
-                        if (o.equals(markerOverlay)) {
-                                markerEnabled = true;
-                        }
+        boolean markerEnabled = false;
+        boolean mapstoreEnabled = false;
+        for (Overlay o : mapView.getOverlays()) {
+                if (o.equals(spatialiteOverlay)) {
+                    spatialiteEnabled = true;
                 }
-                Bundle bundle = new Bundle();
-                bundle.putBoolean(MARKERS_ENABLED_FLAG, markerEnabled);
-                bundle.putBoolean(DATA_ENABLED_FLAG,spatialiteEnabled);        
-                datalistIntent.putExtras(bundle);
+                if (o.equals(markerOverlay)) {
+                    markerEnabled = true;
+                }
+                if (o.equals(wmsOverlay)) {
+                	mapstoreEnabled = true;
+            }
+        }
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(MARKERS_ENABLED_FLAG, markerEnabled);
+        bundle.putBoolean(DATA_ENABLED_FLAG,spatialiteEnabled); 
+        bundle.putBoolean(MAPSTORE_ENABLED_FLAG,mapstoreEnabled);
+        if(mapStoreConfig!=null){
+        	bundle.putSerializable(MAPSTORE_CONFIG, mapStoreConfig);
+        }
+        datalistIntent.putExtras(bundle);
 		startActivityForResult(datalistIntent, DATAPROPERTIES_REQUEST_CODE);
 		return true;
 	}
@@ -659,14 +725,27 @@ public class MapsActivity extends MapActivity {
 		}
 		if(requestCode==DATAPROPERTIES_REQUEST_CODE){
 		        Bundle b = data.getExtras();
+		        if(b.containsKey(MAPSTORE_CONFIG)){
+		        	loadMapStoreConfig((MapStoreConfiguration)b.getSerializable(MAPSTORE_CONFIG));
+		        }
 		        boolean m = b.getBoolean(MARKERS_ENABLED_FLAG,true);
 		        this.markerActivated=m;
 		        boolean d = b.getBoolean(DATA_ENABLED_FLAG,true);
-		        this.spatialActivated=d;
+		        boolean ms = b.getBoolean(MAPSTORE_ENABLED_FLAG,true);
+		        this.mapstoreActivated= ms;
 		        toggleOverlayVisibility(R.id.markers ,m);
+		        toggleOverlayVisibility(R.id.mapstore,ms);
 		        toggleOverlayVisibility(R.id.data, d);
+		        
 			mapView.redraw();
+		}else if(requestCode==MAPSTORE_REQUEST_CODE){
+			if(data ==null ) return;//TODO fix result code
+			Resource resource = (Resource) data.getSerializableExtra(GeoStoreResourceDetailActivity.PARAMS.RESOURCE);
+			String geoStoreUrl = data.getStringExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL);
+			 MapStoreUtils.loadMapStoreConfig(geoStoreUrl, resource, this);
+			
 		}
+		
 	}
 
 	/**
@@ -761,16 +840,10 @@ public class MapsActivity extends MapActivity {
         // Checks the orientation of the screen for landscape and portrait and set portrait mode always
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             setRequestedOrientation (ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-            if(markerActivated)
-            	toggleOverlayVisibility(R.id.markers, markerActivated);
-            else if(spatialActivated)
-            	toggleOverlayVisibility(R.id.data, spatialActivated);
+           
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
             setRequestedOrientation (ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-            if(markerActivated)
-            	toggleOverlayVisibility(R.id.markers, markerActivated);
-            else if(spatialActivated)
-            	toggleOverlayVisibility(R.id.data, spatialActivated);
+           
         }
     }
 
@@ -792,5 +865,16 @@ public class MapsActivity extends MapActivity {
         String textScaleDefault = getString(R.string.preferences_text_scale_default);
         this.mapView.setTextScale(Float.parseFloat(sharedPreferences.getString("mapTextScale", textScaleDefault)));
     }
+	public void setMapStoreConfig(MapStoreConfiguration result) {
+		this.mapStoreConfig=result;
+		
+	}
+	
+	public void loadMapStoreConfig(MapStoreConfiguration result){
+
+		addWMSLayers(MapStoreUtils.buildWMSLayers(result));
+		Log.v("MapStore","LAYERS in WMS LAYER:"+  wmsOverlay.getLayers().size());
+		setMapStoreConfig(result);
+	}
 	
 }

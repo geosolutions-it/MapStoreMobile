@@ -24,6 +24,8 @@ import java.util.HashMap;
 public class WMSSource implements Source{
 	public HashMap<String,String> baseParams= new HashMap<String,String>();
 	private String url;
+	private String title;
+	
 	public WMSSource(String url){
 		setDefaultParameters();
 		this.url=url;

@@ -29,14 +29,58 @@ public class WMSLayer {
 	private String name;
 	
 	/**
-	 * Parameters like style and cql_filter
+	 * The title of the layer
 	 */
-	public HashMap<String,String> baseParams;
 	
+	private String title;
+	
+	private boolean tiled = false;
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getGroup() {
+		return group;
+	}
+
+	public void setGroup(String group) {
+		this.group = group;
+	}
+
+	public boolean isVisibility() {
+		return visibility;
+	}
+
+	public void setVisibility(boolean visibility) {
+		this.visibility = visibility;
+	}
+
+	public HashMap<String, String> getBaseParams() {
+		return baseParams;
+	}
+
+	public void setBaseParams(HashMap<String, String> baseParams) {
+		this.baseParams = baseParams;
+	}
 	/**
 	 * The Source of the WMSLayer
 	 */
 	private WMSSource source;
+	
+	private String group;
+	
+	private boolean visibility =true;
+	
+	/**
+	 * Parameters like style and cql_filter
+	 */
+	public HashMap<String,String> baseParams;
+	
+	
 	
 	public void setName(String name) {
 		this.name = name;
@@ -55,4 +99,14 @@ public class WMSLayer {
 	public String getName(){
 		return name;
 	}
+
+	public boolean isTiled() {
+		return tiled;
+	}
+
+	public void setTiled(boolean tiled) {
+		this.tiled = tiled;
+	}
+	
+	
 }

@@ -39,21 +39,36 @@ import android.util.Log;
 public  class WMSOverlay implements Overlay,FreezableOverlay {
 
     private Projection projection;
-    private 
-    Bitmap cacheBitmap;
+    private Bitmap cacheBitmap;
     boolean isCaching=false;
     private WMSRenderer renderer =new WMSUntiledRenderer();
+    
+    ArrayList<WMSLayer> layers = new ArrayList<WMSLayer>();
     
     public WMSRenderer getRenderer() {
 		return renderer;
 	}
 
+	public ArrayList<WMSLayer> getLayers() {
+		return layers;
+	}
+
+	public void setLayers(ArrayList<WMSLayer> layers) {
+		this.layers = layers;
+		renderer.setLayers(layers);
+	}
+
 	public void setRenderer(WMSRenderer renderer) {
 		this.renderer = renderer;
 	}
+	
+	/**
+	 * Saved MapStore Configuration
+	 */
+	private String config;
+    
 
-	ArrayList<WMSLayer> layers = new ArrayList<WMSLayer>();
-    public Projection getProjection() {
+	public Projection getProjection() {
 		return projection;
 	}
     
@@ -136,5 +151,13 @@ public  class WMSOverlay implements Overlay,FreezableOverlay {
        }
         
     }
+    
+	public String getConfig() {
+		return config;
+	}
+	
+	public void setConfig(String config) {
+		this.config = config;
+	}
  
 }

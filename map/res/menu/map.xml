@@ -3,4 +3,5 @@
 
     <item android:id="@+id/menu_data" android:title="@string/menu_layers" ></item>
     <item android:id="@+id/preferences" android:title="@string/menu_preferences"></item>
+    <item android:id="@+id/menu_geostore" android:title="@string/menu_geostore"></item>
 </menu>

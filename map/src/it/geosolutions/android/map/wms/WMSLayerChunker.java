@@ -44,6 +44,7 @@ public class WMSLayerChunker {
 			ArrayList<WMSLayer> layers) {
 		HashMap<WMSSource,ArrayList<WMSLayer>> sources = new HashMap<WMSSource,ArrayList<WMSLayer>>();
 		for(WMSLayer l: layers){
+			if(!l.isVisibility()) continue;
 			WMSSource s = l.getSource();
 			ArrayList<WMSLayer> sameSourceLayers = sources.get(s);
 			if(sameSourceLayers == null){

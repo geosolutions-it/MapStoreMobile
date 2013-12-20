@@ -192,7 +192,9 @@ public Loader<List<Resource>> onCreateLoader(int id, Bundle args) {
 public void onLoadFinished(Loader<List<Resource>> loader,
         List<Resource> results) {
    
-	adapter.addAll(results);
+	for(Resource a : results ){
+		adapter.add(a);
+	}
 	if (adapter.isEmpty()) {
         setNoData();
     }else{
