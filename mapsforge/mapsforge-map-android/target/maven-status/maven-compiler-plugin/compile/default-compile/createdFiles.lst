@@ -1,0 +1,15 @@
+org\mapsforge\map\android\graphics\AndroidGraphics.class
+org\mapsforge\map\android\graphics\AndroidPath$1.class
+org\mapsforge\map\android\graphics\AndroidPaint.class
+org\mapsforge\map\android\input\TouchGestureDetector.class
+org\mapsforge\map\android\layer\MyLocationOverlay.class
+org\mapsforge\map\android\graphics\AndroidMatrix.class
+org\mapsforge\map\android\graphics\AndroidPath.class
+org\mapsforge\map\android\graphics\AndroidCanvas.class
+org\mapsforge\map\android\graphics\AndroidGraphics$1.class
+org\mapsforge\map\android\graphics\AndroidBitmap.class
+org\mapsforge\map\android\input\TouchEventHandler.class
+org\mapsforge\map\android\AndroidPreferences.class
+org\mapsforge\map\android\input\TouchEventListener.class
+org\mapsforge\map\android\view\MapView.class
+org\mapsforge\map\android\graphics\AndroidPaint$1.class
