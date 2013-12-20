@@ -13,18 +13,18 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-package it.geosolutions.android.map.fragment;
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+	package it.geosolutions.android.map.fragment;
 
 import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.activities.GetFeatureInfoAttributeActivity;
-import it.geosolutions.android.map.adapters.FeatureInfoLayerLayerdapter;
+import it.geosolutions.android.map.adapters.FeatureCircleLayerLayerAdapter;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
-import it.geosolutions.android.map.loaders.FeatureInfoLoader;
-import it.geosolutions.android.map.model.FeatureInfoQuery;
-import it.geosolutions.android.map.model.FeatureInfoQueryResult;
-import it.geosolutions.android.map.model.FeatureInfoTaskQuery;
+import it.geosolutions.android.map.loaders.FeatureCircleLoader;
+import it.geosolutions.android.map.model.FeatureCircleQuery;
+import it.geosolutions.android.map.model.FeatureCircleQueryResult;
+import it.geosolutions.android.map.model.FeatureCircleTaskQuery;
 import it.geosolutions.android.map.utils.FeatureInfoUtils;
 
 import java.util.ArrayList;
@@ -49,22 +49,23 @@ import com.actionbarsherlock.app.SherlockListFragment;
 import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
 
 /**
- * Show a list of the layers from a feature info query This fragment is
+ * Show a list of the layers from a feature Circle query This fragment is
  * optimized to get only the available features doing a query on the visible
  * layers to check if at least one is present.
  * 
- * @author Lorenzo Natali (www.geo-solutions.it)
+ * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com)
  */
-public class FeatureInfoLayerListFragment extends SherlockListFragment
-        implements LoaderCallbacks<List<FeatureInfoQueryResult>> {
-private FeatureInfoLayerLayerdapter adapter;
+public class FeatureCircleLayerListFragment extends SherlockListFragment
+        implements LoaderCallbacks<List<FeatureCircleQueryResult>> {
+	
+private FeatureCircleLayerLayerAdapter adapter;
 private static final int LOADER_INDEX =0;
 
-FeatureInfoTaskQuery[] queryQueue;
+FeatureCircleTaskQuery[] queryQueue;
 
 // The callbacks through which we will interact with the LoaderManager.
 
-private LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>> mCallbacks;
+private LoaderManager.LoaderCallbacks<List<FeatureCircleQueryResult>> mCallbacks;
 
 /**
  * Called once on creation
@@ -79,20 +80,19 @@ public void onCreate(Bundle savedInstanceState) {
     // get parameters to create the task query
     // TODO use arguments instead
     Bundle extras = getActivity().getIntent().getExtras();
-    FeatureInfoQuery query = (FeatureInfoQuery) extras.getParcelable("query");
+    FeatureCircleQuery query = (FeatureCircleQuery) extras.getParcelable("query");
     ArrayList<String> layers = extras.getStringArrayList("layers");
     // create a unique loader index
     // TODO use a better system to get the proper loader
     // TODO check if needed,maybe the activity has only one loader
     
 
-    // create task query
-    //queryQueue = createTaskQueryQueue(layers, query);
+    // create task query to execute on spatialite db
     queryQueue = FeatureInfoUtils.createTaskQueryQueue(layers, query, null, 1);
     // Initialize loader and callbacks for the parent activity
 
     // setup the listView
-    adapter = new FeatureInfoLayerLayerdapter(getSherlockActivity(),
+    adapter = new FeatureCircleLayerLayerAdapter(getSherlockActivity(),
             R.layout.feature_info_layer_list_row);
     setListAdapter(adapter);
 
@@ -130,7 +130,6 @@ private void stopLoadingGUI() {
                         .setSupportProgressBarIndeterminateVisibility(false);
         getSherlockActivity()
                         .setSupportProgressBarVisibility(false);
-        Log.v("FEATURE_INFO_TASK", "task terminated");
         
     }
     adapter.notifyDataSetChanged();
@@ -143,10 +142,10 @@ private void setNoData() {
 /**
  * Create the data loader and bind the loader to the
  * parent callbacks
- * @param query array of <FeatureInfoTaskQuery> to pass to the loader
+ * @param query array of <FeatureCircleTaskQuery> to pass to the loader
  * @param loaderIndex a unique id for query loader
  */
-private void startDataLoading(FeatureInfoTaskQuery[] query, int loaderIndex) {
+private void startDataLoading(FeatureCircleTaskQuery[] query, int loaderIndex) {
     // create task query
 
     // initialize Load Manager
@@ -181,7 +180,7 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
             i.removeExtra("layers");
             // add a list with only one layer
             ArrayList<String> subList = new ArrayList<String>();
-            FeatureInfoQueryResult item = (FeatureInfoQueryResult) parent
+            FeatureCircleQueryResult item = (FeatureCircleQueryResult) parent
                     .getAdapter().getItem(position);
             subList.add(item.getLayerName());
             i.putExtra("layers", subList);
@@ -197,29 +196,29 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
 }
 
 /**
- * create an array of <FeatureInfoTaskQuery> from the <FeatureInfoQuery>
+ * create an array of <FeatureCircleTaskQuery> from the <FeatureCircleQuery>
  * and the list of layers. This array can be passed to the loader to perform
  * a query 
  * @param layers a list of <String> for whom to generate the query
  * @param query the base query (bounding box etc..) 
- * @return an array of <FeatureInfoTaskQuery> to pass to a loader
+ * @return an array of <FeatureCircleTaskQuery> to pass to a loader
  */
-private FeatureInfoTaskQuery[] createTaskQueryQueue(ArrayList<String> layers,
-        FeatureInfoQuery query) {
+private FeatureCircleTaskQuery[] createTaskQueryQueue(ArrayList<String> layers,
+        FeatureCircleQuery query) {
     final SpatialDataSourceManager sdbManager = SpatialDataSourceManager
             .getInstance();
     int querySize = layers.size();
-    FeatureInfoTaskQuery[] queryQueue = new FeatureInfoTaskQuery[querySize];
+    FeatureCircleTaskQuery[] queryQueue = new FeatureCircleTaskQuery[querySize];
     int index = 0;
     for (String layer : layers) {
         SpatialVectorTable table;
         try {
             table = sdbManager.getVectorTableByName(layer);
         } catch (Exception e1) {
-            Log.e("FEATUREINFO", "unable to get table:" + layer);
+            Log.e("FEATURECircle", "unable to get table:" + layer);
             continue;
         }
-        FeatureInfoTaskQuery taskquery = new FeatureInfoTaskQuery(query);
+        FeatureCircleTaskQuery taskquery = new FeatureCircleTaskQuery(query);
         taskquery.setTable(table);
         taskquery.setHandler(sdbManager.getSpatialDataSourceHandler(table));
         // query.setStart(0);
@@ -235,17 +234,17 @@ private FeatureInfoTaskQuery[] createTaskQueryQueue(ArrayList<String> layers,
  * Create the loader
  */
 @Override
-public Loader<List<FeatureInfoQueryResult>> onCreateLoader(int id, Bundle args) {
+public Loader<List<FeatureCircleQueryResult>> onCreateLoader(int id, Bundle args) {
 
-    return new FeatureInfoLoader(getSherlockActivity(), queryQueue);
+    return new FeatureCircleLoader(getSherlockActivity(), queryQueue);
 }
 
 @Override
-public void onLoadFinished(Loader<List<FeatureInfoQueryResult>> loader,
-        List<FeatureInfoQueryResult> results) {
+public void onLoadFinished(Loader<List<FeatureCircleQueryResult>> loader,
+        List<FeatureCircleQueryResult> results) {
     //for each result, an entry is added to the list if
     // it contains a result
-    for (FeatureInfoQueryResult result : results) {
+    for (FeatureCircleQueryResult result : results) {
         if (result.getFeatures().size() > 0) {
             adapter.add(result);
         }
@@ -257,12 +256,9 @@ public void onLoadFinished(Loader<List<FeatureInfoQueryResult>> loader,
 
 }
 
-
-
 @Override
-public void onLoaderReset(Loader<List<FeatureInfoQueryResult>> arg0) {
+public void onLoaderReset(Loader<List<FeatureCircleQueryResult>> arg0) {
     adapter.clear();
-
 }
 
 /*
@@ -272,6 +268,6 @@ public void onLoaderReset(Loader<List<FeatureInfoQueryResult>> arg0) {
 @Override
 public void onDestroy() {
     // TODO try to kill the load process
-    super.onDestroy();
+	    super.onDestroy();
 	}
 }

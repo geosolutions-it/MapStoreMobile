@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources >
+	<string-array name="array_dashes">
+        <item>No</item>
+        <item>Si</item>
+	</string-array>
+	<string-array name="preferences_selection_shape">
+		<item >Rettangolare</item>
+		<item >Circolare</item>
+		<item>Poligonale</item>
+		<item>Puntuale</item>
+	</string-array>
+	<string name="preferences_selection_shape_default">Rettangolare</string>
+</resources>

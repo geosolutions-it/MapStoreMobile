@@ -71,4 +71,6 @@
 	<string name="preferences_stroke_category">Stile del bordo</string>
 	<string name="preferences_dashed_stroke_screen">Stile del bordo tratteggiato</string>
 	<string name="preferences_dashed_stroke_screen_desc">Imposta lo stile del bordo tratteggiato</string>
+	<string name="preferences_shape_selection">Forma della selezione</string>
+ 	<string name="preferences_shape_selection_desc">Scegli la forma della selezione</string>
 </resources>
