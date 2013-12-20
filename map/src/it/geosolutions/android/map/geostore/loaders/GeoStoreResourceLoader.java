@@ -18,35 +18,14 @@
 package it.geosolutions.android.map.geostore.loaders;
 
 
-import it.geosolutions.android.map.geostore.model.Attribute;
-import it.geosolutions.android.map.geostore.model.Container;
-import it.geosolutions.android.map.geostore.model.GeoStoreAttributeTypeAdapter;
-import it.geosolutions.android.map.geostore.model.GeoStoreResourceTypeAdapter;
 import it.geosolutions.android.map.geostore.model.Resource;
-import it.geosolutions.android.map.geostore.model.ResourceList;
 import it.geosolutions.android.map.geostore.utils.GeoStoreClient;
 
-import java.io.IOException;
 import java.util.List;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpMessage;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicHttpRequest;
-import org.apache.http.util.EntityUtils;
-
 import android.support.v4.content.AsyncTaskLoader;
-import android.util.Log;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.annotations.SerializedName;
 /**
  * AsyncTaskLoader to load Resources from GeoStore.
  * Uses JSON format and gson Library to convert GeoStore stuff
@@ -97,6 +76,7 @@ public class GeoStoreResourceLoader extends AsyncTaskLoader<List<Resource>> {
 		GeoStoreClient gsc= new GeoStoreClient();
 		gsc.setUrl(geostore_url);
 		mData = gsc.getResources();
+		
 		return mData;
 	}
 

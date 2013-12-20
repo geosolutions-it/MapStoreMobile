@@ -54,11 +54,11 @@ public class GeoStoreClient {
 		this.password = password;
 	}
 
-	public List<Resource> getResources() {
+	public List<Resource> searchResources(String s ) {
 		HttpClient httpclient = new DefaultHttpClient();
-		HttpGet get = new HttpGet(url + "resources/");
+		HttpGet get = new HttpGet(url + "extjs/search/*"+s+"*");
 		if (url == null)
-			;
+			return new ArrayList<Resource>();
 		{
 			Log.w("GeoStore", "URL Not Present. Unable to submit the request");
 		}
@@ -97,9 +97,9 @@ public class GeoStoreClient {
 		return new ArrayList<Resource>();
 	}
 	
-	public List<Resource> searchResources() {
+	public List<Resource> getResources() {
 		HttpClient httpclient = new DefaultHttpClient();
-		HttpGet get = new HttpGet(url + "extjs/search/*");
+		HttpGet get = new HttpGet(url + "resources/");
 		if (url == null)
 			;
 		{
