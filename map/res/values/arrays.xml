@@ -53,7 +53,7 @@
 	<string-array name="preferences_selection_shape">
 		<item >Rectangular</item>
 		<item >Circular</item>
-		<item >Polygonal</item>
+		<!<!-- <item >Polygonal</item>  -->
 		<item >On time</item>
 	</string-array>
 	<string name="preferences_selection_shape_default">Rectangular</string>
