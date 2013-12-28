@@ -1,35 +1,41 @@
 package it.geosolutions.android.map.mapstore.utils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.mapsforge.core.model.GeoPoint;
-
 import it.geosolutions.android.map.MapsActivity;
-import it.geosolutions.android.map.geostore.model.Attribute;
-import it.geosolutions.android.map.geostore.model.GeoStoreAttributeTypeAdapter;
-import it.geosolutions.android.map.geostore.model.GeoStoreResourceTypeAdapter;
 import it.geosolutions.android.map.geostore.model.Resource;
 import it.geosolutions.android.map.geostore.utils.GeoStoreClient;
 import it.geosolutions.android.map.mapstore.model.MapStoreConfiguration;
 import it.geosolutions.android.map.mapstore.model.MapStoreLayer;
-import it.geosolutions.android.map.mapstore.model.MapStoreMap;
 import it.geosolutions.android.map.mapstore.model.MapStoreSource;
 import it.geosolutions.android.map.utils.ProjectionUtils;
 import it.geosolutions.android.map.wms.WMSLayer;
 import it.geosolutions.android.map.wms.WMSSource;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.mapsforge.core.model.GeoPoint;
+
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-
+/**
+ * Utility class for MapStore configuration reading and management
+ * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
+ *
+ */
 public class MapStoreUtils {
 	public final static  String WMS_PTYPE ="gxp_wmssource";
 
+	/**
+	 * Creates an async task to get and read a mapstore configuration
+	 * @param geoStoreUrl
+	 * @param resource
+	 * @param mapsActivity
+	 * @return
+	 */
 	public static WMSLayer loadMapStoreConfig(final String geoStoreUrl,final Resource resource, final MapsActivity mapsActivity) {
 		if(resource ==null || geoStoreUrl== null){
 			//TODO notify
@@ -98,17 +104,13 @@ public class MapStoreUtils {
 		};
 		task.execute("");
 		return null;
-		
-		
-
-		
-		
+				
 	}
 
-	
-
-	/*
+	/**
 	 * Check if the needed fields are present
+	 * @param ms the configuration to check
+	 * @return true if the configuration contains layers and sources
 	 */
 	private static boolean  isValidConfiguration(MapStoreConfiguration ms) {
 		if(ms==null) return false;
@@ -138,6 +140,7 @@ public class MapStoreUtils {
 				//don't add layers without Source
 				if(ll== null) continue;
 				if(ll.getSource()==null){
+					result.map.layers.remove(l);
 					Log.w("MapStore","layer not added because the source is missing or not supported:"+ll.getName());
 				}else{
 					layers.add(ll);
@@ -179,7 +182,7 @@ public class MapStoreUtils {
 	/**
 	 * Check if the ptype is a wms type. The default source type is managed to avoid missing ptypes for
 	 * some configurations.
-	 * @param mss
+	 * @param mss the MapStore configuration 
 	 * @param defaultSourceType if ptype is null, the default ptype should be the wms one. in this case the layer is wms by default.
 	 * @return
 	 */
@@ -188,10 +191,13 @@ public class MapStoreUtils {
 		return isWMS;
 	}
 	/**
-	 * Put the proper layer configurations from a mapstore one
+	 * Put the proper layer configurations from a MapStore one. Get the <WMSSource> from the map passed as parameter and
+	 * create the <WMSLayer> using it.
+	 * (The MapStore configuration contains the name of the source and the map passed as second parameter
+	 *  maps the names and the already converted sources )
 	 * Set base params properly
-	 * @param mlayer
-	 * @param sources
+	 * @param mlayer the <MapStoreLayer> to convert
+	 * @param sources a map of WMSSources by name
 	 * @return
 	 */
 	public static WMSLayer mapStoreLayer2Layer(MapStoreLayer mlayer,HashMap<String,WMSSource> sources){

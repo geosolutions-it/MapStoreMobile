@@ -76,6 +76,8 @@
          <activity android:name="it.geosolutions.android.map.geostore.activities.GeoStoreResourceDetailActivity">
         </activity>
         <!-- End GeoStore -->
+        <activity android:name="it.geosolutions.android.map.mapstore.activities.MapStoreLayerListActivity">
+        </activity>
     </application>
 
 </manifest>

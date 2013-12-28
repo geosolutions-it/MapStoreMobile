@@ -383,8 +383,8 @@ public class MapsActivity extends MapActivity {
 		    return true;
         }else if(itemId == R.id.menu_geostore){
 		    Intent pref = new Intent(this,GeoStoreResourcesActivity.class);
-		    pref.putExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL,"http://sit.comune.bolzano.it/geostore/rest/");
-		    //pref.putExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL,"http://mapstore.geo-solutions.it/geostore/rest/");
+//		    pref.putExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL,"http://sit.comune.bolzano.it/geostore/rest/");
+		    pref.putExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL,"http://mapstore.geo-solutions.it/geostore/rest/");
 		    startActivityForResult(pref, MAPSTORE_REQUEST_CODE);
 		    return true;
 	        
