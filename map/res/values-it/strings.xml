@@ -26,4 +26,6 @@
 	<string name="progress_dialog_title">Attendere prego</string>
 	<string name="progress_dialog_message">Scaricamento dei dati</string>
 	<string name="progress_dialog_unzipping">Decompressione in corso</string>
+	<string name="next">Successivo</string>
+	<string name="previous">Precedente</string>
 </resources>

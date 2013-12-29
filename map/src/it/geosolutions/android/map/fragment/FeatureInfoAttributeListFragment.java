@@ -292,8 +292,6 @@ private void setNoData() {
 private void startLoadingGUI() {
     if (getSherlockActivity() != null) {
         // start progress bars
-        getSherlockActivity()
-                .setSupportProgressBarIndeterminateVisibility(true);
         getSherlockActivity().setSupportProgressBarVisibility(true);
     }
     // set suggestion text
