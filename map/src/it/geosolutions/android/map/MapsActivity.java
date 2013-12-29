@@ -18,6 +18,7 @@
 package it.geosolutions.android.map;
 
 import it.geosolutions.android.map.activities.GetFeatureInfoLayerListActivity;
+import it.geosolutions.android.map.activities.MapActivityBase;
 import it.geosolutions.android.map.control.CoordinateControl;
 import it.geosolutions.android.map.control.LocationControl;
 import it.geosolutions.android.map.control.MapControl;
@@ -48,13 +49,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.mapgenerator.TileCache;
 import org.mapsforge.android.maps.overlay.Overlay;
 import org.mapsforge.core.model.GeoPoint;
 import org.mapsforge.core.model.MapPosition;
-
-import com.actionbarsherlock.view.Window;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -64,16 +62,19 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.Toast;
+
+import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 
 /**
  * This is an implementation of the custom view for the map component
@@ -81,7 +82,7 @@ import android.widget.Toast;
  * 
  * 
  */
-public class MapsActivity extends MapActivity {
+public class MapsActivity extends MapActivityBase {
     
 	
 		// default path for files
@@ -171,13 +172,34 @@ public class MapsActivity extends MapActivity {
 	public static final String MAPSTORE_CONFIG = "MAPSTORE_CONFIG";
 	private static boolean canConfirm;
 
+	
+	/**
+	 * LAYOUT PARAMETERS 
+	 */
+    private DrawerLayout mDrawerLayout;
+    private ListView mDrawerList;
+    private ActionBarDrawerToggle mDrawerToggle;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		 // setup loading 
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        getSupportActionBar();
+        setSupportProgressBarIndeterminateVisibility(false); 
 		super.onCreate(savedInstanceState);
-		//ProgressDialog pd = ProgressDialog.show(this,"This is the title","This is the detail text",true,false,null);
-		// create map view and db
-		requestWindowFeature((int) Window.FEATURE_INDETERMINATE_PROGRESS);
-        requestWindowFeature((int) Window.FEATURE_PROGRESS);
+
+		//
+		// LAYOUT INITIALIZATION 
+		//
+		setContentView(R.layout.main);
+		//Setup the left menu (Drawer)
+        setupDrawerLayout();
+       
+        
+        //
+		// MAP INIZIALIZATION 
+		//
+		
 		boolean mapLoaded = initMap(savedInstanceState);
 		dbLoaded = initDb();
 		//if something went wrong durind db and map initialization,
@@ -224,6 +246,63 @@ public class MapsActivity extends MapActivity {
 		//
 		centerMapFile();
 		
+	}
+	
+	/**
+	 * Setup the Drawer as a left menu
+	 */
+	private void setupDrawerLayout() {
+		String[] mDrawerTitles = {getString(R.string.menu_layers),
+				getString(R.string.menu_preferences),
+				getString(R.string.menu_geostore)};
+		
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList = (ListView) findViewById(R.id.left_drawer);
+
+        // Set the adapter for the list view
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
+                R.layout.drawer_list_item, mDrawerTitles));
+        mDrawerList.setOnItemClickListener(new  ListView.OnItemClickListener(){
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				if(onDrawerItemSelected(arg2)){
+					mDrawerLayout.closeDrawers();
+				}
+			}
+        	
+        });
+        mDrawerToggle = new ActionBarDrawerToggle(
+                this,                  /* host Activity */
+                mDrawerLayout,         /* DrawerLayout object */
+                R.drawable.ic_drawer,  /* nav drawer icon to replace 'Up' caret  */
+                R.string.drawer_open,  /* "open drawer" description */
+                R.string.drawer_close  /* "close drawer" description */
+                ) {
+
+            private CharSequence mTitle=getTitle();
+
+			/** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+                getSupportActionBar().setTitle(mTitle);
+                supportInvalidateOptionsMenu();
+            }
+
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+            	mTitle = getSupportActionBar().getTitle();
+            	getSupportActionBar().setTitle(R.string.drawer_title);
+            	supportInvalidateOptionsMenu();
+            }
+        };
+
+        // Set the drawer toggle as the DrawerListener
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+        
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        
 	}
 	/**
 	 * Resume the state of:
@@ -343,20 +422,6 @@ public class MapsActivity extends MapActivity {
 
 	}
 
-	/**
-	 * creates the list of overlays as a checkbox list and set the items checked
-         * or not
-	 */
-	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v,
-			ContextMenuInfo menuInfo) {
-		super.onCreateContextMenu(menu, v, menuInfo);
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.map, menu);
-
-	}
-
-
 	
 
 	/**
@@ -372,27 +437,40 @@ public class MapsActivity extends MapActivity {
 		} else {
 			item.setChecked(true);
 		}
-		if (itemId == R.id.data || itemId == R.id.markers) {
+		if (itemId == R.id.data || itemId == R.id.markers) { //TODO move this operation in another place
 			toggleOverlayVisibility(itemId, item.isChecked());
 			return true;
-		} else if (itemId == R.id.menu_data) {
-			return showDataList(item);
-		} else if(itemId == R.id.preferences){
-		    Intent pref = new Intent(this,EditPreferences.class);
-		    startActivity(pref);
-		    return true;
-        }else if(itemId == R.id.menu_geostore){
-		    Intent pref = new Intent(this,GeoStoreResourcesActivity.class);
-//		    pref.putExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL,"http://sit.comune.bolzano.it/geostore/rest/");
-		    pref.putExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL,"http://mapstore.geo-solutions.it/geostore/rest/");
-		    startActivityForResult(pref, MAPSTORE_REQUEST_CODE);
-		    return true;
 	        
-		}else{
-            return super.onOptionsItemSelected(item);
-		} 
+        }else  if (item.getItemId() == android.R.id.home) {
+
+            if (mDrawerLayout.isDrawerOpen(mDrawerList)) {
+            	mDrawerLayout.closeDrawer(mDrawerList);
+            } else {
+            	mDrawerLayout.openDrawer(mDrawerList);
+            }
+        
+		}
+        return super.onOptionsItemSelected(item);
+		 
 	}
 
+	public boolean onDrawerItemSelected(int itemId){
+		 Log.v("DRAWER", "Selected item"+itemId);
+		 if (itemId == 0) {
+				return showDataList();
+			} else if(itemId == 1){
+			    Intent pref = new Intent(this,EditPreferences.class);
+			    startActivity(pref);
+			    return true;
+	        }else if(itemId == 2){
+			    Intent pref = new Intent(this,GeoStoreResourcesActivity.class);
+//			    pref.putExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL,"http://sit.comune.bolzano.it/geostore/rest/");
+			    pref.putExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL,"http://mapstore.geo-solutions.it/geostore/rest/");
+			    startActivityForResult(pref, MAPSTORE_REQUEST_CODE);
+			    return true;
+	        }
+		 return false;
+	}
 	/**
 	 * Add/Remove the Overlay from the mapView if the
 	 * 
@@ -457,7 +535,7 @@ public class MapsActivity extends MapActivity {
 	/**
 	 * Create the markers and add them to the MarkerOverlay
 	 * Gets it from the Intent or from the savedInstanceState
-	 * Assign them the proper geopoint if missing
+	 * Assign them the proper <GeoPoint> if missing
 	 * @param savedInstanceState
 	 */
 	private void createMarkers(Bundle savedInstanceState) {
@@ -527,14 +605,6 @@ public class MapsActivity extends MapActivity {
 		return true;
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.map, menu);
-
-		return true;
-	}
-
 	/**
 	 * Initialize the map with Controls and background
 	 * @param savedInstanceState 
@@ -542,7 +612,7 @@ public class MapsActivity extends MapActivity {
 	 * @return
 	 */
 	private boolean initMap(Bundle savedInstanceState) {
-		setContentView(R.layout.activity_map);
+		//setContentView(R.layout.activity_map);
 		Log.v("MAP","Map Activated");
 		this.mapView =  (AdvancedMapView) findViewById(R.id.advancedMapView);
 		// TODO configurable controls
@@ -683,7 +753,7 @@ public class MapsActivity extends MapActivity {
 	 * @param item
 	 * @return
 	 */
-	public boolean showDataList(MenuItem item) {
+	public boolean showDataList() {
 		Intent datalistIntent = new Intent(this, DataListActivity.class);
 		boolean spatialiteEnabled = false;
         boolean markerEnabled = false;
@@ -835,8 +905,16 @@ public class MapsActivity extends MapActivity {
     }
     
     @Override
+    public void onPostCreate(Bundle savedInstanceState){
+    	super.onPostCreate(savedInstanceState);
+    	// Sync the toggle state after onRestoreInstanceState has occurred.
+        mDrawerToggle.syncState();
+    }
+    
+    @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
         // Checks the orientation of the screen for landscape and portrait and set portrait mode always
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             setRequestedOrientation (ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);

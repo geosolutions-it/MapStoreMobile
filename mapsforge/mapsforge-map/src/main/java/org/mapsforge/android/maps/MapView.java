@@ -140,7 +140,7 @@ public class MapView extends ViewGroup {
 		this.mapZoomControls = new MapZoomControls(context, this);
 		this.overlays = Collections.synchronizedList(new ArrayList<Overlay>());
 		this.projection = new MapViewProjection(this);
-		this.touchEventHandler = new TouchEventHandler(mapActivity, this);
+		this.touchEventHandler = new TouchEventHandler(mapActivity.getActivityContext(), this);
 
 		this.databaseRenderer = new DatabaseRenderer(this.mapDatabase);
 
@@ -577,13 +577,13 @@ public class MapView extends ViewGroup {
 		}
 	}
 
-	void clearAndRedrawMapView() {
+	public void clearAndRedrawMapView() {
 		this.jobQueue.clear();
 		this.frameBuffer.clear();
 		redraw();
 	}
 
-	void destroy() {
+	public void destroy() {
 		this.overlayController.interrupt();
 		this.mapMover.interrupt();
 		this.mapWorker.interrupt();
@@ -608,17 +608,17 @@ public class MapView extends ViewGroup {
 	/**
 	 * @return the maximum possible zoom level.
 	 */
-	byte getZoomLevelMax() {
+	public byte getZoomLevelMax() {
 		return (byte) Math.min(this.mapZoomControls.getZoomLevelMax(), this.databaseRenderer.getZoomLevelMax());
 	}
 
-	void onPause() {
+	public void onPause() {
 		this.mapWorker.pause();
 		this.mapMover.pause();
 		this.zoomAnimator.pause();
 	}
 
-	void onResume() {
+	public void onResume() {
 		this.mapWorker.proceed();
 		this.mapMover.proceed();
 		this.zoomAnimator.proceed();

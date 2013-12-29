@@ -14,7 +14,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <!-- end of Map Specific permission -->
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="10"
         android:targetSdkVersion="17" />
 
     <application
@@ -39,7 +39,8 @@
         </activity>
          <activity 
              android:name="it.geosolutions.android.map.MapsActivity" 
-             android:label="@string/app_name">
+             android:label="@string/app_name"
+             >
         </activity>
         <activity
             android:name="it.geosolutions.android.map.activities.style.LinesDataPropertiesActivity"

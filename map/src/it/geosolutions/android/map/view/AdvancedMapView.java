@@ -17,6 +17,7 @@
  */
 package it.geosolutions.android.map.view;
 
+import it.geosolutions.android.map.MapsActivity;
 import it.geosolutions.android.map.control.MapControl;
 import it.geosolutions.android.map.overlay.FreezableOverlay;
 import it.geosolutions.android.map.overlay.MarkerOverlay;
@@ -32,30 +33,59 @@ import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
-
+/**
+ * This class extends the <MapView> adding the management of the <MapControl> objects.
+ * 
+ * @author Admin
+ *
+ */
 public class AdvancedMapView extends MapView {
 	protected List<MapControl> controls =  new ArrayList<MapControl>();
-	
+	protected MapsActivity activity;
 	public AdvancedMapView(Context context) {
 		super(context);		
+		//get reference to mapsActivity for actionbar support
+		if(context instanceof MapsActivity){
+			activity = (MapsActivity) context; 
+		}
 	}
+	
+	/**
+	 * Constructor
+	 * @param context the Activity (must implement <MapActivity> interface)
+	 * @param attributeSet the attributeSet
+	 */
 	public  AdvancedMapView(Context context, AttributeSet attributeSet){
 		super(context,attributeSet);
 	}
+	
+	/**
+	 * Add a <MapControl> object to the controls of the map
+	 * @param m the <MapControl> object
+	 */
 	public void addControl(MapControl m){
 		controls.add(m);
 		Log.v("CONTROL","total controls:"+controls.size());
 	}
+	
+	/**
+	 * remove the passed <MapControl> from the controls 
+	 * @param m the control to remove
+	 */
 	public void removeControl(MapControl m){
 		if(controls.contains(m)){
 			controls.remove(m);
 		}
-		
 	}
 	
+	/**
+	 * Get the list of <MapControl> binded to the map.
+	 * @return
+	 */
 	public List<MapControl> getControls(){
 		return controls;
 	}
+	
 	/**
 	 * Drows the map and the controls optional functions
 	 */
@@ -68,8 +98,12 @@ public class AdvancedMapView extends MapView {
 			}
 		}
 	}
+	
 	/**
-	 * Extend the touch event with other events from the controllers
+	 * Extend the touch event with other events from the controllers.
+	 * The controls have a associated MapListener.
+	 * If this listener catch the event (onTouch method returns true)
+	 * the event is not propagated to the map.
 	 */
 	@Override
 	public boolean onTouchEvent(MotionEvent motionEvent) {
@@ -101,6 +135,10 @@ public class AdvancedMapView extends MapView {
 		return null;
 		
 	}
+	
+	/**
+	 * Freeze all the <FreezableOverlay> overlays 
+	 */
 	public void freezeOverlays(){
 	    for(Overlay o:getOverlays()){
 	        if (o instanceof FreezableOverlay) {
@@ -109,6 +147,10 @@ public class AdvancedMapView extends MapView {
                 }
 	    }
 	}
+	
+	/**
+	 * Thaws all the <FreezableOverlay> overlays
+	 */
 	public void thawOverlays(){
 	    for(Overlay o:getOverlays()){
                 if (o instanceof FreezableOverlay) {
