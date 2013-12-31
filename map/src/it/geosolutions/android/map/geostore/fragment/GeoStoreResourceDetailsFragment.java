@@ -64,7 +64,6 @@ public void onCreate(Bundle savedInstanceState) {
     Bundle extras = getActivity().getIntent().getExtras();
     geoStoreUrl =  extras.getString(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL);
     resource = (Resource) getArguments().getSerializable(PARAMS.RESOURCE);
-
 }
 
 @Override
@@ -75,10 +74,10 @@ public View onCreateView(LayoutInflater inflater, ViewGroup container,
     //name
     TextView name = (TextView)v.findViewById(R.id.name);
     name.setText(resource.name);
-    //description
-    TextView description = (TextView)v.findViewById(R.id.description);
-    description.setText(resource.description);
-  //Creation
+    //owner
+    TextView owner = (TextView)v.findViewById(R.id.owner);
+    owner.setText(resource.owner);
+    //Creation
     TextView creation = (TextView)v.findViewById(R.id.creation);
     creation.setText(resource.creation);
     //Last Update
@@ -87,6 +86,9 @@ public View onCreateView(LayoutInflater inflater, ViewGroup container,
     //id
     TextView idt = (TextView)v.findViewById(R.id.id);
     idt.setText(resource.id.toString());
+    //description
+    TextView description = (TextView)v.findViewById(R.id.description);
+    description.setText(resource.description);
     return v;
 }
 

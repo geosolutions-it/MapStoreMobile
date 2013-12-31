@@ -14,28 +14,20 @@
         android:id="@android:id/list"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:drawSelectorOnTop="true" >
+        android:drawSelectorOnTop="true">
     </ListView>
    
    	<LinearLayout
 	    android:id="@android:id/empty"
 	    android:layout_width="fill_parent"
 	    android:layout_height="fill_parent"
-	   
 		android:gravity="center"
 	    android:visibility="gone">
-        <!-- 
-        TODO add a picture at the center of the layout
-         <ImageView 
-           android:id="@+id/Image" 
-			android:layout_width="wrap_content" 
-			android:layout_height="wrap_content"
-			android:src="@drawable/ic_action_info" />  -->
+          
 	    <TextView android:id="@+id/empty_text"
-	               android:layout_width="match_parent"
-	               android:layout_height="fill_parent"
+	               android:layout_width="wrap_content"
+	               android:layout_height="wrap_content"
 	               android:layout_gravity="center"
 	               android:text="@string/geostore_extracting_information"/>
-         
   	</LinearLayout>
 </LinearLayout>

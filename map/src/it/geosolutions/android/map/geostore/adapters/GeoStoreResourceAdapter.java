@@ -98,6 +98,10 @@ public View getView(int position, View convertView, ViewGroup parent) {
         if (name != null) {
             name.setText(result.name);
         }
+        TextView desc = (TextView) v.findViewById(R.id.geostore_resource_description);
+        if (desc != null) {
+        	desc.setText(result.description);
+        }
        
     }
 

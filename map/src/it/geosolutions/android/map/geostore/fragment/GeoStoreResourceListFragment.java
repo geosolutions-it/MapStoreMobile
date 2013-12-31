@@ -55,18 +55,7 @@ import com.actionbarsherlock.widget.SearchView;
  * search capabilities
  * 
  * @author Lorenzo Natali (www.geo-solutions.it)
- */
-/**
- * @author Admin
- *
- */
-/**
- * @author Admin
- *
- */
-/**
- * @author Admin
- *
+ * 
  */
 public class GeoStoreResourceListFragment extends SherlockListFragment
         implements 	LoaderCallbacks<List<Resource>>,
@@ -402,7 +391,7 @@ public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCoun
     if(loader.totalCount==0){
     	return;
     }
-    //if the last item is visibile and can load more resources
+    //if the last item is visible and can load more resources
     //load more resources
     int l = visibleItemCount + firstVisibleItem;
     if (l >= totalItemCount && !isLoading && adapter.getCount()<loader.totalCount) {
