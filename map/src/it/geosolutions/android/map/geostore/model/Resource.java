@@ -21,9 +21,6 @@ import java.util.List;
 
 public class Resource implements Serializable{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	public Long id;
 	public String name;
@@ -31,6 +28,10 @@ public class Resource implements Serializable{
 	public String creation;
 	public String lastUpdate;
 	public String metadata;
+	public String owner;
 	public List<Attribute> attribute;
 	public String data;
+	public Boolean canDelete;
+	public Boolean canCopy;
+	
 }

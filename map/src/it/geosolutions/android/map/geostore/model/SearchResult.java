@@ -1,9 +1,10 @@
 package it.geosolutions.android.map.geostore.model;
 
-import java.util.ArrayList;
+import java.util.List;
+
 
 public class SearchResult {
-	public ArrayList<Resource> results;
+	public List<Resource> results;
 	public boolean success;
 	public int totalCount;
 }

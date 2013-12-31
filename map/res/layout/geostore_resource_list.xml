@@ -3,14 +3,20 @@
  android:orientation="vertical" 
  android:layout_width="fill_parent"
   android:layout_height="fill_parent">
-	
+	<TextView 
+	    android:id="@+id/info"
+	    android:layout_height="wrap_content"
+	    android:layout_width="fill_parent"
+	    android:gravity="center_horizontal"
+	    android:background="#ABD7F5"
+	    />
    <ListView
         android:id="@android:id/list"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:drawSelectorOnTop="true" >
-
     </ListView>
+   
    	<LinearLayout
 	    android:id="@android:id/empty"
 	    android:layout_width="fill_parent"
@@ -18,16 +24,18 @@
 	   
 		android:gravity="center"
 	    android:visibility="gone">
-        <ImageView 
+        <!-- 
+        TODO add a picture at the center of the layout
+         <ImageView 
            android:id="@+id/Image" 
 			android:layout_width="wrap_content" 
 			android:layout_height="wrap_content"
-			android:src="@drawable/ic_action_info" />
+			android:src="@drawable/ic_action_info" />  -->
 	    <TextView android:id="@+id/empty_text"
 	               android:layout_width="match_parent"
-	               android:layout_height="match_parent"
+	               android:layout_height="fill_parent"
 	               android:layout_gravity="center"
-	               android:text="@string/feature_info_extracting_information"/><!-- TODO make it visible once load ends -->
+	               android:text="@string/geostore_extracting_information"/>
          
   	</LinearLayout>
 </LinearLayout>

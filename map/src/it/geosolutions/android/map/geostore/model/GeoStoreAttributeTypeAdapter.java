@@ -43,7 +43,7 @@ public class GeoStoreAttributeTypeAdapter implements JsonDeserializer<List<Attri
 	        } else if (json.isJsonObject()) {
 	            vals.add((Attribute) ctx.deserialize(json, Attribute.class));
 	        } else {
-	            throw new RuntimeException("Unexpected JSON type: " + json.getClass());
+	        	return vals;//throw new RuntimeException("Unexpected JSON type: " + json.getClass());
 	        }
 	        return vals;
 	}

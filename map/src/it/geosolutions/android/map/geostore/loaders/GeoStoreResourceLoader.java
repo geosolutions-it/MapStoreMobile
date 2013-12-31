@@ -40,12 +40,18 @@ public class GeoStoreResourceLoader extends AsyncTaskLoader<List<Resource>> {
 
 	private String geostore_url;
 	private List<Resource> mData;
+	private String textFilter;
+	public int page;
+	public int limit;
+	public int totalCount;
 
 	public GeoStoreResourceLoader(SherlockFragmentActivity context,
-			String url,String parameters) {
+			String url,String parameters,int page,int limit) {
 		super(context);
 		geostore_url = url;
-		 
+		textFilter = parameters;
+		this.page=page;
+		this.limit=limit;
 	}
 	
 	@Override
@@ -74,9 +80,15 @@ public class GeoStoreResourceLoader extends AsyncTaskLoader<List<Resource>> {
 	public List<Resource> loadInBackground() {
 		//String testString = "{\"ResourceList\":{\"Resource\":[{\"canDelete\":false,\"canEdit\":false,\"creation\":\"2013-08-08T11:57:40.319+02:00\",\"description\":\"Agit GWC\",\"id\":341,\"lastUpdate\":\"2013-10-23T09:56:50.105+02:00\",\"name\":\"Agit GWC\"},{\"canDelete\":false,\"canEdit\":false,\"creation\":\"2013-10-15T12:05:56.637+02:00\",\"description\":\"DB_Servizi\",\"id\":441,\"lastUpdate\":\"2013-10-23T09:56:51.790+02:00\",\"name\":\"DB_Servizi\"},{\"canDelete\":false,\"canEdit\":false,\"creation\":\"2013-09-26T15:20:58.713+02:00\",\"description\":\"Elettrosmog\",\"id\":401,\"lastUpdate\":\"2013-10-23T09:56:50.448+02:00\",\"name\":\"Elettrosmog\"},{\"canDelete\":false,\"canEdit\":false,\"creation\":\"2013-07-18T09:12:56.718+02:00\",\"description\":\"Mappatura Acustica\",\"id\":301,\"lastUpdate\":\"2013-11-15T09:03:40.882+01:00\",\"name\":\"Mappatura Acustica\"},{\"canDelete\":false,\"canEdit\":false,\"creation\":\"2013-08-22T11:56:10.021+02:00\",\"description\":\"Mobilità\",\"id\":361,\"lastUpdate\":\"2013-11-15T08:27:51.114+01:00\",\"name\":\"Mobilità\"},{\"canDelete\":false,\"canEdit\":false,\"creation\":\"2013-10-22T14:42:07.262+02:00\",\"description\":\"PUC\",\"id\":481,\"lastUpdate\":\"2013-12-18T09:01:03.973+01:00\",\"name\":\"PUC\"},{\"canDelete\":false,\"canEdit\":false,\"creation\":\"2013-08-07T13:38:57.515+02:00\",\"description\":\"Mappa dello Stradario - Integrazione diretta con GeoWebCache\",\"id\":321,\"lastUpdate\":\"2013-11-14T10:05:48.109+01:00\",\"name\":\"Stradario GWC\"},{\"canDelete\":false,\"canEdit\":false,\"creation\":\"2013-09-27T14:47:19.492+02:00\",\"description\":\"New stradario test Comune BZ\",\"id\":424,\"lastUpdate\":\"2013-10-23T09:56:48.841+02:00\",\"name\":\"StradarioTestLatest\"},{\"canDelete\":false,\"canEdit\":false,\"creation\":\"2013-07-08T17:34:03.597+02:00\",\"description\":\"WiFi\",\"id\":287,\"lastUpdate\":\"2013-11-15T09:06:13.170+01:00\",\"name\":\"WiFi New\"}]}}";
 		GeoStoreClient gsc= new GeoStoreClient();
-		gsc.setUrl(geostore_url);
-		mData = gsc.getResources();
 		
+		gsc.setUrl(geostore_url);
+		if(textFilter!=null){
+			mData = gsc.searchResources(textFilter,limit*page,limit);
+			totalCount = gsc.totalCount;
+		}else{
+			mData = gsc.searchResources("*",limit*page,limit);
+			totalCount = gsc.totalCount;
+		}
 		return mData;
 	}
 

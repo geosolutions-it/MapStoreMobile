@@ -4,12 +4,15 @@ import it.geosolutions.android.map.geostore.model.Attribute;
 import it.geosolutions.android.map.geostore.model.Container;
 import it.geosolutions.android.map.geostore.model.GeoStoreAttributeTypeAdapter;
 import it.geosolutions.android.map.geostore.model.GeoStoreResourceTypeAdapter;
+import it.geosolutions.android.map.geostore.model.GeoStoreTypeAdapter;
 import it.geosolutions.android.map.geostore.model.Resource;
 import it.geosolutions.android.map.geostore.model.ResourceList;
 import it.geosolutions.android.map.geostore.model.SearchResult;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.http.HttpEntity;
@@ -24,12 +27,14 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 
 public class GeoStoreClient {
 	private String url;
 	private String username;
 	private String password;
-
+	public int totalCount=0;
 	public String getUrl() {
 		return url;
 	}
@@ -54,45 +59,58 @@ public class GeoStoreClient {
 		this.password = password;
 	}
 
-	public List<Resource> searchResources(String s ) {
+	public List<Resource> searchResources(String s,int start,int limit) {
 		HttpClient httpclient = new DefaultHttpClient();
-		HttpGet get = new HttpGet(url + "extjs/search/*"+s+"*");
+		String req = url + "extjs/search/*"+s+"*?start="+start+"&limit="+limit;
+		Log.v("GeoStore","request_url:"+req);
+		HttpGet get = new HttpGet(req);
 		if (url == null)
 			return new ArrayList<Resource>();
 		{
 			Log.w("GeoStore", "URL Not Present. Unable to submit the request");
 		}
 		get.addHeader("Accept", "application/json");
+		
 		HttpResponse response;
 		// TODO support pagination, filtering, account
+		String responseText = null;
+
 		try {
 			response = httpclient.execute(get);
-
 			HttpEntity resEntity = response.getEntity();
-			String responseText;
 			if (resEntity != null) {
+				
 				// parse response.
 				responseText = EntityUtils.toString(resEntity);
 				Log.d("GeoStore", "remote service response:");
 				Log.d("GeoStore", responseText);
-				Gson gson = new GsonBuilder()
-				// .setDateFormat("yyyy-mm-ddTHH:mm:ss.zzz") //TODO
-				// implement date format
-				.registerTypeAdapter(Resource[].class,
-						new GeoStoreResourceTypeAdapter())
-				.registerTypeAdapter(Attribute[].class,
-						new GeoStoreAttributeTypeAdapter()).create();
+				Gson gson = getGeoStoreGsonBuilder();
 				SearchResult c = gson.fromJson(responseText, SearchResult.class);
-				if(c== null) {return null;}
-				if(!c.success) {return null;}
-				return c.results;
+				if(c!= null) {
+					if(c.success) {
+						totalCount=c.totalCount;
+						return c.results;
+					}else{
+						return null;
+					}
+				}
 			}
 		} catch (ClientProtocolException e) {
 			// TODO Auto-generated catch block
 			Log.e("GeoStore", "HTTP Protocol error");
+			return null;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			Log.e("GeoStore", "IOException during HTTP request");
+			return null;
+		} catch (IllegalArgumentException e){
+			Log.e("GeoStore","Unable to parse the response:"+responseText);
+			Log.e("GeoStore","Error:"+e.getMessage());
+			return null;
+		}catch (JsonSyntaxException e){
+			Log.e("GeoStore","Unable to parse the response:"+responseText);
+			Log.e("GeoStore","Error:"+e.getMessage());
+			return null;
 		}
 		return new ArrayList<Resource>();
 	}
@@ -118,17 +136,10 @@ public class GeoStoreClient {
 				responseText = EntityUtils.toString(resEntity);
 				Log.d("GeoStore", "remote service response:");
 				Log.d("GeoStore", responseText);
-				Gson gson = new GsonBuilder()
-				// .setDateFormat("yyyy-mm-ddTHH:mm:ss.zzz") //TODO
-				// implement date format
-				.registerTypeAdapter(Resource[].class,
-						new GeoStoreResourceTypeAdapter())
-				.registerTypeAdapter(Attribute[].class,
-						new GeoStoreAttributeTypeAdapter()).create();
+				Gson gson = getGeoStoreGsonBuilder();
 				Container ctnrl = gson.fromJson(responseText, Container.class);
 				ResourceList rl = ctnrl.resourceList;
 				return rl.list;
-
 			}
 
 		} catch (ClientProtocolException e) {
@@ -139,6 +150,23 @@ public class GeoStoreClient {
 			Log.e("GeoStore", "IOException during HTTP request");
 		}
 		return null;
+	}
+
+	/**
+	 * Provides the Gson object that recongnize Resource and Attributes as arrays or single object.
+	 * 
+	 * @return
+	 */
+	private Gson getGeoStoreGsonBuilder() {
+		Type resourceListType = new TypeToken<List<Resource>>(){}.getType();
+		Type attributeListType = new TypeToken<List<Attribute>>(){}.getType();
+		return new GsonBuilder()
+		// .setDateFormat("yyyy-mm-ddTHH:mm:ss.zzz") //TODO
+		// implement date formatsource>).class,
+		.registerTypeAdapter(resourceListType,
+				new GeoStoreResourceTypeAdapter())
+		.registerTypeAdapter(attributeListType,
+				new GeoStoreAttributeTypeAdapter()).create();
 	}
 	
 
