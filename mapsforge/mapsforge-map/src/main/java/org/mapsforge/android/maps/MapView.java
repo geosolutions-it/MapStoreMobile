@@ -49,6 +49,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Canvas;
+import android.os.Handler;
+import android.os.Message;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -95,6 +97,7 @@ public class MapView extends ViewGroup {
 	private final Projection projection;
 	private final TouchEventHandler touchEventHandler;
 	private final ZoomAnimator zoomAnimator;
+	private Handler handler;
 
 	/**
 	 * @param context
@@ -153,8 +156,21 @@ public class MapView extends ViewGroup {
 
 		this.zoomAnimator = new ZoomAnimator(this);
 		this.zoomAnimator.start();
+		this.handler = new Handler() {
+			@Override
+			public void handleMessage(Message msg) {
 
-		this.overlayController = new OverlayController(this);
+				switch (msg.what) {
+					case (0):
+						loadStop();
+						break;
+					case (1):
+						loadStart();
+						break;
+				}
+			}
+		};
+		this.overlayController = new OverlayController(this, handler);
 		this.overlayController.start();
 
 		GeoPoint startPoint = this.databaseRenderer.getStartPoint();
@@ -167,6 +183,16 @@ public class MapView extends ViewGroup {
 		}
 
 		mapActivity.registerMapView(this);
+	}
+
+	protected void loadStart() {
+		// empty
+
+	}
+
+	protected void loadStop() {
+		// empty
+
 	}
 
 	/**
@@ -623,4 +649,5 @@ public class MapView extends ViewGroup {
 		this.mapMover.proceed();
 		this.zoomAnimator.proceed();
 	}
+
 }
