@@ -47,23 +47,53 @@ public class OverlayManager {
 	public WMSOverlay wmsOverlay;
 	private MapStoreConfiguration mapStoreConfig;
 	
+	/**
+	 * returns the <MapStoreConfiguration> for the WMSLayer
+	 * @return
+	 */
 	public MapStoreConfiguration getMapStoreConfig() {
 		return mapStoreConfig;
 	}
+	
+	/**
+	 * set the 
+	 * @param mapStoreConfig for the WMSLayer
+	 */
 	public void setMapStoreConfig(MapStoreConfiguration mapStoreConfig) {
 		this.mapStoreConfig = mapStoreConfig;
 		overlayChangeListener.onOverlayVisibilityChange(R.id.mapstore, mapstoreActivated);
 	}
+	
+	/**
+	 * the <OverlayChangeListener> that notifies the changes in the overlay
+	 * visibility and events of add of a <MapStoreConfiguration>
+	 */
 	public OverlayChangeListener overlayChangeListener =new OverlayChangeListener(){
 		public void onOverlayVisibilityChange(int id, boolean visibility) {}
 		
 	};
+	
+	/**
+	 * get the current <OverlayChangeListener>
+	 * @return
+	 */
 	public OverlayChangeListener getOverlayChangeListener() {
 		return overlayChangeListener;
 	}
+	
+	/**
+	 * set the <OverlayChangeListener> object to monitor the overlay changes
+	 * @param overlayChangeListener
+	 */
 	public void setOverlayChangeListener(OverlayChangeListener overlayChangeListener) {
 		this.overlayChangeListener = overlayChangeListener;
 	}
+	
+	/**
+	 * Create the <OverlayManager>
+	 * it automatically binds to the mapView and initialize overlays
+	 * @param mapView
+	 */
 	public OverlayManager(AdvancedMapView mapView) {
 		//add spatialite overlay
 		this.mapView = mapView;
@@ -135,6 +165,10 @@ public class OverlayManager {
 		}
 
 	}
+	
+	/**
+	 * sets the data overlay visible
+	 */
 	public void setDataVisible() {
 		spatialActivated = true;
 		mapView.getOverlays().add(spatialiteOverlay);
@@ -142,6 +176,11 @@ public class OverlayManager {
 
 		
 	}
+	
+	/**
+	 * get the markerOverlay
+	 * @return the <MarkerOverlay>
+	 */
 	public MarkerOverlay getMarkerOverlay() {
 		return markerOverlay;
 	}
@@ -176,11 +215,21 @@ public class OverlayManager {
 		// TODO Auto-generated method stub
 		return wmsOverlay;
 	}
+	
+	/**
+	 * load a MapStore configuration into the WMSOverlay
+	 * @param the <MapStoreConfiguration> object to load
+	 */
 	public void loadMapStoreConfig(MapStoreConfiguration result){
 		if(result == null) return ;
 		addWMSLayers(MapStoreUtils.buildWMSLayers(result));
 		setMapStoreConfig(result);
 	}
+	
+	/**
+	 * save the current status of the layers in the provided bundle
+	 * @param savedInstanceState
+	 */
 	public void saveInstanceState(Bundle savedInstanceState) {
 		ArrayList<DescribedMarker> markers = getMarkerOverlay().getMarkers();
 		savedInstanceState.putParcelableArrayList(MapsActivity.PARAMETERS.MARKERS,MarkerUtils.getMarkersDTO(markers));
@@ -191,6 +240,11 @@ public class OverlayManager {
         
 		
 	}
+	
+	/**
+	 * restore the state of the overlays from a bundle
+	 * @param savedInstanceState
+	 */
 	public void restoreInstanceState(Bundle savedInstanceState) {
 		 if(savedInstanceState.getBoolean(MARKERS_ENABLED_FLAG,true)){
 		        setMarkerVisible();

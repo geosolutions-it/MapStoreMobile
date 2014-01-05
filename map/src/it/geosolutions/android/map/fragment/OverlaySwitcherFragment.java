@@ -80,8 +80,7 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
     om = ac.overlayManager;
 
     super.onViewCreated(view, savedInstanceState);
- // get data from the intent
-    // TODO get them from arguments
+    // setup of the checkboxes
     m = (CheckBox)view.findViewById(R.id.markers);
     ms = (CheckBox)view.findViewById(R.id.mapstore);
     d = (CheckBox)view.findViewById(R.id.data);
@@ -116,7 +115,7 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
 		}
 	});
     
-	//mapstoreconfig opening
+	//MapStoreLayerList launcher
 	msdet = (ImageButton) view.findViewById(R.id.mapstore_detail);
 	msdet.setOnClickListener(new OnClickListener() {
 		
@@ -137,6 +136,7 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
     	
 		msdet.setVisibility(ImageButton.GONE);
     }
+    //the map selection activity launcher
     ImageButton msEd = (ImageButton) view.findViewById(R.id.mapstore_edit);
 	msEd.setOnClickListener(new OnClickListener() {
 		
@@ -149,6 +149,7 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
 			
 		}
 	});
+	//local data style list
     ImageButton dataListButton = (ImageButton) view.findViewById(R.id.data_list);
     dataListButton.setOnClickListener(new OnClickListener() {
 		
@@ -168,7 +169,9 @@ public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
 
 }
-
+/**
+ * called on overlay visibility changes
+ */
 @Override
 public void onOverlayVisibilityChange(int id, boolean visibility) {
 		if(id== R.id.data && d!=null){
