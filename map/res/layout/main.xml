@@ -13,12 +13,31 @@
         </FrameLayout>
     
     <!-- The navigation drawer -->
-    <ListView android:id="@+id/left_drawer"
+    <ScrollView android:id="@+id/left_drawer"
+        android:orientation="vertical"
         android:layout_width="240dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="0dp"
-        android:background="#111"/>
+        android:background="#C111">
+        <LinearLayout android:id="@+id/left_drawer_container"
+            android:orientation="vertical"
+			android:layout_width="match_parent"
+        	android:layout_height="wrap_content"
+             />
+            
+        
+        </ScrollView>
+    
+    <!-- Not Used Yet - make the right_drawer visible  in map.xml to allow display this item 
+         and set the visibility to visible in the Following oblect
+         -->
+<!--     <LinearLayout android:id="@+id/right_drawer" -->
+<!--         android:orientation="vertical" -->
+<!--         android:layout_width="240dp" -->
+<!--         android:layout_height="match_parent" -->
+<!--         android:layout_gravity="end" -->
+<!--         android:dividerHeight="0dp" -->
+<!--         android:background="#111" > -->
+<!--     </LinearLayout> -->
     
 </android.support.v4.widget.DrawerLayout>

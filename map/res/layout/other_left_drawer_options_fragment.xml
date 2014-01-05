@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layer_checkboxes"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:layout_alignParentTop="true"
+    android:orientation="vertical" >
+      <TextView
+            style="?android:attr/listSeparatorTextViewStyle"
+            android:layout_marginRight="4dp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/other"
+            android:textColor="#FFFFFF"
+             />
+      
+        <RelativeLayout
+            android:clickable="true"
+            android:id="@+id/settings"
+            android:background="@drawable/drawer_selectable_item"
+            
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+             >
+
+            <ImageView android:src="@drawable/ic_action_settings"
+                android:contentDescription="@string/menu_settings"
+                android:gravity="center_vertical"
+                android:id="@+id/action_settings_icon"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_centerVertical="true"
+
+                android:layout_alignParentLeft="true"/>
+            <TextView
+            android:text="@string/menu_settings"
+			android:paddingLeft="20dp"
+			android:textSize="20sp"
+            android:layout_centerVertical="true"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:gravity="center_vertical"
+            android:layout_toRightOf="@id/action_settings_icon"
+            android:layout_alignParentRight="true"
+            android:textColor="#FFFFFF"
+            ></TextView>
+        
+        </RelativeLayout>
+   </LinearLayout>

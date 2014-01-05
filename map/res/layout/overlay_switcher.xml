@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/layer_checkboxes"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignParentTop="true"  >
+
+      <TextView
+            
+            style="?android:attr/listSeparatorTextViewStyle"
+            android:layout_marginRight="4dp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/menu_layers"
+            android:textColor="#FFFFFF" />
+      
+        <!-- Checkboxes for layer enable/disable -->
+        <!--  Markers -->
+		<LinearLayout 
+		    android:layout_width="match_parent"
+		    android:layout_height="match_parent"
+		    android:orientation="horizontal"
+		    android:padding="5dp"
+		    android:textColor="#FFFFFF" >
+        <CheckBox
+            android:id="@+id/markers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:text="@string/markers"
+            android:textColor="#FFFFFF" 
+            />
+		</LinearLayout>
+		
+		<!--  MapStore -->
+        <RelativeLayout
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:orientation="horizontal"
+		    android:padding="5dp" >
+		<CheckBox
+            android:id="@+id/mapstore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/menu_geostore"
+            android:textColor="#FFFFFF" 
+            />
+		<ImageButton
+		    android:background="@drawable/drawer_selectable_item"
+		    android:src="@drawable/ic_content_edit"
+		    android:contentDescription="@string/menu_geostore"
+	        android:id="@+id/mapstore_edit"
+	        android:layout_width="wrap_content"
+	        android:layout_gravity="right"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentRight="true"
+	        android:textColor="#FFFFFF"
+	         />
+		 <ImageButton
+   		    android:background="@drawable/drawer_selectable_item"
+		    android:src="@drawable/ic_collection_as_list"
+		    android:contentDescription="@string/menu_geostore"
+	        android:id="@+id/mapstore_detail"
+	        android:layout_width="wrap_content"
+	        android:layout_gravity="right"
+	        android:layout_height="wrap_content"
+     	    android:layout_toLeftOf="@id/mapstore_edit"
+	        android:textColor="#FFFFFF"
+	         />
+		 
+		  
+		</RelativeLayout>
+		<!-- Local Data -->
+		<RelativeLayout
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:orientation="horizontal"
+		    android:padding="5dp" >
+        <CheckBox
+            android:id="@+id/data"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/data"
+            android:textColor="#FFFFFF" />
+        <ImageButton
+   		    android:background="@drawable/drawer_selectable_item"
+            
+		    android:src="@drawable/ic_collection_as_list"
+		    android:contentDescription="@string/data"
+	        android:id="@+id/data_list"
+	        android:layout_width="wrap_content"
+	        android:layout_gravity="right"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentRight="true"
+	        android:textColor="#FFFFFF"
+	         />
+        </RelativeLayout>
+    </LinearLayout>

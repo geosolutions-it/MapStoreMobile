@@ -6,4 +6,9 @@
           android:showAsAction="collapseActionView|ifRoom"
           android:actionViewClass="android.widget.SearchView" />
            -->
+           <item android:id="@+id/layer_menu_action"
+          android:title="Layers"
+          android:icon="@drawable/ic_location_map"
+          android:showAsAction="never"
+           /> 
 </menu>

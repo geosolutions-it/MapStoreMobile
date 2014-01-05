@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+<LinearLayout 
+        android:id="@+id/layer_checkboxes"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignParentTop="true" >
+
+      <TextView
+            
+            style="?android:attr/listSeparatorTextViewStyle"
+            android:layout_marginRight="4dp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/menu_layers"
+            android:textColor="#FFFFFF" />
+      
+        <!-- Checkboxes for layer enable/disable -->
+        <!--  Markers -->
+		<LinearLayout 
+		    android:layout_width="match_parent"
+		    android:layout_height="match_parent"
+		    android:orientation="horizontal"
+		    android:padding="5dp"
+		    android:textColor="#FFFFFF" >
+        <CheckBox
+            android:id="@+id/markers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:text="@string/markers"
+            android:textColor="#FFFFFF" 
+            />
+		</LinearLayout>
+		
+		<!--  MapStore -->
+        <RelativeLayout
+		    android:layout_width="match_parent"
+		    android:layout_height="match_parent"
+		    android:orientation="horizontal"
+		    android:padding="5dp" >
+		<CheckBox
+            android:id="@+id/mapstore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/menu_geostore"
+            android:textColor="#FFFFFF" 
+            />
+		
+		 <ImageButton
+		    android:src="@drawable/ic_list_light"
+		    android:contentDescription="@string/menu_geostore"
+	        android:id="@+id/mapstore_detail"
+	        android:layout_width="wrap_content"
+	        android:layout_gravity="right"
+	        android:layout_height="wrap_content"
+	        android:visibility="gone"
+	        android:background="@null"
+	        android:layout_alignParentRight="true"
+	        android:textColor="#FFFFFF"
+	         />
+		</RelativeLayout>
+		<!-- Local Data -->
+		<LinearLayout 
+		    android:layout_width="match_parent"
+		    android:layout_height="match_parent"
+		    android:orientation="horizontal"
+		    android:padding="5dp" >
+        <CheckBox
+            android:id="@+id/data"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:text="@string/data"
+            android:textColor="#FFFFFF" />
+        </LinearLayout>
+    </LinearLayout>
+</merge>

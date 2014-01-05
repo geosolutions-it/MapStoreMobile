@@ -4,7 +4,7 @@
     <string name="action_settings">Impostazioni</string>
     <string name="data">Dati</string>
     <string name="styles">Stili</string>
-    <string name="markers">Segnalazioni</string>
+    <string name="markers">Marker</string>
     <string name="min_zoom">Minimo zoom level</string>
     <string name="max_zoom">Massimo zoom Level</string>
     <string name="style_point">Punto</string>
@@ -28,4 +28,5 @@
 	<string name="progress_dialog_unzipping">Decompressione in corso</string>
 	<string name="next">Successivo</string>
 	<string name="previous">Precedente</string>
+	<string name="other">Altro</string>
 </resources>

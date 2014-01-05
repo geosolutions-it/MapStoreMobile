@@ -24,6 +24,7 @@ import org.mapsforge.core.model.GeoPoint;
 import org.mapsforge.core.model.MapPosition;
 
 import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -40,7 +41,7 @@ import android.content.SharedPreferences.Editor;
  * When the MapActivity is shut down, the current center position, zoom level and map file of the MapView are saved in a
  * preferences file and restored in the next startup process.
  */
-public abstract class MapActivityBase extends SherlockActivity implements MapActivity {
+public abstract class MapActivityBase extends SherlockFragmentActivity implements MapActivity {
 	private static final String KEY_LATITUDE = "latitude";
 	private static final String KEY_LONGITUDE = "longitude";
 	private static final String KEY_MAP_FILE = "mapFile";

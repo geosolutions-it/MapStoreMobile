@@ -21,6 +21,7 @@ import it.geosolutions.android.map.MapsActivity;
 import it.geosolutions.android.map.control.MapControl;
 import it.geosolutions.android.map.overlay.FreezableOverlay;
 import it.geosolutions.android.map.overlay.MarkerOverlay;
+import it.geosolutions.android.map.utils.OverlayManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,8 +43,18 @@ import android.view.MotionEvent;
 public class AdvancedMapView extends MapView {
 	protected List<MapControl> controls =  new ArrayList<MapControl>();
 	protected MapsActivity activity;
+	public OverlayManager overlayManger;
+	
+	public OverlayManager getOverlayManger() {
+		return overlayManger;
+	}
+
+	public void setOverlayManger(OverlayManager overlayManger) {
+		this.overlayManger = overlayManger;
+	}
+
 	public AdvancedMapView(Context context) {
-		super(context);		
+		super(context);
 		//get reference to mapsActivity for actionbar support
 		if(context instanceof MapsActivity){
 			activity = (MapsActivity) context; 
@@ -57,6 +68,9 @@ public class AdvancedMapView extends MapView {
 	 */
 	public  AdvancedMapView(Context context, AttributeSet attributeSet){
 		super(context,attributeSet);
+		if(context instanceof MapsActivity){
+			activity = (MapsActivity) context; 
+		}
 	}
 	
 	/**
@@ -160,4 +174,19 @@ public class AdvancedMapView extends MapView {
             }
 	}
 
+	@Override
+	protected void loadStart() {
+		Log.v("MapView","Redraw start");
+		if(activity!=null){
+			activity.setSupportProgressBarIndeterminateVisibility(true);
+		}
+	}
+	@Override
+	protected void loadStop() {
+		Log.v("MapView","Redraw stop");
+		if(activity!=null){
+			
+			activity.setSupportProgressBarIndeterminateVisibility(false);
+		}
+	}
 }

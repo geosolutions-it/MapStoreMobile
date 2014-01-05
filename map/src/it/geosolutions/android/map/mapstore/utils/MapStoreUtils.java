@@ -79,7 +79,7 @@ public class MapStoreUtils {
 			@Override
 			protected void onPostExecute(MapStoreConfiguration result) {
 				Log.d("MapStore",result.toString());
-				mapsActivity.loadMapStoreConfig(result);
+				mapsActivity.overlayManager.loadMapStoreConfig(result);
 				GeoPoint p = getPoint(result);
 				if(p!=null){
 					mapsActivity.setPosition(p, (byte)result.map.zoom);
