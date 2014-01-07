@@ -78,41 +78,7 @@ public class DataListActivity extends SherlockListActivity {
         
         setContentView(R.layout.data_list);
         
-        //set checkboxes
-        Bundle bundle = getIntent().getExtras();
-        boolean mapstore = bundle.getBoolean("mapstore", false);
-        boolean markers = bundle.getBoolean("markers", false);
-        boolean data = bundle.getBoolean("data",false);
-        CheckBox m = (CheckBox)findViewById(R.id.markers);
-        CheckBox ms = (CheckBox)findViewById(R.id.mapstore);
-        CheckBox d = (CheckBox)findViewById(R.id.data);
-        ms.setChecked(mapstore);
-        m.setChecked(markers);
-        d.setChecked(data);
-        final DataListActivity ac = this; 
-        //start intent on click on 
-        if(bundle.containsKey(MapsActivity.MAPSTORE_CONFIG)){
-        			mapStoreConfig =(MapStoreConfiguration) bundle.getSerializable(MapsActivity.MAPSTORE_CONFIG);
-        	    
-        			ImageButton msdet = (ImageButton) findViewById(R.id.mapstore_detail);
-        			msdet.setVisibility(ImageButton.VISIBLE);
-        		msdet.setOnClickListener(new OnClickListener() {
-					
-					@Override
-					public void onClick(View v) {
-						Intent i  = new Intent(ac,MapStoreLayerListActivity.class);
-						
-						i.putExtra(MapsActivity.MAPSTORE_CONFIG	, ac.getMapStoreConfig());
-						startActivityForResult(i, 0);
-						
-						
-					}
-
-				});
-        	
-        }else{
-        	
-        }
+       
         
     }
 
@@ -228,7 +194,6 @@ public class DataListActivity extends SherlockListActivity {
                 }
                 AdvancedStyle style =StyleManager.getInstance().getStyle(item.getName());
                 if(holder.visibleView!=null){
-                    holder.visibleView.setChecked(style.enabled != 0);
                     holder.visibleView.setOnCheckedChangeListener(new OnCheckedChangeListener(){
                         public void onCheckedChanged( CompoundButton buttonView, boolean isChecked ) {
                         	StyleManager sm = StyleManager.getInstance();
@@ -239,11 +204,9 @@ public class DataListActivity extends SherlockListActivity {
     						} catch (IOException e) {
     							Toast.makeText(getBaseContext(),R.string.error_saving_style,Toast.LENGTH_LONG).show();
     						}
-                        	
-                        	
                         }
-                        
                     });
+                    holder.visibleView.setChecked(style.enabled != 0);
                 }
             if (holder.legend != null) {
                 holder.legend.setImageDrawable(new BitmapDrawable(getContext()
@@ -286,15 +249,6 @@ public class DataListActivity extends SherlockListActivity {
      */
     private void returnData() {
         Intent mIntent = new Intent();
-        CheckBox m = (CheckBox)findViewById(R.id.markers);
-        CheckBox d = (CheckBox)findViewById(R.id.data);
-        CheckBox ms = (CheckBox)findViewById(R.id.mapstore);
-        Bundle bundle = new Bundle();
-        bundle.putBoolean("markers", m.isChecked());
-        bundle.putBoolean("data",d.isChecked());
-        bundle.putBoolean("mapstore",ms.isChecked());  
-        bundle.putSerializable(MapsActivity.MAPSTORE_CONFIG, mapStoreConfig);//TODO return only if changed
-        mIntent.putExtras(bundle);
         setResult(RESULT_OK, mIntent);
         
     }

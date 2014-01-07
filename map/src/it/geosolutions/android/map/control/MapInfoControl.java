@@ -17,14 +17,8 @@
  */
 package it.geosolutions.android.map.control;
 
-import java.util.ArrayList;
-
 import it.geosolutions.android.map.R;
-import it.geosolutions.android.map.listeners.DoubleTapListener;
 import it.geosolutions.android.map.listeners.MapInfoListener;
-
-import it.geosolutions.android.map.utils.Coordinates;
-import it.geosolutions.android.map.utils.Singleton_Polygon_Points;
 import it.geosolutions.android.map.view.AdvancedMapView;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -53,7 +47,6 @@ public class MapInfoControl extends MapControl{
 	private static final String MODE_PRIVATE = null;
 	
 	protected MapInfoListener mapListener;
-	protected DoubleTapListener doubleTapListener;
 	
 	private static Paint paint = new Paint();
 	private static int FILL_COLOR = Color.BLUE;
@@ -95,9 +88,7 @@ public class MapInfoControl extends MapControl{
 		array = activity.getResources().getStringArray(R.array.preferences_selection_shape);
 		Shape_Selection = array[0]; //default selection rectangular
 		this.mapListener = new MapInfoListener(mapView, activity, Shape_Selection);
-		this.doubleTapListener = new DoubleTapListener(mapView,activity);
-		/*polygon = new Path();
-		polygon.reset();*/
+
 	}
 	
 	/**
@@ -112,9 +103,6 @@ public class MapInfoControl extends MapControl{
 		array = activity.getResources().getStringArray(R.array.preferences_selection_shape);
 		Shape_Selection = array[0]; //default selection rectangular
 		this.mapListener = new MapInfoListener(mapView,activity,Shape_Selection);
-		this.doubleTapListener = new DoubleTapListener(mapView,activity);
-		/*polygon = new Path();
-		polygon.reset();*/
 	}
 	
 	/**
@@ -188,25 +176,16 @@ public class MapInfoControl extends MapControl{
 			return;
 		}
 		
-		/*Path polygon = null;
-		polygon = new Path();
-		polygon.reset();*/
 		float radius = 0;
 		RectF r = null;
 		float x1 = 0, x2 = 0, y1 = 0, y2 = 0;
 		
-		if(!Shape_Selection.equals(array[2])){
-			x1= mapListener.getStartX();
-			y1= mapListener.getStartY();
-			x2= mapListener.getEndX();
-			y2= mapListener.getEndY();
-		}
 		
-		/*else{ //Prepare for drawing the polygon of polygonal selection
-			polygon = new Path();
-			polygon.reset();
-		}*/
-		 
+        x1= mapListener.getStartX();
+        y1= mapListener.getStartY();
+        x2= mapListener.getEndX();
+        y2= mapListener.getEndY();
+		
 		// fill	
 	    paint.setStyle(Paint.Style.FILL);
 	    paint.setColor(FILL_COLOR);
@@ -218,12 +197,6 @@ public class MapInfoControl extends MapControl{
 		    radius = (float) Math.sqrt((radius_x*radius_x)+(radius_y*radius_y));   
 		    canvas.drawCircle(x1, y1, radius, paint);
 		    
-		    //center style
-		    /*Paint paint_center = new Paint();
-		    paint_center.setColor(Color.BLACK);
-		    paint_center.setStyle(Paint.Style.FILL);
-		    //paint_center.setAlpha(0);
-		    canvas.drawCircle(x1, y1, radius, paint_center); //draw center of circle*/
 		}	
 		else if(Shape_Selection.equals(array[0])){
 			r= new RectF(
@@ -234,18 +207,6 @@ public class MapInfoControl extends MapControl{
 			
 		    canvas.drawRect(r, paint);
 		}
-	   /* else if(Shape_Selection.equals(array[2])){
-			//Draw polygon
-	    	//for(int i = 0; !this.doubleTapListener.pointsAcquired(); i++){
-	    	if(!this.doubleTapListener.pointsAcquired()){
-	    		Coordinates point = Singleton_Polygon_Points.getInstance().getPoint(index);
-				if(index==0) polygon.moveTo(point.getX(), point.getY());
-				else polygon.lineTo(point.getX(), point.getY());
-				index++;
-	    	}	
-	    	else
-	    		polygon.lineTo(Singleton_Polygon_Points.getInstance().getPoint(0).getX(), Singleton_Polygon_Points.getInstance().getPoint(0).getY());
-	    }*/
 
 	    // border
 	    paint.setStyle(Paint.Style.STROKE);
@@ -262,10 +223,8 @@ public class MapInfoControl extends MapControl{
 		    canvas.drawRect(r, paint);
 	    else if(this.Shape_Selection.equals(array[1]))
 	    		canvas.drawCircle(x1, y1, radius, paint);
-	   /*else if(this.Shape_Selection.equals(array[2]))
-	    	canvas.drawPath(polygon, paint);
+
 	    
-		Singleton_Polygon_Points.getInstance().reset(); //Reset class, when a new selection starts these points will be not present!*/
 
 	}
 
@@ -274,10 +233,8 @@ public class MapInfoControl extends MapControl{
 	    super.setMode(mode);
 	    if(mode == MODE_VIEW){
 	        mapListener.setMode(MapInfoListener.MODE_VIEW);
-	        doubleTapListener.setMode(DoubleTapListener.MODE_VIEW);
 	    }else{
 	        mapListener.setMode(MapInfoListener.MODE_EDIT);
-	        doubleTapListener.setMode(DoubleTapListener.MODE_EDIT);
 	    }
 	}
 	

@@ -212,16 +212,6 @@ public boolean onTouch(View v, MotionEvent event){
             Log.d("MAPINFOTOOL", "drag stopped");
             isPinching = true;
         }
-        else if(this.Shape_Selection.equals(array[2])){
-        	//Use this to capture points for polygonal selection
-    		endX = event.getX();
-    		endY = event.getY();
-    		Coordinates new_point = new Coordinates(endX,endY);
-        	Singleton_Polygon_Points.getInstance().setPoint(new_point);
-        	Log.d("MAPINFOTOOL", "Point " + endX + " " + endY); 
-        	dragStarted = false;
-        	return false;
-        }
     }
     if (action == MotionEvent.ACTION_MOVE) {
         if (pointerCount > 1 || isPinching) {
@@ -231,11 +221,11 @@ public boolean onTouch(View v, MotionEvent event){
         }
         // START DRAGGING
         if (!dragStarted) {
+        	Log.d("MAPINFOTOOL", "dragging started");
             startX = event.getX();
             startY = event.getY();
         }
         dragStarted = true;
-        Log.d("MAPINFOTOOL", "dragging started");
         endX = event.getX();
         endY = event.getY();
 
@@ -244,12 +234,12 @@ public boolean onTouch(View v, MotionEvent event){
         return true;
 
     } else if (dragStarted && action == MotionEvent.ACTION_UP) {
-        if (pointerCount > 1 /*&& !Shape_Selection.equals(array[2])*/) {
+        if (pointerCount > 1) {
             isPinching = true;
             dragStarted = false;
             Log.d("MAPINFOTOOL", "drag stopped");
             return false;
-        } else if (isPinching && !Shape_Selection.equals(array[2])) {
+        } else if (isPinching) {
             isPinching = false;
             dragStarted = false;
             Log.d("MAPINFOTOOL", "drag stopped");
@@ -349,21 +339,11 @@ public void setMode(int mode) {
     this.mode = mode;
 }
 
-/** ATTENZIONE PUO' ESSERE ELIMINATO, USA LE PREFERENZE! ANZICHE' QST METODO.
+/** 
  * Method used by extern to update shape of selection when user chooses one different from current choice
  * @param shape
  */
 public void updateShapeSelection(String shape){
 	this.Shape_Selection = shape;
 }
-
-/**
- * Return a point of polygonal selection stored by singleton class.
- * @param index
- * @return
- */
-public Coordinates getPolygonPoint(int index){
-	return Singleton_Polygon_Points.getInstance().getPoint(index);
-}
-
 }

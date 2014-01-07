@@ -113,7 +113,7 @@ public void setEnabled(boolean enabled) {
  * remove location overlay from the map
  */
 public void removeOverlay() {
-    view.getOverlays().remove(overlay);
+    view.overlayManger.removeOverlay(overlay);
 }
 
 /**
@@ -186,7 +186,7 @@ private void initMyLocationOverlay() {
  * Add the overlay to the top of layers
  */
 private void addOverlay() {
-    view.getOverlays().add(view.getOverlays().size(), overlay);
+    view.getOverlayManger().addLocationOverlay(overlay);
 };
 
 /*

@@ -30,7 +30,8 @@ public class MapStoreUtils {
 	public final static  String WMS_PTYPE ="gxp_wmssource";
 
 	/**
-	 * Creates an async task to get and read a mapstore configuration
+	 * Creates an async task to get and read a mapstore configuration from the geostore url.
+	 * 
 	 * @param geoStoreUrl
 	 * @param resource
 	 * @param mapsActivity
@@ -78,7 +79,7 @@ public class MapStoreUtils {
 			@Override
 			protected void onPostExecute(MapStoreConfiguration result) {
 				Log.d("MapStore",result.toString());
-				mapsActivity.loadMapStoreConfig(result);
+				mapsActivity.overlayManager.loadMapStoreConfig(result);
 				GeoPoint p = getPoint(result);
 				if(p!=null){
 					mapsActivity.setPosition(p, (byte)result.map.zoom);
@@ -191,7 +192,7 @@ public class MapStoreUtils {
 		return isWMS;
 	}
 	/**
-	 * Put the proper layer configurations from a MapStore one. Get the <WMSSource> from the map passed as parameter and
+	 * Put the proper layer configurations from a MapStore's one. Get the <WMSSource> from the map passed as parameter and
 	 * create the <WMSLayer> using it.
 	 * (The MapStore configuration contains the name of the source and the map passed as second parameter
 	 *  maps the names and the already converted sources )

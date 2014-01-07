@@ -17,9 +17,11 @@
  */
 package it.geosolutions.android.map.view;
 
+import it.geosolutions.android.map.MapsActivity;
 import it.geosolutions.android.map.control.MapControl;
 import it.geosolutions.android.map.overlay.FreezableOverlay;
 import it.geosolutions.android.map.overlay.MarkerOverlay;
+import it.geosolutions.android.map.utils.OverlayManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,30 +34,72 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.MotionEvent;
-
+/**
+ * This class extends the <MapView> adding the management of the <MapControl> objects.
+ * 
+ * @author Admin
+ *
+ */
 public class AdvancedMapView extends MapView {
 	protected List<MapControl> controls =  new ArrayList<MapControl>();
+	protected MapsActivity activity;
+	public OverlayManager overlayManger;
 	
-	public AdvancedMapView(Context context) {
-		super(context);		
+	public OverlayManager getOverlayManger() {
+		return overlayManger;
 	}
+
+	public void setOverlayManger(OverlayManager overlayManger) {
+		this.overlayManger = overlayManger;
+	}
+
+	public AdvancedMapView(Context context) {
+		super(context);
+		//get reference to mapsActivity for actionbar support
+		if(context instanceof MapsActivity){
+			activity = (MapsActivity) context; 
+		}
+	}
+	
+	/**
+	 * Constructor
+	 * @param context the Activity (must implement <MapActivity> interface)
+	 * @param attributeSet the attributeSet
+	 */
 	public  AdvancedMapView(Context context, AttributeSet attributeSet){
 		super(context,attributeSet);
+		if(context instanceof MapsActivity){
+			activity = (MapsActivity) context; 
+		}
 	}
+	
+	/**
+	 * Add a <MapControl> object to the controls of the map
+	 * @param m the <MapControl> object
+	 */
 	public void addControl(MapControl m){
 		controls.add(m);
 		Log.v("CONTROL","total controls:"+controls.size());
 	}
+	
+	/**
+	 * remove the passed <MapControl> from the controls 
+	 * @param m the control to remove
+	 */
 	public void removeControl(MapControl m){
 		if(controls.contains(m)){
 			controls.remove(m);
 		}
-		
 	}
 	
+	/**
+	 * Get the list of <MapControl> binded to the map.
+	 * @return
+	 */
 	public List<MapControl> getControls(){
 		return controls;
 	}
+	
 	/**
 	 * Drows the map and the controls optional functions
 	 */
@@ -68,8 +112,12 @@ public class AdvancedMapView extends MapView {
 			}
 		}
 	}
+	
 	/**
-	 * Extend the touch event with other events from the controllers
+	 * Extend the touch event with other events from the controllers.
+	 * The controls have a associated MapListener.
+	 * If this listener catch the event (onTouch method returns true)
+	 * the event is not propagated to the map.
 	 */
 	@Override
 	public boolean onTouchEvent(MotionEvent motionEvent) {
@@ -92,25 +140,6 @@ public class AdvancedMapView extends MapView {
 	}
 	
 	/**
-	 * Method to propagate ti map double tap event
-	 * @param event
-	 * @return
-	 */
-	/*public boolean onDoubleTapEvent(MotionEvent event){
-		boolean catched = false;
-		boolean doubleTapResult =true;
-		for(MapControl cl : controls){
-			OnDoubleTapListener gl = cl.getDoubleTapListener();
-			if(cl.isEnabled() &&  gl!=null){
-				//if one controller returns true the event is not propagated to the map
-				catched = gl.onDoubleTap(event) || catched;
-			}
-		}
-		
-		return doubleTapResult || catched; //Check su ritorno solo di catched
-	}*/
-	
-	/**
 	 * Workaround for getting proper overlay
 	 */
 	public MarkerOverlay getMarkerOverlay(){
@@ -122,6 +151,10 @@ public class AdvancedMapView extends MapView {
 		return null;
 		
 	}
+	
+	/**
+	 * Freeze all the <FreezableOverlay> overlays 
+	 */
 	public void freezeOverlays(){
 	    for(Overlay o:getOverlays()){
 	        if (o instanceof FreezableOverlay) {
@@ -130,6 +163,10 @@ public class AdvancedMapView extends MapView {
                 }
 	    }
 	}
+	
+	/**
+	 * Thaws all the <FreezableOverlay> overlays
+	 */
 	public void thawOverlays(){
 	    for(Overlay o:getOverlays()){
                 if (o instanceof FreezableOverlay) {
@@ -137,5 +174,21 @@ public class AdvancedMapView extends MapView {
                     
                 }
             }
+	}
+
+	@Override
+	protected void loadStart() {
+		Log.v("MapView","Redraw start");
+		if(activity!=null){
+			activity.setSupportProgressBarIndeterminateVisibility(true);
+		}
+	}
+	@Override
+	protected void loadStop() {
+		Log.v("MapView","Redraw stop");
+		if(activity!=null){
+			
+			activity.setSupportProgressBarIndeterminateVisibility(false);
+		}
 	}
 }

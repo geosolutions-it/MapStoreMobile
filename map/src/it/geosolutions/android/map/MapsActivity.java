@@ -18,6 +18,7 @@
 package it.geosolutions.android.map;
 
 import it.geosolutions.android.map.activities.GetFeatureInfoLayerListActivity;
+import it.geosolutions.android.map.activities.MapActivityBase;
 import it.geosolutions.android.map.control.CoordinateControl;
 import it.geosolutions.android.map.control.LocationControl;
 import it.geosolutions.android.map.control.MapControl;
@@ -25,6 +26,8 @@ import it.geosolutions.android.map.control.MapInfoControl;
 import it.geosolutions.android.map.control.MarkerControl;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
 import it.geosolutions.android.map.dto.MarkerDTO;
+import it.geosolutions.android.map.fragment.GenericMenuFragment;
+import it.geosolutions.android.map.fragment.OverlaySwitcherFragment;
 import it.geosolutions.android.map.geostore.activities.GeoStoreResourceDetailActivity;
 import it.geosolutions.android.map.geostore.activities.GeoStoreResourcesActivity;
 import it.geosolutions.android.map.geostore.model.Resource;
@@ -33,28 +36,21 @@ import it.geosolutions.android.map.mapstore.utils.MapStoreUtils;
 import it.geosolutions.android.map.model.Attribute;
 import it.geosolutions.android.map.model.Feature;
 import it.geosolutions.android.map.overlay.MarkerOverlay;
-import it.geosolutions.android.map.overlay.SpatialiteOverlay;
-import it.geosolutions.android.map.overlay.WMSOverlay;
 import it.geosolutions.android.map.overlay.items.DescribedMarker;
-import it.geosolutions.android.map.preferences.EditPreferences;
 import it.geosolutions.android.map.style.StyleManager;
 import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.android.map.utils.MarkerUtils;
+import it.geosolutions.android.map.utils.OverlayManager;
 import it.geosolutions.android.map.utils.SpatialDbUtils;
 import it.geosolutions.android.map.view.AdvancedMapView;
-import it.geosolutions.android.map.wms.WMSLayer;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.mapgenerator.TileCache;
-import org.mapsforge.android.maps.overlay.Overlay;
 import org.mapsforge.core.model.GeoPoint;
 import org.mapsforge.core.model.MapPosition;
-
-import com.actionbarsherlock.view.Window;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -64,16 +60,23 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.Toast;
+
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 
 /**
  * This is an implementation of the custom view for the map component
@@ -81,7 +84,7 @@ import android.widget.Toast;
  * 
  * 
  */
-public class MapsActivity extends MapActivity {
+public class MapsActivity extends MapActivityBase {
     
 	
 		// default path for files
@@ -128,57 +131,65 @@ public class MapsActivity extends MapActivity {
     private boolean dbLoaded;
     
     //------------------------------------------------------
-    //PRIVATE VARIABLES
+    //PUBLIC VARIABLES
     //------------------------------------------------------
-	private MarkerOverlay markerOverlay;
-	private SpatialiteOverlay spatialiteOverlay;
-	private AdvancedMapView mapView;
-	
-	private boolean markerActivated;
-	private boolean spatialActivated;
-	private boolean mapstoreActivated;
+    public AdvancedMapView mapView;
+    public OverlayManager overlayManager;
     //------------------------------------------------------
 	// CONSTANTS
     //------------------------------------------------------
-	private static final int MAPSTORE_REQUEST_CODE = 1;
+	public static final int MAPSTORE_REQUEST_CODE = 1;
 	/** FEATURE_DEFAULT_ID */
 	private static final String FEATURE_DEFAULT_ID = "OGC_FID";
 	
 	/** DB_LOADED_FLAG */
     private static final String DB_LOADED_FLAG = "dbLoaded";
-    
-    /** MARKERS_ENABLED_FLAG */
-    private static final String MARKERS_ENABLED_FLAG = "markers";
-    
-    /** DATA_ENABLED_FLAG */
-    private static final String DATA_ENABLED_FLAG = "data";
-    /** MAPSTORE_ENABLED_FLAG */
-	private static final String MAPSTORE_ENABLED_FLAG = "mapstore";
 
     /** DATAPROPERTIES_REQUEST_CODE */
-    private static final int DATAPROPERTIES_REQUEST_CODE = 671;
+    public static final int DATAPROPERTIES_REQUEST_CODE = 671;
     
     private static final String  FEATUREIDFIELD_FLAG = "fidField";
     /** choosen featureID field */
 	private String featureIdField;
-	private WMSOverlay wmsOverlay;
-	private MapStoreConfiguration mapStoreConfig;
+	
 
 	
 	/** CANCONFRIM_FLAG */
 	private static final String CANCONFRIM_FLAG = "canConfirm_flag";
-	private static final String MAPSTORE_LAYER_CONFIG = "MAPSTORE_LAYER_CONFIG";
 	public static final String MAPSTORE_CONFIG = "MAPSTORE_CONFIG";
 	private static boolean canConfirm;
 
+	
+	/**
+	 * LAYOUT PARAMETERS 
+	 */
+    private DrawerLayout mDrawerLayout;
+    private View mDrawerList;
+    private ActionBarDrawerToggle mDrawerToggle;
+	private View mLayerMenu;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		 // setup loading 
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        getSupportActionBar();
+        setSupportProgressBarIndeterminateVisibility(false); 
 		super.onCreate(savedInstanceState);
-		//ProgressDialog pd = ProgressDialog.show(this,"This is the title","This is the detail text",true,false,null);
-		// create map view and db
-		requestWindowFeature((int) Window.FEATURE_INDETERMINATE_PROGRESS);
-        requestWindowFeature((int) Window.FEATURE_PROGRESS);
+		
+		//
+		// LAYOUT INITIALIZATION 
+		//
+		setContentView(R.layout.main);
+		//Setup the left menu (Drawer)
+        
+        //
+		// MAP INIZIALIZATION 
+		//
+		//create overlay manager
 		boolean mapLoaded = initMap(savedInstanceState);
+		overlayManager= new OverlayManager(mapView);
+		//setup slide menu(es)
+		setupDrawerLayout();
 		dbLoaded = initDb();
 		//if something went wrong durind db and map initialization,
 		// we should stop
@@ -186,27 +197,24 @@ public class MapsActivity extends MapActivity {
 		        //TODO: notify the user the problem
 			this.finish();
 		}
-		//add spatialite overlay
-		this.spatialiteOverlay = new SpatialiteOverlay();
-		spatialiteOverlay.setProjection(mapView.getProjection());
-		wmsOverlay = new WMSOverlay();
 		
-		if(savedInstanceState !=null){
-		        if(savedInstanceState.getBoolean(DATA_ENABLED_FLAG,true)){
-		            mapView.getOverlays().add(spatialiteOverlay);
-		        }
-		        mapStoreConfig = (MapStoreConfiguration) savedInstanceState.getSerializable(MAPSTORE_CONFIG);
-		        if(mapStoreConfig!=null){
-		        	loadMapStoreConfig(mapStoreConfig);
-		        }
-		        
-		        
+		overlayManager.setMarkerOverlay(new MarkerOverlay());
+		if(savedInstanceState !=null){	
+			   overlayManager.restoreInstanceState(savedInstanceState);
 		}else{
-		    mapView.getOverlays().add(spatialiteOverlay);
+			overlayManager.setMarkerVisible();
+			overlayManager.setDataVisible();
+			//setup left drawer fragments
+			FragmentManager fManager = getSupportFragmentManager();
+	        OverlaySwitcherFragment osf = new OverlaySwitcherFragment();
+	        overlayManager.setOverlayChangeListener(osf);
+			FragmentTransaction fragmentTransaction = fManager.beginTransaction();
+			fragmentTransaction.add(R.id.left_drawer_container,osf);
+			GenericMenuFragment other = new GenericMenuFragment();
+			fragmentTransaction.add(R.id.left_drawer_container, other);
+			fragmentTransaction.commit();
 		}
 		this.registerForContextMenu(mapView);
-		
-		
 		mapView.getMapScaleBar().setShowMapScaleBar(true);// TODO preferences;
 		createMarkers(savedInstanceState);
 		
@@ -220,10 +228,55 @@ public class MapsActivity extends MapActivity {
 			this.addConfirmButton();
 		}
 		
-
-		//
 		centerMapFile();
 		
+        
+
+	}
+	
+	/**
+	 * Setup the Drawer as a left menu and layer's menu as the right one
+	 */
+	private void setupDrawerLayout() {
+		
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList = (View) findViewById(R.id.left_drawer);
+        //remove comment the following line
+        //and remove comment to right_drawer in main.xml (check also the comment about map.xml)
+        //to enable also a right drawer
+        //mLayerMenu = (View) findViewById(R.id.right_drawer);
+        
+        mDrawerToggle = new ActionBarDrawerToggle(
+                this,                  /* host Activity */
+                mDrawerLayout,         /* DrawerLayout object */
+                R.drawable.ic_drawer,  /* nav drawer icon to replace 'Up' caret  */
+                R.string.drawer_open,  /* "open drawer" description */
+                R.string.drawer_close  /* "close drawer" description */
+                ) {
+
+            private CharSequence mTitle=getTitle();
+
+			/** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+                getSupportActionBar().setTitle(mTitle);
+                supportInvalidateOptionsMenu();
+            }
+
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+            	mTitle = getSupportActionBar().getTitle();
+            	getSupportActionBar().setTitle(R.string.drawer_title);
+            	supportInvalidateOptionsMenu();
+            }
+        };
+
+        // Set the drawer toggle as the DrawerListener
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        
+        //layerList
+        
 	}
 	/**
 	 * Resume the state of:
@@ -273,7 +326,7 @@ public class MapsActivity extends MapActivity {
 			        public void onClick(DialogInterface dialog, int which) { 
 			        	 Intent returnIntent = new Intent();
 			        	 //get current markers
-			        	 ArrayList<DescribedMarker> markers = markerOverlay.getMarkers();
+			        	 ArrayList<DescribedMarker> markers = overlayManager.getMarkerOverlay().getMarkers();
 			        	 //serialize markers in the response
 			        	 returnIntent.putParcelableArrayListExtra(MapsActivity.PARAMETERS.MARKERS,MarkerUtils.getMarkersDTO(markers));
 			        	 setResult(RESULT_OK,returnIntent);     
@@ -301,11 +354,6 @@ public class MapsActivity extends MapActivity {
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 		super.onSaveInstanceState(savedInstanceState);
-		
-        if(markerActivated)
-        	toggleOverlayVisibility(R.id.markers, markerActivated);
-        else if(spatialActivated)
-        	toggleOverlayVisibility(R.id.data, spatialActivated);
 
 		savedInstanceState.putBoolean(DB_LOADED_FLAG, dbLoaded);
 		
@@ -314,15 +362,7 @@ public class MapsActivity extends MapActivity {
 		savedInstanceState.putBoolean(CANCONFRIM_FLAG, canConfirm);
 		//MARKERS
 		//get current markers
-        ArrayList<DescribedMarker> markers = markerOverlay.getMarkers();
-        //serialize markers in the response
-        savedInstanceState.putParcelableArrayList(MapsActivity.PARAMETERS.MARKERS,MarkerUtils.getMarkersDTO(markers));
-        savedInstanceState.putBoolean(MARKERS_ENABLED_FLAG, mapView.getOverlays().contains(markerOverlay));
-        savedInstanceState.putBoolean(DATA_ENABLED_FLAG, mapView.getOverlays().contains(markerOverlay));
-        savedInstanceState.putBoolean(MAPSTORE_ENABLED_FLAG, mapView.getOverlays().contains(wmsOverlay));
-        if(mapView.getOverlays().contains(wmsOverlay)){
-        	savedInstanceState.putSerializable(MAPSTORE_CONFIG, mapStoreConfig);
-        }
+        overlayManager.saveInstanceState(savedInstanceState);
         for(MapControl mc : mapView.getControls()){
 		    mc.saveState(savedInstanceState);
 		}
@@ -351,8 +391,8 @@ public class MapsActivity extends MapActivity {
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.map, menu);
+		MenuInflater inflater = getSupportMenuInflater();
+		inflater.inflate(R.menu.map, (Menu) menu);
 
 	}
 
@@ -372,98 +412,43 @@ public class MapsActivity extends MapActivity {
 		} else {
 			item.setChecked(true);
 		}
-		if (itemId == R.id.data || itemId == R.id.markers) {
-			toggleOverlayVisibility(itemId, item.isChecked());
+		if (itemId == R.id.data || itemId == R.id.markers) { //TODO move this operation in another place
+			overlayManager.toggleOverlayVisibility(itemId, item.isChecked());
 			return true;
-		} else if (itemId == R.id.menu_data) {
-			return showDataList(item);
-		} else if(itemId == R.id.preferences){
-		    Intent pref = new Intent(this,EditPreferences.class);
-		    startActivity(pref);
-		    return true;
-        }else if(itemId == R.id.menu_geostore){
-		    Intent pref = new Intent(this,GeoStoreResourcesActivity.class);
-//		    pref.putExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL,"http://sit.comune.bolzano.it/geostore/rest/");
-		    pref.putExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL,"http://mapstore.geo-solutions.it/geostore/rest/");
-		    startActivityForResult(pref, MAPSTORE_REQUEST_CODE);
-		    return true;
 	        
-		}else{
-            return super.onOptionsItemSelected(item);
-		} 
+		//Drawer part
+        }else  if (item.getItemId() == android.R.id.home) {
+
+            if (mDrawerLayout.isDrawerOpen(mDrawerList)) {
+            	mDrawerLayout.closeDrawer(mDrawerList);
+            } else {
+            	mDrawerLayout.openDrawer(mDrawerList);
+            	if(mLayerMenu!=null){
+            		mDrawerLayout.closeDrawer(mLayerMenu);
+            	}
+            }
+        //layer menu part
+		}else if(item.getItemId() == R.id.layer_menu_action){
+			if (mDrawerLayout.isDrawerOpen(mLayerMenu)) {
+            	mDrawerLayout.closeDrawer(mDrawerList);
+            } else {
+            	if(mLayerMenu!=null){
+            		mDrawerLayout.openDrawer(mLayerMenu);
+            	}
+            	mDrawerLayout.closeDrawer(mDrawerList);
+            }
+		}
+        return super.onOptionsItemSelected(item);
+		 
 	}
 
-	/**
-	 * Add/Remove the Overlay from the mapView if the
-	 * 
-	 * @param itemId
-	 *            id of the menu item
-	 * @param enabled
-	 *            true to set the layer visible, false to make it not visible
-	 */
-	private void toggleOverlayVisibility(int itemId, boolean enable) {
-		boolean present = false;
-		Overlay overlay = null;
-		Log.v("LAYERS", mapView.getOverlays().size() + " overays found");
-		for (Overlay o : mapView.getOverlays()) {
-			if (o.equals(spatialiteOverlay) && itemId == R.id.data) {
-				present = true;
-				Log.v("LAYERS", "data layer is visible");
-				overlay = o;
-				break;
-			}
-			if (o.equals(wmsOverlay) && itemId == R.id.mapstore) {
-				present = true;
-				Log.v("LAYERS", "marker layer is visible");
-				overlay = o;
-				break;
-			}
-			if (o.equals(markerOverlay) && itemId == R.id.markers) {
-				present = true;
-				Log.v("LAYERS", "marker layer is visible");
-				overlay = o;
-				break;
-			}
-		}
-		if (present && !enable) {
-			mapView.getOverlays().remove(overlay);
-			mapView.redraw();
-			Log.v("LAYERS", "removing layer");
-		} else if (!present && enable) {
-			if (itemId == R.id.data) {
-			        //data layer is always at level 0
-				mapView.getOverlays().add(0, spatialiteOverlay);
-				Log.v("LAYERS", "add data layer");
-			}else if(itemId == R.id.mapstore){
-				if(mapView.getOverlays().size()>0){
-					mapView.getOverlays().add(1,wmsOverlay );
-				}else{
-					mapView.getOverlays().add(0, wmsOverlay);
-				}
-				
-			} else if (itemId == R.id.markers) {
-			        //marker overlay goes always over the data and marker overlay
-					int index = (mapView.getOverlays().contains(spatialiteOverlay) ? 1 :0 ) +
-							(mapView.getOverlays().add(markerOverlay) ? 1 : 0 );
-					mapView.getOverlays().add(index, markerOverlay);
-			        Log.v("LAYERS", "add marker layer");
-
-			}
-			mapView.redraw();
-
-		}
-
-	}
 	/**
 	 * Create the markers and add them to the MarkerOverlay
 	 * Gets it from the Intent or from the savedInstanceState
-	 * Assign them the proper geopoint if missing
+	 * Assign them the proper <GeoPoint> if missing
 	 * @param savedInstanceState
 	 */
 	private void createMarkers(Bundle savedInstanceState) {
-
-		// create an ItemizedOverlay with the default marker
-		this.markerOverlay = new MarkerOverlay();
 		 List<MarkerDTO> markerDTOs=null;
 		// add the OverlayItem to the ArrayItemizedOverlay
 		 ArrayList<DescribedMarker> markers= null;
@@ -487,17 +472,9 @@ public class MapsActivity extends MapActivity {
 		        //TODO dialog : download features for this area?
 		    }
 		}
+		// create an ItemizedOverlay with the default marker
 		
-		
-		markerOverlay.getOverlayItems().addAll(markers);
-		if(savedInstanceState!=null){
-		    if(savedInstanceState.getBoolean(MARKERS_ENABLED_FLAG,true)){
-		        mapView.getOverlays().add(markerOverlay);
-		    }
-		}else{
-		    mapView.getOverlays().add(markerOverlay);
-		}
-		
+		overlayManager.getMarkerOverlay().getOverlayItems().addAll(markers);
 		//TODO uncomment this if an element is present already
 		
 		// add the ArrayItemizedOverlay to the MapView
@@ -530,7 +507,8 @@ public class MapsActivity extends MapActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.map, menu);
+		getSupportMenuInflater().inflate(R.menu.map, menu);
+		
 
 		return true;
 	}
@@ -542,7 +520,7 @@ public class MapsActivity extends MapActivity {
 	 * @return
 	 */
 	private boolean initMap(Bundle savedInstanceState) {
-		setContentView(R.layout.activity_map);
+		//setContentView(R.layout.activity_map);
 		Log.v("MAP","Map Activated");
 		this.mapView =  (AdvancedMapView) findViewById(R.id.advancedMapView);
 		// TODO configurable controls
@@ -668,48 +646,13 @@ public class MapsActivity extends MapActivity {
 		
 		mapView.getMapViewPosition().setMapPosition(new MapPosition(pp,zoomlevel));
 	}
-	public void addWMSLayers(ArrayList<WMSLayer> layers){
-		if(wmsOverlay == null){
-			wmsOverlay=new WMSOverlay();
-		}
-		wmsOverlay.setLayers(layers);
-		toggleOverlayVisibility(R.id.mapstore, true);
-		
-		Log.v("WMS","TOTAL LAYERS:"+wmsOverlay.getLayers().size());
-	}
+	
 	
 	/**
 	 * Opena the Data List activity
 	 * @param item
 	 * @return
 	 */
-	public boolean showDataList(MenuItem item) {
-		Intent datalistIntent = new Intent(this, DataListActivity.class);
-		boolean spatialiteEnabled = false;
-        boolean markerEnabled = false;
-        boolean mapstoreEnabled = false;
-        for (Overlay o : mapView.getOverlays()) {
-                if (o.equals(spatialiteOverlay)) {
-                    spatialiteEnabled = true;
-                }
-                if (o.equals(markerOverlay)) {
-                    markerEnabled = true;
-                }
-                if (o.equals(wmsOverlay)) {
-                	mapstoreEnabled = true;
-            }
-        }
-        Bundle bundle = new Bundle();
-        bundle.putBoolean(MARKERS_ENABLED_FLAG, markerEnabled);
-        bundle.putBoolean(DATA_ENABLED_FLAG,spatialiteEnabled); 
-        bundle.putBoolean(MAPSTORE_ENABLED_FLAG,mapstoreEnabled);
-        if(mapStoreConfig!=null){
-        	bundle.putSerializable(MAPSTORE_CONFIG, mapStoreConfig);
-        }
-        datalistIntent.putExtras(bundle);
-		startActivityForResult(datalistIntent, DATAPROPERTIES_REQUEST_CODE);
-		return true;
-	}
 	
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onActivityResult(int, int, android.content.Intent)
@@ -723,27 +666,19 @@ public class MapsActivity extends MapActivity {
 		for(MapControl control : mapView.getControls()){
 			control.refreshControl(requestCode,resultCode, data);
 		}
+		if(data==null)return;
+		Bundle b = data.getExtras();
 		if(requestCode==DATAPROPERTIES_REQUEST_CODE){
-		        Bundle b = data.getExtras();
-		        if(b.containsKey(MAPSTORE_CONFIG)){
-		        	loadMapStoreConfig((MapStoreConfiguration)b.getSerializable(MAPSTORE_CONFIG));
-		        }
-		        boolean m = b.getBoolean(MARKERS_ENABLED_FLAG,true);
-		        this.markerActivated=m;
-		        boolean d = b.getBoolean(DATA_ENABLED_FLAG,true);
-		        boolean ms = b.getBoolean(MAPSTORE_ENABLED_FLAG,true);
-		        this.mapstoreActivated= ms;
-		        toggleOverlayVisibility(R.id.markers ,m);
-		        toggleOverlayVisibility(R.id.mapstore,ms);
-		        toggleOverlayVisibility(R.id.data, d);
-		        
-			mapView.redraw();
+			mapView.getOverlayController().redrawOverlays();
 		}else if(requestCode==MAPSTORE_REQUEST_CODE){
-			if(data ==null ) return;//TODO fix result code
 			Resource resource = (Resource) data.getSerializableExtra(GeoStoreResourceDetailActivity.PARAMS.RESOURCE);
-			String geoStoreUrl = data.getStringExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL);
-			 MapStoreUtils.loadMapStoreConfig(geoStoreUrl, resource, this);
-			
+			if(resource!=null){
+				String geoStoreUrl = data.getStringExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL);
+				MapStoreUtils.loadMapStoreConfig(geoStoreUrl, resource, this);
+			}
+			if(b.containsKey(MAPSTORE_CONFIG)){
+	        	overlayManager.loadMapStoreConfig((MapStoreConfiguration)b.getSerializable(MAPSTORE_CONFIG));
+	        }
 		}
 		
 	}
@@ -817,11 +752,10 @@ public class MapsActivity extends MapActivity {
         MarkerOverlay m = mapView.getMarkerOverlay();
             //add the marker overlay if not present
             if(m==null){
-                toggleOverlayVisibility(R.id.markers, true);
+                overlayManager.toggleOverlayVisibility(R.id.markers, true);
                 m =  mapView.getMarkerOverlay();
             }
-            
-            //gets
+
             DescribedMarker marker = m.getHighlighted();
             if (marker == null) {
                 List<DescribedMarker> markers = m.getMarkers();
@@ -835,8 +769,16 @@ public class MapsActivity extends MapActivity {
     }
     
     @Override
+    public void onPostCreate(Bundle savedInstanceState){
+    	super.onPostCreate(savedInstanceState);
+    	// Sync the toggle state after onRestoreInstanceState has occurred.
+        mDrawerToggle.syncState();
+    }
+    
+    @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
         // Checks the orientation of the screen for landscape and portrait and set portrait mode always
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             setRequestedOrientation (ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -865,16 +807,14 @@ public class MapsActivity extends MapActivity {
         String textScaleDefault = getString(R.string.preferences_text_scale_default);
         this.mapView.setTextScale(Float.parseFloat(sharedPreferences.getString("mapTextScale", textScaleDefault)));
     }
-	public void setMapStoreConfig(MapStoreConfiguration result) {
-		this.mapStoreConfig=result;
-		
-	}
 	
-	public void loadMapStoreConfig(MapStoreConfiguration result){
-
-		addWMSLayers(MapStoreUtils.buildWMSLayers(result));
-		Log.v("MapStore","LAYERS in WMS LAYER:"+  wmsOverlay.getLayers().size());
-		setMapStoreConfig(result);
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+	    if (keyCode == KeyEvent.KEYCODE_MENU) {
+	        mDrawerLayout.openDrawer(mDrawerList);
+	        return true;
+	    }
+	    return super.onKeyUp(keyCode, event);
 	}
 	
 }

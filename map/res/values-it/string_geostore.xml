@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="geostore_loading_resources">Caricamento Risorse&#x2026;</string>
+    <string name="geostore_resource_name">Nome</string>
+    <string name="geostore_resource_description">Descrizione</string>
+    <string name="geostore_resource_last_updated">Ultimo Aggiornamento</string>
+    <string name="geostore_resource_creation">Data di Creazione</string>
+    <string name="geostore_resource_id">ID</string>
+    <string name="geostore_resource_owner">Proprietario</string>
+    <string name="geostore_extracting_information">Caricamento mappe da MapStore&#x2026;</string>
+    <string name="geostore_extracting_no_result">Nessuna mappa trovata</string>
+    <string name="geostore_more_results">More</string>
+    <string formatted="false" name="geostore_info_format">%d mappe visualizzate di %d totali</string>
+</resources>

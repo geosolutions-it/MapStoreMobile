@@ -6,6 +6,7 @@
  
     <include layout="@layout/layer_row_base_merge"/>
 	<ImageView android:src="@drawable/ic_navigation_next_item_gray"
+	    android:contentDescription="@string/next"
 		android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_alignParentRight="true" />

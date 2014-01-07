@@ -8,7 +8,6 @@
 		<item >Rettangolare</item>
 		<item >Circolare</item>
 		<!-- <item>Poligonale</item> -->
-		<item>Puntuale</item>
 	</string-array>
 	<string name="preferences_selection_shape_default">Rettangolare</string>
 </resources>

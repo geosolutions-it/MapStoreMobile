@@ -7,13 +7,19 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin" >
-
+<LinearLayout 
+    android:orientation="vertical"
+    android:layout_height="wrap_content"
+    android:layout_width="fill_parent">
     <TableLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
 
         <!-- NAME -->
-        <TableRow android:background="#BDBDBD" >
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:background="#BDBDBD" >
 
             <TextView
                 android:layout_width="wrap_content"
@@ -28,18 +34,19 @@
                 android:layout_marginRight="20dip" >
             </TextView>
         </TableRow>
-        <!-- Description -->
+        
+         <!-- Owner -->
 
         <TableRow  >
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_gravity="left"
-                android:text="@string/geostore_resource_description"
+                android:text="@string/geostore_resource_owner"
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/description"
+                android:id="@+id/owner"
                 android:layout_width="wrap_content"
                 android:layout_marginLeft="20dip"
                 android:layout_marginRight="20dip" >
@@ -99,5 +106,20 @@
         </TableRow>
 
     </TableLayout>
+    <!-- Description -->
+     <TextView
+         android:layout_width="fill_parent"
+         android:layout_height="wrap_content"
+         android:text="@string/geostore_resource_description"
+         android:textStyle="bold" />
+
+     <TextView
+         android:id="@+id/description"
+         android:layout_width="fill_parent"
+         android:layout_height="wrap_content"
+         
+          >
+     </TextView>
+</LinearLayout>
 
 </ScrollView>

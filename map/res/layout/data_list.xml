@@ -1,101 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/dataList"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:background="@color/main_background"
-     >
-	
-    <LinearLayout
-        android:id="@+id/layer_checkboxes"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/list_header_title"
+        style="?android:attr/listSeparatorTextViewStyle"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_alignParentTop="true" >
+        android:text="@string/styles" />
 
-      <TextView
-            
-            style="?android:attr/listSeparatorTextViewStyle"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/menu_layers" />
-      
-        <!-- Checkboxes for layer enable/disable -->
-        <!--  Markers -->
-		<LinearLayout 
-		    android:layout_width="match_parent"
-		    android:layout_height="match_parent"
-		    android:orientation="horizontal"
-		    android:padding="5dp" >
-        <CheckBox
-            android:id="@+id/markers"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:text="@string/markers" />
-		</LinearLayout>
-		
-		<!--  MapStore -->
-        <RelativeLayout
-		    android:layout_width="match_parent"
-		    android:layout_height="match_parent"
-		    android:orientation="horizontal"
-		    android:padding="5dp" >
-		<CheckBox
-            android:id="@+id/mapstore"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/menu_geostore" 
-            />
-		
-		 <ImageButton
-		    android:src="@drawable/ic_list_light"
-		    android:contentDescription="@string/menu_geostore"
-	        android:id="@+id/mapstore_detail"
-	        android:layout_width="wrap_content"
-	        android:layout_gravity="right"
-	        android:layout_height="wrap_content"
-	        android:visibility="gone"
-	        android:background="@null"
-	        android:layout_alignParentRight="true"
-	         />
-		</RelativeLayout>
-		<!-- Local Data -->
-		<LinearLayout 
-		    android:layout_width="match_parent"
-		    android:layout_height="match_parent"
-		    android:orientation="horizontal"
-		    android:padding="5dp" >
-        <CheckBox
-            android:id="@+id/data"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:text="@string/data" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <LinearLayout
+    <ListView
+        android:id="@android:id/list"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/layer_checkboxes"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:orientation="vertical" >
-
-        <TextView
-            android:id="@+id/list_header_title"
-            style="?android:attr/listSeparatorTextViewStyle"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/styles" />
-
-        <ListView
-            android:id="@android:id/list"
-            android:layout_width="fill_parent"
-            android:layout_height="match_parent" >
-        </ListView>
-    </LinearLayout>
-
-</RelativeLayout>
+        android:layout_height="match_parent" >
+    </ListView>
+</LinearLayout>

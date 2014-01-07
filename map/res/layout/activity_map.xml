@@ -1,8 +1,9 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<merge xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools" tools:context="it.geosolutions.android.map.MapsActivity">
+<RelativeLayout 
+    
     android:layout_width="fill_parent"
     android:layout_height="match_parent"
-    tools:context="it.geosolutions.android.map.MapsActivity" >
+     >
    
     <LinearLayout android:id="@+id/map_buttonbar"
         android:layout_width="fill_parent"
@@ -55,3 +56,4 @@
 	      
 	  </LinearLayout>
 </RelativeLayout>
+</merge>

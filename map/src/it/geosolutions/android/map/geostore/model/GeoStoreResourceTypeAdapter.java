@@ -43,7 +43,7 @@ public class GeoStoreResourceTypeAdapter implements JsonDeserializer<List<Resour
 	        } else if (json.isJsonObject()) {
 	            vals.add((Resource) ctx.deserialize(json, Resource.class));
 	        } else {
-	            throw new RuntimeException("Unexpected JSON type: " + json.getClass());
+	        	return vals;//throw new RuntimeException("Unexpected JSON type: " + json.getClass());
 	        }
 	        return vals;
 	}
