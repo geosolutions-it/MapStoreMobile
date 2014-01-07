@@ -17,23 +17,26 @@
  */
 package it.geosolutions.android.map.listeners;
 
+import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.activities.GetFeatureInfoLayerListActivity;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
+import it.geosolutions.android.map.model.FeatureCircleQuery;
 import it.geosolutions.android.map.model.FeatureInfoQuery;
 import it.geosolutions.android.map.style.AdvancedStyle;
 import it.geosolutions.android.map.style.StyleManager;
+import it.geosolutions.android.map.utils.Singleton_Polygon_Points;
 import it.geosolutions.android.map.utils.StyleUtils;
 import it.geosolutions.android.map.view.AdvancedMapView;
-
+import it.geosolutions.android.map.utils.Coordinates;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.mapsforge.core.model.GeoPoint;
 import org.mapsforge.core.model.MapPosition;
 import org.mapsforge.core.util.MercatorProjection;
-
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -41,11 +44,11 @@ import android.view.View.OnTouchListener;
 import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
 
 /**
- * TODO
- * 
- * @author Lorenzo Natali
+ * Listener that implements OnTouch Event on map.
+ * @author Lorenzo Natali (www.geo-solutions.it.
  */
-public class MapInfoListener implements OnTouchListener {
+public class MapInfoListener implements OnTouchListener{
+
 // MODES
 public static final int MODE_VIEW = 0;
 
@@ -71,11 +74,30 @@ private boolean isPinching;
 
 private Activity activity;
 
-public MapInfoListener(AdvancedMapView mapView, Activity activity) {
+private String Shape_Selection;
+
+private SharedPreferences pref; //Used to check shape of selection desired
+
+/**
+ * Constructor for class MapInfoListener
+ * @param mapView
+ * @param activity
+ * @param Shape_Selection
+ */
+public MapInfoListener(AdvancedMapView mapView, Activity activity, String Shape_Selection) {
     view = mapView;
     this.activity = activity;
+    this.Shape_Selection = Shape_Selection;
+    pref = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
 }
 
+/**
+ * Create a FeatureQuery for rectangular selection and passes it via intent.
+ * @param n
+ * @param w
+ * @param s
+ * @param e
+ */
 private void infoDialog(final double n, final double w, final double s,
         final double e) {
     try {
@@ -106,6 +128,7 @@ private void infoDialog(final double n, final double w, final double s,
         query.setW(w);
         query.setSrid("4326");
         i.putExtra("query", query);
+        i.putExtra("selection","Rectangular");
         if (mode == MODE_EDIT) {
             i.setAction(Intent.ACTION_PICK);
         } else {
@@ -119,10 +142,65 @@ private void infoDialog(final double n, final double w, final double s,
     }
 }
 
+/**
+ * Create a Feature Query for circular selection and passes it to an activity via intent.
+ * @param x
+ * @param y
+ * @param radius
+ */
+private void infoDialogCircle(final double x, final double y, final double radius /*,final double stroke*/){
+	try {
+        final SpatialDataSourceManager sdbManager = SpatialDataSourceManager
+                .getInstance();
+        final List<SpatialVectorTable> spatialTables = sdbManager
+                .getSpatialVectorTables(false);
+        final StyleManager styleManager = StyleManager.getInstance();
+        final byte zoomLevel = view.getMapViewPosition().getZoomLevel();
+        ArrayList<String> layerNames = new ArrayList<String>();
+        for (SpatialVectorTable table : spatialTables) {
+            String tableName = table.getName();
+            AdvancedStyle style = styleManager.getStyle(tableName);
+
+            // skip this table if not visible
+            if (StyleUtils.isVisible(style, zoomLevel)) {
+                layerNames.add(table.getName());
+
+            }
+        }
+        Intent i = new Intent(view.getContext(),
+                GetFeatureInfoLayerListActivity.class);
+        i.putExtra("layers", layerNames);
+        FeatureCircleQuery query = new FeatureCircleQuery();
+        query.setX(x);
+        query.setY(y);
+        query.setRadius(radius);
+        query.setSrid("4326");
+        i.putExtra("query", query);
+        i.putExtra("selection","Circular"); //Indicate that user has choosed circular selection
+        if (mode == MODE_EDIT) {
+            i.setAction(Intent.ACTION_PICK);
+        } else {
+            i.setAction(Intent.ACTION_VIEW);
+        }
+        activity.startActivityForResult(i,
+                GetFeatureInfoLayerListActivity.CIRCLE_REQUEST);
+
+    } catch (Exception ex) {
+        ex.printStackTrace();
+    }
+}
+
+/**
+ * Method to handle touch event on view.
+ * @param v
+ * @param event class that handle touch.
+ */
 @Override
-public boolean onTouch(View v, MotionEvent event) {
+public boolean onTouch(View v, MotionEvent event){
+    String[] array = activity.getResources().getStringArray(R.array.preferences_selection_shape);
+    
     int action = event.getAction();
-    int pointerCount = event.getPointerCount();
+	int pointerCount = event.getPointerCount(); //Number of pointer of device
     // Try to skip pinch events
     if (Log.isLoggable("MAPINFOTOOL", Log.DEBUG)) {// Log check to avoid string
                                                    // creation
@@ -133,6 +211,16 @@ public boolean onTouch(View v, MotionEvent event) {
             dragStarted = false;
             Log.d("MAPINFOTOOL", "drag stopped");
             isPinching = true;
+        }
+        else if(this.Shape_Selection.equals(array[2])){
+        	//Use this to capture points for polygonal selection
+    		endX = event.getX();
+    		endY = event.getY();
+    		Coordinates new_point = new Coordinates(endX,endY);
+        	Singleton_Polygon_Points.getInstance().setPoint(new_point);
+        	Log.d("MAPINFOTOOL", "Point " + endX + " " + endY); 
+        	dragStarted = false;
+        	return false;
         }
     }
     if (action == MotionEvent.ACTION_MOVE) {
@@ -150,22 +238,24 @@ public boolean onTouch(View v, MotionEvent event) {
         Log.d("MAPINFOTOOL", "dragging started");
         endX = event.getX();
         endY = event.getY();
+
         // Force redraw
         view.redraw();
         return true;
 
     } else if (dragStarted && action == MotionEvent.ACTION_UP) {
-        if (pointerCount > 1) {
+        if (pointerCount > 1 /*&& !Shape_Selection.equals(array[2])*/) {
             isPinching = true;
             dragStarted = false;
             Log.d("MAPINFOTOOL", "drag stopped");
             return false;
-        } else if (isPinching) {
+        } else if (isPinching && !Shape_Selection.equals(array[2])) {
             isPinching = false;
             dragStarted = false;
             Log.d("MAPINFOTOOL", "drag stopped");
             return false;
         }
+ 
         endX = event.getX();
         endY = event.getY();
         if (endX == startX || endY == startY) {
@@ -184,32 +274,54 @@ public boolean onTouch(View v, MotionEvent event) {
                 .getMapPosition();
         byte zoomLevel = view.getMapViewPosition().getZoomLevel();
         GeoPoint geoPoint = mapPosition.geoPoint;
+        
         double pixelLeft = MercatorProjection.longitudeToPixelX(
                 geoPoint.longitude, mapPosition.zoomLevel);
         double pixelTop = MercatorProjection.latitudeToPixelY(
                 geoPoint.latitude, mapPosition.zoomLevel);
         pixelLeft -= view.getWidth() >> 1;
         pixelTop -= view.getHeight() >> 1;
-        double n = MercatorProjection.pixelYToLatitude(pixelTop + startY,
-                zoomLevel);
-        double w = MercatorProjection.pixelXToLongitude(pixelLeft + startX,
-                zoomLevel);
-        double s = MercatorProjection.pixelYToLatitude(pixelTop + endY,
-                zoomLevel);
-        double e = MercatorProjection.pixelXToLongitude(pixelLeft + endX,
-                zoomLevel);
-        Log.v("MAPINFOTOOL", "bbox:" + w + "," + s + "," + e + "," + n);
-        // TODO Allow to draw a rectangle
-        if (!infoTaskLaunched) {
-            // infoTaskLaunched=true;
-            infoDialog(n, w, s, e);
+        
+        double x = 0, y = 0, radius = 0, n = 0, s = 0, e = 0, w = 0;
+        boolean circle_choosed = false;
+        
+        if(pref.getString("selectionShape", "").equals(array[1])){  	
+            //Calculate radius and coordinates of circle
+        	x = MercatorProjection.pixelXToLongitude(pixelLeft + startX, zoomLevel);
+            y = MercatorProjection.pixelYToLatitude(pixelTop + startY, zoomLevel);
+            double fin_x = MercatorProjection.pixelXToLongitude(pixelLeft + endX, zoomLevel);
+            double fin_y = MercatorProjection.pixelYToLatitude(pixelTop + endY, zoomLevel);
+            double rad_x = Math.abs(x-fin_x); 
+            double rad_y = Math.abs(y-fin_y);
+            radius = Math.sqrt( (rad_x*rad_x) + (rad_y*rad_y));
+            circle_choosed = true;
         }
-
+        
+        else if(pref.getString("selectionShape", "").equals(array[0])){
+        	n = MercatorProjection.pixelYToLatitude(pixelTop + startY,
+                    zoomLevel);
+            w = MercatorProjection.pixelXToLongitude(pixelLeft + startX,
+                    zoomLevel);
+            s = MercatorProjection.pixelYToLatitude(pixelTop + endY,
+                    zoomLevel);
+            e = MercatorProjection.pixelXToLongitude(pixelLeft + endX,
+                    zoomLevel);
+            Log.v("MAPINFOTOOL", "bbox:" + w + "," + s + "," + e + "," + n);
+        }
+        
+        // TODO Allow to draw a rectangle
+        if (!infoTaskLaunched && circle_choosed) {
+            // infoTaskLaunched=true;
+        	infoDialogCircle(x,y,radius);
+        }
+        else
+            infoDialog(n, w, s, e);
+        
     }
     return false;
 }
 
-public boolean isDragStarted() {
+public boolean isDragStarted(){
     return dragStarted;
 }
 
@@ -235,6 +347,23 @@ public int getMode() {
 
 public void setMode(int mode) {
     this.mode = mode;
+}
+
+/** ATTENZIONE PUO' ESSERE ELIMINATO, USA LE PREFERENZE! ANZICHE' QST METODO.
+ * Method used by extern to update shape of selection when user chooses one different from current choice
+ * @param shape
+ */
+public void updateShapeSelection(String shape){
+	this.Shape_Selection = shape;
+}
+
+/**
+ * Return a point of polygonal selection stored by singleton class.
+ * @param index
+ * @return
+ */
+public Coordinates getPolygonPoint(int index){
+	return Singleton_Polygon_Points.getInstance().getPoint(index);
 }
 
 }

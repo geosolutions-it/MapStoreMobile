@@ -26,11 +26,11 @@ import java.util.List;
 
 import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.overlay.Overlay;
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.MotionEvent;
 
 public class AdvancedMapView extends MapView {
@@ -82,12 +82,33 @@ public class AdvancedMapView extends MapView {
 				catched = tl.onTouch(this, motionEvent) || catched;
 			}
 		}
+		
 		if(!catched){
 			 touchResult = super.onTouchEvent(motionEvent);
 		}
 		
+
 		return touchResult || catched;
 	}
+	
+	/**
+	 * Method to propagate ti map double tap event
+	 * @param event
+	 * @return
+	 */
+	/*public boolean onDoubleTapEvent(MotionEvent event){
+		boolean catched = false;
+		boolean doubleTapResult =true;
+		for(MapControl cl : controls){
+			OnDoubleTapListener gl = cl.getDoubleTapListener();
+			if(cl.isEnabled() &&  gl!=null){
+				//if one controller returns true the event is not propagated to the map
+				catched = gl.onDoubleTap(event) || catched;
+			}
+		}
+		
+		return doubleTapResult || catched; //Check su ritorno solo di catched
+	}*/
 	
 	/**
 	 * Workaround for getting proper overlay
@@ -117,5 +138,4 @@ public class AdvancedMapView extends MapView {
                 }
             }
 	}
-
 }

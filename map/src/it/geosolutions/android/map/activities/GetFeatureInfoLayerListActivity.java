@@ -17,10 +17,10 @@
  */
 package it.geosolutions.android.map.activities;
 
+import it.geosolutions.android.map.fragment.FeatureCircleLayerListFragment;
 import it.geosolutions.android.map.fragment.FeatureInfoLayerListFragment;
-
+import it.geosolutions.android.map.fragment.FeaturePolygonLayerListFragment;
 import java.util.ArrayList;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -36,9 +36,15 @@ import com.actionbarsherlock.view.Window;
  */
 public class GetFeatureInfoLayerListActivity  extends SherlockFragmentActivity {
 	public static final int BBOX_REQUEST = 10;
+	public static final int CIRCLE_REQUEST = 20;
+	public static final int POLYGON_REQUEST = 30;
 	public static final String RESULT_FEATURE_EXTRA = "FEATURE";
 	public static final String LAYER_FEATURE_EXTRA = "LAYER";
+	
 	FeatureInfoLayerListFragment mTaskFragment;
+	FeatureCircleLayerListFragment cTaskFragment;
+	//FeaturePolygonLayerListFragment pTaskFragment;
+	
 	ArrayList<String> emptyLayers=new ArrayList<String>();
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,17 +52,42 @@ public class GetFeatureInfoLayerListActivity  extends SherlockFragmentActivity {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         requestWindowFeature(Window.FEATURE_PROGRESS);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        
-            // During initial setup, plug in the details fragment.
-        	FragmentManager fm = getSupportFragmentManager();
+        FragmentManager fm = getSupportFragmentManager();
+    	
+        String sel = "";
+        if(getIntent()!=null)
+        	sel = getIntent().getStringExtra("selection"); //Discover which selection user has selected
+                
+        if(sel!=null && sel.equals("Circular")){
+       	 	// During initial setup, plug in the details fragment.
+        	cTaskFragment = (FeatureCircleLayerListFragment) fm.findFragmentByTag("featureInfoLayerList");
+        	if(cTaskFragment == null){
+        		cTaskFragment = new FeatureCircleLayerListFragment();
+    			cTaskFragment.setArguments(getIntent().getExtras());
+        		fm.beginTransaction().add(android.R.id.content,cTaskFragment, "featureInfoLayerList").commit();
+        	}
+        }
+        else if(sel!=null && sel.equals("Rectangular")){
+       	 	// During initial setup, plug in the details fragment.
         	mTaskFragment = (FeatureInfoLayerListFragment) fm.findFragmentByTag("featureInfoLayerList");
         	if(mTaskFragment == null){
-        		mTaskFragment = new FeatureInfoLayerListFragment();
-        		//TODO add empty layers to the view
-        		mTaskFragment.setArguments(getIntent().getExtras());
-        		//TODO add missing layers
-        		fm.beginTransaction().add(android.R.id.content,mTaskFragment, "featureInfoLayerList").commit();
+	        	mTaskFragment = new FeatureInfoLayerListFragment();
+	            //TODO add empty layers to the view
+	            mTaskFragment.setArguments(getIntent().getExtras());
+	            //TODO add missing layers
+	    		fm.beginTransaction().add(android.R.id.content,mTaskFragment, "featureInfoLayerList").commit();
         	}
+        }
+        /*else if(sel!=null && sel.equals("Polygonal")){
+        	// During initial setup, plug in the details fragment.
+        	pTaskFragment = (FeaturePolygonLayerListFragment) fm.findFragmentByTag("featureInfoLayerList");
+        	if(pTaskFragment == null){
+	        	pTaskFragment = new FeaturePolygonLayerListFragment();
+	            pTaskFragment.setArguments(getIntent().getExtras());
+	    		fm.beginTransaction().add(android.R.id.content,pTaskFragment, "featureInfoLayerList").commit();
+        	}
+        }*/
+        	
     }
 	
 	 @Override

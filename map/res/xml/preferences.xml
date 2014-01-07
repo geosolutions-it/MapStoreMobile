@@ -31,6 +31,10 @@
 	    <PreferenceScreen android:key="controllerScreen" android:title="@string/preferences_advanced" android:summary="@string/preferences_advanced_desc">		
 		    <PreferenceScreen android:key="selectionStyle" android:title="@string/preferences_selector_style" android:summary="@string/preferences_selector_style_desc"
 			    android:persistent="false">
+			    	<ListPreference android:title="@string/preferences_shape_selection" android:summary="@string/preferences_shape_selection_desc"
+					android:entryValues="@array/preferences_selection_shape" android:entries="@array/preferences_selection_shape"
+					android:key="selectionShape" android:defaultValue="@string/preferences_selection_shape_default" /> 	
+			    	
 			    	<PreferenceCategory android:key="FillCategory" android:title="@string/preferences_fill_category">
 	    	  			<yuku.ambilwarna.widget.AmbilWarnaPreference 
 		    	      	android:key="FillColor" android:defaultValue="0xff0000ff" android:title="@string/preferences_fill_color"

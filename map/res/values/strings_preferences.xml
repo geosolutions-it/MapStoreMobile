@@ -67,4 +67,6 @@
 	<string name="preferences_stroke_category">Border style</string>
 	<string name="preferences_dashed_stroke_screen">Style of dashed border</string>
 	<string name="preferences_dashed_stroke_screen_desc">Set style of dashed border</string>
+	<string name="preferences_shape_selection">Shape of selection</string>
+	<string name="preferences_shape_selection_desc">Set shape of selection</string>
 </resources>

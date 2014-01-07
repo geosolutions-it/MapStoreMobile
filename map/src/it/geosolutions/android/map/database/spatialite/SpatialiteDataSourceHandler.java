@@ -20,6 +20,7 @@ package it.geosolutions.android.map.database.spatialite;
 import it.geosolutions.android.map.database.SpatialDataSourceHandler;
 import it.geosolutions.android.map.model.Attribute;
 import it.geosolutions.android.map.model.Feature;
+import it.geosolutions.android.map.utils.Coordinates_Query;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -899,9 +900,6 @@ public class SpatialiteDataSourceHandler implements SpatialDataSourceHandler{
         }
     }
     
-    
-    
-
 	/* (non-Javadoc)
 	 * @see it.geosolutions.android.map.database.SpatialDataSourceHandler#queryBBox()
 	 */
@@ -950,6 +948,7 @@ public class SpatialiteDataSourceHandler implements SpatialDataSourceHandler{
 	        }
 	        return features;
 	}
+	
 	@Override
 	public ArrayList<Feature> intersectionToFeatureListBBOX(String boundsSrid,
 			SpatialVectorTable spatialTable, double n, double s, double e,
@@ -969,6 +968,27 @@ public class SpatialiteDataSourceHandler implements SpatialDataSourceHandler{
 	        }
 	        return features;
 	}
+	
+	@Override
+	public ArrayList<Feature> intersectionToCircle(String boundsSrid,
+			SpatialVectorTable spatialTable, double x, double y, double radius,
+			Integer start, Integer limit) throws Exception {
+		
+		Stmt stmt = buildFeatureCircleQuery(boundsSrid, spatialTable, x, y, radius, start, limit);
+        ArrayList<Feature> features = new ArrayList<Feature>();
+        try {
+        	//every row of the table (feature)
+        	generateAttributes(spatialTable, stmt, features, false);//TODO put out this
+            
+        }catch(Exception ee){
+        	Log.e("DATABASE","Error in database query:\nException:"+ee.getMessage());
+        	throw ee;
+        } finally {
+            stmt.close();
+        }
+        return features;
+	}
+	
 	/**
 	 * @param spatialTable
 	 * @param stmt
@@ -1001,8 +1021,9 @@ public class SpatialiteDataSourceHandler implements SpatialDataSourceHandler{
 	 * @param features
 	 * @throws Exception
 	 */
-	private void generateAttributes(SpatialVectorTable spatialTable, Stmt stmt,
+	public void generateAttributes(SpatialVectorTable spatialTable, Stmt stmt,
 			ArrayList<Feature> features,boolean includeGeometry) throws Exception {
+		try{
 		while( stmt.step() ) {
 		    int column_count = stmt.column_count();
 		    Feature feature = new Feature();
@@ -1021,6 +1042,9 @@ public class SpatialiteDataSourceHandler implements SpatialDataSourceHandler{
 		    }
 		    features.add(feature);
 		    //add the ArrayList
+		}
+		}catch(Exception e){
+			e.printStackTrace();
 		}
 	}
 	private Geometry generateGeometry(SpatialVectorTable spatialTable, Stmt stmt,
@@ -1101,7 +1125,7 @@ public class SpatialiteDataSourceHandler implements SpatialDataSourceHandler{
 	 * @throws Exception
 	 */
 	private Stmt buildFeatureBBoxQuery( String destSrid, SpatialVectorTable table, double n, double s, double e, double w,Integer start,Integer limit ) throws Exception {
-        boolean doTransform = false;
+		boolean doTransform = false;
         if (!table.getSrid().equals(destSrid)) {
             doTransform = true;
         }
@@ -1179,12 +1203,253 @@ public class SpatialiteDataSourceHandler implements SpatialDataSourceHandler{
         }
         qSb.append(";");
         String q = qSb.toString();
+        Log.v("ID",q);
         Stmt stmt = db.prepare(q);
 		return stmt;
     }
+	
+	/**
+	 * Intersect a circle using spatial index
+	 * @param destSrid
+	 * @param table
+	 * @param x
+	 * @param y
+	 * @param radius
+	 * @param start
+	 * @param limit
+	 * @return
+	 * @throws Exception
+	 */
+	public Stmt buildFeatureCircleQuery(String destSrid, SpatialVectorTable table, double x,
+			double y, double radius, Integer start, Integer limit) throws Exception {
+		boolean doTransform = false;
+        if (!table.getSrid().equals(destSrid)) {
+            doTransform = true;
+        }
 
-	
-	
-	
+        StringBuilder mbrSb = new StringBuilder();
+        if (doTransform)
+            mbrSb.append("ST_Transform(");
+        
+        mbrSb.append("MakePoint(");
+        mbrSb.append(x);
+        mbrSb.append(" , ");
+        mbrSb.append(y);
+        if (doTransform) {
+            mbrSb.append(", ");
+            mbrSb.append(destSrid);
+            mbrSb.append("), ");
+            mbrSb.append(table.getSrid());
+        }
+        mbrSb.append(")");
+        String mbr = mbrSb.toString(); 
 
+        StringBuilder qSb = new StringBuilder();
+        qSb.append("SELECT *,ST_AsBinary(CastToXY(");
+        if (doTransform)
+            qSb.append("ST_Transform(");
+        qSb.append(table.getGeomName());
+        if (doTransform) {
+            qSb.append(", ");
+            qSb.append(destSrid);
+            qSb.append(")");
+        }
+        qSb.append("))AS ");
+        qSb.append(DEFAULT_GEOMETRY_NAME);
+        // qSb.append(", AsText(");
+        // if (doTransform)
+        // qSb.append("ST_Transform(");
+        // qSb.append(table.geomName);
+        // if (doTransform) {
+        // qSb.append(", ");
+        // qSb.append(destSrid);
+        // qSb.append(")");
+        // }
+        // qSb.append(")");
+        qSb.append(" FROM \"");
+        qSb.append(table.getName());
+        qSb.append("\" WHERE ST_Distance(");
+        qSb.append(table.getGeomName());
+        qSb.append(", ");
+        qSb.append(mbr);
+        qSb.append(") <= ");
+        //double distance = radius + stroke_width;
+        qSb.append(Double.toString(radius));
+        qSb.append(" ");
+        /*qSb.append("   AND ROWID IN (");
+        qSb.append("     SELECT ROWID FROM Spatialindex WHERE f_table_name ='");
+        qSb.append(table.getName());
+        qSb.append("'");
+        qSb.append("     AND search_frame = ");
+        qSb.append(mbr);
+        qSb.append(" )");*/
+        if(limit != null){
+            if(start !=null){
+            	qSb.append(" ORDER BY  ");
+            	qSb.append(ORDER_BY_DEFAULT_FIELD);
+            	qSb.append(" ");
+            }
+            qSb.append(" LIMIT ");
+            if(start != null){
+            	qSb.append(start);
+            	qSb.append(",");
+            	qSb.append(start + limit);
+            }else{
+            	qSb.append(limit);
+            }
+        }
+        qSb.append(";");
+        String q = qSb.toString();
+        Log.v("Query circular",""+q);
+
+        Stmt stmt = db.prepare(q);
+		return stmt;		
+	}
+
+	@Override
+	public ArrayList<Bundle> intersectionToCircleBOX(String boundsSrid,
+			SpatialVectorTable spatialTable, double x, double y, double radius)
+			throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ArrayList<Bundle> intersectionToCircleBOX(String boundsSrid,
+			SpatialVectorTable spatialTable, double x, double y, double radius,
+			Integer start, Integer limit) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	/*
+	@Override
+	public ArrayList<Bundle> intersectionToPolygonBOX(String boundsSrid,
+			SpatialVectorTable spatialTable,
+			ArrayList<Coordinates_Query> polygon_points) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ArrayList<Bundle> intersectionToPolygonBOX(String boundsSrid,
+			SpatialVectorTable spatialTable,
+			ArrayList<Coordinates_Query> polygon_points, Integer start,
+			Integer limit) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ArrayList<Feature> intersectionToPolygon(String boundsSrid,
+			SpatialVectorTable spatialTable, ArrayList<Coordinates_Query> polygon_points,
+			Integer start, Integer limit) throws Exception {
+		
+		Stmt stmt = buildFeaturePolygonQuery(boundsSrid, spatialTable, polygon_points, start, limit);
+        ArrayList<Feature> features = new ArrayList<Feature>();
+        try {
+        	//every row of the table (feature)
+        	generateAttributes(spatialTable, stmt, features, false);//TODO put out this
+            
+        }catch(Exception ee){
+        	Log.e("DATABASE","Error in database query:\nException:"+ee.getMessage());
+        	throw ee;
+        } finally {
+            stmt.close();
+        }
+        return features;
+	}
+
+	public Stmt buildFeaturePolygonQuery(String destSrid,
+			SpatialVectorTable table,
+			ArrayList<Coordinates_Query> polygon_points, Integer start,
+			Integer limit) throws Exception {
+		
+		boolean doTransform = false;
+        if (!table.getSrid().equals(destSrid)) {
+            doTransform = true;
+        }
+
+        StringBuilder mbrSb = new StringBuilder();
+        if (doTransform)
+            mbrSb.append("ST_Transform(");
+        
+        mbrSb.append("PolygonFromText('POLYGON((");
+        for(int i = 0; i<polygon_points.size(); i++){
+            mbrSb.append(polygon_points.get(i).getX());
+            mbrSb.append(" ");
+            mbrSb.append(polygon_points.get(i).getY());
+            if(i<polygon_points.size()-1) mbrSb.append(" , ");
+        }
+        
+        if (doTransform) {
+        	mbrSb.append(" , ");
+            mbrSb.append(destSrid);
+            mbrSb.append("))', ");
+            mbrSb.append(table.getSrid());
+        }
+        
+        else
+        	mbrSb.append("))'");
+        
+        mbrSb.append(")");
+
+        String mbr = mbrSb.toString(); 
+
+        StringBuilder qSb = new StringBuilder();
+        qSb.append("SELECT *,ST_AsBinary(CastToXY(");
+        if (doTransform)
+            qSb.append("ST_Transform(");
+        qSb.append(table.getGeomName());
+        if (doTransform) {
+            qSb.append(", ");
+            qSb.append(destSrid);
+            qSb.append(")");
+        }
+        qSb.append("))AS ");
+        qSb.append(DEFAULT_GEOMETRY_NAME);
+        // qSb.append(", AsText(");
+        // if (doTransform)
+        // qSb.append("ST_Transform(");
+        // qSb.append(table.geomName);
+        // if (doTransform) {
+        // qSb.append(", ");
+        // qSb.append(destSrid);
+        // qSb.append(")");
+        // }
+        // qSb.append(")");
+        qSb.append(" FROM \"");
+        qSb.append(table.getName());
+        qSb.append("\" WHERE ST_Intersects(");
+        qSb.append(table.getGeomName());
+        qSb.append(" , ");
+        qSb.append(mbr);
+        qSb.append(") = 1 ");
+        qSb.append(" AND ROWID IN (");
+        qSb.append("     SELECT ROWID FROM Spatialindex WHERE f_table_name ='");
+        qSb.append(table.getName());
+        qSb.append("'");
+        qSb.append("     AND search_frame = ");
+        qSb.append(mbr);
+        qSb.append(" )");
+        if(limit != null){
+            /*if(start !=null){
+            	qSb.append(" ORDER BY  ");
+            	qSb.append(ORDER_BY_DEFAULT_FIELD);
+            	qSb.append(" ");
+            }*/
+            /*qSb.append(" LIMIT ");
+            if(start != null){
+            	qSb.append(start);
+            	qSb.append(",");
+            	qSb.append(start + limit);
+            }else{
+            	qSb.append(limit);
+            }
+        }
+        qSb.append(";");
+        String q = qSb.toString();
+        Log.v("Query polygon",""+q);
+        Stmt stmt = db.prepare(q);
+		return stmt;		
+	}*/
 }
