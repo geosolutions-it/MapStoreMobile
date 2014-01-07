@@ -155,7 +155,7 @@ public class PointsDataPropertiesActivity extends BaseStyleActivity implements O
 
     public void onOkClick( View view ) {
     	
-        updateStyle(getStyle());
+    	updateStyle(getStyle());
     }
     
     @Override
@@ -179,13 +179,11 @@ public class PointsDataPropertiesActivity extends BaseStyleActivity implements O
         finish();
     }
 
-    @Override
+    @Override 
     public void onItemSelected( AdapterView< ? > callingView, View view, int arg2, long arg3 ) {
     	style = getStyle();
-        if(callingView.equals(colorStroke)){
-            String color = String.format("#%06X", (0xFFFFFF & colorSelStroke)); //Convert from hex to #RRGGBB format      
-            style.strokecolor = color;
-        } else if (callingView.equals(sizeSpinner)) {
+   
+    	if (callingView.equals(sizeSpinner)) {
             String sizeString = (String) sizeSpinner.getSelectedItem();
             float size = Float.parseFloat(sizeString);
             style.size = size;
@@ -197,9 +195,6 @@ public class PointsDataPropertiesActivity extends BaseStyleActivity implements O
             String alphaString = (String) alphaSpinner.getSelectedItem();
             float alpha100 = Float.parseFloat(alphaString);
             style.strokealpha = alpha100 / 100f;
-        } else if (callingView.equals(colorFill)){
-        	String color = String.format("#%06X", (0xFFFFFF & colorSelFill)); //Convert from hex to #RRGGBB format      
-            style.fillcolor = color;
         } else if (callingView.equals(fillAlphaSpinner)) {
             String alphaString = (String) fillAlphaSpinner.getSelectedItem();
             float alpha100 = Float.parseFloat(alphaString);
@@ -220,6 +215,11 @@ public class PointsDataPropertiesActivity extends BaseStyleActivity implements O
     public void onNothingSelected( AdapterView< ? > arg0 ) {
     }
 
+    /**
+     * Show a color picker dialog, permit to user to set fill and stroke color.
+     * @param color_sel
+     * @param sel
+     */
     public void colorPicker(int color_sel, final who sel){
 		AmbilWarnaDialog dialog = new AmbilWarnaDialog(this, color_sel,new OnAmbilWarnaListener(){
 			@Override
@@ -227,10 +227,16 @@ public class PointsDataPropertiesActivity extends BaseStyleActivity implements O
 
 			@Override
 			public void onOk(AmbilWarnaDialog dialog, int color){ //Return color selected by user
-				if(sel==who.Fill) 
+				if(sel==who.Fill) {
 					colorSelFill = color;
-				else 
+					String col = String.format("#%06X", (0xFFFFFF & colorSelFill)); //Convert from hex to #RRGGBB format      
+			        style.fillcolor = col;
+				}
+				else {
 					colorSelStroke = color;
+					String col = String.format("#%06X", (0xFFFFFF & colorSelStroke)); //Convert from hex to #RRGGBB format      
+			        style.strokecolor = col;
+				}
 			} 		
     	});
     	

@@ -53,7 +53,6 @@ public class LinesDataPropertiesActivity extends BaseStyleActivity {
     public void onCreate( Bundle icicle ) {
         super.onCreate(icicle);
 
-        //colorSelStroke = 0xff000000; 
         setContentView(R.layout.data_line_properties);
         final AdvancedStyle style = getStyle();
         setBaseStyleProperties(style);

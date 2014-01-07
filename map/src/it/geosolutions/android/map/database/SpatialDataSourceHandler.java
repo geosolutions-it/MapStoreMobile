@@ -17,8 +17,8 @@
  */
 package it.geosolutions.android.map.database;
 
-import it.geosolutions.android.map.model.Attribute;
 import it.geosolutions.android.map.model.Feature;
+import it.geosolutions.android.map.utils.Coordinates_Query;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -57,6 +57,33 @@ public interface SpatialDataSourceHandler extends ISpatialDatabaseHandler {
 			SpatialVectorTable spatialTable, double n, double s, double e,
 			double w, Integer start, Integer limit) throws Exception;
 	/**
+	 * 
+	 * @param boundsSrid
+	 * @param spatialTable
+	 * @param x
+	 * @param y
+	 * @param radius
+	 * @return
+	 * @throws Exception
+	 */
+	ArrayList<Bundle> intersectionToCircleBOX(String boundsSrid,
+			SpatialVectorTable spatialTable, double x, double y, double radius) throws Exception;
+	
+	/**
+	 * @param boundsSrid
+	 * @param spatialTable
+	 * @param x	 
+	 * @param y
+	 * @param radius
+	 * @param start
+	 * @param limit
+	 * @return
+	 * @throws Exception
+	 */
+	ArrayList<Bundle> intersectionToCircleBOX(String boundsSrid,
+			SpatialVectorTable spatialTable, double x, double y, double radius,
+			Integer start, Integer limit) throws Exception;
+	/**
 	 * @param boundsSrid
 	 * @param spatialTable
 	 * @param n
@@ -87,6 +114,21 @@ public interface SpatialDataSourceHandler extends ISpatialDatabaseHandler {
 			SpatialVectorTable spatialTable, double n, double s, double e,
 			double w, Integer start, Integer limit) throws Exception;
 	/**
+	 * @param boundsSrid
+	 * @param spatialTable
+	 * @param x
+	 * @param y
+	 * @param radius
+	 * @param stroke_width
+	 * @param start
+	 * @param limit
+	 * @return
+	 * @throws Exception
+	 */
+	ArrayList<Feature> intersectionToCircle(String boundsSrid,
+			SpatialVectorTable spatialTable, double x, double y, double radius,
+			Integer start, Integer limit) throws Exception;
+	/**
 	 * @param srid 
 	 * @param layer
 	 * @param attributeName
@@ -115,5 +157,42 @@ public interface SpatialDataSourceHandler extends ISpatialDatabaseHandler {
 			SpatialVectorTable table, String attributeName,
 			String attributeValue, Integer start, Integer limit,
 			boolean getGeometry) throws Exception;
-}
+	
+	/**
+	 * 
+	 * @param boundsSrid
+	 * @param spatialTable
+	 * @param polygon_points
+	 * @return
+	 * @throws Exception
+	 */
+	/*ArrayList<Bundle> intersectionToPolygonBOX(String boundsSrid,
+			SpatialVectorTable spatialTable, ArrayList<Coordinates_Query> polygon_points) throws Exception;
 
+	/**
+	 * @param boundsSrid
+	 * @param spatialTable
+	 * @param polygon_points
+	 * @param start
+	 * @param limit
+	 * @return
+	 * @throws Exception
+	 */
+	/*ArrayList<Bundle> intersectionToPolygonBOX(String boundsSrid,
+			SpatialVectorTable spatialTable, ArrayList<Coordinates_Query> polygon_points,
+			Integer start, Integer limit) throws Exception;
+	
+	/**
+	 * @param boundsSrid
+	 * @param spatialTable
+	 * @param polygon_points
+	 * @param start
+	 * @param limit
+	 * @return
+	 * @throws Exception
+	 */
+	/*ArrayList<Feature> intersectionToPolygon(String boundsSrid,
+			SpatialVectorTable spatialTable, ArrayList<Coordinates_Query> polygon_points,
+			Integer start, Integer limit) throws Exception;*/
+
+}

@@ -17,33 +17,20 @@
  */
 package it.geosolutions.android.map.activities;
 
-import java.util.ArrayList;
-
-import jsqlite.Exception;
-
-import it.geosolutions.android.map.adapters.LayerAdapter;
-import it.geosolutions.android.map.database.SpatialDataSourceManager;
+import it.geosolutions.android.map.fragment.FeatureCircleAttributeListFragment;
+import it.geosolutions.android.map.fragment.FeatureCircleLayerListFragment;
 import it.geosolutions.android.map.fragment.FeatureInfoAttributeListFragment;
 import it.geosolutions.android.map.fragment.FeatureInfoLayerListFragment;
-import it.geosolutions.android.map.fragment.GetFeatureInfoFragment;
-import it.geosolutions.android.map.loaders.FeatureInfoLoader;
-import it.geosolutions.android.map.model.FeatureInfoQueryResult;
-import it.geosolutions.android.map.model.FeatureInfoTaskQuery;
+import it.geosolutions.android.map.fragment.FeaturePolygonAttributeListFragment;
+import it.geosolutions.android.map.fragment.FeaturePolygonLayerListFragment;
 import it.geosolutions.android.map.R;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
-
-import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
 
 /**
  * This activity manages the FeatureInfoAttributeListFragment 
@@ -55,8 +42,13 @@ public class GetFeatureInfoAttributeActivity  extends SherlockFragmentActivity {
 
 	public static final int GET_ITEM = 0;
 	
-	//current fragment
+	//Fragment for rectangular selection
 	FeatureInfoAttributeListFragment mTaskFragment;
+	//Fragment for circular selection
+	FeatureCircleAttributeListFragment cTaskFragment;
+	//Fragment for polygonal selection
+	//FeaturePolygonAttributeListFragment pTaskFragment;
+	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
 		overridePendingTransition(R.anim.in_from_right,
@@ -65,28 +57,57 @@ public class GetFeatureInfoAttributeActivity  extends SherlockFragmentActivity {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         requestWindowFeature(Window.FEATURE_PROGRESS);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-       
-            // During initial setup, plug in the details fragment.
-//        	FeatureInfoLayerListFragment details = new FeatureInfoLayerListFragment();
-//            details.setArguments(getIntent().getExtras());
-//            getSupportFragmentManager().beginTransaction().add(android.R.id.content, details).commit();
-        	FragmentManager fm = getSupportFragmentManager();
-        	mTaskFragment = (FeatureInfoAttributeListFragment) fm.findFragmentByTag("featureInfoAttributeList");
-        	if(mTaskFragment == null){
-        		mTaskFragment = new FeatureInfoAttributeListFragment();
-        		fm.beginTransaction().add(android.R.id.content,mTaskFragment, "featureInfoAttributeList").commit();
+    	FragmentManager fm = getSupportFragmentManager();
+ 	
+    	String sel = "";
+        if(getIntent()!=null)
+        	sel = getIntent().getStringExtra("selection"); //Discover which selection user has selected
+                
+        if(sel!=null && sel.equals("Circular")){
+        	// During initial setup, plug in the details fragment.
+        	FeatureCircleLayerListFragment details = new FeatureCircleLayerListFragment();
+        	//details.setArguments(getIntent().getExtras());
+        	//fm.beginTransaction().add(android.R.id.content, details).commit(); 
+        	cTaskFragment = (FeatureCircleAttributeListFragment) fm.findFragmentByTag("featureInfoLayerList");
+        	if(cTaskFragment == null){
+        		cTaskFragment = new FeatureCircleAttributeListFragment();
+            	details.setArguments(getIntent().getExtras());
+        		fm.beginTransaction().add(android.R.id.content,cTaskFragment, "featureInfoLayerList").commit();
         	}
+        }
+        else if(sel!=null && sel.equals("Rectangular")){
+        	// During initial setup, plug in the details fragment.
+        	FeatureInfoLayerListFragment details = new FeatureInfoLayerListFragment();
+        	//fm.beginTransaction().add(android.R.id.content, details).commit();
+        	mTaskFragment = (FeatureInfoAttributeListFragment) fm.findFragmentByTag("featureInfoLayerList");
+        	if(mTaskFragment == null){
+	        	mTaskFragment = new FeatureInfoAttributeListFragment();
+	        	details.setArguments(getIntent().getExtras());
+	        	//TODO add empty layers to the view
+	            //TODO add missing layers
+	    		fm.beginTransaction().add(android.R.id.content,mTaskFragment, "featureInfoLayerList").commit();
+        	}
+        }
         
-            
-        
-    
+        /*else if(sel!=null && sel.equals("Polygonal")){
+        	// During initial setup, plug in the details fragment.
+        	FeaturePolygonLayerListFragment details = new FeaturePolygonLayerListFragment();
+        	Log.v("Id","GetFeatureInfoattributeactivity");
+        	
+        	pTaskFragment = (FeaturePolygonAttributeListFragment) fm.findFragmentByTag("featureInfoLayerList");
+        	if(pTaskFragment == null){
+            	Log.v("Id","GetFeatureInfoAt");
+	        	pTaskFragment = new FeaturePolygonAttributeListFragment();
+	            details.setArguments(getIntent().getExtras());
+	    		fm.beginTransaction().add(android.R.id.content,pTaskFragment, "featureInfoLayerList").commit();
+        	}
+        }*/
     }
 	
 	 @Override
 	    public boolean onOptionsItemSelected(MenuItem item) {
 	    	 switch (item.getItemId()) {
-	    	    case android.R.id.home:
-	    	    
+	    	    case android.R.id.home:  	    
 	    	      finish();
 	    	      overridePendingTransition(R.anim.in_from_left,R.anim.out_to_right);
 	    	      break;
@@ -101,6 +122,5 @@ public class GetFeatureInfoAttributeActivity  extends SherlockFragmentActivity {
 	protected void onStop() {
 		// TODO Auto-generated method stub
 		super.onStop();
-		
 	}
 }
