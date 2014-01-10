@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:title="@string/menu_preferences" >
-
 	<PreferenceCategory android:title="@string/preferences_map">
-	<!-- 	<CheckBoxPreference android:title="@string/preferences_show_scale_bar" android:summary="@string/preferences_show_scale_bar_desc"
+	<!-- <CheckBoxPreference android:title="@string/preferences_show_scale_bar" android:summary="@string/preferences_show_scale_bar_desc"
 			android:key="showScaleBar" />  -->
 		<!-- <ListPreference android:title="@string/preferences_scale_bar_unit" android:summary="@string/preferences_scale_bar_unit_desc"
 			android:entryValues="@array/preferences_scale_bar_unit_keys" android:entries="@array/preferences_scale_bar_unit_values"
@@ -29,11 +28,13 @@
 	
 	<PreferenceCategory android:title="@string/preferences_advanced">
 	    <PreferenceScreen android:key="controllerScreen" android:title="@string/preferences_advanced" android:summary="@string/preferences_advanced_desc">		
-		    <PreferenceScreen android:key="selectionStyle" android:title="@string/preferences_selector_style" android:summary="@string/preferences_selector_style_desc"
+		    	<PreferenceCategory android:key="selectionStyle" android:title="@string/preferences_selector_style" android:summary="@string/preferences_selector_style_desc"
 			    android:persistent="false">
 			    	<ListPreference android:title="@string/preferences_shape_selection" android:summary="@string/preferences_shape_selection_desc"
 					android:entryValues="@array/preferences_selection_shape" android:entries="@array/preferences_selection_shape"
 					android:key="selectionShape" android:defaultValue="@string/preferences_selection_shape_default" /> 	
+			    	<it.geosolutions.android.map.preferences.SetRadiusPreference android:key="OnePointSelectionRadius" android:title="@string/preferences_radius" android:summary="@string/preferences_radius_desc" />
+			    </PreferenceCategory>
 			    	
 			    	<PreferenceCategory android:key="FillCategory" android:title="@string/preferences_fill_category">
 	    	  			<yuku.ambilwarna.widget.AmbilWarnaPreference 
@@ -54,26 +55,13 @@
 	    	  			<it.geosolutions.android.map.preferences.StyleStrokePreference 
 		    	   		 android:title="@string/preferences_stroke_width" android:summary="@string/preferences_stroke_width_desc" android:key="StrokeWidth" />
 	    	  			<ListPreference android:key="StrokeAngles" android:title="@string/preferences_line_joins_stroke" android:summary="@string/preferences_line_joins_stroke_desc" android:entryValues="@array/preferences_line_joins_stroke_keys" 
-		    	  		android:entries="@array/preferences_line_joins_stroke_values" android:defaultValue="@string/preferences_line_joins_stroke_default" />	 	  		
+		    	  		android:entries="@array/preferences_line_joins_stroke_values" android:defaultValue="@string/preferences_line_joins_stroke_default" />	 	  				
 	    	  			<PreferenceScreen android:key="DashedStrokeScreen" android:title="@string/preferences_dashed_stroke_screen" android:summary="@string/preferences_dashed_stroke_screen_desc">
 	    	  			    <CheckBoxPreference android:key="DashedStroke" android:title="@string/preferences_dashed_stroke" android:summary="@string/preferences_dashed_stroke_desc" android:defaultValue="False" /> 	    	  				 	  			
 	    	  				<it.geosolutions.android.map.preferences.StyleStrokePreference android:key="StrokeSpaces" android:title="@string/preferences_stroke_spaces" android:summary="@string/preferences_stroke_spaces_desc" android:dependency="DashedStroke" />
 	    	  				<it.geosolutions.android.map.preferences.StyleStrokePreference android:key="StrokeDim" android:title="@string/preferences_stroke_shape_dimension" android:summary="@string/preferences_stroke_shape_dimension_desc" android:dependency="DashedStroke" />
-	    	  			</PreferenceScreen>
+	    	  			</PreferenceScreen> 	  			
 					</PreferenceCategory>
-				</PreferenceScreen>
-			</PreferenceScreen>		
-		</PreferenceCategory>
-
-	<!-- <PreferenceCategory android:title="@string/preferences_debug">
-		<CheckBoxPreference android:title="@string/preferences_show_fps_counter" android:summary="@string/preferences_show_fps_counter_desc"
-			android:key="showFpsCounter" />
-		<CheckBoxPreference android:title="@string/preferences_show_tile_frames" android:summary="@string/preferences_show_tile_frames_desc"
-			android:key="drawTileFrames" />
-		<CheckBoxPreference android:title="@string/preferences_show_tile_coordinates" android:summary="@string/preferences_show_tile_coordinates_desc"
-			android:key="drawTileCoordinates" />
-		<CheckBoxPreference android:title="@string/preferences_show_water_tiles" android:summary="@string/preferences_show_water_tiles_desc"
-			android:key="highlightWaterTiles" />
+		</PreferenceScreen>		
 	</PreferenceCategory>
-	 -->
 </PreferenceScreen>

@@ -24,10 +24,8 @@ import it.geosolutions.android.map.model.FeatureCircleQuery;
 import it.geosolutions.android.map.model.FeatureInfoQuery;
 import it.geosolutions.android.map.style.AdvancedStyle;
 import it.geosolutions.android.map.style.StyleManager;
-import it.geosolutions.android.map.utils.Singleton_Polygon_Points;
 import it.geosolutions.android.map.utils.StyleUtils;
 import it.geosolutions.android.map.view.AdvancedMapView;
-import it.geosolutions.android.map.utils.Coordinates;
 import java.util.ArrayList;
 import java.util.List;
 import org.mapsforge.core.model.GeoPoint;
@@ -38,6 +36,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
+
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -74,8 +73,6 @@ private boolean isPinching;
 
 private Activity activity;
 
-private String Shape_Selection;
-
 private SharedPreferences pref; //Used to check shape of selection desired
 
 /**
@@ -87,12 +84,11 @@ private SharedPreferences pref; //Used to check shape of selection desired
 public MapInfoListener(AdvancedMapView mapView, Activity activity, String Shape_Selection) {
     view = mapView;
     this.activity = activity;
-    this.Shape_Selection = Shape_Selection;
     pref = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
 }
 
 /**
- * Create a FeatureQuery for rectangular selection and passes it via intent.
+ * Create a FeatureQuery for rectangular selection and pass it via intent.
  * @param n
  * @param w
  * @param s
@@ -143,14 +139,14 @@ private void infoDialog(final double n, final double w, final double s,
 }
 
 /**
- * Create a Feature Query for circular selection and passes it to an activity via intent.
+ * Create a Feature Query for circular and on time selection and pass it to an activity via intent.
  * @param x
  * @param y
  * @param radius
  */
-private void infoDialogCircle(final double x, final double y, final double radius /*,final double stroke*/){
-	try {
-        final SpatialDataSourceManager sdbManager = SpatialDataSourceManager
+private void infoDialogCircle(final double x, final double y, final double radius){
+       try{
+		final SpatialDataSourceManager sdbManager = SpatialDataSourceManager
                 .getInstance();
         final List<SpatialVectorTable> spatialTables = sdbManager
                 .getSpatialVectorTables(false);
@@ -182,12 +178,12 @@ private void infoDialogCircle(final double x, final double y, final double radiu
         } else {
             i.setAction(Intent.ACTION_VIEW);
         }
+        
         activity.startActivityForResult(i,
                 GetFeatureInfoLayerListActivity.CIRCLE_REQUEST);
-
-    } catch (Exception ex) {
-        ex.printStackTrace();
-    }
+        }catch(Exception ex){
+        	ex.printStackTrace();
+        }
 }
 
 /**
@@ -197,153 +193,166 @@ private void infoDialogCircle(final double x, final double y, final double radiu
  */
 @Override
 public boolean onTouch(View v, MotionEvent event){
-    String[] array = activity.getResources().getStringArray(R.array.preferences_selection_shape);
+    String[] array = activity.getResources().getStringArray(R.array.preferences_selection_shape);    
     
     int action = event.getAction();
-	int pointerCount = event.getPointerCount(); //Number of pointer of device
+    int pointerCount = event.getPointerCount(); //Number of pointer of device
+    
     // Try to skip pinch events
     if (Log.isLoggable("MAPINFOTOOL", Log.DEBUG)) {// Log check to avoid string
                                                    // creation
         Log.d("MAPINFOTOOL", "performed action:" + action + " on Info Tool");
     }
+        
     if (action == MotionEvent.ACTION_DOWN) {
-        if (dragStarted && pointerCount > 1) {
+    	if(dragStarted  && pointerCount > 1) {
             dragStarted = false;
             Log.d("MAPINFOTOOL", "drag stopped");
             isPinching = true;
-        }
+        }  	
     }
-    if (action == MotionEvent.ACTION_MOVE) {
-        if (pointerCount > 1 || isPinching) {
-            dragStarted = false;
-            Log.d("MAPINFOTOOL", "drag stopped");
-            return false;
-        }
-        // START DRAGGING
-        if (!dragStarted) {
-        	Log.d("MAPINFOTOOL", "dragging started");
-            startX = event.getX();
-            startY = event.getY();
-        }
-        dragStarted = true;
-        endX = event.getX();
-        endY = event.getY();
+    if(action == MotionEvent.ACTION_MOVE) {
+        	if (pointerCount > 1 || isPinching) {
+                dragStarted = false;
+                Log.d("MAPINFOTOOL", "drag stopped");
+                return false;
+            }
+            // START DRAGGING
+            if (!dragStarted) {
+                startX = event.getX();
+                startY = event.getY();
+            }
 
-        // Force redraw
-        view.redraw();
-        return true;
-
+        	dragStarted = true;
+            Log.d("MAPINFOTOOL", "dragging started");
+        	endX = event.getX();
+            endY = event.getY();
+        
+            // Force redraw   
+	        view.redraw();
+	        return true;
     } else if (dragStarted && action == MotionEvent.ACTION_UP) {
-        if (pointerCount > 1) {
-            isPinching = true;
-            dragStarted = false;
+        	if (pointerCount > 1){
+                isPinching = true;
+                dragStarted = false;
+                Log.d("MAPINFOTOOL", "drag stopped");
+                return false;
+            } else if (isPinching){
+                isPinching = false;
+                dragStarted = false;
+                Log.d("MAPINFOTOOL", "drag stopped");
+                return false;
+            }
+        	 endX = event.getX();
+             endY = event.getY();
+             if (endX == startX || endY == startY) {
+                 dragStarted = false;
+                 isPinching = false;
+                 return false;
+             }             
+        	// END DRAGGING EVENT		
+        	dragStarted = false;
             Log.d("MAPINFOTOOL", "drag stopped");
-            return false;
-        } else if (isPinching) {
-            isPinching = false;
-            dragStarted = false;
-            Log.d("MAPINFOTOOL", "drag stopped");
-            return false;
-        }
- 
-        endX = event.getX();
-        endY = event.getY();
-        if (endX == startX || endY == startY) {
-            dragStarted = false;
-            isPinching = false;
-            return false;
-        }
-        // END DRAGGING EVENT
-        dragStarted = false;
-        Log.d("MAPINFOTOOL", "drag stopped");
-        Log.d("MAPINFOTOOL", "start query layer");
+            Log.d("MAPINFOTOOL", "start query layer");
 
-        // TODO use an utility class for
-        // this operations
-        MapPosition mapPosition = this.view.getMapViewPosition()
-                .getMapPosition();
-        byte zoomLevel = view.getMapViewPosition().getZoomLevel();
-        GeoPoint geoPoint = mapPosition.geoPoint;
-        
-        double pixelLeft = MercatorProjection.longitudeToPixelX(
-                geoPoint.longitude, mapPosition.zoomLevel);
-        double pixelTop = MercatorProjection.latitudeToPixelY(
-                geoPoint.latitude, mapPosition.zoomLevel);
-        pixelLeft -= view.getWidth() >> 1;
-        pixelTop -= view.getHeight() >> 1;
-        
-        double x = 0, y = 0, radius = 0, n = 0, s = 0, e = 0, w = 0;
-        boolean circle_choosed = false;
-        
-        if(pref.getString("selectionShape", "").equals(array[1])){  	
-            //Calculate radius and coordinates of circle
-        	x = MercatorProjection.pixelXToLongitude(pixelLeft + startX, zoomLevel);
-            y = MercatorProjection.pixelYToLatitude(pixelTop + startY, zoomLevel);
-            double fin_x = MercatorProjection.pixelXToLongitude(pixelLeft + endX, zoomLevel);
-            double fin_y = MercatorProjection.pixelYToLatitude(pixelTop + endY, zoomLevel);
-            double rad_x = Math.abs(x-fin_x); 
-            double rad_y = Math.abs(y-fin_y);
-            radius = Math.sqrt( (rad_x*rad_x) + (rad_y*rad_y));
-            circle_choosed = true;
-        }
-        
-        else if(pref.getString("selectionShape", "").equals(array[0])){
-        	n = MercatorProjection.pixelYToLatitude(pixelTop + startY,
-                    zoomLevel);
-            w = MercatorProjection.pixelXToLongitude(pixelLeft + startX,
-                    zoomLevel);
-            s = MercatorProjection.pixelYToLatitude(pixelTop + endY,
-                    zoomLevel);
-            e = MercatorProjection.pixelXToLongitude(pixelLeft + endX,
-                    zoomLevel);
-            Log.v("MAPINFOTOOL", "bbox:" + w + "," + s + "," + e + "," + n);
-        }
-        
-        // TODO Allow to draw a rectangle
-        if (!infoTaskLaunched && circle_choosed) {
-            // infoTaskLaunched=true;
-        	infoDialogCircle(x,y,radius);
-        }
-        else
-            infoDialog(n, w, s, e);
-        
-    }
+            // TODO use an utility class for
+            // this operations
+            MapPosition mapPosition = this.view.getMapViewPosition()
+                    .getMapPosition();
+            byte zoomLevel = view.getMapViewPosition().getZoomLevel();
+            GeoPoint geoPoint = mapPosition.geoPoint;
+            
+            double pixelLeft = MercatorProjection.longitudeToPixelX(
+                    geoPoint.longitude, mapPosition.zoomLevel);
+            double pixelTop = MercatorProjection.latitudeToPixelY(
+                    geoPoint.latitude, mapPosition.zoomLevel);
+            pixelLeft -= view.getWidth() >> 1;
+            pixelTop -= view.getHeight() >> 1;
+            
+            double x = 0, y = 0, radius = 0, n = 0, s = 0, e = 0, w = 0, fin_x = 0, fin_y = 0, rad_x =0, rad_y=0;      
+            if(pref.getString("selectionShape", "").equals(array[0])){
+            	n = MercatorProjection.pixelYToLatitude(pixelTop + startY,
+                        zoomLevel);
+                w = MercatorProjection.pixelXToLongitude(pixelLeft + startX,
+                        zoomLevel);
+                s = MercatorProjection.pixelYToLatitude(pixelTop + endY,
+                        zoomLevel);
+                e = MercatorProjection.pixelXToLongitude(pixelLeft + endX,
+                        zoomLevel);
+                Log.v("MAPINFOTOOL", "bbox:" + w + "," + s + "," + e + "," + n);
+                infoDialog(n, w, s, e);
+            }
+            else {  
+            		//Calculate radius and coordinates of circle
+                	x = MercatorProjection.pixelXToLongitude(pixelLeft + startX, zoomLevel);
+                    y = MercatorProjection.pixelYToLatitude(pixelTop + startY, zoomLevel);
+                    fin_x = MercatorProjection.pixelXToLongitude(pixelLeft + endX, zoomLevel);
+                    fin_y = MercatorProjection.pixelYToLatitude(pixelTop + endY, zoomLevel);
+                    rad_x = Math.abs(x-fin_x); 
+                    rad_y = Math.abs(y-fin_y);
+                    radius = Math.sqrt( (rad_x*rad_x) + (rad_y*rad_y));
+            	
+	                Log.v("MAPINFOTOOL", "circle: center (" + x + "," + y + ") radius " + radius);
+	            	infoDialogCircle(x,y,radius);
+            	}
+        }	
+    
     return false;
 }
 
+/**
+ * Check if user start dragging
+ * @return
+ */
 public boolean isDragStarted(){
     return dragStarted;
 }
 
+/**
+ * Return start x coordinate for selection
+ * @return
+ */
 public float getStartX() {
     return startX;
 }
 
+/**
+ * Return start y coordinate for selection
+ * @return
+ */
 public float getStartY() {
     return startY;
 }
 
+/**
+ * Return final x coordinate for selection
+ * @return
+ */
 public float getEndX() {
     return endX;
 }
 
+/**
+ * Return final y coordinate for selection
+ * @return
+ */
 public float getEndY() {
     return endY;
 }
 
+/**
+ * Return mode.
+ * @return
+ */
 public int getMode() {
     return mode;
 }
 
+/**
+ * Set mode.
+ * @param mode
+ */
 public void setMode(int mode) {
     this.mode = mode;
-}
-
-/** 
- * Method used by extern to update shape of selection when user chooses one different from current choice
- * @param shape
- */
-public void updateShapeSelection(String shape){
-	this.Shape_Selection = shape;
 }
 }

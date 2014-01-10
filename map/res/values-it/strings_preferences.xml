@@ -73,4 +73,6 @@
 	<string name="preferences_dashed_stroke_screen_desc">Imposta lo stile del bordo tratteggiato</string>
 	<string name="preferences_shape_selection">Forma della selezione</string>
  	<string name="preferences_shape_selection_desc">Scegli la forma della selezione</string>
+ 	<string name="preferences_radius">Raggio</string>
+	<string name="preferences_radius_desc">Imposta il raggio della selezione puntuale</string>
 </resources>

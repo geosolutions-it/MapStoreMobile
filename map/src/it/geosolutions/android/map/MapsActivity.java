@@ -31,6 +31,7 @@ import it.geosolutions.android.map.fragment.OverlaySwitcherFragment;
 import it.geosolutions.android.map.geostore.activities.GeoStoreResourceDetailActivity;
 import it.geosolutions.android.map.geostore.activities.GeoStoreResourcesActivity;
 import it.geosolutions.android.map.geostore.model.Resource;
+import it.geosolutions.android.map.listeners.OneTapListener;
 import it.geosolutions.android.map.mapstore.model.MapStoreConfiguration;
 import it.geosolutions.android.map.mapstore.utils.MapStoreUtils;
 import it.geosolutions.android.map.model.Attribute;
@@ -581,7 +582,7 @@ public class MapsActivity extends MapActivityBase {
 			 mc.setGroup(group);
 	         mc.setMode(MarkerControl.MODE_EDIT);
 		 }         
-         		 
+		 
 		 //My location Control 
 		 LocationControl lc  =new LocationControl(mapView);
 		 lc.setActivationButton((ImageButton)findViewById(R.id.ButtonLocation));

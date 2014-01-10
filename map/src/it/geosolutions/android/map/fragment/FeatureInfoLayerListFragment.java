@@ -273,5 +273,6 @@ public void onLoaderReset(Loader<List<FeatureInfoQueryResult>> arg0) {
 public void onDestroy() {
     // TODO try to kill the load process
     super.onDestroy();
-	}
+}
+
 }

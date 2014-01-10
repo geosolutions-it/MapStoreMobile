@@ -24,15 +24,15 @@ import android.util.AttributeSet;
  */
 public class StyleStrokePreference extends SeekBarPreference {
 	
-	/**
-     * The default value for transparency of stroke
-     */
-    private static final int STROKE_ALPHA_DEFAULT = 50;
+   /**
+    * The default value for transparency of stroke
+    */
+   private static final int STROKE_ALPHA_DEFAULT = 50;
     
-    /**
-     * The maximum value for transparency of stroke
-     */
-    private static final int STROKE_ALPHA_MAX = 100;
+   /**
+    * The maximum value for transparency of stroke
+    */
+   private static final int STROKE_ALPHA_MAX = 100;
     
     /**
     * The default value for width of stroke
@@ -49,15 +49,15 @@ public class StyleStrokePreference extends SeekBarPreference {
     */
    private static final float STROKE_SPACES_DEFAULT = 10f;
     
-    /**
+   /**
      * The default value for dimension of every shape of stroke
-     */
-    private static final float STROKE_SHAPE_DIMENSION_DEFAULT = 15f;
+    */
+   private static final float STROKE_SHAPE_DIMENSION_DEFAULT = 15f;
     
-    /**
-     * The maximum value for spaces between shapes and dimension of shapes.
-     */
-     private static final float STROKE_MAX = 100f; 
+   /**
+    * The maximum value for spaces between shapes and dimension of shapes.
+    */
+   private static final float STROKE_MAX = 100f; 
 	
      /**
 	 * Construct a new style stroke preference seek bar.

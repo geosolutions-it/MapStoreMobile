@@ -18,6 +18,7 @@
 package it.geosolutions.android.map.view;
 
 import it.geosolutions.android.map.MapsActivity;
+import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.control.MapControl;
 import it.geosolutions.android.map.overlay.FreezableOverlay;
 import it.geosolutions.android.map.overlay.MarkerOverlay;
@@ -28,11 +29,13 @@ import java.util.List;
 
 import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.overlay.Overlay;
+
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
+import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.MotionEvent;
 /**
  * This class extends the <MapView> adding the management of the <MapControl> objects.
@@ -44,6 +47,7 @@ public class AdvancedMapView extends MapView {
 	protected List<MapControl> controls =  new ArrayList<MapControl>();
 	protected MapsActivity activity;
 	public OverlayManager overlayManger;
+	private SharedPreferences pref;
 	
 	public OverlayManager getOverlayManger() {
 		return overlayManger;
@@ -59,6 +63,7 @@ public class AdvancedMapView extends MapView {
 		if(context instanceof MapsActivity){
 			activity = (MapsActivity) context; 
 		}
+		pref = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
 	}
 	
 	/**
@@ -71,6 +76,7 @@ public class AdvancedMapView extends MapView {
 		if(context instanceof MapsActivity){
 			activity = (MapsActivity) context; 
 		}
+		pref = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
 	}
 	
 	/**
@@ -124,18 +130,20 @@ public class AdvancedMapView extends MapView {
 		boolean catched = false;
 		boolean touchResult =true;
 		for(MapControl cl : controls){
-			OnTouchListener tl = cl.getMapListener();
+			//If user chooses one point selection select listener for one tap event
+			OnTouchListener tl;
+			if(pref.getString("selectionShape", "").equals(activity.getResources().getStringArray(R.array.preferences_selection_shape)[2]))
+				tl = cl.getOneTapListener();
+			  else
+				tl = cl.getMapListener();
 			if(cl.isEnabled() && tl !=null){
 				//if one controller returns true the event is not propagated to the map
 				catched = tl.onTouch(this, motionEvent) || catched;
 			}
 		}
-		
-		if(!catched){
+		if(!catched)
 			 touchResult = super.onTouchEvent(motionEvent);
-		}
 		
-
 		return touchResult || catched;
 	}
 	
@@ -191,4 +199,5 @@ public class AdvancedMapView extends MapView {
 			activity.setSupportProgressBarIndeterminateVisibility(false);
 		}
 	}
+
 }
