@@ -22,8 +22,7 @@ import it.geosolutions.android.map.model.FeatureCircleQuery;
 import it.geosolutions.android.map.model.FeatureCircleTaskQuery;
 import it.geosolutions.android.map.model.FeatureInfoQuery;
 import it.geosolutions.android.map.model.FeatureInfoTaskQuery;
-import it.geosolutions.android.map.model.FeaturePolygonQuery;
-import it.geosolutions.android.map.model.FeaturePolygonTaskQuery;
+
 import java.util.ArrayList;
 import jsqlite.Exception;
 import android.util.Log;
@@ -95,42 +94,6 @@ public class FeatureInfoUtils {
 				continue;
 			}
 			FeatureCircleTaskQuery taskquery = new FeatureCircleTaskQuery(query);
-			taskquery.setTable(table);
-			taskquery.setHandler(sdbManager.getSpatialDataSourceHandler(table));
-			taskquery.setStart(start);
-			taskquery.setLimit(limit);
-
-			queryQueue[index] = taskquery;
-			index++;
-		}
-		return queryQueue;
-	}
-	
-	/**
-	 * Creates a task query queue from the original query, adding start and limit and the proper layer handlers.
-	 * @param sdbManager
-	 * @param layers
-	 * @param querySize
-	 * @param query
-	 * @param limit 
-	 * @param start 
-	 * @return
-	 */
-	public static FeaturePolygonTaskQuery[] createTaskQueryQueue(ArrayList<String> layers, FeaturePolygonQuery query, Integer start, Integer limit) {
-		final SpatialDataSourceManager sdbManager = SpatialDataSourceManager
-				.getInstance();
-		int querySize = layers.size();
-		FeaturePolygonTaskQuery[] queryQueue = new FeaturePolygonTaskQuery[querySize];
-		int index = 0;
-		for (String layer : layers) {
-			SpatialVectorTable table;
-			try {
-				table = sdbManager.getVectorTableByName(layer);
-			} catch (Exception e1) {
-				Log.e("FEATUREINFO", "unable to get table:" + layer);
-				continue;
-			}
-			FeaturePolygonTaskQuery taskquery = new FeaturePolygonTaskQuery(query);
 			taskquery.setTable(table);
 			taskquery.setHandler(sdbManager.getSpatialDataSourceHandler(table));
 			taskquery.setStart(start);

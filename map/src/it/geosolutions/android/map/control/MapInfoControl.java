@@ -19,6 +19,7 @@ package it.geosolutions.android.map.control;
 
 import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.listeners.MapInfoListener;
+import it.geosolutions.android.map.listeners.OneTapListener;
 import it.geosolutions.android.map.view.AdvancedMapView;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -29,15 +30,13 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.RectF;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.View.OnTouchListener;
 
 /**
- * A control for Infomations about the map.
+ * A control for Informations about the map.
  * Wraps a listener and draw rectangle on the map.
  * @author Lorenzo Natali (www.geo-solutions.it)
  *
@@ -47,6 +46,7 @@ public class MapInfoControl extends MapControl{
 	private static final String MODE_PRIVATE = null;
 	
 	protected MapInfoListener mapListener;
+	protected OneTapListener oneTapListener;
 	
 	private static Paint paint = new Paint();
 	private static int FILL_COLOR = Color.BLUE;
@@ -58,23 +58,24 @@ public class MapInfoControl extends MapControl{
 	private static float STROKE_SPACES = 10f;
 	private static float STROKE_SHAPE_DIMENSION = 15f;
 	private static Paint.Join STROKE_ANGLES = Paint.Join.ROUND;
-	private String Shape_Selection; 
+	private String Shape_Selection;
+	private static float RADIUS_PIXEL = 10f;
 	
 	private Activity activity; 
 	private String[] array;
-	private int index = 0;
-	private Path polygon;
-		
+	
+	private SharedPreferences pref;
+	
 	//Overrides the MapListener
 	@Override
 	public OnTouchListener getMapListener() {
 		return this.mapListener;
 	};
 	
-	//Overrides the Listener for doubleTapEvent
+	//Override the OneTapListener
 	@Override
-	public OnDoubleTapListener getDoubleTapListener(){
-		return this.doubleTapListener;
+	public OnTouchListener getOneTapListener() {
+		return this.oneTapListener;
 	};
 	
 	/**
@@ -88,7 +89,7 @@ public class MapInfoControl extends MapControl{
 		array = activity.getResources().getStringArray(R.array.preferences_selection_shape);
 		Shape_Selection = array[0]; //default selection rectangular
 		this.mapListener = new MapInfoListener(mapView, activity, Shape_Selection);
-
+		oneTapListener = new OneTapListener(mapView,activity);
 	}
 	
 	/**
@@ -103,6 +104,7 @@ public class MapInfoControl extends MapControl{
 		array = activity.getResources().getStringArray(R.array.preferences_selection_shape);
 		Shape_Selection = array[0]; //default selection rectangular
 		this.mapListener = new MapInfoListener(mapView,activity,Shape_Selection);
+		oneTapListener = new OneTapListener(mapView,activity);
 	}
 	
 	/**
@@ -111,12 +113,12 @@ public class MapInfoControl extends MapControl{
 	 */
 	public void loadStyleSelectorPreferences(){
 		Context context = activity.getApplicationContext();
-		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+		pref  = PreferenceManager.getDefaultSharedPreferences(context);
 		
 		//Load preferences about style of fill
 		int fill_color = pref.getInt("FillColor", FILL_COLOR);
 		if(fill_color != FILL_COLOR) FILL_COLOR = fill_color; //Check if default color for selection has been selected, otherwise it changes the variable FILL_COLOR
-
+		
 		int fill_alpha = pref.getInt("FillAlpha", FILL_ALPHA);
 		if(fill_alpha != FILL_ALPHA) FILL_ALPHA = fill_alpha;
 
@@ -150,12 +152,13 @@ public class MapInfoControl extends MapControl{
 		}
 		
 		String shape_sel = pref.getString("selectionShape", this.Shape_Selection);
-		if(!shape_sel.equals(Shape_Selection)){
+		if(!shape_sel.equals(Shape_Selection))
 			//Control if the user has choosed a new shape for selection
 			Shape_Selection = shape_sel;
-			mapListener.updateShapeSelection(Shape_Selection);
-		} 
-				
+			
+		int ontime_radius = pref.getInt("OnTimeSelectionRadius", (int) RADIUS_PIXEL);
+		if(ontime_radius != RADIUS_PIXEL) RADIUS_PIXEL = (float)ontime_radius;
+		
 		if(stroke_dashed != STROKE_DASHED || stroke_spaces != STROKE_SPACES || stroke_shape_dim != STROKE_SHAPE_DIMENSION || has_changed){
 			STROKE_DASHED = stroke_dashed;
 			STROKE_SPACES = stroke_spaces;
@@ -167,38 +170,40 @@ public class MapInfoControl extends MapControl{
 	}
 
 	/**
-	 * Method used to draw on map, possibile selections is: rectangular, circular, polygonal.
+	 * Method used to draw on map, possible selections is: rectangular, circular, on time.
 	 * @param canvas
 	 */
 	@Override
 	public void draw(Canvas canvas) {
-		if(!mapListener.isDragStarted()){
-			return;
+		
+		if(Shape_Selection.equals(array[2])){
+			if(!oneTapListener.pointsAcquired())
+					return;
+		}
+		else{
+			if(!mapListener.isDragStarted())return;
 		}
 		
 		float radius = 0;
 		RectF r = null;
 		float x1 = 0, x2 = 0, y1 = 0, y2 = 0;
 		
-		
-        x1= mapListener.getStartX();
-        y1= mapListener.getStartY();
-        x2= mapListener.getEndX();
-        y2= mapListener.getEndY();
-		
+		if(!Shape_Selection.equals(array[2])){
+			x1= mapListener.getStartX();
+			y1= mapListener.getStartY();
+			x2= mapListener.getEndX();
+			y2= mapListener.getEndY();
+		}	
+		else{
+			x1= oneTapListener.getStartX();
+			y1= oneTapListener.getStartY();
+		}
 		// fill	
 	    paint.setStyle(Paint.Style.FILL);
 	    paint.setColor(FILL_COLOR);
 	    paint.setAlpha(FILL_ALPHA);
-	    		
-	    if(this.Shape_Selection.equals(array[1])){
-	    	float radius_y = Math.abs(x1-x2);
-		    float radius_x = Math.abs(y1-y2);
-		    radius = (float) Math.sqrt((radius_x*radius_x)+(radius_y*radius_y));   
-		    canvas.drawCircle(x1, y1, radius, paint);
-		    
-		}	
-		else if(Shape_Selection.equals(array[0])){
+
+		if(Shape_Selection.equals(array[0])){
 			r= new RectF(
 				x1<x2?x1:x2,
 				y1<y2?y1:y2,
@@ -206,6 +211,16 @@ public class MapInfoControl extends MapControl{
 				y1>=y2?y1:y2);
 			
 		    canvas.drawRect(r, paint);
+		} else{
+			if(Shape_Selection.equals(array[1])){
+				float radius_y = Math.abs(x1-x2);
+			    float radius_x = Math.abs(y1-y2);
+			    radius = (float) Math.sqrt((radius_x*radius_x)+(radius_y*radius_y));
+			}
+			else
+				radius = (float) pref.getInt("OnePointSelectionRadius", (int) this.RADIUS_PIXEL);
+				   
+		    canvas.drawCircle(x1, y1, radius, paint);
 		}
 
 	    // border
@@ -221,11 +236,8 @@ public class MapInfoControl extends MapControl{
 	   
 	    if(this.Shape_Selection.equals(array[0]))
 		    canvas.drawRect(r, paint);
-	    else if(this.Shape_Selection.equals(array[1]))
-	    		canvas.drawCircle(x1, y1, radius, paint);
-
-	    
-
+	    else 	    		
+	    	canvas.drawCircle(x1, y1, radius, paint);	    
 	}
 
 	@Override 
@@ -233,8 +245,11 @@ public class MapInfoControl extends MapControl{
 	    super.setMode(mode);
 	    if(mode == MODE_VIEW){
 	        mapListener.setMode(MapInfoListener.MODE_VIEW);
-	    }else{
-	        mapListener.setMode(MapInfoListener.MODE_EDIT);
+	        oneTapListener.setMode(OneTapListener.MODE_VIEW);
+	    }
+	    else{
+	        mapListener.setMode(MapInfoListener.MODE_EDIT);	 
+	        oneTapListener.setMode(OneTapListener.MODE_EDIT);
 	    }
 	}
 	

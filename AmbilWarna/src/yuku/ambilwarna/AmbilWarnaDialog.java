@@ -4,9 +4,10 @@ import android.app.*;
 import android.content.*;
 import android.content.DialogInterface.OnCancelListener;
 import android.graphics.*;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.*;
 import android.widget.*;
-import android.widget.TextView.OnEditorActionListener;
 
 public class AmbilWarnaDialog {
 	public interface OnAmbilWarnaListener {
@@ -26,7 +27,6 @@ public class AmbilWarnaDialog {
 	final float[] currentColorHsv = new float[3];
 	final View viewRGB;
 	final Context context;
-	final Integer Color_RGB;
 
 	/**
 	 * create an AmbilWarnaDialog. call this only from OnCreateDialog() or from a background thread.
@@ -42,7 +42,6 @@ public class AmbilWarnaDialog {
 		this.listener = listener;
 		this.context = context;
 		Color.colorToHSV(color, currentColorHsv);
-		Color_RGB = null;
 
 		final View view = LayoutInflater.from(context).inflate(R.layout.ambilwarna_dialog, null);
 		viewRGB = view.findViewById(R.id.ambilwarna_rgb);
@@ -268,19 +267,19 @@ public class AmbilWarnaDialog {
 		return null;
 	}
 	
-	/**
-	 * Add a OnEditorActionListener to edit text to capture text insert by user
-	 * @param rgbEditText
-	 */
 	public void addListner(final EditText rgbEditText){
-		rgbEditText.setOnEditorActionListener(new OnEditorActionListener(){
+		rgbEditText.addTextChangedListener(new TextWatcher(){
+			public void afterTextChanged(Editable s) {}
 
 			@Override
-			public boolean onEditorAction(TextView arg0, int arg1, KeyEvent arg2) {
-				rgbEditText.setText(rgbEditText.getText().toString());				
-				return false;
+			public void beforeTextChanged(CharSequence arg0, int arg1,
+					int arg2, int arg3) {}
+
+			@Override
+			public void onTextChanged(CharSequence arg0, int arg1,
+					int arg2, int arg3) {
+				rgbEditText.setText(rgbEditText.getText().toString());
 			}
-			
 		});
 	}
 }

@@ -19,7 +19,6 @@ package it.geosolutions.android.map.activities;
 
 import it.geosolutions.android.map.fragment.FeatureCircleLayerListFragment;
 import it.geosolutions.android.map.fragment.FeatureInfoLayerListFragment;
-import it.geosolutions.android.map.fragment.FeaturePolygonLayerListFragment;
 import java.util.ArrayList;
 import android.app.Activity;
 import android.content.Intent;
@@ -37,7 +36,6 @@ import com.actionbarsherlock.view.Window;
 public class GetFeatureInfoLayerListActivity  extends SherlockFragmentActivity {
 	public static final int BBOX_REQUEST = 10;
 	public static final int CIRCLE_REQUEST = 20;
-	public static final int POLYGON_REQUEST = 30;
 	public static final String RESULT_FEATURE_EXTRA = "FEATURE";
 	public static final String LAYER_FEATURE_EXTRA = "LAYER";
 	
@@ -78,16 +76,6 @@ public class GetFeatureInfoLayerListActivity  extends SherlockFragmentActivity {
 	    		fm.beginTransaction().add(android.R.id.content,mTaskFragment, "featureInfoLayerList").commit();
         	}
         }
-        /*else if(sel!=null && sel.equals("Polygonal")){
-        	// During initial setup, plug in the details fragment.
-        	pTaskFragment = (FeaturePolygonLayerListFragment) fm.findFragmentByTag("featureInfoLayerList");
-        	if(pTaskFragment == null){
-	        	pTaskFragment = new FeaturePolygonLayerListFragment();
-	            pTaskFragment.setArguments(getIntent().getExtras());
-	    		fm.beginTransaction().add(android.R.id.content,pTaskFragment, "featureInfoLayerList").commit();
-        	}
-        }*/
-        	
     }
 	
 	 @Override

@@ -21,7 +21,6 @@ import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.activities.GetFeatureInfoLayerListActivity;
 import it.geosolutions.android.map.adapters.FeatureInfoAttributesAdapter;
 import it.geosolutions.android.map.loaders.FeatureInfoLoader;
-import it.geosolutions.android.map.model.Attribute;
 import it.geosolutions.android.map.model.Feature;
 import it.geosolutions.android.map.model.FeatureInfoQuery;
 import it.geosolutions.android.map.model.FeatureInfoQueryResult;
@@ -31,13 +30,11 @@ import it.geosolutions.android.map.utils.FeatureInfoUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -244,7 +241,6 @@ public Loader<List<FeatureInfoQueryResult>> onCreateLoader(int id, Bundle args) 
 }
 
 // populate the list and set buttonbar visibility options
-@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 @Override
 public void onLoadFinished(Loader<List<FeatureInfoQueryResult>> loader,
         List<FeatureInfoQueryResult> data) {
@@ -257,16 +253,8 @@ public void onLoadFinished(Loader<List<FeatureInfoQueryResult>> loader,
         if (currentFeatures.size() > 0) {
             // only the first feature display.
             // other will be used to check availability
-        	if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
-        		adapter.addAll(currentFeatures.get(0));        		
-        	}else{
-        		for(Attribute a : currentFeatures.get(0) ){
-            		adapter.add(a);
-        		}
-        	}
+            adapter.addAll(currentFeatures.get(0));
         }
-
-
 
     } else {
         setButtonBarVisibility(null);
