@@ -81,7 +81,7 @@ private SharedPreferences pref; //Used to check shape of selection desired
  * @param activity
  * @param Shape_Selection
  */
-public MapInfoListener(AdvancedMapView mapView, Activity activity, String Shape_Selection) {
+public MapInfoListener(AdvancedMapView mapView, Activity activity) {
     view = mapView;
     this.activity = activity;
     pref = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
@@ -355,4 +355,5 @@ public int getMode() {
 public void setMode(int mode) {
     this.mode = mode;
 }
+
 }

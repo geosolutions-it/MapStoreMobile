@@ -31,7 +31,6 @@ import it.geosolutions.android.map.fragment.OverlaySwitcherFragment;
 import it.geosolutions.android.map.geostore.activities.GeoStoreResourceDetailActivity;
 import it.geosolutions.android.map.geostore.activities.GeoStoreResourcesActivity;
 import it.geosolutions.android.map.geostore.model.Resource;
-import it.geosolutions.android.map.listeners.OneTapListener;
 import it.geosolutions.android.map.mapstore.model.MapStoreConfiguration;
 import it.geosolutions.android.map.mapstore.utils.MapStoreUtils;
 import it.geosolutions.android.map.model.Attribute;

@@ -32,6 +32,7 @@ import it.geosolutions.android.map.database.SpatialDataSourceManager;
 import it.geosolutions.android.map.model.FeatureCircleQuery;
 import it.geosolutions.android.map.style.AdvancedStyle;
 import it.geosolutions.android.map.style.StyleManager;
+import it.geosolutions.android.map.utils.ProjectionUtils;
 import it.geosolutions.android.map.utils.StyleUtils;
 import it.geosolutions.android.map.view.AdvancedMapView;
 import android.app.Activity;
@@ -59,7 +60,7 @@ public class OneTapListener implements OnTouchListener, OnGestureListener {
 	private Activity activity;
 	private boolean pointsAcquired;
 	private SharedPreferences pref;
-	private float startX, startY;
+	private float startX, startY, radius_pixel;
 	
 	private GestureDetector gd;
 	
@@ -93,6 +94,14 @@ public class OneTapListener implements OnTouchListener, OnGestureListener {
 	}
 	
 	/**
+	 * Return radius of selection to draw a circle on map.
+	 * @return
+	 */
+	public float getRadius(){
+		return radius_pixel;
+	}
+	
+	/**
 	 * Calculate radius of one point selection and convert coordinates from pixel to long/lat.
 	 */
 	public void query_layer(){
@@ -110,13 +119,14 @@ public class OneTapListener implements OnTouchListener, OnGestureListener {
         pixelLeft -= view.getWidth() >> 1;
         pixelTop -= view.getHeight() >> 1;
         
-        double x = 0, y = 0, radius = 0, fin_y = 0;      
+        double x = 0.0 , y = 0.0, radius = 0.0, fin_x = 0.0;      
     	x = MercatorProjection.pixelXToLongitude(pixelLeft + startX, zoomLevel);
         y = MercatorProjection.pixelYToLatitude(pixelTop + startY, zoomLevel);
+        
         //Calculate radius of one point selection
-        radius = (float)pref.getInt("OnePointSelectionRadius", 10);
-        fin_y = MercatorProjection.pixelYToLatitude(pixelTop + startY + radius, zoomLevel);
-        radius = Math.abs(fin_y - y);
+        radius_pixel = (float)pref.getInt("OnePointSelectionRadius", 10);
+        fin_x = MercatorProjection.pixelXToLongitude(pixelLeft + startX + radius_pixel, zoomLevel);
+        radius = Math.abs(fin_x - x);
     	
         Log.v("MAPINFOTOOL", "circle: center (" + x + "," + y + ") radius " + radius);
     	infoDialogCircle(x,y,radius);
@@ -171,6 +181,7 @@ public class OneTapListener implements OnTouchListener, OnGestureListener {
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
+		radius_pixel = (float)pref.getInt("OnePointSelectionRadius", 10);
 		return gd.onTouchEvent(event);
 	}
 

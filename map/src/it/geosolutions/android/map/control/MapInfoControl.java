@@ -17,9 +17,16 @@
  */
 package it.geosolutions.android.map.control;
 
+import java.text.DecimalFormat;
+
+import org.mapsforge.core.model.GeoPoint;
+import org.mapsforge.core.model.MapPosition;
+import org.mapsforge.core.util.MercatorProjection;
+
 import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.listeners.MapInfoListener;
 import it.geosolutions.android.map.listeners.OneTapListener;
+import it.geosolutions.android.map.utils.GeodesicDistance;
 import it.geosolutions.android.map.view.AdvancedMapView;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -30,16 +37,17 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
+import android.graphics.Paint.Align;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View.OnTouchListener;
 
 /**
  * A control for Informations about the map.
- * Wraps a listener and draw rectangle on the map.
+ * Wraps a listener and draw rectangle or circle on the map.
  * @author Lorenzo Natali (www.geo-solutions.it)
- *
  */
 @SuppressLint("WorldReadableFiles")
 public class MapInfoControl extends MapControl{
@@ -58,13 +66,19 @@ public class MapInfoControl extends MapControl{
 	private static float STROKE_SPACES = 10f;
 	private static float STROKE_SHAPE_DIMENSION = 15f;
 	private static Paint.Join STROKE_ANGLES = Paint.Join.ROUND;
-	private String Shape_Selection;
-	private static float RADIUS_PIXEL = 10f;
-	
+	private static String Shape_Selection;
+
 	private Activity activity; 
 	private String[] array;
 	
 	private SharedPreferences pref;
+	
+	private final static Paint COORDINATE_TEXT = new Paint(Paint.ANTI_ALIAS_FLAG);
+	private final static Paint COORDINATE_TEXT_STROKE = new Paint(Paint.ANTI_ALIAS_FLAG);
+	
+	private AdvancedMapView mapView;
+	
+	private float x1, y1, x2, y2;
 	
 	//Overrides the MapListener
 	@Override
@@ -74,7 +88,7 @@ public class MapInfoControl extends MapControl{
 	
 	//Override the OneTapListener
 	@Override
-	public OnTouchListener getOneTapListener() {
+	public OneTapListener getOneTapListener() {
 		return this.oneTapListener;
 	};
 	
@@ -85,10 +99,11 @@ public class MapInfoControl extends MapControl{
 	 */
 	public MapInfoControl(AdvancedMapView mapView,Activity activity) {
 		super(mapView);
+		this.mapView = mapView;
 		this.activity=activity;	
 		array = activity.getResources().getStringArray(R.array.preferences_selection_shape);
 		Shape_Selection = array[0]; //default selection rectangular
-		this.mapListener = new MapInfoListener(mapView, activity, Shape_Selection);
+		this.mapListener = new MapInfoListener(mapView, activity);
 		oneTapListener = new OneTapListener(mapView,activity);
 	}
 	
@@ -99,11 +114,12 @@ public class MapInfoControl extends MapControl{
 	 */
 	public MapInfoControl(AdvancedMapView mapView,Activity activity,boolean enabled) {
 		this(mapView,activity);
+		this.mapView = mapView;
 		this.setEnabled(enabled);
 		this.activity=activity;
 		array = activity.getResources().getStringArray(R.array.preferences_selection_shape);
 		Shape_Selection = array[0]; //default selection rectangular
-		this.mapListener = new MapInfoListener(mapView,activity,Shape_Selection);
+		this.mapListener = new MapInfoListener(mapView,activity);
 		oneTapListener = new OneTapListener(mapView,activity);
 	}
 	
@@ -155,9 +171,6 @@ public class MapInfoControl extends MapControl{
 		if(!shape_sel.equals(Shape_Selection))
 			//Control if the user has choosed a new shape for selection
 			Shape_Selection = shape_sel;
-			
-		int ontime_radius = pref.getInt("OnTimeSelectionRadius", (int) RADIUS_PIXEL);
-		if(ontime_radius != RADIUS_PIXEL) RADIUS_PIXEL = (float)ontime_radius;
 		
 		if(stroke_dashed != STROKE_DASHED || stroke_spaces != STROKE_SPACES || stroke_shape_dim != STROKE_SHAPE_DIMENSION || has_changed){
 			STROKE_DASHED = stroke_dashed;
@@ -170,12 +183,11 @@ public class MapInfoControl extends MapControl{
 	}
 
 	/**
-	 * Method used to draw on map, possible selections is: rectangular, circular, on time.
+	 * Method used to draw on map, possible selections is: rectangular, circular, one point.
 	 * @param canvas
 	 */
 	@Override
-	public void draw(Canvas canvas) {
-		
+	public void draw(Canvas canvas) {		
 		if(Shape_Selection.equals(array[2])){
 			if(!oneTapListener.pointsAcquired())
 					return;
@@ -184,9 +196,8 @@ public class MapInfoControl extends MapControl{
 			if(!mapListener.isDragStarted())return;
 		}
 		
-		float radius = 0;
 		RectF r = null;
-		float x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+		float radius = 0;
 		
 		if(!Shape_Selection.equals(array[2])){
 			x1= mapListener.getStartX();
@@ -213,13 +224,13 @@ public class MapInfoControl extends MapControl{
 		    canvas.drawRect(r, paint);
 		} else{
 			if(Shape_Selection.equals(array[1])){
-				float radius_y = Math.abs(x1-x2);
-			    float radius_x = Math.abs(y1-y2);
+				float radius_x = Math.abs(x1-x2);
+			    float radius_y = Math.abs(y1-y2);
 			    radius = (float) Math.sqrt((radius_x*radius_x)+(radius_y*radius_y));
 			}
 			else
-				radius = (float) pref.getInt("OnePointSelectionRadius", (int) this.RADIUS_PIXEL);
-				   
+				radius = oneTapListener.getRadius();
+			
 		    canvas.drawCircle(x1, y1, radius, paint);
 		}
 
@@ -234,10 +245,13 @@ public class MapInfoControl extends MapControl{
 	    if(STROKE_DASHED==true)
 	 	    paint.setPathEffect(new DashPathEffect(new float[]{STROKE_SHAPE_DIMENSION,STROKE_SPACES}, 0));
 	   
-	    if(this.Shape_Selection.equals(array[0]))
+	    if(Shape_Selection == array[0])
 		    canvas.drawRect(r, paint);
 	    else 	    		
-	    	canvas.drawCircle(x1, y1, radius, paint);	    
+	    	canvas.drawCircle(x1, y1, radius, paint);	
+	    
+	    if(!Shape_Selection.equals(array[0]))
+	    	drawInfo(canvas); //Print info about center and radius if a selection different from rectangular is selected
 	}
 
 	@Override 
@@ -262,5 +276,104 @@ public class MapInfoControl extends MapControl{
 		disable();
 		getActivationButton().setSelected(false);
 		loadStyleSelectorPreferences();
+	}
+	
+	/**
+	 * Draw informations about circular and one point selection(center long/lat, pixels of radius)
+	 * on the top right corner of the screen.
+	 * @param canvas
+	 */
+	public void drawInfo(Canvas canvas){
+		int textSize = 20;
+		configurePaints(textSize);
+		String format ="##.00000";
+		String format_radius = "##";
+		DecimalFormat f = new DecimalFormat(format); 
+		
+		double x_long = convertLong(x1);
+		double y_lat = convertLat(y1);	
+		
+		String center = this.mapView.getResources().getString(R.string.center);
+		String rad = this.mapView.getResources().getString(R.string.radius);
+		String message_center = center + " ("+ f.format(x_long) +" , "+f.format(y_lat)+")";
+		
+		double radius_km;
+		int radius_to_show;
+		if(Shape_Selection.equals(array[2]))
+			radius_km = GeodesicDistance.getDistance(x_long, y_lat, convertLong(x1+pref.getInt("OnePointSelectionRadius", 10)), y_lat);//this.convertRadius(x_long, this.convertLong(x1+pref.getInt("OnePointSelectionRadius", 10)),y_lat,y_lat);
+		else
+			radius_km = GeodesicDistance.getDistance(x_long, y_lat, convertLong(x2), convertLat(y2));//this.convertRadius(x_long, this.convertLong(x2),y_lat,convertLat(y2));
+		
+		if(radius_km < 1){
+			radius_to_show = (int) (radius_km * 1000);
+			format_radius += " m";
+		}
+		else{
+			radius_to_show = (int)radius_km;
+			format_radius += " km";
+		}
+		
+		DecimalFormat rad_format = new DecimalFormat(format_radius);
+		String message_radius = rad + " " + rad_format.format(radius_to_show);
+		
+		canvas.drawText(message_center, (float) canvas.getWidth(), (float) textSize, COORDINATE_TEXT);		
+		canvas.drawText(message_center, (float) canvas.getWidth(), (float) textSize, COORDINATE_TEXT_STROKE);
+		
+		canvas.drawText(message_radius, (float) canvas.getWidth(), (float) textSize*2, COORDINATE_TEXT);		
+		canvas.drawText(message_radius, (float) canvas.getWidth(), (float) textSize*2, COORDINATE_TEXT_STROKE);
+	}
+	
+	/**
+	 * Basic style configurations of paint.
+	 * @param textSize
+	 */
+	private static void configurePaints(int textSize) {
+		COORDINATE_TEXT.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
+		COORDINATE_TEXT.setTextSize(textSize);
+		COORDINATE_TEXT.setColor(Color.BLACK);
+		COORDINATE_TEXT.setTextAlign(Align.RIGHT); 
+		COORDINATE_TEXT_STROKE.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
+		COORDINATE_TEXT_STROKE.setStyle(Paint.Style.STROKE);
+		COORDINATE_TEXT_STROKE.setColor(Color.WHITE);
+		COORDINATE_TEXT_STROKE.setStrokeWidth(2);
+		COORDINATE_TEXT_STROKE.setTextSize(textSize);
+	}
+	
+	/**
+	 * Convert longitude returned by a listener because until query is not launched it isn't already
+	 * converted in longitude.
+	 * @param longitude
+	 * @return
+	 */
+	public double convertLong(float longitude){
+		 MapPosition mapPosition = mapView.getMapViewPosition()
+                 .getMapPosition();
+         byte zoomLevel = mapView.getMapViewPosition().getZoomLevel();
+         GeoPoint geoPoint = mapPosition.geoPoint;
+         
+         double pixelLeft = MercatorProjection.longitudeToPixelX(
+                 geoPoint.longitude, mapPosition.zoomLevel);      
+         pixelLeft -= mapView.getWidth() >> 1; 
+     		
+         return MercatorProjection.pixelXToLongitude(pixelLeft + longitude, zoomLevel);
+	}
+	
+	/**
+	 * Convert latitude returned by a listener because until query is not launched it isn't already
+	 * converted in latitude.
+	 * @param lat
+	 * @return
+	 */
+	public double convertLat(float lat){
+		 MapPosition mapPosition = mapView.getMapViewPosition()
+                 .getMapPosition();
+         byte zoomLevel = mapView.getMapViewPosition().getZoomLevel();
+         GeoPoint geoPoint = mapPosition.geoPoint;
+         
+         double pixelTop = MercatorProjection.latitudeToPixelY(
+                 geoPoint.latitude, mapPosition.zoomLevel);      
+         pixelTop -= mapView.getHeight() >> 1; 
+     
+         return MercatorProjection.pixelYToLatitude(pixelTop + lat, zoomLevel);
 	}
 }

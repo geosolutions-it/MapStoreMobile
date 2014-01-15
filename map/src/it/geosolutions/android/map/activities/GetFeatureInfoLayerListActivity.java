@@ -41,7 +41,6 @@ public class GetFeatureInfoLayerListActivity  extends SherlockFragmentActivity {
 	
 	FeatureInfoLayerListFragment mTaskFragment;
 	FeatureCircleLayerListFragment cTaskFragment;
-	//FeaturePolygonLayerListFragment pTaskFragment;
 	
 	ArrayList<String> emptyLayers=new ArrayList<String>();
 	@Override

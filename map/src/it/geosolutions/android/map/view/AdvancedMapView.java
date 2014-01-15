@@ -107,7 +107,7 @@ public class AdvancedMapView extends MapView {
 	}
 	
 	/**
-	 * Drows the map and the controls optional functions
+	 * Draws the map and the controls optional functions
 	 */
 	@Override
 	public  void onDraw(Canvas canvas){
