@@ -17,29 +17,29 @@ package it.geosolutions.android.map.preferences;
 import it.geosolutions.android.map.R;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.preference.ListPreference;
-import android.preference.Preference;
+
+import android.preference.PreferenceManager;
 import android.util.AttributeSet;
-import android.util.Log;
 
 /**
  * Preferences class to set the radius of on time selection.
  * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com).
  */
 public class SetRadiusPreference extends SeekBarPreference implements OnSharedPreferenceChangeListener{
-
+	
 	/**
 	* The default value for value(In pixel) of radius of an on time selection.
 	*/
-	private static final double RADIUS_PIXEL_DEFAULT = 10.0;
+	private static final double RADIUS_METERS_DEFAULT = 10.0;
 	
 	/**
 	* The maximum value for radius of on time selection.
 	*/
-	private static final double RADIUS_PIXEL_MAX = 100.0;
-	    	
+	private static final double RADIUS_METERS_MAX = 300.0;
+	
+	private String[] array;
+	
 	/**
 	 * Construct a new set radius preference seek bar.
 	 * 
@@ -50,15 +50,20 @@ public class SetRadiusPreference extends SeekBarPreference implements OnSharedPr
 	 */
 	public SetRadiusPreference(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		//Find preference about shape of selection and on time selection radius.
-		/*final Preference ontime_radius = this; //findPreferenceInHierarchy("OnTimeSelectionRadius");
-		/*Disable preference to set radius of on time selection if user wants to use a different
-		 * selection(Rectangular or Circular).
-		 */
+		array = context.getResources().getStringArray(R.array.preferences_selection_shape);
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+		pref.registerOnSharedPreferenceChangeListener(this);
 		
+		//Check if one point selection has been selected otherwise disable this 
+		if(pref.getString("selectionShape", "").equals(array[2]))
+			this.setEnabled(true);
+		else
+			this.setEnabled(false);
+		
+		//Set message, min and max of the seek bar
 		this.messageText = getContext().getString(R.string.preferences_radius_desc);
-		this.setDefault(RADIUS_PIXEL_DEFAULT);
-		this.setMax(RADIUS_PIXEL_MAX);
+		this.setDefault(RADIUS_METERS_DEFAULT);
+		this.setMax(RADIUS_METERS_MAX);
 	}
 
 	/**
@@ -82,7 +87,7 @@ public class SetRadiusPreference extends SeekBarPreference implements OnSharedPr
 	}
 
 	/**
-	 * Return value choosed by user in String format.
+	 * Return value selected by user in String format.
 	 * @param progress
 	 * @return
 	 */
@@ -90,27 +95,19 @@ public class SetRadiusPreference extends SeekBarPreference implements OnSharedPr
 	String getCurrentValueText(int progress) {
 		return String.valueOf(progress); //Return value selected
 	}
-
+	
+	/**
+	 * Listener which detect a changing on selectionShape preference, depending on it enable or
+	 * disable this preference.
+	 * @param sharedPref
+	 * @param key 
+	 */	
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPref, String key) {
-		//if(key.equals("selectionShape"))
-		final ListPreference shapesList = (ListPreference)findPreferenceInHierarchy("selectionShape");		
-		final boolean enabled = false;
-		/*shapesList.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener(){		
-		  public boolean onPreferenceChange(Preference preference, Object newValue) {
-		    final String val = newValue.toString();
-		    int index = shapesList.findIndexOfValue(val);
-		    if(index==3)
-		      enabled = true;
-		    else
-		      enabled = false;
-		    return true;
-		  }
-		});*/
-		
-		if(enabled)
-			this.setEnabled(true);
+		if(key.equals("selectionShape") &&
+			!sharedPref.getString("selectionShape", array[0]).equals(array[2]))
+				this.setEnabled(false);		
 		else 
-			this.setEnabled(false);
+			this.setEnabled(true);
 	}
 }
