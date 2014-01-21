@@ -18,7 +18,9 @@
 package it.geosolutions.android.map.control;
 
 import it.geosolutions.android.map.view.AdvancedMapView;
+
 import java.util.List;
+
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.os.Bundle;
@@ -27,12 +29,11 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.ImageButton;
-
 /**
  * A controller for the AdvancedMapView class.
  * Implements methods for the draw on the map.
  * Allows to be enabled or disabled.
- * @author Lorenzo Natali (www.geo-solutions.it)
+ * @author Lorenzo Natali
  *
  */
 public abstract class MapControl {
@@ -79,8 +80,14 @@ public abstract class MapControl {
 		}
 		 
 	};
-	protected OnTouchListener mapListener;
 	
+	//Listener for on touch event
+	protected OnTouchListener mapListener;
+	protected OnTouchListener oneTapListener;
+	protected OnTouchListener polygonTapListener;
+	
+	//Listener for polygonal selection
+	protected OnTouchListener singleTapListener;
 	protected OnDoubleTapListener doubleTapListener; 
 	
 	public MapControl(AdvancedMapView view){
@@ -132,7 +139,6 @@ public abstract class MapControl {
 	public OnClickListener getActivationListener() {
 		return activationListener;
 	}
-	
 	public void setActivationListener(OnClickListener activationListener) {
 		this.activationListener = activationListener;
 		if(this.activationButton!=null){
@@ -143,12 +149,28 @@ public abstract class MapControl {
 		return mapListener;
 	}
 	
-	public OnDoubleTapListener getDoubleTapListener(){
-		return doubleTapListener;
-	}
-	
 	public void setMapListener(OnTouchListener mapListener) {
 		this.mapListener = mapListener;		
+	}
+	
+	public OnTouchListener getOneTapListener() {
+		return oneTapListener;
+	}
+	
+	public void setOneTapListener(OnTouchListener oneTapListener) {
+		this.oneTapListener = oneTapListener;		
+	}
+	
+	public OnTouchListener getPolygonTapListener() {
+		return polygonTapListener;
+	}
+	
+	public void setPolygonTapListener(OnTouchListener polygonTapListener) {
+		this.polygonTapListener = polygonTapListener;		
+	}
+	
+	public OnDoubleTapListener getDoubleTapListener(){
+		return doubleTapListener;
 	}
 	
 	public void setDoubleTapListener(OnDoubleTapListener doubleTapListener){
@@ -158,14 +180,12 @@ public abstract class MapControl {
 	public ImageButton getActivationButton() {
 		return activationButton;
 	}
-	
 	public void setActivationButton(ImageButton imageButton) {
 		imageButton.setOnClickListener(this.getActivationListener());
 		this.activationButton = imageButton;
 	}
-	
 	/**
-	 * Inteface to allow control refreshing from resultFromIntent
+	 * Interface to allow control refreshing from resultFromIntent
 	 * @param data 
 	 * @param resultCode 
 	 * @param requestCode 
@@ -175,9 +195,9 @@ public abstract class MapControl {
     /**
      * @param savedInstanceState
      */
-    public void saveState(Bundle savedInstanceState){}
+    public void saveState(Bundle savedInstanceState) {}
     
-    public void restoreState(Bundle savedInstanceState ){}
+    public void restoreState(Bundle savedInstanceState ){    }
     
     public String getControlId() {
         return controlId;

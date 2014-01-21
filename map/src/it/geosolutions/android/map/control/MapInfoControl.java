@@ -18,7 +18,13 @@
 package it.geosolutions.android.map.control;
 
 import it.geosolutions.android.map.R;
+import it.geosolutions.android.map.control.todraw.Circle;
+import it.geosolutions.android.map.control.todraw.Polygon;
+import it.geosolutions.android.map.control.todraw.Rectangle;
 import it.geosolutions.android.map.listeners.MapInfoListener;
+import it.geosolutions.android.map.listeners.OneTapListener;
+import it.geosolutions.android.map.listeners.PolygonTapListener;
+
 import it.geosolutions.android.map.view.AdvancedMapView;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -29,26 +35,28 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.RectF;
+
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.View.OnTouchListener;
 
 /**
- * A control for Infomations about the map.
- * Wraps a listener and draw rectangle on the map.
+ * A control for Informations about the map.
+ * Wraps a listener and draw rectangle, circle or polygon on the map.
  * @author Lorenzo Natali (www.geo-solutions.it)
- *
+ * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com)
  */
 @SuppressLint("WorldReadableFiles")
 public class MapInfoControl extends MapControl{
 	private static final String MODE_PRIVATE = null;
 	
+	//Listeners
 	protected MapInfoListener mapListener;
+	protected OneTapListener oneTapListener;
+	protected PolygonTapListener polygonTapListener;
 	
-	private static Paint paint = new Paint();
+	private static Paint paint_fill = new Paint();
+	private static Paint paint_stroke = new Paint();
 	private static int FILL_COLOR = Color.BLUE;
 	private static int FILL_ALPHA = 50;
 	private static int STROKE_COLOR = Color.BLACK;
@@ -58,12 +66,17 @@ public class MapInfoControl extends MapControl{
 	private static float STROKE_SPACES = 10f;
 	private static float STROKE_SHAPE_DIMENSION = 15f;
 	private static Paint.Join STROKE_ANGLES = Paint.Join.ROUND;
-	private String Shape_Selection; 
-	
+	private static String Shape_Selection;
+
 	private Activity activity; 
+	
 	private String[] array;
-	private int index = 0;
-	private Path polygon;
+	private SharedPreferences pref;
+	
+	private final static Paint COORDINATE_TEXT = new Paint(Paint.ANTI_ALIAS_FLAG);
+	private final static Paint COORDINATE_TEXT_STROKE = new Paint(Paint.ANTI_ALIAS_FLAG);
+	
+	private AdvancedMapView mapView;
 		
 	//Overrides the MapListener
 	@Override
@@ -71,10 +84,16 @@ public class MapInfoControl extends MapControl{
 		return this.mapListener;
 	};
 	
-	//Overrides the Listener for doubleTapEvent
+	//Override the OneTapListener
 	@Override
-	public OnDoubleTapListener getDoubleTapListener(){
-		return this.doubleTapListener;
+	public OneTapListener getOneTapListener() {
+		return this.oneTapListener;
+	};
+	
+	//Override the OneTapListener
+	@Override
+	public PolygonTapListener getPolygonTapListener() {
+		return this.polygonTapListener;
 	};
 	
 	/**
@@ -84,25 +103,31 @@ public class MapInfoControl extends MapControl{
 	 */
 	public MapInfoControl(AdvancedMapView mapView,Activity activity) {
 		super(mapView);
+		this.mapView = mapView;
 		this.activity=activity;	
 		array = activity.getResources().getStringArray(R.array.preferences_selection_shape);
 		Shape_Selection = array[0]; //default selection rectangular
-		this.mapListener = new MapInfoListener(mapView, activity, Shape_Selection);
-
+		this.mapListener = new MapInfoListener(mapView, activity);
+		oneTapListener = new OneTapListener(mapView,activity);
+		this.polygonTapListener = new PolygonTapListener(mapView,activity);
 	}
 	
 	/**
 	 * Creates a new MapInfoControl object and the associated listener.
 	 * @param mapView
 	 * @param activity 
+	 * @param enabled
 	 */
 	public MapInfoControl(AdvancedMapView mapView,Activity activity,boolean enabled) {
 		this(mapView,activity);
+		this.mapView = mapView;
 		this.setEnabled(enabled);
 		this.activity=activity;
 		array = activity.getResources().getStringArray(R.array.preferences_selection_shape);
 		Shape_Selection = array[0]; //default selection rectangular
-		this.mapListener = new MapInfoListener(mapView,activity,Shape_Selection);
+		this.mapListener = new MapInfoListener(mapView,activity);
+		oneTapListener = new OneTapListener(mapView,activity);
+		polygonTapListener = new PolygonTapListener(mapView,activity);
 	}
 	
 	/**
@@ -111,12 +136,12 @@ public class MapInfoControl extends MapControl{
 	 */
 	public void loadStyleSelectorPreferences(){
 		Context context = activity.getApplicationContext();
-		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+		pref  = PreferenceManager.getDefaultSharedPreferences(context);
 		
 		//Load preferences about style of fill
 		int fill_color = pref.getInt("FillColor", FILL_COLOR);
 		if(fill_color != FILL_COLOR) FILL_COLOR = fill_color; //Check if default color for selection has been selected, otherwise it changes the variable FILL_COLOR
-
+		
 		int fill_alpha = pref.getInt("FillAlpha", FILL_ALPHA);
 		if(fill_alpha != FILL_ALPHA) FILL_ALPHA = fill_alpha;
 
@@ -150,82 +175,79 @@ public class MapInfoControl extends MapControl{
 		}
 		
 		String shape_sel = pref.getString("selectionShape", this.Shape_Selection);
-		if(!shape_sel.equals(Shape_Selection)){
+		if(!shape_sel.equals(Shape_Selection))
 			//Control if the user has choosed a new shape for selection
 			Shape_Selection = shape_sel;
-			mapListener.updateShapeSelection(Shape_Selection);
-		} 
-				
+		
 		if(stroke_dashed != STROKE_DASHED || stroke_spaces != STROKE_SPACES || stroke_shape_dim != STROKE_SHAPE_DIMENSION || has_changed){
 			STROKE_DASHED = stroke_dashed;
 			STROKE_SPACES = stroke_spaces;
 			STROKE_SHAPE_DIMENSION = stroke_shape_dim;
 			
 			//When user unchecks option for dashed stroke to reset paint is necessary because otherwise the stroke remains dashed. 
-			paint.reset();	
+			paint_stroke.reset();	
 		}	
 	}
 
 	/**
-	 * Method used to draw on map, possibile selections is: rectangular, circular, polygonal.
+	 * Method used to draw on map, possible selections is: rectangular, circular, one point.
 	 * @param canvas
 	 */
 	@Override
-	public void draw(Canvas canvas) {
-		if(!mapListener.isDragStarted()){
-			return;
+	public void draw(Canvas canvas) {		
+		if(Shape_Selection.equals(array[2])){
+			if(!oneTapListener.pointsAcquired()) return;
 		}
-		
-		float radius = 0;
-		RectF r = null;
-		float x1 = 0, x2 = 0, y1 = 0, y2 = 0;
-		
-		
-        x1= mapListener.getStartX();
-        y1= mapListener.getStartY();
-        x2= mapListener.getEndX();
-        y2= mapListener.getEndY();
-		
+		else if(Shape_Selection.equals(array[3])){
+			if(!polygonTapListener.isAcquisitionStarted() || 
+					polygonTapListener.getNumberOfPoints()< 1) return;
+		}
+		else
+			if(!mapListener.isDragStarted()) return;
+				
 		// fill	
-	    paint.setStyle(Paint.Style.FILL);
-	    paint.setColor(FILL_COLOR);
-	    paint.setAlpha(FILL_ALPHA);
-	    		
-	    if(this.Shape_Selection.equals(array[1])){
-	    	float radius_y = Math.abs(x1-x2);
-		    float radius_x = Math.abs(y1-y2);
-		    radius = (float) Math.sqrt((radius_x*radius_x)+(radius_y*radius_y));   
-		    canvas.drawCircle(x1, y1, radius, paint);
-		    
-		}	
-		else if(Shape_Selection.equals(array[0])){
-			r= new RectF(
-				x1<x2?x1:x2,
-				y1<y2?y1:y2,
-				x1>=x2?x1:x2,
-				y1>=y2?y1:y2);
-			
-		    canvas.drawRect(r, paint);
-		}
-
-	    // border
-	    paint.setStyle(Paint.Style.STROKE);
-	    paint.setColor(STROKE_COLOR);
-	    paint.setAlpha(STROKE_ALPHA);
-	    paint.setStrokeWidth(STROKE_WIDTH);
-    	paint.setStrokeJoin(STROKE_ANGLES);
-
-	    //Checks if user required dashed stroke
-	    if(STROKE_DASHED==true)
-	 	    paint.setPathEffect(new DashPathEffect(new float[]{STROKE_SHAPE_DIMENSION,STROKE_SPACES}, 0));
-	   
-	    if(this.Shape_Selection.equals(array[0]))
-		    canvas.drawRect(r, paint);
-	    else if(this.Shape_Selection.equals(array[1]))
-	    		canvas.drawCircle(x1, y1, radius, paint);
-
+	    paint_fill.setStyle(Paint.Style.FILL);
+	    paint_fill.setColor(FILL_COLOR);
+	    paint_fill.setAlpha(FILL_ALPHA);
 	    
-
+	    // border
+	    paint_stroke.setStyle(Paint.Style.STROKE);
+	    paint_stroke.setColor(STROKE_COLOR);
+	    paint_stroke.setAlpha(STROKE_ALPHA);
+	    paint_stroke.setStrokeWidth(STROKE_WIDTH);
+    	paint_stroke.setStrokeJoin(STROKE_ANGLES);
+    	
+    	//Checks if user required dashed stroke
+	    if(STROKE_DASHED==true)
+	 	    paint_stroke.setPathEffect(new DashPathEffect(new float[]{STROKE_SHAPE_DIMENSION,STROKE_SPACES}, 0));
+		
+		if(Shape_Selection.equals(array[0])){
+			Rectangle r = new Rectangle(canvas);
+			r.buildObject(mapListener);
+			r.draw(paint_fill);
+			r.draw(paint_stroke);
+		}
+		
+		else if(Shape_Selection.equals(array[1])){
+			Circle c = new Circle(canvas);
+			c.buildObject(mapListener);
+			c.draw(paint_fill);
+			c.draw(paint_stroke);
+			c.drawInfo(mapView, 0);
+		}
+		else if(Shape_Selection.equals(array[2])){
+			Circle c = new Circle(canvas);
+			c.buildObject(oneTapListener);
+			c.draw(paint_fill);
+			c.draw(paint_stroke);
+			c.drawInfo(mapView, 1);
+		}
+		else{
+			Polygon p = new Polygon(canvas);
+			p.buildPolygon(polygonTapListener);
+			p.draw(paint_fill);
+			p.draw(paint_stroke);
+		}
 	}
 
 	@Override 
@@ -233,14 +255,16 @@ public class MapInfoControl extends MapControl{
 	    super.setMode(mode);
 	    if(mode == MODE_VIEW){
 	        mapListener.setMode(MapInfoListener.MODE_VIEW);
-	    }else{
-	        mapListener.setMode(MapInfoListener.MODE_EDIT);
+	        oneTapListener.setMode(OneTapListener.MODE_VIEW);
+	    }
+	    else{
+	        mapListener.setMode(MapInfoListener.MODE_EDIT);	 
+	        oneTapListener.setMode(OneTapListener.MODE_EDIT);
 	    }
 	}
 	
 	@Override
 	public void refreshControl(int requestCode, int resultCode, Intent data) {
-
 		Log.v("MapInfoControl", "requestCode:"+requestCode);
 		Log.v("MapInfoControl", "resultCode:"+resultCode);
 

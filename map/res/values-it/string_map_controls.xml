@@ -9,6 +9,8 @@
     <string name="button_confirm_marker_position_title">Confermi?</string>
     <string name="map_marker_enable_suggestion">Tocca una segnalazione per selezionarla.\n Premi a lungo su di essa per spostarla.</string>
     <string name="map_marker_drag_suggestion">Muovi il dito per spostare la segnalazione.</string>
+    <string name="center">centro</string>
+    <string name="radius">raggio</string>
     <!--  GeoLocation  -->
     <string name="location_unavailable_message">Nessun servizio di localizzazione rilevato sul dispositivo.</string>
 	<string name="location_deactivated_message">Localizzazione sulla mappa disattivata.</string>
