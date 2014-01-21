@@ -24,6 +24,7 @@ import java.util.List;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.os.Bundle;
+import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
@@ -79,8 +80,15 @@ public abstract class MapControl {
 		}
 		 
 	};
+	
+	//Listener for on touch event
 	protected OnTouchListener mapListener;
 	protected OnTouchListener oneTapListener;
+	protected OnTouchListener polygonTapListener;
+	
+	//Listener for polygonal selection
+	protected OnTouchListener singleTapListener;
+	protected OnDoubleTapListener doubleTapListener; 
 	
 	public MapControl(AdvancedMapView view){
 		this.view = view;
@@ -153,6 +161,22 @@ public abstract class MapControl {
 		this.oneTapListener = oneTapListener;		
 	}
 	
+	public OnTouchListener getPolygonTapListener() {
+		return polygonTapListener;
+	}
+	
+	public void setPolygonTapListener(OnTouchListener polygonTapListener) {
+		this.polygonTapListener = polygonTapListener;		
+	}
+	
+	public OnDoubleTapListener getDoubleTapListener(){
+		return doubleTapListener;
+	}
+	
+	public void setDoubleTapListener(OnDoubleTapListener doubleTapListener){
+		this.doubleTapListener = doubleTapListener;
+	}
+	
 	public ImageButton getActivationButton() {
 		return activationButton;
 	}
@@ -161,7 +185,7 @@ public abstract class MapControl {
 		this.activationButton = imageButton;
 	}
 	/**
-	 * Inteface to allow control refreshing from resultFromIntent
+	 * Interface to allow control refreshing from resultFromIntent
 	 * @param data 
 	 * @param resultCode 
 	 * @param requestCode 
@@ -171,14 +195,10 @@ public abstract class MapControl {
     /**
      * @param savedInstanceState
      */
-    public void saveState(Bundle savedInstanceState) {
-        
-        
-    }
+    public void saveState(Bundle savedInstanceState) {}
     
-    public void restoreState(Bundle savedInstanceState ){
-        
-    }
+    public void restoreState(Bundle savedInstanceState ){    }
+    
     public String getControlId() {
         return controlId;
     }

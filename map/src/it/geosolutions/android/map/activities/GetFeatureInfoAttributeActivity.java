@@ -18,14 +18,13 @@
 package it.geosolutions.android.map.activities;
 
 import it.geosolutions.android.map.fragment.FeatureCircleAttributeListFragment;
-import it.geosolutions.android.map.fragment.FeatureCircleLayerListFragment;
 import it.geosolutions.android.map.fragment.FeatureInfoAttributeListFragment;
 import it.geosolutions.android.map.fragment.FeatureInfoLayerListFragment;
+import it.geosolutions.android.map.fragment.FeaturePolygonAttributeListFragment;
 
 import it.geosolutions.android.map.R;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
@@ -45,6 +44,8 @@ public class GetFeatureInfoAttributeActivity  extends SherlockFragmentActivity {
 	FeatureInfoAttributeListFragment mTaskFragment;
 	//Fragment for circular selection
 	FeatureCircleAttributeListFragment cTaskFragment;
+	//Fragment for polygonal selection
+	FeaturePolygonAttributeListFragment pTaskFragment;
 	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +63,7 @@ public class GetFeatureInfoAttributeActivity  extends SherlockFragmentActivity {
                 
         if(sel!=null && sel.equals("Circular")){
         	// During initial setup, plug in the details fragment.
-        	FeatureCircleLayerListFragment details = new FeatureCircleLayerListFragment();
+        	FeatureInfoLayerListFragment details = new FeatureInfoLayerListFragment();
         	//details.setArguments(getIntent().getExtras());
         	//fm.beginTransaction().add(android.R.id.content, details).commit(); 
         	cTaskFragment = (FeatureCircleAttributeListFragment) fm.findFragmentByTag("featureInfoLayerList");
@@ -84,6 +85,18 @@ public class GetFeatureInfoAttributeActivity  extends SherlockFragmentActivity {
 	            //TODO add missing layers
 	    		fm.beginTransaction().add(android.R.id.content,mTaskFragment, "featureInfoLayerList").commit();
         	}
+        }
+        
+        else if(sel!=null && sel.equals("Polygonal")){
+	    	// During initial setup, plug in the details fragment.
+	    	FeatureInfoLayerListFragment details = new FeatureInfoLayerListFragment();
+	    	
+	    	pTaskFragment = (FeaturePolygonAttributeListFragment) fm.findFragmentByTag("featureInfoLayerList");
+	    	if(pTaskFragment == null){
+	        	pTaskFragment = new FeaturePolygonAttributeListFragment();
+	            details.setArguments(getIntent().getExtras());
+	    		fm.beginTransaction().add(android.R.id.content,pTaskFragment, "featureInfoLayerList").commit();
+	    	}
         }
     }
 	

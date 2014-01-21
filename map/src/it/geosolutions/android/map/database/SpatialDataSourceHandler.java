@@ -18,6 +18,7 @@
 package it.geosolutions.android.map.database;
 
 import it.geosolutions.android.map.model.Feature;
+import it.geosolutions.android.map.utils.Coordinates.Coordinates_Query;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -32,6 +33,7 @@ import eu.geopaparazzi.spatialite.database.spatial.core.ISpatialDatabaseHandler;
 import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
 
 /**
+ * Interface for spatialdatasourcehandler
  * @author Lorenzo Natali (www.geo-solutions.it)
  *
  */
@@ -156,4 +158,41 @@ public interface SpatialDataSourceHandler extends ISpatialDatabaseHandler {
 			SpatialVectorTable table, String attributeName,
 			String attributeValue, Integer start, Integer limit,
 			boolean getGeometry) throws Exception;
+	
+	/**
+	 * 
+	 * @param boundsSrid
+	 * @param spatialTable
+	 * @param polygon_points
+	 * @return
+	 * @throws Exception
+	 */
+	ArrayList<Bundle> intersectionToPolygonBOX(String boundsSrid,
+			SpatialVectorTable spatialTable, ArrayList<Coordinates_Query> polygon_points) throws Exception;
+
+	/**
+	 * @param boundsSrid
+	 * @param spatialTable
+	 * @param polygon_points
+	 * @param start
+	 * @param limit
+	 * @return
+	 * @throws Exception
+	 */
+	ArrayList<Bundle> intersectionToPolygonBOX(String boundsSrid,
+			SpatialVectorTable spatialTable, ArrayList<Coordinates_Query> polygon_points,
+			Integer start, Integer limit) throws Exception;
+	
+	/**
+	 * @param boundsSrid
+	 * @param spatialTable
+	 * @param polygon_points
+	 * @param start
+	 * @param limit
+	 * @return
+	 * @throws Exception
+	 */
+	ArrayList<Feature> intersectionToPolygon(String boundsSrid,
+			SpatialVectorTable spatialTable, ArrayList<Coordinates_Query> polygon_points,
+			Integer start, Integer limit) throws Exception;
 }

@@ -20,8 +20,10 @@ package it.geosolutions.android.map.database.spatialite;
 import it.geosolutions.android.map.database.SpatialDataSourceHandler;
 import it.geosolutions.android.map.model.Attribute;
 import it.geosolutions.android.map.model.Feature;
+import it.geosolutions.android.map.utils.Coordinates.Coordinates_Query;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -51,8 +53,8 @@ import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
 import eu.geopaparazzi.spatialite.database.spatial.core.Style;
 
 /**
- * @author Lorenzo Natali (www.geo-solutions.it)
- *
+ * Implementation of interface of the Spatial data source handler.
+ * @author Lorenzo Natali (www.geo-solutions.it).
  */
 public class SpatialiteDataSourceHandler implements SpatialDataSourceHandler{
 
@@ -513,16 +515,7 @@ public class SpatialiteDataSourceHandler implements SpatialDataSourceHandler{
             qSb.append(")");
         }
         qSb.append("))");
-        // qSb.append(", AsText(");
-        // if (doTransform)
-        // qSb.append("ST_Transform(");
-        // qSb.append(table.geomName);
-        // if (doTransform) {
-        // qSb.append(", ");
-        // qSb.append(destSrid);
-        // qSb.append(")");
-        // }
-        // qSb.append(")");
+        
         qSb.append(" FROM \"");
         qSb.append(table.getName());
         qSb.append("\" WHERE ST_Intersects(");
@@ -1019,10 +1012,11 @@ public class SpatialiteDataSourceHandler implements SpatialDataSourceHandler{
 	 * @param stmt
 	 * @param features
 	 * @throws Exception
+	 * @throws IOException 
 	 */
 	public void generateAttributes(SpatialVectorTable spatialTable, Stmt stmt,
-			ArrayList<Feature> features,boolean includeGeometry) throws Exception {
-		try{
+			ArrayList<Feature> features,boolean includeGeometry) throws Exception{
+		try{	
 		while( stmt.step() ) {
 		    int column_count = stmt.column_count();
 		    Feature feature = new Feature();
@@ -1042,6 +1036,7 @@ public class SpatialiteDataSourceHandler implements SpatialDataSourceHandler{
 		    features.add(feature);
 		    //add the ArrayList
 		}
+		
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -1202,7 +1197,6 @@ public class SpatialiteDataSourceHandler implements SpatialDataSourceHandler{
         }
         qSb.append(";");
         String q = qSb.toString();
-        Log.v("ID",q);
         Stmt stmt = db.prepare(q);
 		return stmt;
     }
@@ -1255,16 +1249,7 @@ public class SpatialiteDataSourceHandler implements SpatialDataSourceHandler{
         }
         qSb.append("))AS ");
         qSb.append(DEFAULT_GEOMETRY_NAME);
-        // qSb.append(", AsText(");
-        // if (doTransform)
-        // qSb.append("ST_Transform(");
-        // qSb.append(table.geomName);
-        // if (doTransform) {
-        // qSb.append(", ");
-        // qSb.append(destSrid);
-        // qSb.append(")");
-        // }
-        // qSb.append(")");
+       
         qSb.append(" FROM \"");
         qSb.append(table.getName());
         qSb.append("\" WHERE ST_Distance(");
@@ -1272,16 +1257,9 @@ public class SpatialiteDataSourceHandler implements SpatialDataSourceHandler{
         qSb.append(", ");
         qSb.append(mbr);
         qSb.append(") <= ");
-        //double distance = radius + stroke_width;
         qSb.append(Double.toString(radius));
         qSb.append(" ");
-        /*qSb.append("   AND ROWID IN (");
-        qSb.append("     SELECT ROWID FROM Spatialindex WHERE f_table_name ='");
-        qSb.append(table.getName());
-        qSb.append("'");
-        qSb.append("     AND search_frame = ");
-        qSb.append(mbr);
-        qSb.append(" )");*/
+        
         if(limit != null){
             if(start !=null){
             	qSb.append(" ORDER BY  ");
@@ -1299,7 +1277,6 @@ public class SpatialiteDataSourceHandler implements SpatialDataSourceHandler{
         }
         qSb.append(";");
         String q = qSb.toString();
-        Log.v("Query circular",""+q);
 
         Stmt stmt = db.prepare(q);
 		return stmt;		
@@ -1319,5 +1296,134 @@ public class SpatialiteDataSourceHandler implements SpatialDataSourceHandler{
 			Integer start, Integer limit) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	@Override
+	public ArrayList<Bundle> intersectionToPolygonBOX(String boundsSrid,
+			SpatialVectorTable spatialTable,
+			ArrayList<Coordinates_Query> polygon_points) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ArrayList<Bundle> intersectionToPolygonBOX(String boundsSrid,
+			SpatialVectorTable spatialTable,
+			ArrayList<Coordinates_Query> polygon_points, Integer start,
+			Integer limit) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ArrayList<Feature> intersectionToPolygon(String boundsSrid,
+			SpatialVectorTable spatialTable, ArrayList<Coordinates_Query> polygon_points,
+			Integer start, Integer limit) throws Exception {
+		
+		Stmt stmt = buildFeaturePolygonQuery(boundsSrid, spatialTable, polygon_points, start, limit);
+        ArrayList<Feature> features = new ArrayList<Feature>();
+        try {
+        	//every row of the table (feature)
+        	generateAttributes(spatialTable, stmt, features, false);//TODO put out this
+            
+        }catch(Exception ee){
+        	Log.e("DATABASE","Error in database query:\nException:"+ee.getMessage());
+        	throw ee;
+        } finally {
+            stmt.close();
+        }
+        return features;
+	}
+
+	public Stmt buildFeaturePolygonQuery(String destSrid,
+			SpatialVectorTable table,
+			ArrayList<Coordinates_Query> polygon_points, Integer start,
+			Integer limit) throws Exception {
+		
+		boolean doTransform = false;
+        if (!table.getSrid().equals(destSrid)) {
+            doTransform = true;
+        }
+
+        StringBuilder mbrSb = new StringBuilder();
+        if (doTransform)
+            mbrSb.append("ST_Transform(");
+        
+        mbrSb.append("PolygonFromText('POLYGON((");
+        for(int i = 0; i<polygon_points.size(); i++){
+            mbrSb.append(polygon_points.get(i).getX());
+            mbrSb.append(" ");
+            mbrSb.append(polygon_points.get(i).getY());
+            if(i<polygon_points.size()-1) {
+            	mbrSb.append(" , ");
+            }
+            
+            if(i==polygon_points.size()-1){
+            	mbrSb.append(" , ");
+            	mbrSb.append(polygon_points.get(0).getX());
+            	mbrSb.append(" ");
+            	mbrSb.append(polygon_points.get(0).getY());
+            }
+        }
+        
+        if (doTransform) {
+        	mbrSb.append(" , ");
+            mbrSb.append(destSrid);
+            mbrSb.append("))', ");
+            mbrSb.append(table.getSrid());
+        }
+        
+        else
+        	mbrSb.append("))'");
+        
+        mbrSb.append(")");
+
+        String mbr = mbrSb.toString(); 
+
+        StringBuilder qSb = new StringBuilder();
+        qSb.append("SELECT *,ST_AsBinary(CastToXY(");
+        if (doTransform)
+            qSb.append("ST_Transform(");
+        qSb.append(table.getGeomName());
+        if (doTransform) {
+            qSb.append(", ");
+            qSb.append(destSrid);
+            qSb.append(")");
+        }
+        qSb.append("))AS ");
+        qSb.append(DEFAULT_GEOMETRY_NAME);
+        qSb.append(" FROM \"");
+        qSb.append(table.getName());
+        qSb.append("\" WHERE ST_Intersects(");
+        qSb.append(table.getGeomName());
+        qSb.append(" , ");
+        qSb.append(mbr);       
+        qSb.append(") = 1 ");
+        qSb.append(" AND ROWID IN (");
+        qSb.append("     SELECT ROWID FROM Spatialindex WHERE f_table_name ='");
+        qSb.append(table.getName());
+        qSb.append("'");
+        qSb.append("     AND search_frame = ");
+        qSb.append(mbr);
+        qSb.append(" )");
+        if(limit != null){
+            if(start !=null){
+            	qSb.append(" ORDER BY  ");
+            	qSb.append(ORDER_BY_DEFAULT_FIELD);
+            	qSb.append(" ");
+            }
+            qSb.append(" LIMIT ");
+            if(start != null){
+            	qSb.append(start);
+            	qSb.append(",");
+            	qSb.append(start + limit);
+            }else{
+            	qSb.append(limit);
+            }
+        }
+        qSb.append(";");
+        String q = qSb.toString();
+        Stmt stmt = db.prepare(q);
+		return stmt;		
 	}
 }

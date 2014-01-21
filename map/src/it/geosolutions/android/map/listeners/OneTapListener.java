@@ -29,10 +29,9 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import it.geosolutions.android.map.activities.GetFeatureInfoLayerListActivity;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
-import it.geosolutions.android.map.model.FeatureCircleQuery;
+import it.geosolutions.android.map.model.query.FeatureCircleQuery;
 import it.geosolutions.android.map.style.AdvancedStyle;
 import it.geosolutions.android.map.style.StyleManager;
-import it.geosolutions.android.map.utils.ProjectionUtils;
 import it.geosolutions.android.map.utils.StyleUtils;
 import it.geosolutions.android.map.view.AdvancedMapView;
 import android.app.Activity;
@@ -154,7 +153,6 @@ public class OneTapListener implements OnTouchListener, OnGestureListener {
 	            // skip this table if not visible
 	            if (StyleUtils.isVisible(style, zoomLevel)) {
 	                layerNames.add(table.getName());
-
 	            }
 	        }
 	        Intent i = new Intent(view.getContext(),
@@ -175,7 +173,7 @@ public class OneTapListener implements OnTouchListener, OnGestureListener {
 	        activity.startActivityForResult(i,
 	                GetFeatureInfoLayerListActivity.CIRCLE_REQUEST);
 	        }catch(Exception ex){
-	        	ex.printStackTrace();
+	        	Log.e("Exception launched ", ex.getMessage());
 	        }
 	}
 

@@ -54,6 +54,7 @@
 		<item >Rectangular</item>
 		<item >Circular</item>
 		<item >One point</item>
+		<item >Polygonal</item>
 	</string-array>
 	<string name="preferences_selection_shape_default">Rectangular</string>
 </resources>

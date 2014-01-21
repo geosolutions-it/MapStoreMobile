@@ -18,6 +18,7 @@ package it.geosolutions.android.map.database;
  */
 import it.geosolutions.android.map.database.spatialite.SpatialiteDataSourceHandler;
 import it.geosolutions.android.map.style.StyleManager;
+import it.geosolutions.android.map.utils.Coordinates.Coordinates_Query;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -207,5 +208,18 @@ public class SpatialDataSourceManager {
      */
     public SpatialDataSourceHandler getSpatialDataSourceHandler(SpatialVectorTable table){
    	 return vectorTablesMap.get(table);
+    }
+    
+    /**
+     * Query a polygon and returns an array of <Bundle> mapped as attributeName->attributeValue
+     * *NOTE*: max 10 results for now
+     * @param boundsSrid
+     * @param spatialTable
+     * @param polygon_points
+     * @return
+     * @throws java.lang.Exception
+     */
+    public ArrayList<Bundle> intersectionToPolygonBox( String boundsSrid, SpatialVectorTable spatialTable, ArrayList<Coordinates_Query> polygon_points) throws java.lang.Exception{
+         return getSpatialDataSourceHandler(spatialTable).intersectionToPolygonBOX(boundsSrid, spatialTable, polygon_points);//TODO allow pass these parameters
     }
 }

@@ -20,8 +20,8 @@ package it.geosolutions.android.map.listeners;
 import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.activities.GetFeatureInfoLayerListActivity;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
-import it.geosolutions.android.map.model.FeatureCircleQuery;
-import it.geosolutions.android.map.model.FeatureInfoQuery;
+import it.geosolutions.android.map.model.query.FeatureCircleQuery;
+import it.geosolutions.android.map.model.query.FeatureRectangularQuery;
 import it.geosolutions.android.map.style.AdvancedStyle;
 import it.geosolutions.android.map.style.StyleManager;
 import it.geosolutions.android.map.utils.StyleUtils;
@@ -117,7 +117,7 @@ private void infoDialog(final double n, final double w, final double s,
         Intent i = new Intent(view.getContext(),
                 GetFeatureInfoLayerListActivity.class);
         i.putExtra("layers", layerNames);
-        FeatureInfoQuery query = new FeatureInfoQuery();
+        FeatureRectangularQuery query = new FeatureRectangularQuery();
         query.setE(e);
         query.setN(n);
         query.setS(s);

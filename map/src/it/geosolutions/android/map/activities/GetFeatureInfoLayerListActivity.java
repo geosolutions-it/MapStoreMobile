@@ -17,8 +17,8 @@
  */
 package it.geosolutions.android.map.activities;
 
-import it.geosolutions.android.map.fragment.FeatureCircleLayerListFragment;
 import it.geosolutions.android.map.fragment.FeatureInfoLayerListFragment;
+
 import java.util.ArrayList;
 import android.app.Activity;
 import android.content.Intent;
@@ -30,18 +30,19 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 
 /**
+ * Class that checks about shape of selection and instance a fragment to show
+ * results of spatialite query. 
  * @author Lorenzo Natali (www.geo-solutions.it)
- *
  */
 public class GetFeatureInfoLayerListActivity  extends SherlockFragmentActivity {
 	public static final int BBOX_REQUEST = 10;
 	public static final int CIRCLE_REQUEST = 20;
+	public static final int POLYGON_REQUEST = 30;
 	public static final String RESULT_FEATURE_EXTRA = "FEATURE";
 	public static final String LAYER_FEATURE_EXTRA = "LAYER";
 	
 	FeatureInfoLayerListFragment mTaskFragment;
-	FeatureCircleLayerListFragment cTaskFragment;
-	
+
 	ArrayList<String> emptyLayers=new ArrayList<String>();
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,30 +52,15 @@ public class GetFeatureInfoLayerListActivity  extends SherlockFragmentActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         FragmentManager fm = getSupportFragmentManager();
     	
-        String sel = "";
-        if(getIntent()!=null)
-        	sel = getIntent().getStringExtra("selection"); //Discover which selection user has selected
-                
-        if(sel!=null && sel.equals("Circular")){
-       	 	// During initial setup, plug in the details fragment.
-        	cTaskFragment = (FeatureCircleLayerListFragment) fm.findFragmentByTag("featureInfoLayerList");
-        	if(cTaskFragment == null){
-        		cTaskFragment = new FeatureCircleLayerListFragment();
-    			cTaskFragment.setArguments(getIntent().getExtras());
-        		fm.beginTransaction().add(android.R.id.content,cTaskFragment, "featureInfoLayerList").commit();
-        	}
-        }
-        else if(sel!=null && sel.equals("Rectangular")){
-       	 	// During initial setup, plug in the details fragment.
-        	mTaskFragment = (FeatureInfoLayerListFragment) fm.findFragmentByTag("featureInfoLayerList");
-        	if(mTaskFragment == null){
-	        	mTaskFragment = new FeatureInfoLayerListFragment();
-	            //TODO add empty layers to the view
-	            mTaskFragment.setArguments(getIntent().getExtras());
-	            //TODO add missing layers
-	    		fm.beginTransaction().add(android.R.id.content,mTaskFragment, "featureInfoLayerList").commit();
-        	}
-        }
+   	 	// During initial setup, plug in the details fragment.
+    	mTaskFragment = (FeatureInfoLayerListFragment) fm.findFragmentByTag("featureInfoLayerList");
+    	if(mTaskFragment == null){
+        	mTaskFragment = new FeatureInfoLayerListFragment();
+            //TODO add empty layers to the view
+            mTaskFragment.setArguments(getIntent().getExtras());
+            //TODO add missing layers
+    		fm.beginTransaction().add(android.R.id.content,mTaskFragment, "featureInfoLayerList").commit();
+    	}
     }
 	
 	 @Override

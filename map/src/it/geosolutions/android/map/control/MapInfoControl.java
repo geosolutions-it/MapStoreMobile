@@ -17,16 +17,14 @@
  */
 package it.geosolutions.android.map.control;
 
-import java.text.DecimalFormat;
-
-import org.mapsforge.core.model.GeoPoint;
-import org.mapsforge.core.model.MapPosition;
-import org.mapsforge.core.util.MercatorProjection;
-
 import it.geosolutions.android.map.R;
+import it.geosolutions.android.map.control.todraw.Circle;
+import it.geosolutions.android.map.control.todraw.Polygon;
+import it.geosolutions.android.map.control.todraw.Rectangle;
 import it.geosolutions.android.map.listeners.MapInfoListener;
 import it.geosolutions.android.map.listeners.OneTapListener;
-import it.geosolutions.android.map.utils.GeodesicDistance;
+import it.geosolutions.android.map.listeners.PolygonTapListener;
+
 import it.geosolutions.android.map.view.AdvancedMapView;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -37,26 +35,28 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
-import android.graphics.Paint.Align;
-import android.graphics.RectF;
-import android.graphics.Typeface;
+
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View.OnTouchListener;
 
 /**
  * A control for Informations about the map.
- * Wraps a listener and draw rectangle or circle on the map.
+ * Wraps a listener and draw rectangle, circle or polygon on the map.
  * @author Lorenzo Natali (www.geo-solutions.it)
+ * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com)
  */
 @SuppressLint("WorldReadableFiles")
 public class MapInfoControl extends MapControl{
 	private static final String MODE_PRIVATE = null;
 	
+	//Listeners
 	protected MapInfoListener mapListener;
 	protected OneTapListener oneTapListener;
+	protected PolygonTapListener polygonTapListener;
 	
-	private static Paint paint = new Paint();
+	private static Paint paint_fill = new Paint();
+	private static Paint paint_stroke = new Paint();
 	private static int FILL_COLOR = Color.BLUE;
 	private static int FILL_ALPHA = 50;
 	private static int STROKE_COLOR = Color.BLACK;
@@ -69,17 +69,15 @@ public class MapInfoControl extends MapControl{
 	private static String Shape_Selection;
 
 	private Activity activity; 
-	private String[] array;
 	
+	private String[] array;
 	private SharedPreferences pref;
 	
 	private final static Paint COORDINATE_TEXT = new Paint(Paint.ANTI_ALIAS_FLAG);
 	private final static Paint COORDINATE_TEXT_STROKE = new Paint(Paint.ANTI_ALIAS_FLAG);
 	
 	private AdvancedMapView mapView;
-	
-	private float x1, y1, x2, y2;
-	
+		
 	//Overrides the MapListener
 	@Override
 	public OnTouchListener getMapListener() {
@@ -90,6 +88,12 @@ public class MapInfoControl extends MapControl{
 	@Override
 	public OneTapListener getOneTapListener() {
 		return this.oneTapListener;
+	};
+	
+	//Override the OneTapListener
+	@Override
+	public PolygonTapListener getPolygonTapListener() {
+		return this.polygonTapListener;
 	};
 	
 	/**
@@ -105,12 +109,14 @@ public class MapInfoControl extends MapControl{
 		Shape_Selection = array[0]; //default selection rectangular
 		this.mapListener = new MapInfoListener(mapView, activity);
 		oneTapListener = new OneTapListener(mapView,activity);
+		this.polygonTapListener = new PolygonTapListener(mapView,activity);
 	}
 	
 	/**
 	 * Creates a new MapInfoControl object and the associated listener.
 	 * @param mapView
 	 * @param activity 
+	 * @param enabled
 	 */
 	public MapInfoControl(AdvancedMapView mapView,Activity activity,boolean enabled) {
 		this(mapView,activity);
@@ -121,6 +127,7 @@ public class MapInfoControl extends MapControl{
 		Shape_Selection = array[0]; //default selection rectangular
 		this.mapListener = new MapInfoListener(mapView,activity);
 		oneTapListener = new OneTapListener(mapView,activity);
+		polygonTapListener = new PolygonTapListener(mapView,activity);
 	}
 	
 	/**
@@ -178,7 +185,7 @@ public class MapInfoControl extends MapControl{
 			STROKE_SHAPE_DIMENSION = stroke_shape_dim;
 			
 			//When user unchecks option for dashed stroke to reset paint is necessary because otherwise the stroke remains dashed. 
-			paint.reset();	
+			paint_stroke.reset();	
 		}	
 	}
 
@@ -189,69 +196,58 @@ public class MapInfoControl extends MapControl{
 	@Override
 	public void draw(Canvas canvas) {		
 		if(Shape_Selection.equals(array[2])){
-			if(!oneTapListener.pointsAcquired())
-					return;
+			if(!oneTapListener.pointsAcquired()) return;
 		}
-		else{
-			if(!mapListener.isDragStarted())return;
+		else if(Shape_Selection.equals(array[3])){
+			if(!polygonTapListener.isAcquisitionStarted() || 
+					polygonTapListener.getNumberOfPoints()< 1) return;
 		}
-		
-		RectF r = null;
-		float radius = 0;
-		
-		if(!Shape_Selection.equals(array[2])){
-			x1= mapListener.getStartX();
-			y1= mapListener.getStartY();
-			x2= mapListener.getEndX();
-			y2= mapListener.getEndY();
-		}	
-		else{
-			x1= oneTapListener.getStartX();
-			y1= oneTapListener.getStartY();
-		}
+		else
+			if(!mapListener.isDragStarted()) return;
+				
 		// fill	
-	    paint.setStyle(Paint.Style.FILL);
-	    paint.setColor(FILL_COLOR);
-	    paint.setAlpha(FILL_ALPHA);
-
-		if(Shape_Selection.equals(array[0])){
-			r= new RectF(
-				x1<x2?x1:x2,
-				y1<y2?y1:y2,
-				x1>=x2?x1:x2,
-				y1>=y2?y1:y2);
-			
-		    canvas.drawRect(r, paint);
-		} else{
-			if(Shape_Selection.equals(array[1])){
-				float radius_x = Math.abs(x1-x2);
-			    float radius_y = Math.abs(y1-y2);
-			    radius = (float) Math.sqrt((radius_x*radius_x)+(radius_y*radius_y));
-			}
-			else
-				radius = oneTapListener.getRadius();
-			
-		    canvas.drawCircle(x1, y1, radius, paint);
-		}
-
-	    // border
-	    paint.setStyle(Paint.Style.STROKE);
-	    paint.setColor(STROKE_COLOR);
-	    paint.setAlpha(STROKE_ALPHA);
-	    paint.setStrokeWidth(STROKE_WIDTH);
-    	paint.setStrokeJoin(STROKE_ANGLES);
-
-	    //Checks if user required dashed stroke
-	    if(STROKE_DASHED==true)
-	 	    paint.setPathEffect(new DashPathEffect(new float[]{STROKE_SHAPE_DIMENSION,STROKE_SPACES}, 0));
-	   
-	    if(Shape_Selection == array[0])
-		    canvas.drawRect(r, paint);
-	    else 	    		
-	    	canvas.drawCircle(x1, y1, radius, paint);	
+	    paint_fill.setStyle(Paint.Style.FILL);
+	    paint_fill.setColor(FILL_COLOR);
+	    paint_fill.setAlpha(FILL_ALPHA);
 	    
-	    if(!Shape_Selection.equals(array[0]))
-	    	drawInfo(canvas); //Print info about center and radius if a selection different from rectangular is selected
+	    // border
+	    paint_stroke.setStyle(Paint.Style.STROKE);
+	    paint_stroke.setColor(STROKE_COLOR);
+	    paint_stroke.setAlpha(STROKE_ALPHA);
+	    paint_stroke.setStrokeWidth(STROKE_WIDTH);
+    	paint_stroke.setStrokeJoin(STROKE_ANGLES);
+    	
+    	//Checks if user required dashed stroke
+	    if(STROKE_DASHED==true)
+	 	    paint_stroke.setPathEffect(new DashPathEffect(new float[]{STROKE_SHAPE_DIMENSION,STROKE_SPACES}, 0));
+		
+		if(Shape_Selection.equals(array[0])){
+			Rectangle r = new Rectangle(canvas);
+			r.buildObject(mapListener);
+			r.draw(paint_fill);
+			r.draw(paint_stroke);
+		}
+		
+		else if(Shape_Selection.equals(array[1])){
+			Circle c = new Circle(canvas);
+			c.buildObject(mapListener);
+			c.draw(paint_fill);
+			c.draw(paint_stroke);
+			c.drawInfo(mapView, 0);
+		}
+		else if(Shape_Selection.equals(array[2])){
+			Circle c = new Circle(canvas);
+			c.buildObject(oneTapListener);
+			c.draw(paint_fill);
+			c.draw(paint_stroke);
+			c.drawInfo(mapView, 1);
+		}
+		else{
+			Polygon p = new Polygon(canvas);
+			p.buildPolygon(polygonTapListener);
+			p.draw(paint_fill);
+			p.draw(paint_stroke);
+		}
 	}
 
 	@Override 
@@ -269,111 +265,11 @@ public class MapInfoControl extends MapControl{
 	
 	@Override
 	public void refreshControl(int requestCode, int resultCode, Intent data) {
-
 		Log.v("MapInfoControl", "requestCode:"+requestCode);
 		Log.v("MapInfoControl", "resultCode:"+resultCode);
 
 		disable();
 		getActivationButton().setSelected(false);
 		loadStyleSelectorPreferences();
-	}
-	
-	/**
-	 * Draw informations about circular and one point selection(center long/lat, pixels of radius)
-	 * on the top right corner of the screen.
-	 * @param canvas
-	 */
-	public void drawInfo(Canvas canvas){
-		int textSize = 20;
-		configurePaints(textSize);
-		String format ="##.00000";
-		String format_radius = "##";
-		DecimalFormat f = new DecimalFormat(format); 
-		
-		double x_long = convertLong(x1);
-		double y_lat = convertLat(y1);	
-		
-		String center = this.mapView.getResources().getString(R.string.center);
-		String rad = this.mapView.getResources().getString(R.string.radius);
-		String message_center = center + " ("+ f.format(x_long) +" , "+f.format(y_lat)+")";
-		
-		double radius_km;
-		int radius_to_show;
-		if(Shape_Selection.equals(array[2]))
-			radius_km = GeodesicDistance.getDistance(x_long, y_lat, convertLong(x1+pref.getInt("OnePointSelectionRadius", 10)), y_lat);//this.convertRadius(x_long, this.convertLong(x1+pref.getInt("OnePointSelectionRadius", 10)),y_lat,y_lat);
-		else
-			radius_km = GeodesicDistance.getDistance(x_long, y_lat, convertLong(x2), convertLat(y2));//this.convertRadius(x_long, this.convertLong(x2),y_lat,convertLat(y2));
-		
-		if(radius_km < 1){
-			radius_to_show = (int) (radius_km * 1000);
-			format_radius += " m";
-		}
-		else{
-			radius_to_show = (int)radius_km;
-			format_radius += " km";
-		}
-		
-		DecimalFormat rad_format = new DecimalFormat(format_radius);
-		String message_radius = rad + " " + rad_format.format(radius_to_show);
-		
-		canvas.drawText(message_center, (float) canvas.getWidth(), (float) textSize, COORDINATE_TEXT);		
-		canvas.drawText(message_center, (float) canvas.getWidth(), (float) textSize, COORDINATE_TEXT_STROKE);
-		
-		canvas.drawText(message_radius, (float) canvas.getWidth(), (float) textSize*2, COORDINATE_TEXT);		
-		canvas.drawText(message_radius, (float) canvas.getWidth(), (float) textSize*2, COORDINATE_TEXT_STROKE);
-	}
-	
-	/**
-	 * Basic style configurations of paint.
-	 * @param textSize
-	 */
-	private static void configurePaints(int textSize) {
-		COORDINATE_TEXT.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-		COORDINATE_TEXT.setTextSize(textSize);
-		COORDINATE_TEXT.setColor(Color.BLACK);
-		COORDINATE_TEXT.setTextAlign(Align.RIGHT); 
-		COORDINATE_TEXT_STROKE.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-		COORDINATE_TEXT_STROKE.setStyle(Paint.Style.STROKE);
-		COORDINATE_TEXT_STROKE.setColor(Color.WHITE);
-		COORDINATE_TEXT_STROKE.setStrokeWidth(2);
-		COORDINATE_TEXT_STROKE.setTextSize(textSize);
-	}
-	
-	/**
-	 * Convert longitude returned by a listener because until query is not launched it isn't already
-	 * converted in longitude.
-	 * @param longitude
-	 * @return
-	 */
-	public double convertLong(float longitude){
-		 MapPosition mapPosition = mapView.getMapViewPosition()
-                 .getMapPosition();
-         byte zoomLevel = mapView.getMapViewPosition().getZoomLevel();
-         GeoPoint geoPoint = mapPosition.geoPoint;
-         
-         double pixelLeft = MercatorProjection.longitudeToPixelX(
-                 geoPoint.longitude, mapPosition.zoomLevel);      
-         pixelLeft -= mapView.getWidth() >> 1; 
-     		
-         return MercatorProjection.pixelXToLongitude(pixelLeft + longitude, zoomLevel);
-	}
-	
-	/**
-	 * Convert latitude returned by a listener because until query is not launched it isn't already
-	 * converted in latitude.
-	 * @param lat
-	 * @return
-	 */
-	public double convertLat(float lat){
-		 MapPosition mapPosition = mapView.getMapViewPosition()
-                 .getMapPosition();
-         byte zoomLevel = mapView.getMapViewPosition().getZoomLevel();
-         GeoPoint geoPoint = mapPosition.geoPoint;
-         
-         double pixelTop = MercatorProjection.latitudeToPixelY(
-                 geoPoint.latitude, mapPosition.zoomLevel);      
-         pixelTop -= mapView.getHeight() >> 1; 
-     
-         return MercatorProjection.pixelYToLatitude(pixelTop + lat, zoomLevel);
 	}
 }

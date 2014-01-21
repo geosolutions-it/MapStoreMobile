@@ -7,7 +7,8 @@
 	<string-array name="preferences_selection_shape">
 		<item >Rettangolare</item>
 		<item >Circolare</item>
-		<item>Puntuale</item>
+		<item >Puntuale</item>
+		<item >Poligonale</item>
 	</string-array>
 	<string name="preferences_selection_shape_default">Rettangolare</string>
 </resources>
