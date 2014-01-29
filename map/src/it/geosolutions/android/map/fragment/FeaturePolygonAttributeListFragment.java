@@ -43,7 +43,7 @@ public class FeaturePolygonAttributeListFragment extends SherlockListFragment
 implements LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>>{
 	
 	private FeatureInfoAttributesAdapter adapter;
-	private FeaturePolygonTaskQuery[] queryQueue; //DIFF
+	private FeaturePolygonTaskQuery[] queryQueue; 
 	
 	// The callbacks through which we will interact with the LoaderManager.
 	private LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>> mCallbacks;
@@ -52,7 +52,7 @@ implements LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>>{
 
 	protected Integer limit;
 
-	protected FeaturePolygonQuery query; //DIFF
+	protected FeaturePolygonQuery query; 
 
 	protected ArrayList<String> layers;
 
@@ -361,6 +361,4 @@ implements LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>>{
 	    	}
 	    activity.finish();
 		}
-
 }
-

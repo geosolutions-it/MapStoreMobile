@@ -20,7 +20,6 @@ package it.geosolutions.android.map.utils;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
 import it.geosolutions.android.map.model.query.FeatureCircleQuery;
 import it.geosolutions.android.map.model.query.FeaturePolygonQuery;
-import it.geosolutions.android.map.model.query.FeatureInfoQuery;
 import it.geosolutions.android.map.model.query.FeatureCircleTaskQuery;
 import it.geosolutions.android.map.model.query.FeatureRectangularQuery;
 import it.geosolutions.android.map.model.query.FeatureRectangularTaskQuery;

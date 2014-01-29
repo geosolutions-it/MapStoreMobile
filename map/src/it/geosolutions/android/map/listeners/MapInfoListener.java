@@ -28,9 +28,7 @@ import it.geosolutions.android.map.utils.StyleUtils;
 import it.geosolutions.android.map.view.AdvancedMapView;
 import java.util.ArrayList;
 import java.util.List;
-import org.mapsforge.core.model.GeoPoint;
-import org.mapsforge.core.model.MapPosition;
-import org.mapsforge.core.util.MercatorProjection;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -41,6 +39,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
+import it.geosolutions.android.map.utils.ConversionUtilities;
 
 /**
  * Listener that implements OnTouch Event on map.
@@ -64,8 +63,6 @@ private float startY;
 private float endX;
 
 private float endY;
-
-private boolean infoTaskLaunched;
 
 protected AdvancedMapView view;
 
@@ -255,45 +252,28 @@ public boolean onTouch(View v, MotionEvent event){
             Log.d("MAPINFOTOOL", "drag stopped");
             Log.d("MAPINFOTOOL", "start query layer");
 
-            // TODO use an utility class for
-            // this operations
-            MapPosition mapPosition = this.view.getMapViewPosition()
-                    .getMapPosition();
-            byte zoomLevel = view.getMapViewPosition().getZoomLevel();
-            GeoPoint geoPoint = mapPosition.geoPoint;
-            
-            double pixelLeft = MercatorProjection.longitudeToPixelX(
-                    geoPoint.longitude, mapPosition.zoomLevel);
-            double pixelTop = MercatorProjection.latitudeToPixelY(
-                    geoPoint.latitude, mapPosition.zoomLevel);
-            pixelLeft -= view.getWidth() >> 1;
-            pixelTop -= view.getHeight() >> 1;
-            
-            double x = 0, y = 0, radius = 0, n = 0, s = 0, e = 0, w = 0, fin_x = 0, fin_y = 0, rad_x =0, rad_y=0;      
+            //Use utility class to perform conversion from pixels to latitude/longitude.
             if(pref.getString("selectionShape", "").equals(array[0])){
-            	n = MercatorProjection.pixelYToLatitude(pixelTop + startY,
-                        zoomLevel);
-                w = MercatorProjection.pixelXToLongitude(pixelLeft + startX,
-                        zoomLevel);
-                s = MercatorProjection.pixelYToLatitude(pixelTop + endY,
-                        zoomLevel);
-                e = MercatorProjection.pixelXToLongitude(pixelLeft + endX,
-                        zoomLevel);
+            	double n = ConversionUtilities.convertFromPixelsToLatitude(view, startY);
+            	double w = ConversionUtilities.convertFromPixelsToLongitude(view, startX);
+            	double s = ConversionUtilities.convertFromPixelsToLatitude(view, endY);
+            	double e = ConversionUtilities.convertFromPixelsToLongitude(view, endX);
+     
                 Log.v("MAPINFOTOOL", "bbox:" + w + "," + s + "," + e + "," + n);
                 infoDialog(n, w, s, e);
             }
             else {  
-            		//Calculate radius and coordinates of circle
-                	x = MercatorProjection.pixelXToLongitude(pixelLeft + startX, zoomLevel);
-                    y = MercatorProjection.pixelYToLatitude(pixelTop + startY, zoomLevel);
-                    fin_x = MercatorProjection.pixelXToLongitude(pixelLeft + endX, zoomLevel);
-                    fin_y = MercatorProjection.pixelYToLatitude(pixelTop + endY, zoomLevel);
-                    rad_x = Math.abs(x-fin_x); 
-                    rad_y = Math.abs(y-fin_y);
-                    radius = Math.sqrt( (rad_x*rad_x) + (rad_y*rad_y));
-            	
-	                Log.v("MAPINFOTOOL", "circle: center (" + x + "," + y + ") radius " + radius);
-	            	infoDialogCircle(x,y,radius);
+            	//Calculate radius and coordinates of circle
+            	double y = ConversionUtilities.convertFromPixelsToLatitude(view, startY);
+            	double x = ConversionUtilities.convertFromPixelsToLongitude(view, startX);
+            	double fin_y = ConversionUtilities.convertFromPixelsToLatitude(view, endY);
+            	double fin_x = ConversionUtilities.convertFromPixelsToLongitude(view, endX);
+                double rad_x = Math.abs(x-fin_x); 
+                double rad_y = Math.abs(y-fin_y);
+                double radius = Math.sqrt( (rad_x*rad_x) + (rad_y*rad_y));
+        	
+                Log.v("MAPINFOTOOL", "circle: center (" + x + "," + y + ") radius " + radius);
+            	infoDialogCircle(x,y,radius);
             	}
         }	
     

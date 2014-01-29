@@ -6,6 +6,7 @@ import org.mapsforge.core.util.MercatorProjection;
 /**
  * Utility Class to convert WebMercator and Geographic coordinates
  * Waiting for integration of a mor complex library to do that 
+ * CHECK THIS CLASS results of toGeographicX and Y is incorrect!
  * @author Admin
  *
  */

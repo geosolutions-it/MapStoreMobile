@@ -17,6 +17,7 @@
  */
 package it.geosolutions.android.map.control.todraw;
 
+import it.geosolutions.android.map.view.AdvancedMapView;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
@@ -27,6 +28,7 @@ import android.graphics.Paint;
 public abstract class ObjectToDraw {
 	
 	protected Canvas canvas;
+	protected AdvancedMapView view;
 	
 	/**
 	 * Constructor of class;
@@ -34,6 +36,15 @@ public abstract class ObjectToDraw {
 	 */
 	public ObjectToDraw(Canvas canvas){
 		this.canvas = canvas;
+	}
+	
+	/**
+	 * Constructor of class;
+	 * @param canvas
+	 */
+	public ObjectToDraw(Canvas canvas, AdvancedMapView view){
+		this.canvas = canvas;
+		this.view = view;
 	}
 
 	/**

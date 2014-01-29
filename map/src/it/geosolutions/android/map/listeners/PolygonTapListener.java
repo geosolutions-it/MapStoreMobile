@@ -21,15 +21,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
+
 import it.geosolutions.android.map.activities.GetFeatureInfoLayerListActivity;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
 import it.geosolutions.android.map.model.query.FeaturePolygonQuery;
 import it.geosolutions.android.map.style.AdvancedStyle;
 import it.geosolutions.android.map.style.StyleManager;
-import it.geosolutions.android.map.utils.ConversionUtility;
+import it.geosolutions.android.map.utils.ConversionUtilities;
 import it.geosolutions.android.map.utils.StyleUtils;
 import it.geosolutions.android.map.utils.Coordinates.Coordinates;
-import it.geosolutions.android.map.utils.Coordinates.Coordinates_Pixel;
 import it.geosolutions.android.map.utils.Coordinates.Coordinates_Query;
 import it.geosolutions.android.map.view.AdvancedMapView;
 import android.app.Activity;
@@ -56,15 +56,11 @@ public class PolygonTapListener implements OnGestureListener, OnDoubleTapListene
 	private Activity activity;
 	private GestureDetector gd;
 	
-	private ArrayList<Coordinates> points; //Used to perform query
-	private ArrayList<Coordinates_Pixel> points_pixel; //Used to draw on map
-	
+	private ArrayList<Coordinates> points; //Store coordinates of points touched on map.	
 	private boolean pointsAcquired, acquisitionStarted; 	
 	private Coordinates new_point;
-	private Coordinates_Pixel new_point_pixel;
 	private float startX, startY;
 	
-
 	/**
 	 * Constructor for class PolygonTapListener
 	 * @param view
@@ -75,10 +71,7 @@ public class PolygonTapListener implements OnGestureListener, OnDoubleTapListene
 		this.activity = activity;
 		pointsAcquired = false;
     	acquisitionStarted = true;
-
-		points = new ArrayList<Coordinates>();
-		points_pixel = new ArrayList<Coordinates_Pixel>();
-		
+		points = new ArrayList<Coordinates>();		
 		gd = new GestureDetector(view.getContext(),this);
 	}
 		
@@ -142,9 +135,7 @@ public class PolygonTapListener implements OnGestureListener, OnDoubleTapListene
 	        Log.e("Exception launched", ex.getMessage());
 	    }
 		
-        points.clear();     
-		pointsAcquired = false;
-		points_pixel.clear();
+		reset();
 	}
 
 	/**
@@ -162,15 +153,7 @@ public class PolygonTapListener implements OnGestureListener, OnDoubleTapListene
 	public void setMode(int mode) {
 	    this.mode = mode;
 	}
-	
-	/**
-	 * Return polygon points(In pixels) of selection to MapInfoControl for drawing.
-	 * @return
-	 */
-	public ArrayList<Coordinates_Pixel> getPolygonPoints(){
-		return points_pixel;
-	}
-	
+		
 	/**
 	 * Return true if a double tap event has been captured and all points of a polygonal selection
 	 * are available.
@@ -212,9 +195,8 @@ public class PolygonTapListener implements OnGestureListener, OnDoubleTapListene
 		startY = event.getY();
 		
 		//Convert coordinates of point in longitude/latitude.
-		new_point = new Coordinates(ConversionUtility.convertFromPixelsToLongitude(view, startX),
-				ConversionUtility.convertFromPixelsToLatitude(view, startY));
-		new_point_pixel = new Coordinates_Pixel(startX,startY);
+		new_point = new Coordinates(ConversionUtilities.convertFromPixelsToLongitude(view, startX),
+				ConversionUtilities.convertFromPixelsToLatitude(view, startY));
     	return false;
 	}
 
@@ -239,7 +221,6 @@ public class PolygonTapListener implements OnGestureListener, OnDoubleTapListene
 	@Override
 	public boolean onSingleTapUp(MotionEvent e) {
 		points.add(new_point);
-		points_pixel.add(new_point_pixel);
 		acquisitionStarted = true;
 		view.redraw();
 		return true;
@@ -255,25 +236,34 @@ public class PolygonTapListener implements OnGestureListener, OnDoubleTapListene
 	 * @return
 	 */
 	public int getNumberOfPoints(){
-		return points_pixel.size();
-
+		return points.size();
 	}
 	
 	/**
-	 * Return x coordinate(pixels) for a point of selection.
+	 * Return x coordinate(longitude) for a point of selection.
 	 * @param index
 	 * @return
 	 */
-	public float getXPoint(int index){
-		return points_pixel.get(index).getX();
+	public double getXPoint(int index){
+		return points.get(index).getX();
 	}
 	
 	/**
-	 * Return y coordinate(pixels) for a point of selection.
+	 * Return y coordinate(latitude) for a point of selection.
 	 * @param index
 	 * @return
 	 */
-	public float getYPoint(int index){
-		return points_pixel.get(index).getY();
+	public double getYPoint(int index){
+		return points.get(index).getY();
+	}
+	
+	/**
+	 * Clear collection of point and restore initial configuration by selection
+	 */
+	public void reset(){
+		points.clear();     
+		pointsAcquired = false;
+		acquisitionStarted = false;
+		view.redraw();
 	}
 }

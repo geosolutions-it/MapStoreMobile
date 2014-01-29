@@ -28,7 +28,6 @@ import it.geosolutions.android.map.listeners.PolygonTapListener;
 import it.geosolutions.android.map.view.AdvancedMapView;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
@@ -38,13 +37,13 @@ import android.graphics.Paint;
 
 import android.preference.PreferenceManager;
 import android.util.Log;
+
 import android.view.View.OnTouchListener;
 
 /**
  * A control for Informations about the map.
  * Wraps a listener and draw rectangle, circle or polygon on the map.
  * @author Lorenzo Natali (www.geo-solutions.it)
- * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com)
  */
 @SuppressLint("WorldReadableFiles")
 public class MapInfoControl extends MapControl{
@@ -68,14 +67,9 @@ public class MapInfoControl extends MapControl{
 	private static Paint.Join STROKE_ANGLES = Paint.Join.ROUND;
 	private static String Shape_Selection;
 
-	private Activity activity; 
-	
+	private Activity activity; 	
 	private String[] array;
 	private SharedPreferences pref;
-	
-	private final static Paint COORDINATE_TEXT = new Paint(Paint.ANTI_ALIAS_FLAG);
-	private final static Paint COORDINATE_TEXT_STROKE = new Paint(Paint.ANTI_ALIAS_FLAG);
-	
 	private AdvancedMapView mapView;
 		
 	//Overrides the MapListener
@@ -102,32 +96,16 @@ public class MapInfoControl extends MapControl{
 	 * @param activity 
 	 */
 	public MapInfoControl(AdvancedMapView mapView,Activity activity) {
-		super(mapView);
+		//super(mapView);
+		super(mapView,activity);
 		this.mapView = mapView;
 		this.activity=activity;	
+		
+		pref  = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
 		array = activity.getResources().getStringArray(R.array.preferences_selection_shape);
 		Shape_Selection = array[0]; //default selection rectangular
-		this.mapListener = new MapInfoListener(mapView, activity);
-		oneTapListener = new OneTapListener(mapView,activity);
-		this.polygonTapListener = new PolygonTapListener(mapView,activity);
-	}
-	
-	/**
-	 * Creates a new MapInfoControl object and the associated listener.
-	 * @param mapView
-	 * @param activity 
-	 * @param enabled
-	 */
-	public MapInfoControl(AdvancedMapView mapView,Activity activity,boolean enabled) {
-		this(mapView,activity);
-		this.mapView = mapView;
-		this.setEnabled(enabled);
-		this.activity=activity;
-		array = activity.getResources().getStringArray(R.array.preferences_selection_shape);
-		Shape_Selection = array[0]; //default selection rectangular
-		this.mapListener = new MapInfoListener(mapView,activity);
-		oneTapListener = new OneTapListener(mapView,activity);
-		polygonTapListener = new PolygonTapListener(mapView,activity);
+		
+		instantiateListener();
 	}
 	
 	/**
@@ -135,9 +113,6 @@ public class MapInfoControl extends MapControl{
 	 * changed from user. 
 	 */
 	public void loadStyleSelectorPreferences(){
-		Context context = activity.getApplicationContext();
-		pref  = PreferenceManager.getDefaultSharedPreferences(context);
-		
 		//Load preferences about style of fill
 		int fill_color = pref.getInt("FillColor", FILL_COLOR);
 		if(fill_color != FILL_COLOR) FILL_COLOR = fill_color; //Check if default color for selection has been selected, otherwise it changes the variable FILL_COLOR
@@ -194,23 +169,13 @@ public class MapInfoControl extends MapControl{
 	 * @param canvas
 	 */
 	@Override
-	public void draw(Canvas canvas) {		
-		if(Shape_Selection.equals(array[2])){
-			if(!oneTapListener.pointsAcquired()) return;
-		}
-		else if(Shape_Selection.equals(array[3])){
-			if(!polygonTapListener.isAcquisitionStarted() || 
-					polygonTapListener.getNumberOfPoints()< 1) return;
-		}
-		else
-			if(!mapListener.isDragStarted()) return;
-				
-		// fill	
+	public void draw(Canvas canvas) {	
+		// fill	properties
 	    paint_fill.setStyle(Paint.Style.FILL);
 	    paint_fill.setColor(FILL_COLOR);
 	    paint_fill.setAlpha(FILL_ALPHA);
 	    
-	    // border
+	    // border properties
 	    paint_stroke.setStyle(Paint.Style.STROKE);
 	    paint_stroke.setColor(STROKE_COLOR);
 	    paint_stroke.setAlpha(STROKE_ALPHA);
@@ -222,6 +187,8 @@ public class MapInfoControl extends MapControl{
 	 	    paint_stroke.setPathEffect(new DashPathEffect(new float[]{STROKE_SHAPE_DIMENSION,STROKE_SPACES}, 0));
 		
 		if(Shape_Selection.equals(array[0])){
+			if(!mapListener.isDragStarted()) return;
+
 			Rectangle r = new Rectangle(canvas);
 			r.buildObject(mapListener);
 			r.draw(paint_fill);
@@ -229,6 +196,8 @@ public class MapInfoControl extends MapControl{
 		}
 		
 		else if(Shape_Selection.equals(array[1])){
+			if(!mapListener.isDragStarted()) return;
+
 			Circle c = new Circle(canvas);
 			c.buildObject(mapListener);
 			c.draw(paint_fill);
@@ -236,6 +205,8 @@ public class MapInfoControl extends MapControl{
 			c.drawInfo(mapView, 0);
 		}
 		else if(Shape_Selection.equals(array[2])){
+			if(!oneTapListener.pointsAcquired()) return;
+			
 			Circle c = new Circle(canvas);
 			c.buildObject(oneTapListener);
 			c.draw(paint_fill);
@@ -243,7 +214,10 @@ public class MapInfoControl extends MapControl{
 			c.drawInfo(mapView, 1);
 		}
 		else{
-			Polygon p = new Polygon(canvas);
+			if(!polygonTapListener.isAcquisitionStarted() || 
+					polygonTapListener.getNumberOfPoints()< 1) return;
+			
+			Polygon p = new Polygon(canvas,view);
 			p.buildPolygon(polygonTapListener);
 			p.draw(paint_fill);
 			p.draw(paint_stroke);
@@ -254,12 +228,20 @@ public class MapInfoControl extends MapControl{
 	public void setMode(int mode){
 	    super.setMode(mode);
 	    if(mode == MODE_VIEW){
-	        mapListener.setMode(MapInfoListener.MODE_VIEW);
-	        oneTapListener.setMode(OneTapListener.MODE_VIEW);
+	        if(mapListener != null) 
+	        	mapListener.setMode(MapInfoListener.MODE_VIEW);
+	        if(oneTapListener != null) 
+	        	oneTapListener.setMode(OneTapListener.MODE_VIEW);
+	        if(polygonTapListener !=null)
+	        	polygonTapListener.setMode(PolygonTapListener.MODE_VIEW);
 	    }
 	    else{
-	        mapListener.setMode(MapInfoListener.MODE_EDIT);	 
-	        oneTapListener.setMode(OneTapListener.MODE_EDIT);
+	    	if(mapListener != null) 
+	    		mapListener.setMode(MapInfoListener.MODE_EDIT);	 
+	        if(oneTapListener != null) 
+	        	oneTapListener.setMode(OneTapListener.MODE_EDIT);
+	        if(polygonTapListener !=null)
+	        	polygonTapListener.setMode(PolygonTapListener.MODE_EDIT);
 	    }
 	}
 	
@@ -271,5 +253,24 @@ public class MapInfoControl extends MapControl{
 		disable();
 		getActivationButton().setSelected(false);
 		loadStyleSelectorPreferences();
+		instantiateListener();
+	}
+	
+	/**
+	 * Instantiate listener for selection choosed by user.
+	 */
+	private void instantiateListener(){
+		if(pref.getString("selectionShape", Shape_Selection).equals(array[3]) 
+				&& polygonTapListener == null){
+			this.polygonTapListener = new PolygonTapListener(mapView,activity);
+			this.setToCancel(polygonTapListener);
+		}
+		else
+			if(pref.getString("selectionShape", Shape_Selection).equals(array[2])
+					&& oneTapListener == null)
+				this.oneTapListener = new OneTapListener(mapView,activity);
+			else
+				if(this.mapListener == null)
+					this.mapListener = new MapInfoListener(mapView,activity);
 	}
 }

@@ -23,7 +23,6 @@ import it.geosolutions.android.map.adapters.FeatureInfoAttributesAdapter;
 import it.geosolutions.android.map.loaders.FeatureInfoLoader;
 import it.geosolutions.android.map.model.Feature;
 import it.geosolutions.android.map.model.query.FeatureInfoQueryResult;
-import it.geosolutions.android.map.model.query.FeatureInfoQuery;
 import it.geosolutions.android.map.model.query.FeatureRectangularQuery;
 import it.geosolutions.android.map.model.query.FeatureRectangularTaskQuery;
 import it.geosolutions.android.map.utils.FeatureInfoUtils;

@@ -22,7 +22,7 @@ import java.text.DecimalFormat;
 import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.listeners.MapInfoListener;
 import it.geosolutions.android.map.listeners.OneTapListener;
-import it.geosolutions.android.map.utils.ConversionUtility;
+import it.geosolutions.android.map.utils.ConversionUtilities;
 import it.geosolutions.android.map.utils.GeodesicDistance;
 import it.geosolutions.android.map.view.AdvancedMapView;
 import android.graphics.Canvas;
@@ -95,8 +95,8 @@ public class Circle extends ObjectToDraw {
 		String format_radius = "##";
 		DecimalFormat f = new DecimalFormat(format); 
 		
-		double x_long = ConversionUtility.convertFromPixelsToLongitude(mapView, x1);
-		double y_lat = ConversionUtility.convertFromPixelsToLatitude(mapView, y1);	
+		double x_long = ConversionUtilities.convertFromPixelsToLongitude(mapView, x1);
+		double y_lat = ConversionUtilities.convertFromPixelsToLatitude(mapView, y1);	
 		
 		String center = mapView.getResources().getString(R.string.center);
 		String rad = mapView.getResources().getString(R.string.radius);
@@ -105,9 +105,9 @@ public class Circle extends ObjectToDraw {
 		double radius_km;
 		int radius_to_show;
 		if(which == 1)
-			radius_km = GeodesicDistance.getDistance(x_long, y_lat, ConversionUtility.convertFromPixelsToLongitude(mapView, x1+radius), y_lat);
+			radius_km = GeodesicDistance.getDistance(x_long, y_lat, ConversionUtilities.convertFromPixelsToLongitude(mapView, x1+radius), y_lat);
 		else
-			radius_km = GeodesicDistance.getDistance(x_long, y_lat, ConversionUtility.convertFromPixelsToLongitude(mapView, x2), ConversionUtility.convertFromPixelsToLatitude(mapView, y2));
+			radius_km = GeodesicDistance.getDistance(x_long, y_lat, ConversionUtilities.convertFromPixelsToLongitude(mapView, x2), ConversionUtilities.convertFromPixelsToLatitude(mapView, y2));
 		
 		if(radius_km < 1){
 			radius_to_show = (int) (radius_km * 1000);

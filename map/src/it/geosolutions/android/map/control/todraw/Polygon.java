@@ -18,9 +18,12 @@
 package it.geosolutions.android.map.control.todraw;
 
 import it.geosolutions.android.map.listeners.PolygonTapListener;
+import it.geosolutions.android.map.utils.ConversionUtilities;
+import it.geosolutions.android.map.view.AdvancedMapView;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Path.Direction;
 
 /**
  * Class to draw a polygon for polygonal selection on map.
@@ -28,14 +31,16 @@ import android.graphics.Path;
  */
 public class Polygon extends ObjectToDraw {
 	private Path polygon;
+	private AdvancedMapView view;
 
 	/**
 	 * Constructor of class polygon.
 	 * @param canvas
 	 */
-	public Polygon(Canvas canvas) {
+	public Polygon(Canvas canvas, AdvancedMapView view) {
 		super(canvas);
 		polygon = new Path();
+		this.view = view;
 	}
 	
 	/**
@@ -43,16 +48,27 @@ public class Polygon extends ObjectToDraw {
 	 * @param polygonTapListener
 	 */
 	public void buildPolygon(PolygonTapListener polygonTapListener){
-		for(int i = 0;i<polygonTapListener.getNumberOfPoints();i++){
-			if(i==0) 
-				polygon.moveTo(polygonTapListener.getXPoint(i), polygonTapListener.getYPoint(i));
-			else 
-				polygon.lineTo(polygonTapListener.getXPoint(i), polygonTapListener.getYPoint(i));
+		float x, y;
+		for(int i = 0;i < polygonTapListener.getNumberOfPoints();i++){
+			if(i==0){
+				x = (float) ConversionUtilities.convertFromLongitudeToPixels(view, polygonTapListener.getXPoint(i));
+				y = (float) ConversionUtilities.convertFromLatitudeToPixels(view, polygonTapListener.getYPoint(i));
+				polygon.moveTo(x, y);	
+				polygon.addCircle(x, y, 8, Direction.CW);
+			} 
+				
+			else{
+				x = (float) ConversionUtilities.convertFromLongitudeToPixels(view, polygonTapListener.getXPoint(i));
+				y = (float) ConversionUtilities.convertFromLatitudeToPixels(view, polygonTapListener.getYPoint(i));
+				polygon.lineTo(x,y);	
+			} 
 		}
 		
 		//Close perimeter of polygon
 		if(polygonTapListener.isPointsAcquired()){
-			polygon.lineTo(polygonTapListener.getXPoint(0), polygonTapListener.getYPoint(0));
+			polygon.lineTo(
+					(float) ConversionUtilities.convertFromLongitudeToPixels(view, polygonTapListener.getXPoint(0)),
+					(float) ConversionUtilities.convertFromLatitudeToPixels(view, polygonTapListener.getYPoint(0)));			
 		}
 	}
 

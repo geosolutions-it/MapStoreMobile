@@ -87,8 +87,7 @@ public class GetFeatureInfoAttributeActivity  extends SherlockFragmentActivity {
         	}
         }
         
-        else if(sel!=null && sel.equals("Polygonal")){
-	    	// During initial setup, plug in the details fragment.
+       else if(sel!=null && sel.equals("Polygonal")){
 	    	FeatureInfoLayerListFragment details = new FeatureInfoLayerListFragment();
 	    	
 	    	pTaskFragment = (FeaturePolygonAttributeListFragment) fm.findFragmentByTag("featureInfoLayerList");

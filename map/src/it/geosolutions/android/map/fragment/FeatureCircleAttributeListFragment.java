@@ -42,7 +42,7 @@ public class FeatureCircleAttributeListFragment extends SherlockListFragment
 implements LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>>{
 	
 	private FeatureInfoAttributesAdapter adapter;
-	private FeatureCircleTaskQuery[] queryQueue; //DIFF
+	private FeatureCircleTaskQuery[] queryQueue; 
 	
 	// The callbacks through which we will interact with the LoaderManager.
 	private LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>> mCallbacks;
@@ -51,7 +51,7 @@ implements LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>>{
 
 	protected Integer limit;
 
-	protected FeatureCircleQuery query; //DIFF
+	protected FeatureCircleQuery query; 
 
 	protected ArrayList<String> layers;
 
@@ -75,7 +75,7 @@ implements LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>>{
 	    Bundle extras = getActivity().getIntent().getExtras();
 	    ;
 	    // TODO get already loaded data;
-	    query = (FeatureCircleQuery) extras.getParcelable("query"); // DIFF
+	    query = (FeatureCircleQuery) extras.getParcelable("query"); //  
 	    layers = extras.getStringArrayList("layers");
 	    start = extras.getInt("start");
 	    limit = extras.getInt("limit");
@@ -180,7 +180,7 @@ implements LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>>{
 	        Integer start, Integer limit) {
 	    // create task query
 	    queryQueue = FeatureInfoUtils.createTaskQueryQueue(layers, query, start,
-	            limit); //DIFF
+	            limit); 
 
 	    // initialize Load Manager
 	    mCallbacks = this;
