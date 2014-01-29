@@ -17,18 +17,13 @@
  */
 package it.geosolutions.android.map.control;
 
-import it.geosolutions.android.map.R;
-import it.geosolutions.android.map.listeners.PolygonTapListener;
 import it.geosolutions.android.map.view.AdvancedMapView;
 
 import java.util.List;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
@@ -50,12 +45,10 @@ public abstract class MapControl {
 	protected ImageButton activationButton;
 	protected int mode=MODE_EDIT;
 	
-	private SharedPreferences pref;
-	private String[] array;
 	
 	public void setMode(int mode){
-            this.mode = mode;
-        }
+        this.mode = mode;
+    }
 	
 	public int getMode(){
 	    return mode;
@@ -72,14 +65,11 @@ public abstract class MapControl {
 
 		@Override
 		public void onClick(View button) {
+			
 			if (button.isSelected()){
-				if(button == (ImageButton) view.findViewById(R.id.ButtonInfo)){
-					if(pref.getString("selectionShape", "").equals(array[3]))
-		        		ptl.reset();
-				}
 	            button.setSelected(false);
-	            disable();
-	        } else {
+	            disable();	            
+			} else {
 	            if(group != null){
 	            	for(MapControl c:group){
 	            			c.disable();
@@ -91,12 +81,11 @@ public abstract class MapControl {
 	        }			
 		}		 
 	};
-	
+		
 	//Listener for touch event on map.
 	protected OnTouchListener mapListener;
 	protected OnTouchListener oneTapListener;
 	protected OnTouchListener polygonTapListener;
-	private PolygonTapListener ptl; //Used when user wants to cancel polygonal selection
 	
 	/**
 	 * Creates the control.
@@ -114,17 +103,6 @@ public abstract class MapControl {
 	public MapControl(AdvancedMapView view,boolean enabled){
 		this(view);
 		setEnabled(enabled);
-	}
-	
-	/**
-	 * Create the control.
-	 * @param view
-	 * @param activity will be used to access to shared preferences.
-	 */
-	public MapControl(AdvancedMapView view,Activity activity){
-		this(view);
-		pref = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
-		array = activity.getResources().getStringArray(R.array.preferences_selection_shape);
 	}
 	
 	/**
@@ -155,7 +133,7 @@ public abstract class MapControl {
 	}
 	
 	/**
-	 * set the control enabled or disabled
+	 * set the control enabled or disabled, override this method to catch and disable events.
 	 * @param enabled if true the control is enabled, disabled if false.
 	 */
 	public void setEnabled(boolean enabled){
@@ -169,7 +147,7 @@ public abstract class MapControl {
 	public OnClickListener getActivationListener() {
 		return activationListener;
 	}
-	
+		
 	public void setActivationListener(OnClickListener activationListener) {
 		this.activationListener = activationListener;
 		if(this.activationButton!=null){
@@ -247,13 +225,5 @@ public abstract class MapControl {
      */
     public void setControlId(String controlId) {
         this.controlId = controlId;
-    }
-    
-    /**
-     * Set identifier for PolygonTapListener, used when user wants to cancel polygonal selection.
-     * @param ptl
-     */
-    protected void setToCancel(PolygonTapListener ptl){
-    	this.ptl = ptl;
     }
 }

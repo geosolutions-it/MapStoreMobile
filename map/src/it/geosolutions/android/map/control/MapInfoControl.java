@@ -89,15 +89,14 @@ public class MapInfoControl extends MapControl{
 	public PolygonTapListener getPolygonTapListener() {
 		return this.polygonTapListener;
 	};
-	
+
 	/**
 	 * Creates a new MapInfoControl object and the associated listener.
 	 * @param mapView
 	 * @param activity 
 	 */
 	public MapInfoControl(AdvancedMapView mapView,Activity activity) {
-		//super(mapView);
-		super(mapView,activity);
+		super(mapView);
 		this.mapView = mapView;
 		this.activity=activity;	
 		
@@ -261,10 +260,8 @@ public class MapInfoControl extends MapControl{
 	 */
 	private void instantiateListener(){
 		if(pref.getString("selectionShape", Shape_Selection).equals(array[3]) 
-				&& polygonTapListener == null){
+				&& polygonTapListener == null)
 			this.polygonTapListener = new PolygonTapListener(mapView,activity);
-			this.setToCancel(polygonTapListener);
-		}
 		else
 			if(pref.getString("selectionShape", Shape_Selection).equals(array[2])
 					&& oneTapListener == null)
@@ -272,5 +269,17 @@ public class MapInfoControl extends MapControl{
 			else
 				if(this.mapListener == null)
 					this.mapListener = new MapInfoListener(mapView,activity);
+	}
+	
+	/**
+	 * Override the method of MapControl to cancel polygonal selection when
+	 * polygon is not closed and button info is not selected.
+	 */
+	@Override 
+	public void setEnabled(boolean enabled){
+		this.enabled =enabled;
+		if(!enabled && polygonTapListener != null && 
+				pref.getString("selectionShape","").equals(array[3]) )
+        	polygonTapListener.reset();
 	}
 }
