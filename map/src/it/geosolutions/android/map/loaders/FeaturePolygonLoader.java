@@ -19,9 +19,9 @@ package it.geosolutions.android.map.loaders;
 
 import it.geosolutions.android.map.database.SpatialDataSourceHandler;
 import it.geosolutions.android.map.model.Feature;
-import it.geosolutions.android.map.model.FeaturePolygonQueryResult;
-import it.geosolutions.android.map.model.FeaturePolygonTaskQuery;
-import it.geosolutions.android.map.utils.Coordinates_Query;
+import it.geosolutions.android.map.model.query.FeatureInfoQueryResult;
+import it.geosolutions.android.map.model.query.FeaturePolygonTaskQuery;
+import it.geosolutions.android.map.utils.Coordinates.Coordinates_Query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,15 +36,14 @@ import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
  * query A query to the task is a "List of Lists of Maps", implemented with a
  * bundle of bundles The main bundle contains is name->list of features feature
  * contains name->value bundles
- * 
  * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com)
  */
 public class FeaturePolygonLoader extends
-        AsyncTaskLoader<List<FeaturePolygonQueryResult>> {
+        AsyncTaskLoader<List<FeatureInfoQueryResult>> {
 	
 int features_loaded = 0;
 
-private List<FeaturePolygonQueryResult> mData;
+private List<FeatureInfoQueryResult> mData;
 
 private FeaturePolygonTaskQuery[] queryQueue;
 
@@ -68,7 +67,7 @@ public FeaturePolygonLoader(Context ctx, FeaturePolygonTaskQuery[] queryQueue) {
 }
 
 protected void doInBackground(FeaturePolygonTaskQuery[] queryQueue,
-        List<FeaturePolygonQueryResult> data) {
+        List<FeatureInfoQueryResult> data) {
     Log.d("FEATURE_Polygon_TASK", "Polygon Task Launched");
     //process all queries
     for (FeaturePolygonTaskQuery query : queryQueue) {
@@ -86,18 +85,12 @@ protected void doInBackground(FeaturePolygonTaskQuery[] queryQueue,
  * @param data the result will be added to this array
  */
 private boolean processQuery(FeaturePolygonTaskQuery query,
-        List<FeaturePolygonQueryResult> data) {
+        List<FeatureInfoQueryResult> data) {
     SpatialDataSourceHandler handler = query.getHandler();
     SpatialVectorTable table = query.getTable();
     String tableName = query.getTable().getName();
-    // check visibility before adding the table
-    // AdvancedStyle s = sm.getStyle(tableName);
-    // if ( !StyleUtils.isVisible(s, zoomLevel) ) {
-    // onProgressUpdate(0);
-    // continue;
-    // }
     
-    ArrayList<Coordinates_Query> polygon_points = query.getPolygonPoints();
+    ArrayList<Coordinates_Query> polygon_points = query.getPolygonPoints(); //get points in format (long/lat).
     
     Integer start = query.getStart();
     Integer limit = query.getLimit();
@@ -107,15 +100,15 @@ private boolean processQuery(FeaturePolygonTaskQuery query,
     }
     // this is empty to skip geometries that returns errors
     ArrayList<Feature> features = new ArrayList<Feature>();
-    /*try {
+    try {
         features = handler.intersectionToPolygon("4326", table, polygon_points, start, limit);
     } catch (Exception e) {
         Log.e("FEATURE_Polygon_TASK", "unable to retrive data for table'"
                 + tableName + "\'.Error:" + e.getLocalizedMessage());
         // TODO now simply skip, do better work
-    }*/
+    }
     // add features
-    FeaturePolygonQueryResult result = new FeaturePolygonQueryResult();
+    FeatureInfoQueryResult result = new FeatureInfoQueryResult();
     result.setLayerName(tableName);
     result.setFeatures(features);
     Log.v("FEATURE_Polygon_TASK", features.size() + " items found for table "
@@ -133,8 +126,8 @@ private boolean processQuery(FeaturePolygonTaskQuery query,
  * @see android.support.v4.content.AsyncTaskLoader#loadInBackground()
  */
 @Override
-public List<FeaturePolygonQueryResult> loadInBackground() {
-    List<FeaturePolygonQueryResult> data = new ArrayList<FeaturePolygonQueryResult>();
+public List<FeatureInfoQueryResult> loadInBackground() {
+    List<FeatureInfoQueryResult> data = new ArrayList<FeatureInfoQueryResult>();
 
     // TODO: Perform the query here and add the results to 'data'.
     doInBackground(queryQueue, data);
@@ -146,7 +139,7 @@ public List<FeaturePolygonQueryResult> loadInBackground() {
 // ** Deliver the results to the registered listener **/
 // ********************************************************/
 @Override
-public void deliverResult(List<FeaturePolygonQueryResult> data) {
+public void deliverResult(List<FeatureInfoQueryResult> data) {
     if (isReset()) {
         // The Loader has been reset; ignore the result and invalidate the data.
         releaseResources(data);
@@ -155,7 +148,7 @@ public void deliverResult(List<FeaturePolygonQueryResult> data) {
 
     // Hold a reference to the old data so it doesn't get garbage collected.
     // We must protect it until the new data has been delivered.
-    List<FeaturePolygonQueryResult> oldData = mData;
+    List<FeatureInfoQueryResult> oldData = mData;
     mData = data;
     if (isStarted()) {
         // If the Loader is in a started state, deliver the results to the
@@ -228,7 +221,7 @@ protected void onReset() {
  * @see android.support.v4.content.AsyncTaskLoader#onCanceled(java.lang.Object)
  */
 @Override
-public void onCanceled(List<FeaturePolygonQueryResult> data) {
+public void onCanceled(List<FeatureInfoQueryResult> data) {
     // TODO Auto-generated method stub
     super.onCanceled(data);
     releaseResources(data);
@@ -237,8 +230,7 @@ public void onCanceled(List<FeaturePolygonQueryResult> data) {
 /**
  * @param data
  */
-private void releaseResources(List<FeaturePolygonQueryResult> data) {
+private void releaseResources(List<FeatureInfoQueryResult> data) {
     // release resource if needed
-
 	}
 }

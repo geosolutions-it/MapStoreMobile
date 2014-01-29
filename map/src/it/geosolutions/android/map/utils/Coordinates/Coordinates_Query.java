@@ -15,13 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.geosolutions.android.map.utils;
+package it.geosolutions.android.map.utils.Coordinates;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * A class containing the coordinates of a point about a polygonal selection, already converted and projected
+ * An object containing the coordinates of a point of polygonal selection, already converted and projected
  * ready to pass to a query.
  * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com).
  */
@@ -40,6 +40,10 @@ public class Coordinates_Query implements Parcelable{
 		this.y = 0;
 	}
 	
+	/**
+	 * Constructor of the class
+	 * @param in
+	 */
 	public Coordinates_Query(Parcel in){
 		super();
 		this.x = in.readDouble();
@@ -47,7 +51,7 @@ public class Coordinates_Query implements Parcelable{
 	}
 	
 	/**
-	 * Constructor of the class for float parameter
+	 * Constructor of the class with double parameter
 	 * @param x
 	 * @param y
 	 */
@@ -57,14 +61,14 @@ public class Coordinates_Query implements Parcelable{
 		this.y = y;
 	}	
 	/**
-	 * Return x value for coordinate of point
+	 * Return x value for coordinate of point.
 	 * @return 
 	 */
 	public double getX(){
 		return x;
 	}	
 	/**
-	 * Return y value for coordinate of point
+	 * Return y value for coordinate of point.
 	 * @return 
 	 */
 	public double getY(){

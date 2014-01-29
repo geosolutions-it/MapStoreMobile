@@ -19,111 +19,79 @@ package it.geosolutions.android.map.listeners;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.mapsforge.core.model.GeoPoint;
-import org.mapsforge.core.model.MapPosition;
-import org.mapsforge.core.util.MercatorProjection;
+
 import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
-import it.geosolutions.android.map.utils.Coordinates_Query;
+
 import it.geosolutions.android.map.activities.GetFeatureInfoLayerListActivity;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
-import it.geosolutions.android.map.model.FeaturePolygonQuery;
+import it.geosolutions.android.map.model.query.FeaturePolygonQuery;
 import it.geosolutions.android.map.style.AdvancedStyle;
 import it.geosolutions.android.map.style.StyleManager;
-import it.geosolutions.android.map.utils.Coordinates;
-import it.geosolutions.android.map.utils.Singleton_Polygon_Points;
+import it.geosolutions.android.map.utils.ConversionUtilities;
 import it.geosolutions.android.map.utils.StyleUtils;
+import it.geosolutions.android.map.utils.Coordinates.Coordinates;
+import it.geosolutions.android.map.utils.Coordinates.Coordinates_Query;
 import it.geosolutions.android.map.view.AdvancedMapView;
 import android.app.Activity;
 import android.content.Intent;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnDoubleTapListener;
+import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 
 /**
  * Listener to implements double tap event on map.
  * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com).
  */
-public class DoubleTapListener implements OnDoubleTapListener{	
-	
+public class PolygonTapListener implements OnGestureListener, OnDoubleTapListener, OnTouchListener{		
 	// MODES
 	public static final int MODE_VIEW = 0;
-
 	public static final int MODE_EDIT = 1;
-	
+	private int mode = MODE_EDIT;
+
 	private AdvancedMapView view;
 	private Activity activity;
 	private GestureDetector gd;
-	private ArrayList<Coordinates_Query> points;
-	private boolean pointsAcquired; 
 	
-	private int mode = MODE_EDIT;
-
+	private ArrayList<Coordinates> points; //Store coordinates of points touched on map.	
+	private boolean pointsAcquired, acquisitionStarted; 	
+	private Coordinates new_point;
+	private float startX, startY;
+	
 	/**
-	 * Constructor for class DoubleTapListener
+	 * Constructor for class PolygonTapListener
 	 * @param view
+	 * @param activity
 	 */
-	public DoubleTapListener(AdvancedMapView view, Activity activity){
+	public PolygonTapListener(AdvancedMapView view, Activity activity){
 		this.view = view;
 		this.activity = activity;
 		pointsAcquired = false;
-	
-		final GestureDetector.SimpleOnGestureListener listener = new GestureDetector.SimpleOnGestureListener(){		
-			/**
-			 * Called when a double tap event has occured.
-			 * @param e
-			 * @return 
-			 */
-			@Override
-		    public boolean onDoubleTap(MotionEvent e) {
-				pointsAcquired = true;
-				preparePoints();
-				infoDialogPolygon(points);
-		        return false;
-		    }
-
-		    @Override
-		    public void onLongPress(MotionEvent e){}
-		};
-		
-		gd = new GestureDetector(view.getContext(),listener);
-		gd.setOnDoubleTapListener(listener);
-		gd.setIsLongpressEnabled(true);
-
-		view.setOnTouchListener(new View.OnTouchListener() {
-		    @Override
-		    public boolean onTouch(View view, MotionEvent event) {
-		        return gd.onTouchEvent(event);
-		    }
-		});
+    	acquisitionStarted = true;
+		points = new ArrayList<Coordinates>();		
+		gd = new GestureDetector(view.getContext(),this);
 	}
 		
 	/**
 	 * Create a new ArrayList with points captured converted from pixel to latitude/longitude, ready for query
 	 */
 	public void preparePoints(){
-		MapPosition mapPosition = this.view.getMapViewPosition()
-                .getMapPosition();
-        byte zoomLevel = view.getMapViewPosition().getZoomLevel();
-        GeoPoint geoPoint = mapPosition.geoPoint;
-        
-        double pixelLeft = MercatorProjection.longitudeToPixelX(
-                geoPoint.longitude, mapPosition.zoomLevel);
-        double pixelTop = MercatorProjection.latitudeToPixelY(
-                geoPoint.latitude, mapPosition.zoomLevel);
-        pixelLeft -= view.getWidth() >> 1;
-        pixelTop -= view.getHeight() >> 1;
-        
-        points = new ArrayList<Coordinates_Query>();
-        ArrayList<Coordinates> polygon_points = Singleton_Polygon_Points.getInstance().getPoints();
-        for(int i = 0; i<polygon_points.size(); i++){ //Exclude last point beacuse with double tap it will be captured two times
-        	double x = MercatorProjection.pixelXToLongitude(pixelLeft + polygon_points.get(i).getX(), zoomLevel);
-        	double y = MercatorProjection.pixelYToLatitude(pixelTop + polygon_points.get(i).getY(), zoomLevel);
-        	Coordinates_Query to_add = new Coordinates_Query(x,y);
-        	points.add(to_add);
+		Coordinates point;
+		Coordinates_Query to_add;
+		
+		//It will contain long/lat of the points that will be used to query on spatialite database
+		ArrayList<Coordinates_Query> polygon_points = new ArrayList<Coordinates_Query>();
+        for(int i = 0; i<points.size()-1; i++){ 
+        	//Exclude last point because with double tap it will be captured twice
+        	point = points.get(i);
+        	to_add = new Coordinates_Query(point.getX(),point.getY());
+        	polygon_points.add(to_add);
         }
         
-        //Singleton_Polygon_Points.getInstance().reset(); //Clear points captured
+        infoDialogPolygon(polygon_points);
 	}
 	
 	/**
@@ -146,7 +114,6 @@ public class DoubleTapListener implements OnDoubleTapListener{
 	            // skip this table if not visible
 	            if (StyleUtils.isVisible(style, zoomLevel)) {
 	                layerNames.add(table.getName());
-
 	            }
 	        }
 	        Intent i = new Intent(view.getContext(),
@@ -164,13 +131,11 @@ public class DoubleTapListener implements OnDoubleTapListener{
 	        }
 	        activity.startActivityForResult(i,
 	                GetFeatureInfoLayerListActivity.POLYGON_REQUEST);
-
 	    } catch (Exception ex) {
-	        ex.printStackTrace();
+	        Log.e("Exception launched", ex.getMessage());
 	    }
 		
-		points.removeAll(points); //TOGLI E FAI IL CLEAR DALL'ESTERNO!
-		//pointsAcquired = false;
+		reset();
 	}
 
 	/**
@@ -188,39 +153,117 @@ public class DoubleTapListener implements OnDoubleTapListener{
 	public void setMode(int mode) {
 	    this.mode = mode;
 	}
-	
-	/**
-	 * Return polygon points of selection to MapInfoControl for drawing.
-	 * @return
-	 */
-	public ArrayList<Coordinates_Query> getPolygonPoints(){
-		return points;
-	}
-	
+		
 	/**
 	 * Return true if a double tap event has been captured and all points of a polygonal selection
 	 * are available.
 	 * @return
 	 */
-	public boolean pointsAcquired(){
+	public boolean isPointsAcquired(){
 		return pointsAcquired;
+	}
+	
+	/**
+	 * Return true if acquisition of points is started, otherwise return false.
+	 * @return
+	 */
+	public boolean isAcquisitionStarted(){
+		return acquisitionStarted;
 	}
 
 	@Override
 	public boolean onDoubleTap(MotionEvent arg0) {
-		// TODO Auto-generated method stub
+		pointsAcquired = true;
+		preparePoints();
+        return false;
+	}
+
+	@Override
+	public boolean onDoubleTapEvent(MotionEvent e) {
 		return false;
 	}
 
 	@Override
-	public boolean onDoubleTapEvent(MotionEvent arg0) {
-		// TODO Auto-generated method stub
+	public boolean onSingleTapConfirmed(MotionEvent e) {
 		return false;
 	}
 
 	@Override
-	public boolean onSingleTapConfirmed(MotionEvent arg0) {
-		// TODO Auto-generated method stub
+	public boolean onDown(MotionEvent event) {
+		//Use this to capture points for polygonal selection
+		startX = event.getX();
+		startY = event.getY();
+		
+		//Convert coordinates of point in longitude/latitude.
+		new_point = new Coordinates(ConversionUtilities.convertFromPixelsToLongitude(view, startX),
+				ConversionUtilities.convertFromPixelsToLatitude(view, startY));
+    	return false;
+	}
+
+	@Override
+	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+			float velocityY) {
 		return false;
+	}
+
+	@Override
+	public void onLongPress(MotionEvent e){}
+
+	@Override
+	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
+			float distanceY) {
+		return false;
+	}
+
+	@Override
+	public void onShowPress(MotionEvent e){}
+
+	@Override
+	public boolean onSingleTapUp(MotionEvent e) {
+		points.add(new_point);
+		acquisitionStarted = true;
+		view.redraw();
+		return true;
+	}
+
+	@Override
+	public boolean onTouch(View v, MotionEvent event){
+		return gd.onTouchEvent(event);
+	}
+	
+	/**
+	 * Return number of points that are currently acquired
+	 * @return
+	 */
+	public int getNumberOfPoints(){
+		return points.size();
+	}
+	
+	/**
+	 * Return x coordinate(longitude) for a point of selection.
+	 * @param index
+	 * @return
+	 */
+	public double getXPoint(int index){
+		return points.get(index).getX();
+	}
+	
+	/**
+	 * Return y coordinate(latitude) for a point of selection.
+	 * @param index
+	 * @return
+	 */
+	public double getYPoint(int index){
+		return points.get(index).getY();
+	}
+	
+	/**
+	 * Clear collection of point and restore initial configuration by selection
+	 */
+	public void reset(){
+		points.clear();     
+		pointsAcquired = false;
+		acquisitionStarted = false;
+		view.redraw();
 	}
 }

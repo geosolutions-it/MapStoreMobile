@@ -15,59 +15,84 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.geosolutions.android.map.model;
+package it.geosolutions.android.map.model.query;
 
-import it.geosolutions.android.map.dto.MarkerDTO;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
+ * Class to represent a query model to perform a search by a rectangle designed on map.
  * @author Lorenzo Natali (www.geo-solutions.it)
- *
  */
-public class FeatureInfoQuery implements Parcelable{
+public class FeatureRectangularQuery extends FeatureInfoQuery{
 	private double n;
 	private double s;
 	private double e;
 	private double w;
-	private byte zoomLevel;
-	private String srid;
+
+	/**
+	 * Method to get n coordinate of rectangle
+	 * @return
+	 */
 	public double getN() {
 		return n;
 	}
+	
+	/**
+	 * Method to set n coordinate of rectangle
+	 * @param n
+	 */
 	public void setN(double n) {
 		this.n = n;
 	}
+	/**
+	 * Method to get s coordinate of rectangle
+	 * @return
+	 */
 	public double getS() {
 		return s;
 	}
+	
+	/**
+	 * Method to set s coordinate of rectangle
+	 * @param s
+	 */
 	public void setS(double s) {
 		this.s = s;
 	}
+	
+	/**
+	 * Method to get e coordinate of rectangle
+	 * @return
+	 */
 	public double getE() {
 		return e;
 	}
+	
+	/**
+	 * Method to set e coordinate of rectangle
+	 * @param e
+	 */
 	public void setE(double e) {
 		this.e = e;
 	}
+	
+	/**
+	 * Method to get w coordinate of rectangle
+	 * @return
+	 */
 	public double getW() {
 		return w;
 	}
+	
+	/**
+	 * Method to set w coordinate of rectangle
+	 * @param w
+	 */
 	public void setW(double w) {
 		this.w = w;
 	}
-	public byte getZoomLevel() {
-		return zoomLevel;
-	}
-	public void setZoomLevel(byte zoomLevel) {
-		this.zoomLevel = zoomLevel;
-	}
-	public String getSrid() {
-		return srid;
-	}
-	public void setSrid(String srid) {
-		this.srid = srid;
-	}
+	
 	/* (non-Javadoc)
 	 * @see android.os.Parcelable#describeContents()
 	 */
@@ -76,6 +101,7 @@ public class FeatureInfoQuery implements Parcelable{
 		// TODO Auto-generated method stub
 		return 0;
 	}
+	
 	/* (non-Javadoc)
 	 * @see android.os.Parcelable#writeToParcel(android.os.Parcel, int)
 	 */
@@ -85,32 +111,32 @@ public class FeatureInfoQuery implements Parcelable{
 		dest.writeDouble(s);
 		dest.writeDouble(e);
 		dest.writeDouble(w);
-		dest.writeByte(zoomLevel);
-		dest.writeString(srid);
-		
 	}
-	public FeatureInfoQuery(Parcel source){
+	
+	/**
+	 * Constructor for class FeatureRectangularQuery.
+	 * @param source
+	 */
+	public FeatureRectangularQuery(Parcel source){
 		n=source.readDouble();
 		s=source.readDouble();
 		e=source.readDouble();
 		w=source.readDouble();
-		zoomLevel=source.readByte();
-		srid=source.readString();
-	}
-	public FeatureInfoQuery(){
-		
 	}
 	
-	 public static final Parcelable.Creator<FeatureInfoQuery> CREATOR
-     = new Parcelable.Creator<FeatureInfoQuery>() {
-	 public FeatureInfoQuery createFromParcel(Parcel in) {
-	     return new FeatureInfoQuery(in);
+	/**
+	 * Default constructor for class.
+	 */
+	public FeatureRectangularQuery(){}
+	
+	 public static final Parcelable.Creator<FeatureRectangularQuery> CREATOR
+     = new Parcelable.Creator<FeatureRectangularQuery>() {
+	 public FeatureRectangularQuery createFromParcel(Parcel in) {
+	     return new FeatureRectangularQuery(in);
 	 }
 
-	 public FeatureInfoQuery[] newArray(int size) {
-	     return new FeatureInfoQuery[size];
-	 }
-	
-	};
-	
+	 public FeatureRectangularQuery[] newArray(int size) {
+	     return new FeatureRectangularQuery[size];
+	 }	
+	};	
 }

@@ -6,9 +6,9 @@ import it.geosolutions.android.map.adapters.FeatureInfoAttributesAdapter;
 
 import it.geosolutions.android.map.loaders.FeaturePolygonLoader;
 import it.geosolutions.android.map.model.Feature;
-import it.geosolutions.android.map.model.FeaturePolygonQuery;
-import it.geosolutions.android.map.model.FeaturePolygonQueryResult;
-import it.geosolutions.android.map.model.FeaturePolygonTaskQuery;
+import it.geosolutions.android.map.model.query.FeaturePolygonQuery;
+import it.geosolutions.android.map.model.query.FeatureInfoQueryResult;
+import it.geosolutions.android.map.model.query.FeaturePolygonTaskQuery;
 import it.geosolutions.android.map.utils.FeatureInfoUtils;
 
 import java.util.ArrayList;
@@ -40,19 +40,19 @@ import com.actionbarsherlock.app.SherlockListFragment;
  * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com)
  */
 public class FeaturePolygonAttributeListFragment extends SherlockListFragment
-implements LoaderManager.LoaderCallbacks<List<FeaturePolygonQueryResult>>{
+implements LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>>{
 	
 	private FeatureInfoAttributesAdapter adapter;
-	private FeaturePolygonTaskQuery[] queryQueue;
+	private FeaturePolygonTaskQuery[] queryQueue; 
 	
 	// The callbacks through which we will interact with the LoaderManager.
-	private LoaderManager.LoaderCallbacks<List<FeaturePolygonQueryResult>> mCallbacks;
+	private LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>> mCallbacks;
 
 	protected Integer start;
 
 	protected Integer limit;
 
-	protected FeaturePolygonQuery query;
+	protected FeaturePolygonQuery query; 
 
 	protected ArrayList<String> layers;
 
@@ -183,7 +183,7 @@ implements LoaderManager.LoaderCallbacks<List<FeaturePolygonQueryResult>>{
 	        Integer start, Integer limit) {
 	    // create task query
 	    queryQueue = FeatureInfoUtils.createTaskQueryQueue(layers, query, start,
-	            limit);
+	            limit); 
 
 	    // initialize Load Manager
 	    mCallbacks = this;
@@ -217,19 +217,19 @@ implements LoaderManager.LoaderCallbacks<List<FeaturePolygonQueryResult>>{
 	 * android.os.Bundle)
 	 */
 	@Override
-	public Loader<List<FeaturePolygonQueryResult>> onCreateLoader(int id, Bundle args) {
+	public Loader<List<FeatureInfoQueryResult>> onCreateLoader(int id, Bundle args) {
 
 	    return new FeaturePolygonLoader(getSherlockActivity(), queryQueue);
 	}
 
 	// populate the list and set buttonbar visibility options
 	@Override
-	public void onLoadFinished(Loader<List<FeaturePolygonQueryResult>> loader,
-	        List<FeaturePolygonQueryResult> data) {
+	public void onLoadFinished(Loader<List<FeatureInfoQueryResult>> loader,
+	        List<FeatureInfoQueryResult> data) {
 	    setListAdapter(adapter);
 	    if (data.size() > 0) {
 	        // only one layer display
-	        FeaturePolygonQueryResult result = data.get(0);
+	        FeatureInfoQueryResult result = data.get(0);
 	        currentFeatures = result.getFeatures();
 	        setButtonBarVisibility(currentFeatures);
 	        if (currentFeatures.size() > 0) {
@@ -330,7 +330,7 @@ implements LoaderManager.LoaderCallbacks<List<FeaturePolygonQueryResult>>{
 	}
 
 	@Override
-	public void onLoaderReset(Loader<List<FeaturePolygonQueryResult>> arg0) {
+	public void onLoaderReset(Loader<List<FeatureInfoQueryResult>> arg0) {
 	    adapter.clear();
 
 	}
@@ -361,6 +361,4 @@ implements LoaderManager.LoaderCallbacks<List<FeaturePolygonQueryResult>>{
 	    	}
 	    activity.finish();
 		}
-
 }
-

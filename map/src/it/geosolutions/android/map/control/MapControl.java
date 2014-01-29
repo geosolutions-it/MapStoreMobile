@@ -18,11 +18,12 @@
 package it.geosolutions.android.map.control;
 
 import it.geosolutions.android.map.view.AdvancedMapView;
+
 import java.util.List;
+
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.os.Bundle;
-import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
@@ -33,7 +34,6 @@ import android.widget.ImageButton;
  * Implements methods for the draw on the map.
  * Allows to be enabled or disabled.
  * @author Lorenzo Natali (www.geo-solutions.it)
- *
  */
 public abstract class MapControl {
         protected String controlId;
@@ -45,9 +45,10 @@ public abstract class MapControl {
 	protected ImageButton activationButton;
 	protected int mode=MODE_EDIT;
 	
+	
 	public void setMode(int mode){
-            this.mode = mode;
-        }
+        this.mode = mode;
+    }
 	
 	public int getMode(){
 	    return mode;
@@ -58,14 +59,17 @@ public abstract class MapControl {
 	public void setGroup(List<MapControl> group) {
 		this.group = group;
 	}
+	
+	// Set OnClickListener for Image buttons.
 	protected OnClickListener activationListener=new OnClickListener(){
 
 		@Override
 		public void onClick(View button) {
+			
 			if (button.isSelected()){
 	            button.setSelected(false);
-	            disable();
-	        } else {
+	            disable();	            
+			} else {
 	            if(group != null){
 	            	for(MapControl c:group){
 	            			c.disable();
@@ -74,18 +78,23 @@ public abstract class MapControl {
 	            }
 	            button.setSelected(true);
 	            enable();
-	        }
-			
-		}
-		 
+	        }			
+		}		 
 	};
+		
+	//Listener for touch event on map.
 	protected OnTouchListener mapListener;
+	protected OnTouchListener oneTapListener;
+	protected OnTouchListener polygonTapListener;
 	
-	protected OnDoubleTapListener doubleTapListener; 
-	
+	/**
+	 * Creates the control.
+	 * @param view
+	 */
 	public MapControl(AdvancedMapView view){
 		this.view = view;
 	}
+	
 	/**
 	 * Creates the control with the flag enabled
 	 * @param view the mapView 
@@ -95,6 +104,7 @@ public abstract class MapControl {
 		this(view);
 		setEnabled(enabled);
 	}
+	
 	/**
 	 * Draw on the canvas
 	 * @param canvas
@@ -123,49 +133,71 @@ public abstract class MapControl {
 	}
 	
 	/**
-	 * set the control enabled or disabled
+	 * set the control enabled or disabled, override this method to catch and disable events.
 	 * @param enabled if true the control is enabled, disabled if false.
 	 */
 	public void setEnabled(boolean enabled){
 		this.enabled =enabled;
 	}
+	
+	/**
+	 * Return listener for Image Buttons.
+	 * @return
+	 */
 	public OnClickListener getActivationListener() {
 		return activationListener;
 	}
-	
+		
 	public void setActivationListener(OnClickListener activationListener) {
 		this.activationListener = activationListener;
 		if(this.activationButton!=null){
 			this.activationButton.setOnClickListener(activationListener);
 		}
 	}
+	
 	public OnTouchListener getMapListener() {
 		return mapListener;
-	}
-	
-	public OnDoubleTapListener getDoubleTapListener(){
-		return doubleTapListener;
 	}
 	
 	public void setMapListener(OnTouchListener mapListener) {
 		this.mapListener = mapListener;		
 	}
 	
-	public void setDoubleTapListener(OnDoubleTapListener doubleTapListener){
-		this.doubleTapListener = doubleTapListener;
+	public OnTouchListener getOneTapListener() {
+		return oneTapListener;
 	}
 	
+	public void setOneTapListener(OnTouchListener oneTapListener) {
+		this.oneTapListener = oneTapListener;		
+	}
+	
+	public OnTouchListener getPolygonTapListener() {
+		return polygonTapListener;
+	}
+	
+	public void setPolygonTapListener(OnTouchListener polygonTapListener) {
+		this.polygonTapListener = polygonTapListener;		
+	}
+	
+	/**
+	 * Get ImageButton identifier.
+	 * @return
+	 */
 	public ImageButton getActivationButton() {
 		return activationButton;
 	}
 	
+	/**
+	 * Set listener for click event on ImageButton.
+	 * @param imageButton on then to set listener.
+	 */
 	public void setActivationButton(ImageButton imageButton) {
 		imageButton.setOnClickListener(this.getActivationListener());
-		this.activationButton = imageButton;
+		this.activationButton = imageButton;		
 	}
 	
 	/**
-	 * Inteface to allow control refreshing from resultFromIntent
+	 * Interface to allow control refreshing from resultFromIntent
 	 * @param data 
 	 * @param resultCode 
 	 * @param requestCode 
@@ -175,14 +207,22 @@ public abstract class MapControl {
     /**
      * @param savedInstanceState
      */
-    public void saveState(Bundle savedInstanceState){}
+    public void saveState(Bundle savedInstanceState) {}
     
-    public void restoreState(Bundle savedInstanceState ){}
+    public void restoreState(Bundle savedInstanceState){    }
     
+    /**
+     * Return control Identifier.
+     * @return
+     */
     public String getControlId() {
         return controlId;
     }
 
+    /**
+     * Set control identifier.
+     * @param controlId
+     */
     public void setControlId(String controlId) {
         this.controlId = controlId;
     }
