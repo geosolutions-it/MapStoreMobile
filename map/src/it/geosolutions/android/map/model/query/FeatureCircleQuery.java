@@ -15,23 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.geosolutions.android.map.model;
+package it.geosolutions.android.map.model.query;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Class to represent a query model to perform a search by a circle drawed on map.
+ * Class to represent a query model to perform a search by a circle designed on map.
  * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com).
  */
-public class FeatureCircleQuery implements Parcelable {
-	//Coordinates of center
-	private double x;
-	private double y;
-	private double radius;
-	//private double stroke_width;
-	private byte zoomLevel;
-	private String srid;
+public class FeatureCircleQuery extends FeatureInfoQuery{
+	
+	private double x, y, radius;
 	
 	/**
 	 * Method that return x coordinate of center
@@ -75,48 +70,7 @@ public class FeatureCircleQuery implements Parcelable {
 	public void setRadius(double radius) {
 		this.radius = radius;
 	}
-	/**
-	 * Method that return stroke width of circle
-	 * @return double
-	 
-	public double getStrokeWidth() {
-		return stroke_width;
-	}
-	/**
-	 * Method that set stroke width of circle
-	 * @param double
-	 
-	public void setStrokeWidth(double stroke_width) {
-		this.stroke_width = stroke_width;
-	}
-	/**
-	 * Method that return zoom level
-	 * @return byte
-	 */
-	public byte getZoomLevel() {
-		return zoomLevel;
-	}
-	/**
-	 * Method that set requested zoom level
-	 * @param byte
-	 */
-	public void setZoomLevel(byte zoomLevel) {
-		this.zoomLevel = zoomLevel;
-	}
-	/**
-	 * Method that return current reference system
-	 * @return String
-	 */
-	public String getSrid() {
-		return srid;
-	}
-	/**
-	 * Method that set the reference system
-	 * @param String
-	 */
-	public void setSrid(String srid) {
-		this.srid = srid;
-	}	
+	
 	/* (non-Javadoc)
 	 * @see android.os.Parcelable#describeContents()
 	 */
@@ -133,17 +87,21 @@ public class FeatureCircleQuery implements Parcelable {
 		dest.writeDouble(x);
 		dest.writeDouble(y);
 		dest.writeDouble(radius);
-		dest.writeByte(zoomLevel);
-		dest.writeString(srid);	
 	}
 	
+	/**
+	 * Constructor for class FeatureCircleQuery.
+	 * @param source
+	 */
 	public FeatureCircleQuery(Parcel source){
 		x=source.readDouble();
 		y=source.readDouble();
 		radius=source.readDouble();
-		zoomLevel=source.readByte();
-		srid=source.readString();
 	}
+	
+	/**
+	 * Default constructor for class.
+	 */
 	public FeatureCircleQuery(){}
 	
 	 public static final Parcelable.Creator<FeatureCircleQuery> CREATOR

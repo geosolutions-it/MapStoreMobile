@@ -12,7 +12,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <!-- Map Specific permission -->
     <uses-permission android:name="android.permission.VIBRATE" />
-    <!-- end of Map Specific permission -->
+    <!-- endo of Map Specific permission -->
     <uses-sdk
         android:minSdkVersion="10"
         android:targetSdkVersion="17" />

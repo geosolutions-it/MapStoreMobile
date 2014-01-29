@@ -15,23 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.geosolutions.android.map.model;
+package it.geosolutions.android.map.model.query;
 
 import java.util.ArrayList;
 import android.os.Parcel;
 import android.os.Parcelable;
-import it.geosolutions.android.map.utils.Coordinates_Query;
+import it.geosolutions.android.map.utils.Coordinates.Coordinates_Query;
 
 /**
- * Class to represent a query model to perform a search by polygon drawed on map.
+ * Class to represent a query model to perform a search by polygon designed on map.
  * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com).
  */
-public class FeaturePolygonQuery implements Parcelable{
-
+public class FeaturePolygonQuery extends FeatureInfoQuery{
 	private ArrayList<Coordinates_Query> polygon_points;  //Store coordinates of polygon points
-	private byte zoomLevel;
-	private String srid;
 	
+	/**
+	 * Default constructor for class
+	 */
 	public FeaturePolygonQuery(){
 		polygon_points = new ArrayList<Coordinates_Query>();
 	}
@@ -43,40 +43,13 @@ public class FeaturePolygonQuery implements Parcelable{
 		return polygon_points;
 	}
 	/**
-	 * Method that set an arraylist storing points of polygon
-	 * @param double
+	 * Method that set an array storing points of polygonal selection.
+	 * @param polygon_points points captured by tap events on map.
 	 */
 	public void setPolygonPoints(ArrayList<Coordinates_Query> polygon_points) {
 		this.polygon_points = polygon_points;
 	}	
-	/**
-	 * Method that return zoom level
-	 * @return byte
-	 */
-	public byte getZoomLevel() {
-		return zoomLevel;
-	}
-	/**
-	 * Method that set requested zoom level
-	 * @param byte
-	 */
-	public void setZoomLevel(byte zoomLevel) {
-		this.zoomLevel = zoomLevel;
-	}
-	/**
-	 * Method that return current reference system
-	 * @return String
-	 */
-	public String getSrid() {
-		return srid;
-	}
-	/**
-	 * Method that set the reference system
-	 * @param String
-	 */
-	public void setSrid(String srid) {
-		this.srid = srid;
-	}	
+
 	/* (non-Javadoc)
 	 * @see android.os.Parcelable#describeContents()
 	 */
@@ -93,15 +66,15 @@ public class FeaturePolygonQuery implements Parcelable{
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeTypedList(polygon_points);
-		dest.writeByte(zoomLevel);
-		dest.writeString(srid);	
 	}
 	
+	/**
+	 * Constructor for class FeaturePolygonQuery
+	 * @param source
+	 */
 	public FeaturePolygonQuery(Parcel source){
 		polygon_points = new ArrayList<Coordinates_Query>();
 		source.readTypedList(polygon_points,Coordinates_Query.CREATOR);
-		zoomLevel=source.readByte();
-		srid=source.readString();
 	}
 		
 	 public static final Parcelable.Creator<FeaturePolygonQuery> CREATOR

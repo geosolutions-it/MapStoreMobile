@@ -9,6 +9,8 @@
     <string name="button_confirm_marker_position_title">Confirm</string>
     <string name="map_marker_enable_suggestion">Tap on a marker to select.\n Long press to move it.</string>
     <string name="map_marker_drag_suggestion">Move your finger to drag the marker.</string>
+    <string name="center">center</string>
+    <string name="radius">radius</string>
     <!--  GeoLocation  -->
     <string name="location_unavailable_message">No location provider available.</string>
 	<string name="location_deactivated_message">Location control deactivated.</string>

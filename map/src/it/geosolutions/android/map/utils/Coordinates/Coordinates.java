@@ -15,48 +15,49 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.geosolutions.android.map.utils;
+package it.geosolutions.android.map.utils.Coordinates;
 
 /**
- * A class containing the coordinates of a point about a polygonal selection
+ * A class containing the coordinates(lon/lat) of a point on earth surface
  * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com).
  */
 public class Coordinates{
 	
-	private float x = 0f, y=0f;
+	private double x, y;
+	
 	/**
 	 * Default constructor of the class
 	 * @param x
 	 * @param y
 	 */
 	public Coordinates(){
-		this.x = 0f;
-		this.y = 0f;
+		this.x = 0;
+		this.y = 0;
 	}
 	
 	/**
-	 * Constructor of the class for float parameter
+	 * Constructor of the class for double parameter
 	 * @param x
 	 * @param y
 	 */
-	public Coordinates(float x, float y){
+	public Coordinates(double x, double y){
 		this.x = x;
 		this.y = y;
 	}
 	
 	/**
-	 * Return x value for coordinate of point
+	 * Return x value for coordinate of point.
 	 * @return 
 	 */
-	public float getX(){
+	public double getX(){
 		return x;
 	}
 	
 	/**
-	 * Return y value for coordinate of point
+	 * Return y value for coordinate of point.
 	 * @return 
 	 */
-	public float getY(){
+	public double getY(){
 		return y;
 	}
 }

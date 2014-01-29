@@ -14,21 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.geosolutions.android.map.model;
+package it.geosolutions.android.map.model.query;
 
 import android.os.Parcel;
 import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
 import it.geosolutions.android.map.database.SpatialDataSourceHandler;
 
 /**
- * PolygonTaskQuery for polygonal query
- * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com)
- *
- */
+* TaskQuery for polygonal selection.
+* @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com).
+*/
 public class FeaturePolygonTaskQuery extends FeaturePolygonQuery {
 	
-	/** 
-	 * Constructor for class.
+	/**
+	 * Constructor for class FeaturePolygonTaskQuery.
 	 * @param source
 	 */
 	public FeaturePolygonTaskQuery(Parcel source) {
@@ -37,8 +36,8 @@ public class FeaturePolygonTaskQuery extends FeaturePolygonQuery {
 	}
 	
 	/**
-	 * Constructor for class
-	 * @param q
+	 * Constructor for class FeaturePolygonTaskQuery.
+	 * @param source
 	 */
 	public FeaturePolygonTaskQuery(FeaturePolygonQuery q){
 		setPolygonPoints(q.getPolygonPoints());

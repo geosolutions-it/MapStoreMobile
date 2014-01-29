@@ -15,49 +15,70 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.geosolutions.android.map.model;
+package it.geosolutions.android.map.model.query;
 
 import android.os.Parcel;
 import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
 import it.geosolutions.android.map.database.SpatialDataSourceHandler;
 
 /**
+ * Task query for rectangular selection
  * @author Lorenzo Natali (www.geo-solutions.it)
- *
  */
-public class FeatureInfoTaskQuery extends FeatureInfoQuery {
+public class FeatureRectangularTaskQuery extends FeatureRectangularQuery {
+	
 	/**
+	 * Constructor for class FeatureRectangularTaskQuery.
 	 * @param source
 	 */
-	public FeatureInfoTaskQuery(Parcel source) {
-		super(source);
-		
+	public FeatureRectangularTaskQuery(Parcel source) {
+		super(source);	
 	}
-	public FeatureInfoTaskQuery(FeatureInfoQuery q){
+	
+	/**
+	 * Constructor for class FeatureRectangularTaskQuery.
+	 * @param q
+	 */
+	public FeatureRectangularTaskQuery(FeatureRectangularQuery q){
 		setE(q.getE());
 		setS(q.getS());
 		setW(q.getW());
 		setN(q.getN());
-		setSrid(q.getSrid());
-		setZoomLevel(q.getZoomLevel());
 	}
+	
 	private SpatialDataSourceHandler handler;
 	private SpatialVectorTable table;
 	private Integer start;
 	private Integer limit;
 
+	/**
+	 * Return start value
+	 * @return
+	 */
 	public Integer getStart() {
 		return start;
 	}
 
+	/**
+	 * Set start value
+	 * @param start
+	 */
 	public void setStart(Integer start) {
 		this.start = start;
 	}
 
+	/**
+	 * Return limit value
+	 * @return
+	 */
 	public Integer getLimit() {
 		return limit;
 	}
 
+	/**
+	 * Set limit value
+	 * @param limit
+	 */
 	public void setLimit(Integer limit) {
 		this.limit = limit;
 	}

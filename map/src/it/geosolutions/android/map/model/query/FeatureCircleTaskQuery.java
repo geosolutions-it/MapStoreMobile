@@ -15,24 +15,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.geosolutions.android.map.model;
+package it.geosolutions.android.map.model.query;
 
 import android.os.Parcel;
 import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
 import it.geosolutions.android.map.database.SpatialDataSourceHandler;
 
 /**
- * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com)
- *
+ * TaskQuery for circular selection.
+ * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com).
  */
 public class FeatureCircleTaskQuery extends FeatureCircleQuery {
+	
 	/**
+	 * Constructor for class FeatureCircleTaskQuery.
 	 * @param source
 	 */
 	public FeatureCircleTaskQuery(Parcel source) {
 		super(source);
 		
 	}
+	
+	/**
+	 * Constructor for class FeatureCircleTaskQuery.
+	 * @param q
+	 */
 	public FeatureCircleTaskQuery(FeatureCircleQuery q){
 		setX(q.getX());
 		setY(q.getY());
@@ -46,18 +53,34 @@ public class FeatureCircleTaskQuery extends FeatureCircleQuery {
 	private Integer start;
 	private Integer limit;
 
+	/**
+	 * Get start value.
+	 * @return
+	 */
 	public Integer getStart() {
 		return start;
 	}
 
+	/**
+	 * Set start value.
+	 * @param start
+	 */
 	public void setStart(Integer start) {
 		this.start = start;
 	}
 
+	/**
+	 * Get limit value.
+	 * @return
+	 */
 	public Integer getLimit() {
 		return limit;
 	}
 
+	/**
+	 * set limit value.
+	 * @param limit
+	 */
 	public void setLimit(Integer limit) {
 		this.limit = limit;
 	}

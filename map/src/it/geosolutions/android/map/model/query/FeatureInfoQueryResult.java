@@ -15,15 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.geosolutions.android.map.model;
+package it.geosolutions.android.map.model.query;
+
+import it.geosolutions.android.map.model.Feature;
 
 import java.util.ArrayList;
 
 /**
- * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com)
- *
+ * Model for result of a query
+ * @author Lorenzo Natali (www.geo-solutions.it)
  */
-public class FeatureCircleQueryResult {
+public class FeatureInfoQueryResult {
 	private String layerName;
 	ArrayList<Feature> features;
 	public String getLayerName() {

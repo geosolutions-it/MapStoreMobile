@@ -18,7 +18,7 @@
 package it.geosolutions.android.map.adapters;
 
 import it.geosolutions.android.map.R;
-import it.geosolutions.android.map.model.FeatureInfoQueryResult;
+import it.geosolutions.android.map.model.query.FeatureInfoQueryResult;
 import it.geosolutions.android.map.renderer.LegendRenderer;
 
 import java.util.ArrayList;

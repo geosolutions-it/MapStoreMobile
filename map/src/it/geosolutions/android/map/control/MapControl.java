@@ -17,12 +17,18 @@
  */
 package it.geosolutions.android.map.control;
 
+import it.geosolutions.android.map.R;
+import it.geosolutions.android.map.listeners.PolygonTapListener;
 import it.geosolutions.android.map.view.AdvancedMapView;
+
 import java.util.List;
+
+import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.os.Bundle;
-import android.view.GestureDetector.OnDoubleTapListener;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
@@ -33,7 +39,6 @@ import android.widget.ImageButton;
  * Implements methods for the draw on the map.
  * Allows to be enabled or disabled.
  * @author Lorenzo Natali (www.geo-solutions.it)
- *
  */
 public abstract class MapControl {
         protected String controlId;
@@ -44,6 +49,9 @@ public abstract class MapControl {
 	List<MapControl> group;
 	protected ImageButton activationButton;
 	protected int mode=MODE_EDIT;
+	
+	private SharedPreferences pref;
+	private String[] array;
 	
 	public void setMode(int mode){
             this.mode = mode;
@@ -58,11 +66,17 @@ public abstract class MapControl {
 	public void setGroup(List<MapControl> group) {
 		this.group = group;
 	}
+	
+	// Set OnClickListener for Image buttons.
 	protected OnClickListener activationListener=new OnClickListener(){
 
 		@Override
 		public void onClick(View button) {
 			if (button.isSelected()){
+				if(button == (ImageButton) view.findViewById(R.id.ButtonInfo)){
+					if(pref.getString("selectionShape", "").equals(array[3]))
+		        		ptl.reset();
+				}
 	            button.setSelected(false);
 	            disable();
 	        } else {
@@ -74,18 +88,24 @@ public abstract class MapControl {
 	            }
 	            button.setSelected(true);
 	            enable();
-	        }
-			
-		}
-		 
+	        }			
+		}		 
 	};
+	
+	//Listener for touch event on map.
 	protected OnTouchListener mapListener;
+	protected OnTouchListener oneTapListener;
+	protected OnTouchListener polygonTapListener;
+	private PolygonTapListener ptl; //Used when user wants to cancel polygonal selection
 	
-	protected OnDoubleTapListener doubleTapListener; 
-	
+	/**
+	 * Creates the control.
+	 * @param view
+	 */
 	public MapControl(AdvancedMapView view){
 		this.view = view;
 	}
+	
 	/**
 	 * Creates the control with the flag enabled
 	 * @param view the mapView 
@@ -95,6 +115,18 @@ public abstract class MapControl {
 		this(view);
 		setEnabled(enabled);
 	}
+	
+	/**
+	 * Create the control.
+	 * @param view
+	 * @param activity will be used to access to shared preferences.
+	 */
+	public MapControl(AdvancedMapView view,Activity activity){
+		this(view);
+		pref = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
+		array = activity.getResources().getStringArray(R.array.preferences_selection_shape);
+	}
+	
 	/**
 	 * Draw on the canvas
 	 * @param canvas
@@ -129,6 +161,11 @@ public abstract class MapControl {
 	public void setEnabled(boolean enabled){
 		this.enabled =enabled;
 	}
+	
+	/**
+	 * Return listener for Image Buttons.
+	 * @return
+	 */
 	public OnClickListener getActivationListener() {
 		return activationListener;
 	}
@@ -139,33 +176,50 @@ public abstract class MapControl {
 			this.activationButton.setOnClickListener(activationListener);
 		}
 	}
+	
 	public OnTouchListener getMapListener() {
 		return mapListener;
-	}
-	
-	public OnDoubleTapListener getDoubleTapListener(){
-		return doubleTapListener;
 	}
 	
 	public void setMapListener(OnTouchListener mapListener) {
 		this.mapListener = mapListener;		
 	}
 	
-	public void setDoubleTapListener(OnDoubleTapListener doubleTapListener){
-		this.doubleTapListener = doubleTapListener;
+	public OnTouchListener getOneTapListener() {
+		return oneTapListener;
 	}
 	
+	public void setOneTapListener(OnTouchListener oneTapListener) {
+		this.oneTapListener = oneTapListener;		
+	}
+	
+	public OnTouchListener getPolygonTapListener() {
+		return polygonTapListener;
+	}
+	
+	public void setPolygonTapListener(OnTouchListener polygonTapListener) {
+		this.polygonTapListener = polygonTapListener;		
+	}
+	
+	/**
+	 * Get ImageButton identifier.
+	 * @return
+	 */
 	public ImageButton getActivationButton() {
 		return activationButton;
 	}
 	
+	/**
+	 * Set listener for click event on ImageButton.
+	 * @param imageButton on then to set listener.
+	 */
 	public void setActivationButton(ImageButton imageButton) {
 		imageButton.setOnClickListener(this.getActivationListener());
-		this.activationButton = imageButton;
+		this.activationButton = imageButton;		
 	}
 	
 	/**
-	 * Inteface to allow control refreshing from resultFromIntent
+	 * Interface to allow control refreshing from resultFromIntent
 	 * @param data 
 	 * @param resultCode 
 	 * @param requestCode 
@@ -175,15 +229,31 @@ public abstract class MapControl {
     /**
      * @param savedInstanceState
      */
-    public void saveState(Bundle savedInstanceState){}
+    public void saveState(Bundle savedInstanceState) {}
     
-    public void restoreState(Bundle savedInstanceState ){}
+    public void restoreState(Bundle savedInstanceState){    }
     
+    /**
+     * Return control Identifier.
+     * @return
+     */
     public String getControlId() {
         return controlId;
     }
 
+    /**
+     * Set control identifier.
+     * @param controlId
+     */
     public void setControlId(String controlId) {
         this.controlId = controlId;
+    }
+    
+    /**
+     * Set identifier for PolygonTapListener, used when user wants to cancel polygonal selection.
+     * @param ptl
+     */
+    protected void setToCancel(PolygonTapListener ptl){
+    	this.ptl = ptl;
     }
 }
