@@ -817,6 +817,9 @@ public class MapsActivity extends MapActivityBase {
     public void onPostCreate(Bundle savedInstanceState){
     	super.onPostCreate(savedInstanceState);
     	// Sync the toggle state after onRestoreInstanceState has occurred.
+    	TileCache fileSystemTileCache = this.mapView.getFileSystemTileCache();
+    	
+    	Log.v("PERSISTENCE","capacity"+fileSystemTileCache.getCapacity()+",persistence:"+fileSystemTileCache.isPersistent());
         mDrawerToggle.syncState();
     }
     
@@ -843,9 +846,11 @@ public class MapsActivity extends MapActivityBase {
     public void loadPersistencePreferences(){
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         boolean persistent = sharedPreferences.getBoolean("TileCachePersistence", true);
+        Log.v("PERSISTENCE","cache size:"+sharedPreferences.getInt("TileCacheSize", FILE_SYSTEM_CACHE_SIZE_DEFAULT)+",persistent"+persistent);
         int capacity = Math.min(sharedPreferences.getInt("TileCacheSize", FILE_SYSTEM_CACHE_SIZE_DEFAULT),
                         FILE_SYSTEM_CACHE_SIZE_MAX);
         TileCache fileSystemTileCache = this.mapView.getFileSystemTileCache();
+        
         fileSystemTileCache.setPersistent(persistent);
         fileSystemTileCache.setCapacity(capacity);
         // text size
