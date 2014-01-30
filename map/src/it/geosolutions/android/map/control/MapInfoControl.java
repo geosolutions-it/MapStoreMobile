@@ -105,6 +105,7 @@ public class MapInfoControl extends MapControl{
 		Shape_Selection = array[0]; //default selection rectangular
 		
 		instantiateListener();
+		setMode(mode);
 	}
 	
 	/**
@@ -253,6 +254,7 @@ public class MapInfoControl extends MapControl{
 		getActivationButton().setSelected(false);
 		loadStyleSelectorPreferences();
 		instantiateListener();
+		setMode(mode);
 	}
 	
 	/**
@@ -277,7 +279,7 @@ public class MapInfoControl extends MapControl{
 	 */
 	@Override 
 	public void setEnabled(boolean enabled){
-		this.enabled =enabled;
+		super.setEnabled(enabled);
 		if(!enabled && polygonTapListener != null && 
 				pref.getString("selectionShape","").equals(array[3]) )
         	polygonTapListener.reset();

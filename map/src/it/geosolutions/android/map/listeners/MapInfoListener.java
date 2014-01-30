@@ -203,14 +203,14 @@ public boolean onTouch(View v, MotionEvent event){
         
     if (action == MotionEvent.ACTION_DOWN) {
     	if(dragStarted  && pointerCount > 1) {
-            dragStarted = false;
+            setDragStarted(false);
             Log.d("MAPINFOTOOL", "drag stopped");
             isPinching = true;
         }  	
     }
     if(action == MotionEvent.ACTION_MOVE) {
         	if (pointerCount > 1 || isPinching) {
-                dragStarted = false;
+                setDragStarted(false);
                 Log.d("MAPINFOTOOL", "drag stopped");
                 return false;
             }
@@ -220,7 +220,7 @@ public boolean onTouch(View v, MotionEvent event){
                 startY = event.getY();
             }
 
-        	dragStarted = true;
+        	setDragStarted(true);
             Log.d("MAPINFOTOOL", "dragging started");
         	endX = event.getX();
             endY = event.getY();
@@ -231,24 +231,24 @@ public boolean onTouch(View v, MotionEvent event){
     } else if (dragStarted && action == MotionEvent.ACTION_UP) {
         	if (pointerCount > 1){
                 isPinching = true;
-                dragStarted = false;
+                setDragStarted(false);
                 Log.d("MAPINFOTOOL", "drag stopped");
                 return false;
             } else if (isPinching){
                 isPinching = false;
-                dragStarted = false;
+                setDragStarted(false);
                 Log.d("MAPINFOTOOL", "drag stopped");
                 return false;
             }
         	 endX = event.getX();
              endY = event.getY();
              if (endX == startX || endY == startY) {
-                 dragStarted = false;
+                 setDragStarted(false);
                  isPinching = false;
                  return false;
              }             
         	// END DRAGGING EVENT		
-        	dragStarted = false;
+        	setDragStarted(false);
             Log.d("MAPINFOTOOL", "drag stopped");
             Log.d("MAPINFOTOOL", "start query layer");
 
@@ -278,6 +278,17 @@ public boolean onTouch(View v, MotionEvent event){
         }	
     
     return false;
+}
+
+private void setDragStarted(boolean b) {
+//	if(dragStarted ^ b){
+//		if (dragStarted= true){
+//			this.view.thawOverlays();
+//		}else{
+//			this.view.freezeOverlays();
+//		}
+//	}
+	dragStarted=b;
 }
 
 /**
