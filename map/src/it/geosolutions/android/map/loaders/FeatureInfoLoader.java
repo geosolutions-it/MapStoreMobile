@@ -19,8 +19,8 @@ package it.geosolutions.android.map.loaders;
 
 import it.geosolutions.android.map.database.SpatialDataSourceHandler;
 import it.geosolutions.android.map.model.Feature;
-import it.geosolutions.android.map.model.FeatureInfoQueryResult;
-import it.geosolutions.android.map.model.FeatureInfoTaskQuery;
+import it.geosolutions.android.map.model.query.FeatureInfoQueryResult;
+import it.geosolutions.android.map.model.query.FeatureRectangularTaskQuery;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,12 +49,17 @@ int features_loaded = 0;
 
 private List<FeatureInfoQueryResult> mData;
 
-private FeatureInfoTaskQuery[] queryQueue;
+private FeatureRectangularTaskQuery[] queryQueue;
 
 // private FeatureInfoObserver mObserver;
 private static int MAX_FEATURES = 10;
 
-public FeatureInfoLoader(Context ctx, FeatureInfoTaskQuery[] queryQueue) {
+/**
+ * Constructor for class FeatureInfoLoader
+ * @param ctx
+ * @param queryQueue
+ */
+public FeatureInfoLoader(Context ctx, FeatureRectangularTaskQuery[] queryQueue) {
     // Loaders may be used across multiple Activities (assuming they aren't
     // bound to the LoaderManager), so NEVER hold a reference to the context
     // directly. Doing so will cause you to leak an entire Activity's context.
@@ -65,11 +70,11 @@ public FeatureInfoLoader(Context ctx, FeatureInfoTaskQuery[] queryQueue) {
 
 }
 
-protected void doInBackground(FeatureInfoTaskQuery[] queryQueue,
+protected void doInBackground(FeatureRectangularTaskQuery[] queryQueue,
         List<FeatureInfoQueryResult> data) {
     Log.d("FEATURE_INFO_TASK", "Info Task Launched");
     //process all queries
-    for (FeatureInfoTaskQuery query : queryQueue) {
+    for (FeatureRectangularTaskQuery query : queryQueue) {
         if (!processQuery(query, data)) {
             return;
         }
@@ -83,7 +88,7 @@ protected void doInBackground(FeatureInfoTaskQuery[] queryQueue,
  * @param query
  * @param data the result will be added to this array
  */
-private boolean processQuery(FeatureInfoTaskQuery query,
+private boolean processQuery(FeatureRectangularTaskQuery query,
         List<FeatureInfoQueryResult> data) {
     SpatialDataSourceHandler handler = query.getHandler();
     SpatialVectorTable table = query.getTable();

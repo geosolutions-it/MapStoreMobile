@@ -18,6 +18,7 @@
 package it.geosolutions.android.map.view;
 
 import it.geosolutions.android.map.MapsActivity;
+import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.control.MapControl;
 import it.geosolutions.android.map.overlay.FreezableOverlay;
 import it.geosolutions.android.map.overlay.MarkerOverlay;
@@ -30,20 +31,23 @@ import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.overlay.Overlay;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
+import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+
 /**
  * This class extends the <MapView> adding the management of the <MapControl> objects.
- * 
- * @author Admin
- *
+ * @author  Lorenzo Natali.
  */
 public class AdvancedMapView extends MapView {
 	protected List<MapControl> controls =  new ArrayList<MapControl>();
 	protected MapsActivity activity;
 	public OverlayManager overlayManger;
+	private SharedPreferences pref;
+	private String[] array;
 	
 	public OverlayManager getOverlayManger() {
 		return overlayManger;
@@ -59,6 +63,8 @@ public class AdvancedMapView extends MapView {
 		if(context instanceof MapsActivity){
 			activity = (MapsActivity) context; 
 		}
+		pref = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
+		array = activity.getResources().getStringArray(R.array.preferences_selection_shape);
 	}
 	
 	/**
@@ -71,6 +77,8 @@ public class AdvancedMapView extends MapView {
 		if(context instanceof MapsActivity){
 			activity = (MapsActivity) context; 
 		}
+		pref = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
+		array = activity.getResources().getStringArray(R.array.preferences_selection_shape);
 	}
 	
 	/**
@@ -101,7 +109,7 @@ public class AdvancedMapView extends MapView {
 	}
 	
 	/**
-	 * Drows the map and the controls optional functions
+	 * Draws the map and the controls optional functions
 	 */
 	@Override
 	public  void onDraw(Canvas canvas){
@@ -116,26 +124,34 @@ public class AdvancedMapView extends MapView {
 	/**
 	 * Extend the touch event with other events from the controllers.
 	 * The controls have a associated MapListener.
-	 * If this listener catch the event (onTouch method returns true)
-	 * the event is not propagated to the map.
+	 * If this listener catch the event (onTouch method returns true) the event is not propagated 
+	 * to the map.
 	 */
 	@Override
 	public boolean onTouchEvent(MotionEvent motionEvent) {
 		boolean catched = false;
 		boolean touchResult =true;
 		for(MapControl cl : controls){
-			OnTouchListener tl = cl.getMapListener();
+			//If user chooses one point selection select listener for one tap event
+			OnTouchListener tl = null;
+			if(pref.getString("selectionShape", "").equals(array[2])){
+				tl = cl.getOneTapListener();
+			}
+			else 
+				if(pref.getString("selectionShape", "").equals(array[3])){
+					tl = cl.getPolygonTapListener();
+				}
+				else 
+					tl = cl.getMapListener();
+			
 			if(cl.isEnabled() && tl !=null){
 				//if one controller returns true the event is not propagated to the map
 				catched = tl.onTouch(this, motionEvent) || catched;
 			}
 		}
-		
-		if(!catched){
+		if(!catched)
 			 touchResult = super.onTouchEvent(motionEvent);
-		}
 		
-
 		return touchResult || catched;
 	}
 	

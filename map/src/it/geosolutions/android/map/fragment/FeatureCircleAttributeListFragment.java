@@ -5,9 +5,9 @@ import it.geosolutions.android.map.activities.GetFeatureInfoLayerListActivity;
 import it.geosolutions.android.map.adapters.FeatureInfoAttributesAdapter;
 import it.geosolutions.android.map.loaders.FeatureCircleLoader;
 import it.geosolutions.android.map.model.Feature;
-import it.geosolutions.android.map.model.FeatureCircleQuery;
-import it.geosolutions.android.map.model.FeatureCircleQueryResult;
-import it.geosolutions.android.map.model.FeatureCircleTaskQuery;
+import it.geosolutions.android.map.model.query.FeatureCircleQuery;
+import it.geosolutions.android.map.model.query.FeatureCircleTaskQuery;
+import it.geosolutions.android.map.model.query.FeatureInfoQueryResult;
 
 import it.geosolutions.android.map.utils.FeatureInfoUtils;
 
@@ -36,23 +36,22 @@ import com.actionbarsherlock.app.SherlockListFragment;
  * This fragment shows a view containing the attributes of a single feature from a
  * selected layer Supports pagination and returns to the activity in case of
  * selection.
- * 
  * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com)
  */
 public class FeatureCircleAttributeListFragment extends SherlockListFragment
-implements LoaderManager.LoaderCallbacks<List<FeatureCircleQueryResult>>{
+implements LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>>{
 	
 	private FeatureInfoAttributesAdapter adapter;
-	private FeatureCircleTaskQuery[] queryQueue;
+	private FeatureCircleTaskQuery[] queryQueue; 
 	
 	// The callbacks through which we will interact with the LoaderManager.
-	private LoaderManager.LoaderCallbacks<List<FeatureCircleQueryResult>> mCallbacks;
+	private LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>> mCallbacks;
 
 	protected Integer start;
 
 	protected Integer limit;
 
-	protected FeatureCircleQuery query;
+	protected FeatureCircleQuery query; 
 
 	protected ArrayList<String> layers;
 
@@ -76,7 +75,7 @@ implements LoaderManager.LoaderCallbacks<List<FeatureCircleQueryResult>>{
 	    Bundle extras = getActivity().getIntent().getExtras();
 	    ;
 	    // TODO get already loaded data;
-	    query = (FeatureCircleQuery) extras.getParcelable("query");
+	    query = (FeatureCircleQuery) extras.getParcelable("query"); //  
 	    layers = extras.getStringArrayList("layers");
 	    start = extras.getInt("start");
 	    limit = extras.getInt("limit");
@@ -181,7 +180,7 @@ implements LoaderManager.LoaderCallbacks<List<FeatureCircleQueryResult>>{
 	        Integer start, Integer limit) {
 	    // create task query
 	    queryQueue = FeatureInfoUtils.createTaskQueryQueue(layers, query, start,
-	            limit);
+	            limit); 
 
 	    // initialize Load Manager
 	    mCallbacks = this;
@@ -215,19 +214,19 @@ implements LoaderManager.LoaderCallbacks<List<FeatureCircleQueryResult>>{
 	 * android.os.Bundle)
 	 */
 	@Override
-	public Loader<List<FeatureCircleQueryResult>> onCreateLoader(int id, Bundle args) {
+	public Loader<List<FeatureInfoQueryResult>> onCreateLoader(int id, Bundle args) {
 
 	    return new FeatureCircleLoader(getSherlockActivity(), queryQueue);
 	}
 
 	// populate the list and set buttonbar visibility options
 	@Override
-	public void onLoadFinished(Loader<List<FeatureCircleQueryResult>> loader,
-	        List<FeatureCircleQueryResult> data) {
+	public void onLoadFinished(Loader<List<FeatureInfoQueryResult>> loader,
+	        List<FeatureInfoQueryResult> data) {
 	    setListAdapter(adapter);
 	    if (data.size() > 0) {
 	        // only one layer display
-	        FeatureCircleQueryResult result = data.get(0);
+	        FeatureInfoQueryResult result = data.get(0);
 	        currentFeatures = result.getFeatures();
 	        setButtonBarVisibility(currentFeatures);
 	        if (currentFeatures.size() > 0) {
@@ -328,7 +327,7 @@ implements LoaderManager.LoaderCallbacks<List<FeatureCircleQueryResult>>{
 	}
 
 	@Override
-	public void onLoaderReset(Loader<List<FeatureCircleQueryResult>> arg0) {
+	public void onLoaderReset(Loader<List<FeatureInfoQueryResult>> arg0) {
 	    adapter.clear();
 
 	}
@@ -359,6 +358,4 @@ implements LoaderManager.LoaderCallbacks<List<FeatureCircleQueryResult>>{
 	    	}
 	    activity.finish();
 		}
-
 }
-

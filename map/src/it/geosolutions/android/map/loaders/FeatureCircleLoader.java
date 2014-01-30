@@ -19,8 +19,9 @@ package it.geosolutions.android.map.loaders;
 
 import it.geosolutions.android.map.database.SpatialDataSourceHandler;
 import it.geosolutions.android.map.model.Feature;
-import it.geosolutions.android.map.model.FeatureCircleQueryResult;
-import it.geosolutions.android.map.model.FeatureCircleTaskQuery;
+import it.geosolutions.android.map.model.query.FeatureCircleTaskQuery;
+import it.geosolutions.android.map.model.query.FeatureInfoQueryResult;
+
 import java.util.ArrayList;
 import java.util.List;
 import jsqlite.Exception;
@@ -37,11 +38,11 @@ import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
  * @author Lorenzo Natali (www.geo-solutions.it)
  */
 public class FeatureCircleLoader extends
-        AsyncTaskLoader<List<FeatureCircleQueryResult>> {
+        AsyncTaskLoader<List<FeatureInfoQueryResult>> {
 	
 int features_loaded = 0;
 
-private List<FeatureCircleQueryResult> mData;
+private List<FeatureInfoQueryResult> mData;
 
 private FeatureCircleTaskQuery[] queryQueue;
 
@@ -60,7 +61,7 @@ public FeatureCircleLoader(Context ctx, FeatureCircleTaskQuery[] queryQueue) {
 }
 
 protected void doInBackground(FeatureCircleTaskQuery[] queryQueue,
-        List<FeatureCircleQueryResult> data) {
+        List<FeatureInfoQueryResult> data) {
     Log.d("FEATURE_Circle_TASK", "Circle Task Launched");
     //process all queries
     for (FeatureCircleTaskQuery query : queryQueue) {
@@ -78,7 +79,7 @@ protected void doInBackground(FeatureCircleTaskQuery[] queryQueue,
  * @param data the result will be added to this array
  */
 private boolean processQuery(FeatureCircleTaskQuery query,
-        List<FeatureCircleQueryResult> data) {
+        List<FeatureInfoQueryResult> data) {
     SpatialDataSourceHandler handler = query.getHandler();
     SpatialVectorTable table = query.getTable();
     String tableName = query.getTable().getName();
@@ -109,7 +110,7 @@ private boolean processQuery(FeatureCircleTaskQuery query,
         // TODO now simply skip, do better work
     }
     // add features
-    FeatureCircleQueryResult result = new FeatureCircleQueryResult();
+    FeatureInfoQueryResult result = new FeatureInfoQueryResult();
     result.setLayerName(tableName);
     result.setFeatures(features);
     Log.v("FEATURE_Circle_TASK", features.size() + " items found for table "
@@ -127,8 +128,8 @@ private boolean processQuery(FeatureCircleTaskQuery query,
  * @see android.support.v4.content.AsyncTaskLoader#loadInBackground()
  */
 @Override
-public List<FeatureCircleQueryResult> loadInBackground() {
-    List<FeatureCircleQueryResult> data = new ArrayList<FeatureCircleQueryResult>();
+public List<FeatureInfoQueryResult> loadInBackground() {
+    List<FeatureInfoQueryResult> data = new ArrayList<FeatureInfoQueryResult>();
 
     // TODO: Perform the query here and add the results to 'data'.
     doInBackground(queryQueue, data);
@@ -140,7 +141,7 @@ public List<FeatureCircleQueryResult> loadInBackground() {
 // ** Deliver the results to the registered listener **/
 // ********************************************************/
 @Override
-public void deliverResult(List<FeatureCircleQueryResult> data) {
+public void deliverResult(List<FeatureInfoQueryResult> data) {
     if (isReset()) {
         // The Loader has been reset; ignore the result and invalidate the data.
         releaseResources(data);
@@ -149,7 +150,7 @@ public void deliverResult(List<FeatureCircleQueryResult> data) {
 
     // Hold a reference to the old data so it doesn't get garbage collected.
     // We must protect it until the new data has been delivered.
-    List<FeatureCircleQueryResult> oldData = mData;
+    List<FeatureInfoQueryResult> oldData = mData;
     mData = data;
     if (isStarted()) {
         // If the Loader is in a started state, deliver the results to the
@@ -222,7 +223,7 @@ protected void onReset() {
  * @see android.support.v4.content.AsyncTaskLoader#onCanceled(java.lang.Object)
  */
 @Override
-public void onCanceled(List<FeatureCircleQueryResult> data) {
+public void onCanceled(List<FeatureInfoQueryResult> data) {
     // TODO Auto-generated method stub
     super.onCanceled(data);
     releaseResources(data);
@@ -231,7 +232,7 @@ public void onCanceled(List<FeatureCircleQueryResult> data) {
 /**
  * @param data
  */
-private void releaseResources(List<FeatureCircleQueryResult> data) {
+private void releaseResources(List<FeatureInfoQueryResult> data) {
     // release resource if needed
 
 	}

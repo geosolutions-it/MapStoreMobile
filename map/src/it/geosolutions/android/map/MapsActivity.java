@@ -618,7 +618,7 @@ public class MapsActivity extends MapActivityBase {
 			 mc.setGroup(group);
 	         mc.setMode(MarkerControl.MODE_EDIT);
 		 }         
-         		 
+		 
 		 //My location Control 
 		 LocationControl lc  =new LocationControl(mapView);
 		 lc.setActivationButton((ImageButton)findViewById(R.id.ButtonLocation));
