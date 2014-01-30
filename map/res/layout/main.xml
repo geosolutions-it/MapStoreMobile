@@ -18,7 +18,7 @@
         android:layout_width="240dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="#C111">
+        android:background="#CFFF">
         
        <include layout="@layout/left_drawer"/>
         
