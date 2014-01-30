@@ -18,45 +18,27 @@
 package it.geosolutions.android.map.mapstore.activities;
 
 import it.geosolutions.android.map.MapsActivity;
-import it.geosolutions.android.map.activities.style.LinesDataPropertiesActivity;
-import it.geosolutions.android.map.activities.style.PointsDataPropertiesActivity;
-import it.geosolutions.android.map.activities.style.PolygonsDataPropertiesActivity;
-import it.geosolutions.android.map.database.SpatialDataSourceManager;
+import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.mapstore.model.MapStoreConfiguration;
 import it.geosolutions.android.map.mapstore.model.MapStoreLayer;
-import it.geosolutions.android.map.mapstore.model.MapStoreSource;
-import it.geosolutions.android.map.renderer.LegendRenderer;
-import it.geosolutions.android.map.style.AdvancedStyle;
-import it.geosolutions.android.map.style.StyleManager;
-import it.geosolutions.android.map.R;
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.ImageView;
 import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockListActivity;
 import com.actionbarsherlock.view.MenuItem;
-
-import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
-import eu.geopaparazzi.spatialite.util.SpatialiteLibraryConstants;
 
 
 /**
@@ -69,10 +51,13 @@ class ViewHolder {
 	CheckBox visibleView;
 }
 
-
+/**
+ * This activity shows a list of layers from a mapstore configuration json file
+ * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
+ *
+ */
 public class MapStoreLayerListActivity extends SherlockListActivity {
 	
-    private List<SpatialVectorTable> spatialTables = new ArrayList<SpatialVectorTable>();
 	private MapStoreConfiguration mapStoreConfig;
 
     public void onCreate( Bundle icicle ) {
@@ -139,6 +124,10 @@ public class MapStoreLayerListActivity extends SherlockListActivity {
 
     }
     
+    /**
+     * returns the layers  from the mapstore configurations
+     * @return the list of <MapStoreLayers> loaded
+     */
     protected ArrayList<MapStoreLayer> getLayers() {
 		return mapStoreConfig.map.layers;
 	}
@@ -146,6 +135,7 @@ public class MapStoreLayerListActivity extends SherlockListActivity {
 	@Override
     public boolean onOptionsItemSelected(MenuItem item) {
     	 switch (item.getItemId()) {
+    	 	//return data if home button clicked
     	    case android.R.id.home:
     	      returnData();
     	      finish();
@@ -156,10 +146,7 @@ public class MapStoreLayerListActivity extends SherlockListActivity {
     
     @Override
     public void onBackPressed() {
-        Bundle bundle = new Bundle();
-        //bundle.putString(FIELD_A, mA.getText().toString());
-        
-        
+    	//return data also if back button is pressed
         returnData();
 
         super.onBackPressed();
@@ -171,6 +158,7 @@ public class MapStoreLayerListActivity extends SherlockListActivity {
     private void returnData() {
         Intent mIntent = new Intent();
         Bundle bundle = new Bundle();
+        //reverse the list to return the layers in the correct order
         Collections.reverse(mapStoreConfig.map.layers);
         bundle.putSerializable(MapsActivity.MAPSTORE_CONFIG	, mapStoreConfig) ;
         mIntent.putExtras(bundle);

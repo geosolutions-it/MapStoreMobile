@@ -29,6 +29,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.mapsforge.android.maps.Projection;
 import org.mapsforge.core.model.BoundingBox;
 
 import android.graphics.Bitmap;
@@ -37,15 +38,14 @@ import android.graphics.Canvas;
 import android.util.Log;
 
 /**
- * A Renderer for wms services that renders 
- * @author Admin
+ * A Simple renderer that draws maps  
+ * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
  *
  */
-
-public  class WMSUntiledRenderer implements WMSRenderer {
+public  class WMSUntiledRenderer implements WMSRenderer{
 	ArrayList<WMSRequest> requests;
+	private ArrayList layers;
 	
-	//public ArrayList<WMSLayer> layers =new ArrayList<WMSLayer>();
 	public void render(Canvas c, BoundingBox boundingBox, byte zoomLevel){
 		if(requests ==null){
 			Log.d("WMS","request is missing, draw skipped");
@@ -58,6 +58,11 @@ public  class WMSUntiledRenderer implements WMSRenderer {
 	    
 	}
 
+	/**
+	 * Draws the layers on the canvas from a WMS url
+	 * @param c
+	 * @param url
+	 */
 	private void draw(Canvas c, URL url) {
 		if(url == null) return; //TODO notify
 	    HttpURLConnection connection;
@@ -82,6 +87,12 @@ public  class WMSUntiledRenderer implements WMSRenderer {
 		}
 	}
 	
+	/**
+	 * Create the parameters for the current location and the default ones too
+	 * @param c the Canvas 
+	 * @param boundingBox
+	 * @return
+	 */
 	private HashMap<String,String> createParameters(Canvas c, BoundingBox boundingBox){
 		double n = boundingBox.maxLatitude;
         double w = boundingBox.minLongitude;
@@ -104,11 +115,28 @@ public  class WMSUntiledRenderer implements WMSRenderer {
 	    
 	}
 
+	@Override
+	public void setLayers(ArrayList layers) {
+		this.layers = layers;
+		refresh();
+		Log.v("WMS","request models created:"+ requests.size());
+
+	}
 
 	@Override
-	public void setLayers(ArrayList<WMSLayer> layers) {
-		requests = WMSLayerChunker.createChunkedRequests(layers);
-		Log.v("WMS","request models created:"+ requests.size());
-		
+	public void refresh() {
+		requests = WMSLayerChunker.createChunkedRequests(this.layers);
 	}
+
+	@Override
+	public ArrayList<WMSLayer> getLayers() {
+		// TODO Auto-generated method stub
+		return layers;
+	}
+
+	@Override
+	public void setProjection(Projection projection) {
+		//nothing to do projection object not needed here
+	}
+	
 }

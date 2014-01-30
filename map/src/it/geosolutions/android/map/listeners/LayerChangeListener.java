@@ -15,24 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.geosolutions.android.map.mapstore.model;
+package it.geosolutions.android.map.listeners;
 
-import java.io.Serializable;
-/**
- * Container for properties of a <MapStoreConfiguration> Layer
- * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
- *
- */
-public class MapStoreLayer implements Serializable{
-	public String source;
-	public String title;
-	public String group;
-	public String name;
-	public String format;
-	public String styles;
-	public String transparent;
-	public Boolean tiled ;
-	public Double ratio;
-	public Boolean visibility;
-	public Integer buffer;
+import it.geosolutions.android.map.model.Layer;
+
+import java.util.ArrayList;
+
+public interface LayerChangeListener {
+	void onSetLayers(ArrayList<Layer> layers);
+	void onLayerVisibilityChange(Layer layer);
 }

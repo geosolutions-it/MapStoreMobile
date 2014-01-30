@@ -40,13 +40,18 @@ public class WMSRequest {
 	
 
 	private ArrayList<WMSLayer> layers;
-	private HashMap<String,String> params = new HashMap<String,String>();
 	private HashMap<String, String> currentParams;
 	public class PARAMS{
 		public static final String STYLES = "styles";
 		public static final String CQL_FILTER = "cql_filter";
 		public static final String LAYERS = "layers";
 	}
+	
+	/**
+	 * create a request for the WMS source and 
+	 * @param source
+	 * @param layers
+	 */
 	public WMSRequest(WMSSource source,ArrayList<WMSLayer> layers) {
 		this.source = source;
 		this.layers = layers;

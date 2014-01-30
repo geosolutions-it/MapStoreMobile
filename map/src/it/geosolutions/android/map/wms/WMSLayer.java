@@ -17,17 +17,30 @@
  */
 package it.geosolutions.android.map.wms;
 
+import it.geosolutions.android.map.model.Layer;
+
 import java.util.HashMap;
 /**
  * Abstraction of WMSLayer 
  * @author  Lorenzo Natali (lorenzo.natali@geo-solutions.it) 
  */
-public class WMSLayer {
+public class WMSLayer implements Layer<WMSSource>{
 	/**
 	 * The name of the layer
 	 */
 	private String name;
-	
+	/**
+	 * The Source of the WMSLayer
+	 */
+	private WMSSource source;
+	/**
+	 * The group of the layer
+	 */
+	private String group;
+	/**
+	 * the visibility
+	 */
+	private boolean visibility =true;
 	/**
 	 * The title of the layer
 	 */
@@ -35,6 +48,17 @@ public class WMSLayer {
 	private String title;
 	
 	private boolean tiled = false;
+	
+	/**
+	 * Create a WMS layer getting the source and the layer name
+	 * @param source the <WMSSource> object that represents the WMS service
+	 * @param name the name of the layer in the WMS service
+	 */
+	public WMSLayer(WMSSource source, String name){
+		this.source = source;
+		this.name=name;
+	}
+	
 	public String getTitle() {
 		return title;
 	}
@@ -43,13 +67,21 @@ public class WMSLayer {
 		this.title = title;
 	}
 
+	/**
+	 * @return the group of the layer
+	 */
 	public String getGroup() {
 		return group;
 	}
 
+	/**
+	 * Set the group of the layer
+	 * @param group
+	 */
 	public void setGroup(String group) {
 		this.group = group;
 	}
+
 
 	public boolean isVisibility() {
 		return visibility;
@@ -59,21 +91,21 @@ public class WMSLayer {
 		this.visibility = visibility;
 	}
 
+	/**
+	 * @return a map of the base parameters for this layer
+	 */
 	public HashMap<String, String> getBaseParams() {
 		return baseParams;
 	}
 
+	/**
+	 * set the base parameters for this layer
+	 * @param baseParams
+	 */
 	public void setBaseParams(HashMap<String, String> baseParams) {
 		this.baseParams = baseParams;
 	}
-	/**
-	 * The Source of the WMSLayer
-	 */
-	private WMSSource source;
 	
-	private String group;
-	
-	private boolean visibility =true;
 	
 	/**
 	 * Parameters like style and cql_filter
@@ -81,32 +113,42 @@ public class WMSLayer {
 	public HashMap<String,String> baseParams;
 	
 	
-	
+	/**
+	 * set the layer name (to use in WMS services)
+	 * @param name
+	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	/**
+	 * get the Name of the layer
+	 * @return
+	 */
+	public String getName(){
+		return name;
 	}
 
 	public WMSSource getSource() {
 		return source;
 	}
+	
 	public void setSource(WMSSource source) {
 		this.source = source;
 	}
-	public WMSLayer(WMSSource source, String name){
-		this.source = source;
-		this.name=name;
-	}
-	public String getName(){
-		return name;
-	}
-
+	
+	/**
+	 * @return if the layer is tiled or not
+	 */
 	public boolean isTiled() {
 		return tiled;
 	}
 
+	/**
+	 * set the "tiled" parameter
+	 * @param tiled
+	 */
 	public void setTiled(boolean tiled) {
 		this.tiled = tiled;
 	}
-	
-	
 }

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.geosolutions.android.map.fragment;
+package it.geosolutions.android.map.overlay.switcher;
 
 import it.geosolutions.android.map.DataListActivity;
 import it.geosolutions.android.map.MapsActivity;
@@ -23,7 +23,7 @@ import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.geostore.activities.GeoStoreResourcesActivity;
 import it.geosolutions.android.map.listeners.OverlayChangeListener;
 import it.geosolutions.android.map.mapstore.activities.MapStoreLayerListActivity;
-import it.geosolutions.android.map.utils.OverlayManager;
+import it.geosolutions.android.map.overlay.managers.SimpleOverlayManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -39,7 +39,7 @@ import com.actionbarsherlock.app.SherlockFragment;
 
 /**
  * This fragment shows a view o the attributes of a single feature from a
- * feature passed as Extra
+ * feature passed as Extra. Is binded with The <SimpleOverlayManager> methods
  * 
  * @author Lorenzo Natali (www.geo-solutions.it)
  */
@@ -49,7 +49,7 @@ private CheckBox m;
 private CheckBox ms;
 private CheckBox d;
 private ImageButton msdet;
-OverlayManager om ;
+private SimpleOverlayManager om ;
 
 /**
  * Called only once
@@ -77,7 +77,7 @@ public View onCreateView(LayoutInflater inflater, ViewGroup container,
 @Override
 public void onViewCreated(View view, Bundle savedInstanceState) {
     final MapsActivity ac = (MapsActivity)getActivity(); 
-    om = ac.overlayManager;
+    om = (SimpleOverlayManager) ac.overlayManager;
 
     super.onViewCreated(view, savedInstanceState);
     // setup of the checkboxes
@@ -87,6 +87,8 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
     ms.setChecked(om.mapstoreActivated);
     m.setChecked(om.markerActivated);
     d.setChecked(om.spatialActivated);
+    
+    //Set the handlers of the buttons to show/hide the overlays on check/decheck
     ms.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 		
 		@Override
@@ -122,7 +124,7 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
 		@Override
 		public void onClick(View v) {
 			Intent i  = new Intent(ac,MapStoreLayerListActivity.class);
-			//TODO put mapstore config
+			//TODO put MapStore config
 			i.putExtra(MapsActivity.MAPSTORE_CONFIG	, om.getMapStoreConfig());
 			ac.startActivityForResult(i, MapsActivity.MAPSTORE_REQUEST_CODE);
 			
@@ -164,11 +166,6 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
 
 }
 
-@Override
-public void onActivityCreated(Bundle savedInstanceState) {
-    super.onActivityCreated(savedInstanceState);
-
-}
 /**
  * called on overlay visibility changes
  */

@@ -27,7 +27,6 @@ import it.geosolutions.android.map.control.MarkerControl;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
 import it.geosolutions.android.map.dto.MarkerDTO;
 import it.geosolutions.android.map.fragment.GenericMenuFragment;
-import it.geosolutions.android.map.fragment.OverlaySwitcherFragment;
 import it.geosolutions.android.map.geostore.activities.GeoStoreResourceDetailActivity;
 import it.geosolutions.android.map.geostore.activities.GeoStoreResourcesActivity;
 import it.geosolutions.android.map.geostore.model.Resource;
@@ -35,12 +34,18 @@ import it.geosolutions.android.map.mapstore.model.MapStoreConfiguration;
 import it.geosolutions.android.map.mapstore.utils.MapStoreUtils;
 import it.geosolutions.android.map.model.Attribute;
 import it.geosolutions.android.map.model.Feature;
+import it.geosolutions.android.map.model.Layer;
+import it.geosolutions.android.map.model.MSMMap;
 import it.geosolutions.android.map.overlay.MarkerOverlay;
 import it.geosolutions.android.map.overlay.items.DescribedMarker;
+import it.geosolutions.android.map.overlay.managers.MultiSourceOverlayManager;
+import it.geosolutions.android.map.overlay.managers.OverlayManager;
+import it.geosolutions.android.map.overlay.managers.SimpleOverlayManager;
+import it.geosolutions.android.map.overlay.switcher.LayerSwitcherFragment;
+import it.geosolutions.android.map.overlay.switcher.OverlaySwitcherFragment;
 import it.geosolutions.android.map.style.StyleManager;
 import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.android.map.utils.MarkerUtils;
-import it.geosolutions.android.map.utils.OverlayManager;
 import it.geosolutions.android.map.utils.SpatialDbUtils;
 import it.geosolutions.android.map.view.AdvancedMapView;
 
@@ -61,6 +66,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
@@ -73,13 +79,19 @@ import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 
 /**
- * This is an implementation of the custom view for the map component
+ * This is an implementation of the custom view for the map component.
+ * Allows to be started in 2 models:
+ *  * MODE_VIEW : does not allow to change the markers position
+ *  * MODE_EDIT : allow to change marker position and select a feature to use to replace current markers
+ *  
+ * 
  * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it) 
  * 
  * 
@@ -187,7 +199,8 @@ public class MapsActivity extends MapActivityBase {
 		//
 		//create overlay manager
 		boolean mapLoaded = initMap(savedInstanceState);
-		overlayManager= new OverlayManager(mapView);
+		MultiSourceOverlayManager layerManager =  new MultiSourceOverlayManager(mapView);
+		overlayManager=layerManager;
 		//setup slide menu(es)
 		setupDrawerLayout();
 		dbLoaded = initDb();
@@ -198,24 +211,17 @@ public class MapsActivity extends MapActivityBase {
 			this.finish();
 		}
 		
-		overlayManager.setMarkerOverlay(new MarkerOverlay());
-		if(savedInstanceState !=null){	
-			   overlayManager.restoreInstanceState(savedInstanceState);
-		}else{
-			overlayManager.setMarkerVisible();
-			overlayManager.setDataVisible();
-			//setup left drawer fragments
-			FragmentManager fManager = getSupportFragmentManager();
-	        OverlaySwitcherFragment osf = new OverlaySwitcherFragment();
-	        overlayManager.setOverlayChangeListener(osf);
-			FragmentTransaction fragmentTransaction = fManager.beginTransaction();
-			fragmentTransaction.add(R.id.left_drawer_container,osf);
-			GenericMenuFragment other = new GenericMenuFragment();
-			fragmentTransaction.add(R.id.left_drawer_container, other);
-			fragmentTransaction.commit();
-		}
+		
+		// 
+		// LEFT MENU INITIALIZATION
+		//
+		setupLeftMenu(savedInstanceState, layerManager);
+		
+		// CONTEXT MENU 
 		this.registerForContextMenu(mapView);
 		mapView.getMapScaleBar().setShowMapScaleBar(true);// TODO preferences;
+		
+		overlayManager.setMarkerOverlay(new MarkerOverlay());
 		createMarkers(savedInstanceState);
 		
 		String action = getIntent().getAction();
@@ -232,6 +238,42 @@ public class MapsActivity extends MapActivityBase {
 		
         
 
+	}
+
+	/**
+	 * Creates/Restore the layer switcher or restore the old one and add
+	 * all other menu 
+	 * @param savedInstanceState
+	 * @param layerManager
+	 */
+	private void setupLeftMenu(Bundle savedInstanceState,
+			MultiSourceOverlayManager layerManager) {
+		//work on fragment management
+		FragmentManager fManager = getSupportFragmentManager();
+		LayerSwitcherFragment osf;
+		if(savedInstanceState !=null){	
+			osf=  (LayerSwitcherFragment)fManager.findFragmentById(R.id.left_drawer_container);
+			if(osf == null){
+				Log.e("MAPSACTIVITY", "unable to restore layer switcher");
+			}
+			layerManager.setLayerChangeListener(osf);
+			layerManager.restoreInstanceState(savedInstanceState);
+			
+		}else{
+			
+			layerManager.defaultInit();
+			MSMMap map = SpatialDbUtils.mapFromDb();
+	        layerManager.loadMap(map);
+			//setup left drawer fragments
+	        osf =  new LayerSwitcherFragment();
+	        layerManager.setLayerChangeListener(osf);
+			FragmentTransaction fragmentTransaction = fManager.beginTransaction();
+			fragmentTransaction.add(R.id.left_drawer_container,osf);
+			GenericMenuFragment other = new GenericMenuFragment();
+			fragmentTransaction.add(R.id.left_drawer_container_bottom, other);
+			fragmentTransaction.commit();
+			
+		}
 	}
 	
 	/**
@@ -282,7 +324,7 @@ public class MapsActivity extends MapActivityBase {
 	 * Resume the state of:
 	 * 
 	 * * tile cache
-	 * * markers position (TODO)
+	 * * Controls
 	 */
 	@Override
 	protected void onResume() {
@@ -406,18 +448,9 @@ public class MapsActivity extends MapActivityBase {
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		int itemId = item.getItemId();
-		// Toggle selection
-		if (item.isChecked()) {
-			item.setChecked(false);
-		} else {
-			item.setChecked(true);
-		}
-		if (itemId == R.id.data || itemId == R.id.markers) { //TODO move this operation in another place
-			overlayManager.toggleOverlayVisibility(itemId, item.isChecked());
-			return true;
-	        
+		
 		//Drawer part
-        }else  if (item.getItemId() == android.R.id.home) {
+        if (item.getItemId() == android.R.id.home) {
 
             if (mDrawerLayout.isDrawerOpen(mDrawerList)) {
             	mDrawerLayout.closeDrawer(mDrawerList);
@@ -486,6 +519,10 @@ public class MapsActivity extends MapActivityBase {
 	
 	
 	// TODO move this initialization in a better place (config stuff)
+	/**
+	 * Initializes the database 
+	 * @return true if the initialization was successful
+	 */
 	private boolean initDb() {
 		// init styleManager
 		StyleManager.getInstance().init(this, MAP_DIR);
@@ -661,11 +698,19 @@ public class MapsActivity extends MapActivityBase {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if(requestCode == GetFeatureInfoLayerListActivity.BBOX_REQUEST && resultCode == RESULT_OK){
+			//the response can contain a feature to use to replace the current marker 
+			//on the map
 			manageMarkerSubstitutionAction(data);
 		}
+		
+		//controls can be refreshed getting the result of an intent, in this case
+		// each control knows wich intent he sent with their requestCode/resultCode
 		for(MapControl control : mapView.getControls()){
 			control.refreshControl(requestCode,resultCode, data);
 		}
+		
+		//manager mapstore configuration load 
+		//TODO: with the new interface this will load a map instead of the mapstoreconfig
 		if(data==null)return;
 		Bundle b = data.getExtras();
 		if(requestCode==DATAPROPERTIES_REQUEST_CODE){

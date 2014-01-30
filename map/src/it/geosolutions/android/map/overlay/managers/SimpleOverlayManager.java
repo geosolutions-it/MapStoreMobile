@@ -1,4 +1,21 @@
-package it.geosolutions.android.map.utils;
+/*
+ * GeoSolutions - MapstoreMobile - GeoSpatial Framework on Android based devices
+ * Copyright (C) 2013  GeoSolutions (www.geo-solutions.it)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package it.geosolutions.android.map.overlay.managers;
 
 import java.util.ArrayList;
 
@@ -7,10 +24,13 @@ import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.listeners.OverlayChangeListener;
 import it.geosolutions.android.map.mapstore.model.MapStoreConfiguration;
 import it.geosolutions.android.map.mapstore.utils.MapStoreUtils;
+import it.geosolutions.android.map.model.Layer;
 import it.geosolutions.android.map.overlay.MarkerOverlay;
 import it.geosolutions.android.map.overlay.SpatialiteOverlay;
 import it.geosolutions.android.map.overlay.WMSOverlay;
 import it.geosolutions.android.map.overlay.items.DescribedMarker;
+import it.geosolutions.android.map.overlay.switcher.OverlaySwitcherFragment;
+import it.geosolutions.android.map.utils.MarkerUtils;
 import it.geosolutions.android.map.view.AdvancedMapView;
 import it.geosolutions.android.map.wms.WMSLayer;
 
@@ -18,13 +38,14 @@ import org.mapsforge.android.maps.overlay.MyLocationOverlay;
 import org.mapsforge.android.maps.overlay.Overlay;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 /**
  * Manages overlays of the AdvancedMapView
  * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
  *
  */
-public class OverlayManager {
+public class SimpleOverlayManager implements OverlayManager {
 	 /** MARKERS_ENABLED_FLAG */
     private static final String MARKERS_ENABLED_FLAG = "markers";
     
@@ -33,20 +54,19 @@ public class OverlayManager {
     /** MAPSTORE_ENABLED_FLAG */
 	private static final String MAPSTORE_ENABLED_FLAG = "mapstore";
 	public static final String MAPSTORE_CONFIG = "MAPSTORE_CONFIG";
-
+	
 	//------------------------------------------------------
     //PUBLIC VARIABLES
     //------------------------------------------------------
     public MarkerOverlay markerOverlay;
     public SpatialiteOverlay spatialiteOverlay;
-    public AdvancedMapView mapView;
 	
 	public boolean markerActivated;
 	public boolean spatialActivated;
 	public boolean mapstoreActivated;
 	public WMSOverlay wmsOverlay;
 	private MapStoreConfiguration mapStoreConfig;
-	
+	private AdvancedMapView mapView;
 	/**
 	 * returns the <MapStoreConfiguration> for the WMSLayer
 	 * @return
@@ -72,6 +92,8 @@ public class OverlayManager {
 		public void onOverlayVisibilityChange(int id, boolean visibility) {}
 		
 	};
+
+
 	
 	/**
 	 * get the current <OverlayChangeListener>
@@ -94,13 +116,15 @@ public class OverlayManager {
 	 * it automatically binds to the mapView and initialize overlays
 	 * @param mapView
 	 */
-	public OverlayManager(AdvancedMapView mapView) {
+	public SimpleOverlayManager(AdvancedMapView mapView) {
+		this.mapView =mapView;
 		//add spatialite overlay
-		this.mapView = mapView;
 		mapView.setOverlayManger(this);
 		this.spatialiteOverlay = new SpatialiteOverlay();
 		spatialiteOverlay.setProjection(mapView.getProjection());
 		wmsOverlay = new WMSOverlay();
+		wmsOverlay.setProjection(mapView.getProjection());
+		setMarkerOverlay(new MarkerOverlay());
 	}
 	/**
 	 * Add/Remove the Overlay from the mapView if the
@@ -200,14 +224,14 @@ public class OverlayManager {
 		mapView.getOverlays().add(mapView.getOverlays().size(), overlay);
 		
 	}
-	public void removeOverlay(MyLocationOverlay overlay) {
+	public void removeOverlay(Overlay overlay) {
 		mapView.getOverlays().remove(overlay);	
 	}
-	public void addWMSLayers(ArrayList<WMSLayer> layers){
+	public void addWMSLayers(ArrayList<Layer> arrayList){
 		if(wmsOverlay == null){
 			wmsOverlay=new WMSOverlay();
 		}
-		wmsOverlay.setLayers(layers);
+		wmsOverlay.setLayers((ArrayList<WMSLayer>)(ArrayList) arrayList);
 		toggleOverlayVisibility(R.id.mapstore, true);
 		Log.v("WMS","TOTAL LAYERS:" + wmsOverlay.getLayers().size());
 	}
@@ -255,6 +279,14 @@ public class OverlayManager {
      	loadMapStoreConfig((MapStoreConfiguration) savedInstanceState.getSerializable(MAPSTORE_CONFIG));
 		toggleOverlayVisibility(R.id.mapstore,savedInstanceState.getBoolean(MAPSTORE_ENABLED_FLAG,false) );
 	}
+
+	public void defaultInit() {		
+		
+		setMarkerVisible();
+		setDataVisible();
+		
+	}
+
 	
 	
 }

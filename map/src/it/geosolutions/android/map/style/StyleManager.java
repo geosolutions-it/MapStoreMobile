@@ -40,9 +40,9 @@ public class StyleManager{
 	private static StyleManager styleManager = null;
 	private StyleObjectProvider styles = new StyleObjectProvider();
 
-	private Map<String,AdvancedStyle> styleCache;
-	private HashMap<String, Paint> fillPaints = new HashMap<String, Paint>();
-    private HashMap<String, Paint> strokePaints = new HashMap<String, Paint>();
+	private  Map<String,AdvancedStyle> styleCache;
+	private static HashMap<String, Paint> fillPaints = new HashMap<String, Paint>();
+    private static HashMap<String, Paint> strokePaints = new HashMap<String, Paint>();
 	private StyleManager() {
 		styleCache = new HashMap<String,AdvancedStyle>();
     }
@@ -88,7 +88,7 @@ public class StyleManager{
      * @param name the name of the style
      * @return
      */
-    public AdvancedStyle getStyle(String name){
+    public  AdvancedStyle getStyle(String name){
  
     	if(styleCache.containsKey(name)){
 //    		Log.d("STYLE","style "+name+" in the cache");
@@ -107,7 +107,7 @@ public class StyleManager{
      * @param style
      * @return
      */
-    public Paint getFillPaint4Style( Style style ) {
+    public static Paint getFillPaint4Style( Style style ) {
         Paint paint = fillPaints.get(style.name);
         if (paint == null) {
             paint = new Paint();
@@ -120,7 +120,7 @@ public class StyleManager{
         float alpha = style.fillalpha * 255f;
         paint.setAlpha((int) alpha);
         
-        AdvancedStyle fill_style = getStyle(style.name);
+        AdvancedStyle fill_style = StyleManager.getInstance().getStyle(style.name);
         if(fill_style.dashed)
  	    	paint.setPathEffect(new DashPathEffect(new float[]{15f,10f}, 0));
         
@@ -132,7 +132,7 @@ public class StyleManager{
      * @param style
      * @return
      */
-    public Paint getStrokePaint4Style( Style style ) {
+    public static Paint getStrokePaint4Style( Style style ) {
         Paint paint = strokePaints.get(style.name);
         if (paint == null) {
             paint = new Paint();
@@ -148,7 +148,7 @@ public class StyleManager{
         paint.setAlpha((int) alpha);
         paint.setStrokeWidth(style.width);
         
-        AdvancedStyle stroke_style = getStyle(style.name);
+        AdvancedStyle stroke_style = StyleManager.getInstance().getStyle(style.name);
         if(stroke_style.dashed) //Check if the dash is enabled
         	paint.setPathEffect(new DashPathEffect(new float[]{15f,10f}, 0));
 

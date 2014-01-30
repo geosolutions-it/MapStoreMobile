@@ -1,4 +1,3 @@
-package it.geosolutions.android.map.database;
 /*
  * GeoSolutions Android map Library - Digital field mapping on Android based devices
  * Copyright (C) 2013  GeoSolutions (www.geo-solutions.it)
@@ -16,6 +15,8 @@ package it.geosolutions.android.map.database;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package it.geosolutions.android.map.database;
+
 import it.geosolutions.android.map.database.spatialite.SpatialiteDataSourceHandler;
 import it.geosolutions.android.map.style.StyleManager;
 import it.geosolutions.android.map.utils.Coordinates_Query;

@@ -13,20 +13,16 @@
         </FrameLayout>
     
     <!-- The navigation drawer -->
-    <ScrollView android:id="@+id/left_drawer"
+    <RelativeLayout android:id="@+id/left_drawer"
         android:orientation="vertical"
         android:layout_width="240dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:background="#C111">
-        <LinearLayout android:id="@+id/left_drawer_container"
-            android:orientation="vertical"
-			android:layout_width="match_parent"
-        	android:layout_height="wrap_content"
-             />
-            
         
-        </ScrollView>
+       <include layout="@layout/left_drawer"/>
+        
+     </RelativeLayout>
     
     <!-- Not Used Yet - make the right_drawer visible  in map.xml to allow display this item 
          and set the visibility to visible in the Following oblect

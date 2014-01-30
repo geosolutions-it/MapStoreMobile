@@ -19,6 +19,9 @@ package it.geosolutions.android.map.utils;
 import it.geosolutions.android.map.database.SpatialDataSourceHandler;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
 import it.geosolutions.android.map.model.Feature;
+import it.geosolutions.android.map.model.MSMMap;
+import it.geosolutions.android.map.spatialite.SpatialiteLayer;
+import it.geosolutions.android.map.spatialite.SpatialiteSource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +35,7 @@ import android.util.Log;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.ParseException;
 
+import eu.geopaparazzi.spatialite.database.spatial.core.ISpatialDatabaseHandler;
 import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
 
 /**
@@ -186,5 +190,48 @@ public static GeoPoint getGeopointFromLayer( String attributeName, String attrib
         }
     }
     return null;
+}
+
+/**
+ * Creates a <MSMMap> getting the whole database configuration.
+ * This should be changed once the db are loaded as sources 
+ * @return
+ */
+public static MSMMap mapFromDb(){
+	MSMMap m = new MSMMap();
+	try {
+		List<ISpatialDatabaseHandler> handlers = SpatialDataSourceManager.getInstance().getSpatialDatabaseHandlers();
+		SpatialDataSourceManager.getInstance().getSpatialVectorTables(true);
+		
+		
+		for(ISpatialDatabaseHandler h : handlers){
+			List<SpatialVectorTable> tables =  h.getSpatialVectorTables(true);
+			SpatialiteSource s = null;
+			//inspect and create the source
+			if(tables.size()>0){
+				SpatialDataSourceHandler dsm = SpatialDataSourceManager.getInstance().getSpatialDataSourceHandler(tables.get(0));
+				if(dsm != null){
+					s = new SpatialiteSource(dsm);
+					Log.v("SpatialiteDBload","Created source from datasource"+s.getTitle());
+				}else{
+					s = new SpatialiteSource(h);
+				}
+			}else{
+				s = new SpatialiteSource(h);
+			}
+			
+			//add the source to the layers that has the same handler source
+			for (SpatialVectorTable t : tables) {
+				SpatialiteLayer l = new SpatialiteLayer(t);
+				l.setSource(s);
+				m.layers.add(l);
+			}
+		}
+	} catch (Exception e) {
+		// TODO Auto-generated catch block
+		Log.e("Spatialite","error retrieving spatial vector tables");
+		return m;
+	}
+	return m;
 }
 }

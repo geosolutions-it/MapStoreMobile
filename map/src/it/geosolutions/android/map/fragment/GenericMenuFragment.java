@@ -23,8 +23,8 @@ import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.geostore.activities.GeoStoreResourcesActivity;
 import it.geosolutions.android.map.listeners.OverlayChangeListener;
 import it.geosolutions.android.map.mapstore.activities.MapStoreLayerListActivity;
+import it.geosolutions.android.map.overlay.managers.SimpleOverlayManager;
 import it.geosolutions.android.map.preferences.EditPreferences;
-import it.geosolutions.android.map.utils.OverlayManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -40,7 +40,8 @@ import android.widget.ImageButton;
 import com.actionbarsherlock.app.SherlockFragment;
 
 /**
- * This fragment shows a view o the attributes of a single feature from a
+ * This fragment shows a some menu options
+ * For now it contains only the Settings view
  * feature passed as Extra
  * 
  * @author Lorenzo Natali (www.geo-solutions.it)
@@ -50,7 +51,7 @@ public class GenericMenuFragment extends SherlockFragment{
 
 
 /**
- * Called only once
+ * Called only once. The instance is automatically retained
  */
 @Override
 public void onCreate(Bundle savedInstanceState) {
@@ -74,9 +75,9 @@ public View onCreateView(LayoutInflater inflater, ViewGroup container,
  */
 @Override
 public void onViewCreated(View view, Bundle savedInstanceState) {
-    
+    //add the setting view click listener to open the settings activity
 	View t = (View)view.findViewById(R.id.settings);
-   t.setOnClickListener(new OnClickListener() {
+	t.setOnClickListener(new OnClickListener() {
 	
 		@Override
 		public void onClick(View v) {

@@ -1,3 +1,20 @@
+/*
+ * GeoSolutions Android map Library - Digital field mapping on Android based devices
+ * Copyright (C) 2013  GeoSolutions (www.geo-solutions.it)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package it.geosolutions.android.map.mapstore.utils;
 
 import it.geosolutions.android.map.MapsActivity;
@@ -6,6 +23,7 @@ import it.geosolutions.android.map.geostore.utils.GeoStoreClient;
 import it.geosolutions.android.map.mapstore.model.MapStoreConfiguration;
 import it.geosolutions.android.map.mapstore.model.MapStoreLayer;
 import it.geosolutions.android.map.mapstore.model.MapStoreSource;
+import it.geosolutions.android.map.model.Layer;
 import it.geosolutions.android.map.utils.ProjectionUtils;
 import it.geosolutions.android.map.wms.WMSLayer;
 import it.geosolutions.android.map.wms.WMSSource;
@@ -55,6 +73,7 @@ public class MapStoreUtils {
 				String configString = client.getData(id);
 				MapStoreConfiguration ctnrl = null;
 				try{
+					//try to parse the downloaded MapStore Configuration
 					Gson gson = new GsonBuilder().create();
 					ctnrl = gson.fromJson(configString, MapStoreConfiguration.class);
 					//check "data" object if sources and map field are null)
@@ -68,10 +87,10 @@ public class MapStoreUtils {
 					}
 				}catch(IllegalStateException e){
 					Log.e("MapStore","Unable to parse response");
-					//Toast.makeText(mapsActivity, "ERROR PARSING MAPSTOREMAP", Toast.LENGTH_LONG).show();
+					//TODO Toast.makeText(mapsActivity, "ERROR PARSING MAPSTOREMAP", Toast.LENGTH_LONG).show();
 				}catch(JsonSyntaxException e){
 					Log.e("MapStore","Unable to parse response");
-					//Toast.makeText(mapsActivity, "ERROR PARSING MAPSTOREMAP", Toast.LENGTH_LONG).show();
+					//TODO Toast.makeText(mapsActivity, "ERROR PARSING MAPSTOREMAP", Toast.LENGTH_LONG).show();
 				}
 				return ctnrl;
 			}
@@ -79,6 +98,7 @@ public class MapStoreUtils {
 			@Override
 			protected void onPostExecute(MapStoreConfiguration result) {
 				Log.d("MapStore",result.toString());
+				//call the loadMapStore config on the Activity
 				mapsActivity.overlayManager.loadMapStoreConfig(result);
 				GeoPoint p = getPoint(result);
 				if(p!=null){
@@ -125,8 +145,8 @@ public class MapStoreUtils {
 	 * @param result
 	 * @return
 	 */
-	public static ArrayList<WMSLayer>  buildWMSLayers(MapStoreConfiguration result) {
-		ArrayList<WMSLayer> layers = new ArrayList<WMSLayer>();
+	public static ArrayList<Layer>  buildWMSLayers(MapStoreConfiguration result) {
+		ArrayList<Layer> layers = new ArrayList<Layer>();
 		if(result != null){
 			HashMap<String,WMSSource> sources= new HashMap<String,WMSSource>();
 			if(result.sources==null) return layers;

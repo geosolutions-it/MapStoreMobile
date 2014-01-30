@@ -15,24 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.geosolutions.android.map.mapstore.model;
+package it.geosolutions.android.map.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+
 /**
- * Container for properties of a <MapStoreConfiguration> Layer
+ * Base container for a MapStoreMobile Map.
+ * Contain the layers, a name and a description
  * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
  *
  */
-public class MapStoreLayer implements Serializable{
-	public String source;
-	public String title;
-	public String group;
+public class MSMMap implements Serializable{
+	public int id=0;
 	public String name;
-	public String format;
-	public String styles;
-	public String transparent;
-	public Boolean tiled ;
-	public Double ratio;
-	public Boolean visibility;
-	public Integer buffer;
+	public String description;
+	public ArrayList<Layer> layers = new ArrayList<Layer>();
 }

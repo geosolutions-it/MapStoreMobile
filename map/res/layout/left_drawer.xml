@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+    
+     <LinearLayout android:id="@+id/left_drawer_container_bottom"
+            android:orientation="vertical"
+			android:layout_width="match_parent"
+        	android:layout_height="wrap_content"
+			android:layout_alignParentBottom="true"
+
+		/>
+        <LinearLayout android:id="@+id/left_drawer_container"
+            android:orientation="vertical"
+			android:layout_width="match_parent"
+        	android:layout_height="wrap_content"
+        	android:layout_alignParentTop="true"
+        	android:layout_above="@id/left_drawer_container_bottom"
+             />
+       
+</merge>

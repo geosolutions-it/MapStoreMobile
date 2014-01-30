@@ -21,18 +21,18 @@ import it.geosolutions.android.map.MapsActivity;
 import it.geosolutions.android.map.control.MapControl;
 import it.geosolutions.android.map.overlay.FreezableOverlay;
 import it.geosolutions.android.map.overlay.MarkerOverlay;
-import it.geosolutions.android.map.utils.OverlayManager;
+import it.geosolutions.android.map.overlay.managers.OverlayManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.overlay.Overlay;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.MotionEvent;
 /**
  * This class extends the <MapView> adding the management of the <MapControl> objects.
@@ -178,14 +178,12 @@ public class AdvancedMapView extends MapView {
 
 	@Override
 	protected void loadStart() {
-		Log.v("MapView","Redraw start");
 		if(activity!=null){
 			activity.setSupportProgressBarIndeterminateVisibility(true);
 		}
 	}
 	@Override
 	protected void loadStop() {
-		Log.v("MapView","Redraw stop");
 		if(activity!=null){
 			
 			activity.setSupportProgressBarIndeterminateVisibility(false);
