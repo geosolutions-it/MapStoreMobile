@@ -10,7 +10,9 @@ import it.geosolutions.android.map.geostore.model.ResourceList;
 import it.geosolutions.android.map.geostore.model.SearchResult;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -61,6 +63,12 @@ public class GeoStoreClient {
 
 	public List<Resource> searchResources(String s,int start,int limit) {
 		HttpClient httpclient = new DefaultHttpClient();
+		try {
+			s = URLEncoder.encode(s,"utf-8");
+		} catch (UnsupportedEncodingException e1) {
+			Log.e("GeoStore","unable to encode search text\n" + e1.getStackTrace());
+			return new ArrayList<Resource>();
+		}
 		String req = url + "extjs/search/*"+s+"*?start="+start+"&limit="+limit;
 		Log.v("GeoStore","request_url:"+req);
 		HttpGet get = new HttpGet(req);
