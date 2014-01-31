@@ -49,11 +49,11 @@ public class LinesDataPropertiesActivity extends BaseStyleActivity {
     protected Spinner dashSpinner;
     private TextView colorStroke;
     private Integer colorSelStroke;
+    private String[] array; 
 
     public void onCreate( Bundle icicle ) {
         super.onCreate(icicle);
 
-        //colorSelStroke = 0xff000000; 
         setContentView(R.layout.data_line_properties);
         final AdvancedStyle style = getStyle();
         setBaseStyleProperties(style);
@@ -97,17 +97,15 @@ public class LinesDataPropertiesActivity extends BaseStyleActivity {
         decimationText = (EditText) findViewById(R.id.decimation_text);
         decimationText.setText(decimation);
         
-        String dash = String.valueOf(style.dashed);
-        if(dash.equals("true")) dash = "Ok";
-        else dash = "No";
-        dashSpinner = (Spinner) findViewById(R.id.dash_spinner);
-        count = dashSpinner.getCount();
-        for( int i = 0; i < count; i++ ) {
-            if (dashSpinner.getItemAtPosition(i).equals(dash)) {
-                dashSpinner.setSelection(i);
-                break;
-            }
-        }
+        boolean dashed = style.dashed;
+        array = this.getResources().getStringArray(R.array.array_dashes);
+       
+        dashSpinner = (Spinner) findViewById(R.id.dash_spinner);        
+        if (dashSpinner.getItemAtPosition(0).equals(array[0]) && !dashed)
+            dashSpinner.setSelection(0);
+        else
+        	dashSpinner.setSelection(1);
+      
     }
 
     @Override
@@ -157,9 +155,8 @@ public class LinesDataPropertiesActivity extends BaseStyleActivity {
         }
         style.decimationFactor = decimation;
         
-        String dash = (String) dashSpinner.getSelectedItem();
-        String[] array = this.getResources().getStringArray(R.array.array_dashes);
-    	if(dash.equals(array[1]))
+        String dashed = (String) dashSpinner.getSelectedItem();
+    	if(dashed.equals(array[1]))
     		style.dashed = true;
     	else
     		style.dashed = false;
