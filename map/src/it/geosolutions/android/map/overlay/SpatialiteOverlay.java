@@ -19,6 +19,7 @@ package it.geosolutions.android.map.overlay;
 
 import it.geosolutions.android.map.style.AdvancedStyle;
 import it.geosolutions.android.map.style.StyleManager;
+import it.geosolutions.android.map.utils.ProjectionUtils;
 import it.geosolutions.android.map.utils.StyleUtils;
 
 import java.util.List;
@@ -108,9 +109,10 @@ public  class SpatialiteOverlay implements Overlay,FreezableOverlay {
 	//replaces the argument
         GeoPoint dp = new GeoPoint(n, w); //ULC
 
-	        long drawX =  (long) MercatorProjection.longitudeToPixelX(dp.longitude, drawZoomLevel);
-	        long drawY =  (long) MercatorProjection.latitudeToPixelY(dp.latitude, drawZoomLevel);
-		//projection.toPoint(dp, drawPosition,drawZoomLevel);
+	    //get draw point   
+        long[] pxDp= ProjectionUtils.getDrawPoint(dp, projection, drawZoomLevel);
+        long drawX = pxDp[0];
+        long drawY= pxDp[1];
 
 		
 

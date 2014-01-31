@@ -69,6 +69,7 @@ public  class MultiSourceOverlay implements Overlay,FreezableOverlay {
 
 	public void setProjection(Projection projection) {
 		this.projection = projection;
+		this.renderer.setProjection(projection);
 	}
 
     @Override

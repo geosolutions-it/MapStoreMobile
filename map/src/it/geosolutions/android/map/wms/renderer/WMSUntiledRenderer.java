@@ -31,6 +31,7 @@ import java.util.HashMap;
 
 import org.mapsforge.android.maps.Projection;
 import org.mapsforge.core.model.BoundingBox;
+import org.mapsforge.core.model.GeoPoint;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -45,6 +46,7 @@ import android.util.Log;
 public  class WMSUntiledRenderer implements WMSRenderer{
 	ArrayList<WMSRequest> requests;
 	private ArrayList layers;
+	private Projection projection;
 	
 	public void render(Canvas c, BoundingBox boundingBox, byte zoomLevel){
 		if(requests ==null){
@@ -53,7 +55,8 @@ public  class WMSUntiledRenderer implements WMSRenderer{
 		}
 	
 		for(WMSRequest r :requests){
-			draw(c, r.getURL(createParameters(c,boundingBox)));
+			URL url = r.getURL(createParameters(c,boundingBox,zoomLevel));
+			draw(c,url,boundingBox,zoomLevel);
 		}
 	    
 	}
@@ -62,8 +65,10 @@ public  class WMSUntiledRenderer implements WMSRenderer{
 	 * Draws the layers on the canvas from a WMS url
 	 * @param c
 	 * @param url
+	 * @param zoomLevel 
+	 * @param boundingBox 
 	 */
-	private void draw(Canvas c, URL url) {
+	private void draw(Canvas c, URL url, BoundingBox boundingBox, byte zoomLevel) {
 		if(url == null) return; //TODO notify
 	    HttpURLConnection connection;
 		try {
@@ -78,7 +83,9 @@ public  class WMSUntiledRenderer implements WMSRenderer{
 			Bitmap img = BitmapFactory.decodeStream(is); 
 			if(img!=null){
 				Log.v("WMS","Map Updated");
-				c.drawBitmap(img, 0, 0, null);
+				long[] pxDp= ProjectionUtils.getMapLeftTopPoint(projection);
+				Log.v("WMS","Draw point:"+pxDp[0]+","+pxDp[1]);
+				c.drawBitmap(img, pxDp[0] >0 ?  pxDp[0] : 0 , pxDp[1] >0 ?  pxDp[1] : 0, null);
 			}else {
 				Log.e("WMS","null image from the request");
 			}
@@ -91,9 +98,10 @@ public  class WMSUntiledRenderer implements WMSRenderer{
 	 * Create the parameters for the current location and the default ones too
 	 * @param c the Canvas 
 	 * @param boundingBox
+	 * @param zoomLevel 
 	 * @return
 	 */
-	private HashMap<String,String> createParameters(Canvas c, BoundingBox boundingBox){
+	private HashMap<String,String> createParameters(Canvas c, BoundingBox boundingBox, byte zoomLevel){
 		double n = boundingBox.maxLatitude;
         double w = boundingBox.minLongitude;
         double s = boundingBox.minLatitude;
@@ -103,13 +111,23 @@ public  class WMSUntiledRenderer implements WMSRenderer{
         double sm =ProjectionUtils.toWebMercatorY(s);
 	    double em = ProjectionUtils.toWebMercatorX(e);
 	    HashMap<String,String> params = new HashMap<String,String>();
+	    //picture size
+	    
+	    synchronized (projection) {
+		    long[] pictureSize = ProjectionUtils.calculateMapSize(c.getWidth(), c.getHeight(), projection);
+		    params.put("width",(pictureSize[0])+"");
+		    params.put("height",(pictureSize[1])+"");
+		    Log.v("WMS","Picture Size:"+pictureSize[0]+","+pictureSize[1]);
+	    };
+	    //Log.v("WMSRenderer","request bbox:"+w+","+s+""+e +","+n);
+	    
 	    params.put("bbox", wm + "," + sm + "," + em + "," + nm);
 	    params.put("service","WMS");
 	    params.put("srs","EPSG:900913");
 	    params.put("request","GetMap");
 	    params.put("version","1.1.1");
-	    params.put("width",c.getWidth()+"");
-	    params.put("height",c.getHeight()+"");
+
+	    
 	    
 	    return params;
 	    
@@ -136,7 +154,7 @@ public  class WMSUntiledRenderer implements WMSRenderer{
 
 	@Override
 	public void setProjection(Projection projection) {
-		//nothing to do projection object not needed here
+		this.projection = projection;
 	}
 	
 }

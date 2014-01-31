@@ -17,7 +17,12 @@
  */
 package it.geosolutions.android.map.utils;
 
+import org.mapsforge.android.maps.Projection;
+import org.mapsforge.core.model.GeoPoint;
 import org.mapsforge.core.util.MercatorProjection;
+
+import android.graphics.Point;
+import android.util.Log;
 
 /**
  * Utility Class to convert WebMercator and Geographic coordinates
@@ -86,5 +91,95 @@ public class ProjectionUtils {
 	    }
 	    double a = lat * 0.017453292519943295;
 	    return 3189068.5 * Math.log((1.0 + Math.sin(a)) / (1.0 - Math.sin(a)));
+	}
+	
+	/**
+	 * Gets the left-up corner and returns the point on the canvas to draw to
+	 * @param dp the top left corner of the map
+	 * @param projection the mapview projection
+	 * @param drawZoomLevel the current zoom level
+	 * @return array of pixels [x,y]
+	 */
+	public static long[] getDrawPoint(GeoPoint dp, Projection projection, byte drawZoomLevel){
+		long drawX = (long) MercatorProjection.longitudeToPixelX(dp.longitude,
+				drawZoomLevel);
+		long drawY = (long) MercatorProjection.latitudeToPixelY(dp.latitude,
+				drawZoomLevel);
+		Point p = new Point(0,0);
+        projection.toPixels(new GeoPoint(MercatorProjection.LATITUDE_MAX,-180), p);
+
+        if(p.x >0){
+        	drawX -=p.x;
+        }
+        if(p.y>0){
+        	drawY-=p.y;
+        }
+    	return new long[]{drawX,drawY};
+	}
+
+	/**
+	 * Returns the point on the mapView of the top left point of the Mercator Left top
+	 * @param projection
+	 * @param zoomLevel
+	 * @return 
+	 */
+	public static long[] getMapLeftTopPoint(Projection projection) {
+		Point p = new Point(0,0);
+        projection.toPixels(new GeoPoint(MercatorProjection.LATITUDE_MAX,-180), p);
+    	return new long[]{p.x,p.y};
+	
+		
+	}
+	
+	/**
+	 * Returns the point on the mapView of the bottom point of the Mercator bottom right
+	 * @param projection
+	 * @param zoomLevel
+	 * @return 
+	 */
+	public static long[] getMapRightBottom(Projection projection){
+		Point p = new Point(0,0);
+		projection.toPixels(new GeoPoint(MercatorProjection.LATITUDE_MIN,180), p);
+		return new long[]{p.x,p.y};
+	}
+	
+	/**
+	 * Calulate the size of a WMS request getting proper width/height from the projection
+	 * @param width
+	 * @param height
+	 * @param projection
+	 * @return
+	 */
+	public static long[] calculateMapSize(long width,long height,Projection projection){
+		long[] lt = getMapLeftTopPoint(projection);
+		long[] rb = getMapRightBottom(projection);
+	    Log.v("WMS","Left-top:"+lt[0]+","+lt[1]);
+	    Log.v("WMS","Right-bottom:"+rb[0]+","+rb[1]);
+
+		long[] out =new long[2];
+		if(rb[0] < width){
+			width = rb[0]; 
+			Log.v("WMS","Width:"+width);
+		}
+		if(lt[0] > 0){
+			out[0] = width -lt[0];
+		}else{
+			out[0] = width;
+		}
+		Log.v("WMS","Width:"+width);
+		if(rb[1] < height){
+			height = rb[1]; 
+			Log.v("WMS","height:"+height);
+		}
+		if(lt[1] > 0){
+			out[1] = height -lt[1];
+		}else{
+			out[1] = height;
+		}
+		Log.v("WMS","height:"+height);
+		return out;
+		
+		
+		
 	}
 }

@@ -104,6 +104,7 @@ public class MultiSourceOverlayManager implements OverlayManager {
 		this.spatialiteOverlay = new SpatialiteOverlay();
 		spatialiteOverlay.setProjection(mapView.getProjection());
 		layerOverlay = new MultiSourceOverlay();
+		layerOverlay.setProjection(mapView.getProjection());
 		setMarkerOverlay(new MarkerOverlay());
 	}
 
