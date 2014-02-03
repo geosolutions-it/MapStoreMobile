@@ -21,6 +21,8 @@ import it.geosolutions.android.map.MapsActivity;
 import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.mapstore.model.MapStoreConfiguration;
 import it.geosolutions.android.map.mapstore.model.MapStoreLayer;
+import it.geosolutions.android.map.mapstore.model.MapStoreSource;
+import it.geosolutions.android.map.mapstore.utils.MapStoreUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -91,7 +93,18 @@ public class MapStoreLayerListActivity extends SherlockListActivity {
     private void refreshList( boolean doReread ) {
         
         final MapStoreLayerListActivity act =this;
-
+        ArrayList<MapStoreLayer> valid = new ArrayList<MapStoreLayer>();
+        
+        //the only valid layers to add are the WMS_Source's one
+        for(MapStoreLayer l : mapStoreConfig.map.layers){
+        	MapStoreSource s = mapStoreConfig.sources.get(l.source);
+        	if(l.source !=null && MapStoreUtils.isWMS(s, mapStoreConfig.defaultSourceType)){
+        		valid.add(l);
+        	}
+        }
+        //replace the current 
+        mapStoreConfig.map.layers = valid;
+        
     	ArrayAdapter<MapStoreLayer> arrayAdapter = new ArrayAdapter<MapStoreLayer>(this, R.layout.data_row,mapStoreConfig.map.layers){
             @Override
             public View getView( final int position, View cView, ViewGroup parent ) {
@@ -145,10 +158,10 @@ public class MapStoreLayerListActivity extends SherlockListActivity {
 		return false;
     }
     
-    @Override
+	@Override
     public void onBackPressed() {
-    	//return data also if back button is pressed
         super.onBackPressed();
+        overridePendingTransition(R.anim.in_from_left, R.anim.out_to_right);
     }
 
     /**

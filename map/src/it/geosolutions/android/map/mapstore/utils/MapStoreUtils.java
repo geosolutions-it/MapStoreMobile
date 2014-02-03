@@ -159,10 +159,11 @@ public class MapStoreUtils {
 	 * @param defaultSourceType if ptype is null, the default ptype should be the wms one. in this case the layer is wms by default.
 	 * @return
 	 */
-	private static boolean isWMS(MapStoreSource mss, String defaultSourceType) {
+	public static boolean isWMS(MapStoreSource mss, String defaultSourceType) {
 		boolean isWMS =WMS_PTYPE.equals(mss.ptype) || (mss.ptype == null && WMS_PTYPE.equals(defaultSourceType));
 		return isWMS;
 	}
+	
 	/**
 	 * Put the proper layer configurations from a MapStore's one. Get the <WMSSource> from the map passed as parameter and
 	 * create the <WMSLayer> using it.

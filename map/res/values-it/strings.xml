@@ -36,4 +36,6 @@
 	<string name="details">Dettagli</string>
 	<string name="available_maps">Mappe Disponibili</string>
 	<string name="map_details">Dettagli Mappa</string>
+	<string name="empty_layers">Nessun layer compatibile in questa mappa</string>
+	
 </resources>
