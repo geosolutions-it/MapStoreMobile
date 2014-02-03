@@ -20,6 +20,7 @@ package it.geosolutions.android.map.geostore.activities;
 import java.util.ArrayList;
 
 import it.geosolutions.android.map.MapsActivity;
+import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.geostore.fragment.GeoStoreResourceDetailsFragment;
 import it.geosolutions.android.map.geostore.model.Resource;
 import it.geosolutions.android.map.mapstore.model.MapStoreConfiguration;
@@ -45,7 +46,7 @@ public class GeoStoreResourceDetailActivity extends SherlockFragmentActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-
+		overridePendingTransition(R.anim.in_from_right, R.anim.out_to_left);
 		super.onCreate(savedInstanceState);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		if (savedInstanceState == null) {
@@ -64,6 +65,7 @@ public class GeoStoreResourceDetailActivity extends SherlockFragmentActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == android.R.id.home) {
 			finish();
+			overridePendingTransition(R.anim.in_from_left, R.anim.out_to_right);
 		} 
 		return false;
 	}
@@ -94,7 +96,12 @@ public class GeoStoreResourceDetailActivity extends SherlockFragmentActivity {
 		
 		
 	}
-
+	
+	@Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.in_from_left, R.anim.out_to_right);
+    }
 	/**
 	 * @param layerToAdd
 	 */
@@ -105,6 +112,7 @@ public class GeoStoreResourceDetailActivity extends SherlockFragmentActivity {
         i.putExtras(bundle);
         setResult(RESULT_OK, i);
         finish();
+        overridePendingTransition(R.anim.in_from_left, R.anim.out_to_right);
 		
 		
 	}

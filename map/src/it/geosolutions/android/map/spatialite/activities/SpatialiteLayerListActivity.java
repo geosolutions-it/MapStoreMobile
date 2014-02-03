@@ -78,12 +78,18 @@ ImageView legend ;
 
 
 public class SpatialiteLayerListActivity extends SherlockListActivity {
+	public class PARAMS{
+		public static final String LAYERSTORE_NAME="LAYERSTORE_NAME";
+	}
     private List<SpatialVectorTable> spatialTables = new ArrayList<SpatialVectorTable>();;
 
     public void onCreate( Bundle icicle ) {
         super.onCreate(icicle);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        
+        overridePendingTransition(R.anim.in_from_right, R.anim.out_to_left);
+        //set title
+        String layerStoreName = getIntent().getStringExtra(PARAMS.LAYERSTORE_NAME);
+        setTitle(layerStoreName);
         setContentView(R.layout.spatialite_layer_list);
         //set the handler for the select layers button 
         Button selectLayers = (Button) findViewById(R.id.select_layers);
@@ -92,6 +98,7 @@ public class SpatialiteLayerListActivity extends SherlockListActivity {
 			@Override
 			public void onClick(View v) {
 				returnSelected();
+				overridePendingTransition(R.anim.in_from_left, R.anim.out_to_right);
 				
 			}
 		});
@@ -102,6 +109,7 @@ public class SpatialiteLayerListActivity extends SherlockListActivity {
 			@Override
 			public void onClick(View v) {
 				returnAll();
+				overridePendingTransition(R.anim.in_from_left, R.anim.out_to_right);
 				
 			}
 		});
@@ -201,6 +209,7 @@ public class SpatialiteLayerListActivity extends SherlockListActivity {
     	 switch (item.getItemId()) {
     	    case android.R.id.home:
     	      finish();
+    	      overridePendingTransition(R.anim.in_from_left, R.anim.out_to_right);
     	      break;
     	 }
 		return false;
@@ -209,6 +218,7 @@ public class SpatialiteLayerListActivity extends SherlockListActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        overridePendingTransition(R.anim.in_from_left, R.anim.out_to_right);
     }
 
     /**

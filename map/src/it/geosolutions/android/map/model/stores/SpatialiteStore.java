@@ -48,6 +48,7 @@ public class SpatialiteStore extends BaseLayerStore{
 	@Override
 	public void openDetails(Activity ac) {
 		Intent datalistIntent = new Intent(ac, SpatialiteLayerListActivity.class);
+		datalistIntent.putExtra(SpatialiteLayerListActivity.PARAMS.LAYERSTORE_NAME, getName());
 		ac.startActivityForResult(datalistIntent, MapsActivity.DATAPROPERTIES_REQUEST_CODE);
 		
 	}

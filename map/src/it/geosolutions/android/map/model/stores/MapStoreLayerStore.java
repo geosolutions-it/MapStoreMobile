@@ -54,6 +54,7 @@ public class MapStoreLayerStore extends BaseLayerStore {
 	public void openDetails(Activity ac) {
 		 Intent pref = new Intent(ac,GeoStoreResourcesActivity.class);
 		pref.putExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL,url);
+		pref.putExtra(GeoStoreResourcesActivity.PARAMS.LAYERSTORE_NAME,getName());
 		ac.startActivityForResult(pref, MapsActivity.MAPSTORE_REQUEST_CODE);
 		
 	}

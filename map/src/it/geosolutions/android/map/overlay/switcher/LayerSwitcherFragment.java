@@ -35,11 +35,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockListFragment;
 
@@ -91,6 +93,16 @@ public View onCreateView(LayoutInflater inflater, ViewGroup container,
     return inflater.inflate(R.layout.layer_switcher, container, false);
 }
 
+/* (non-Javadoc)
+	 * @see android.support.v4.app.Fragment#onResume()
+	 */
+	@Override
+	public void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		 getSherlockActivity().getSupportLoaderManager().initLoader(LOADER_INDEX, null, this);
+	}
+
 /*
  * (non-Javadoc)
  * @see android.support.v4.app.ListFragment#onViewCreated(android.view.View,
@@ -107,7 +119,6 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
 		@Override
 		public void onClick(View v) {
 		    Intent pref = new Intent(ac,BrowseSourcesActivity.class);
-			pref.putExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL,"http://mapstore.geo-solutions.it/geostore/rest/");
 		    ac.startActivityForResult(pref, MapsActivity.LAYER_ADD);
 		}
 	});
@@ -154,8 +165,13 @@ private void reload() {
 	if(adapter !=null){
 		adapter.clear();
 		//force reload
-		getSherlockActivity().getSupportLoaderManager().getLoader(LOADER_INDEX).forceLoad();
-
+		Loader l = getSherlockActivity().getSupportLoaderManager().getLoader(LOADER_INDEX);
+		if(l!=null){
+			l.forceLoad();
+		}else{
+			Log.e("LAYER_SWITCHER", "Unable to reload layers");
+		}
+		
 	}
 	
 }

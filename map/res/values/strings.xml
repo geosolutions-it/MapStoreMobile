@@ -29,10 +29,11 @@
 	<string name="progress_dialog_title">Wait please</string>
 	<string name="progress_dialog_message">Download data</string>
 	<string name="progress_dialog_unzipping">Unzipping ongoing</string>
-	<string name="url_data_test_archive">http://demo.geo-solutions.it/share/mapstoremobile/MapStoreMobile-test-data.zip</string>
 	<string name="next">Next</string>
 	<string name="previous">Previous</string>
 	<string name="other">Other</string>
 	<string name="edit">Edit</string>
 	<string name="details">Details</string>
+	<string name="available_maps">Available Maps</string>
+	<string name="map_details">Map Details</string>
 </resources>

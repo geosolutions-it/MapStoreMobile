@@ -119,6 +119,7 @@ public View onCreateView(LayoutInflater inflater, ViewGroup container,
 						//TODO put MapStore config
 						i.putExtra(MapsActivity.MAPSTORE_CONFIG	,result);
 						startActivityForResult(i, MapsActivity.MAPSTORE_REQUEST_CODE);
+						getSherlockActivity().overridePendingTransition(R.anim.in_from_right, R.anim.out_to_left);
 					}
 				};
 				task.execute("");

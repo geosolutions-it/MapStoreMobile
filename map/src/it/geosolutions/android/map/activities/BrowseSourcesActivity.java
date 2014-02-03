@@ -85,6 +85,12 @@ public class BrowseSourcesActivity extends SherlockFragmentActivity {
 		}
 		return false;
 	}
+	
+	@Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.in_from_left, R.anim.out_to_right);
+    }
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if( RESULT_OK == resultCode ){

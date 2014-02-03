@@ -17,7 +17,9 @@
  */
 package it.geosolutions.android.map.geostore.activities;
 
+import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.geostore.fragment.GeoStoreResourceListFragment;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -35,6 +37,7 @@ import com.actionbarsherlock.view.Window;
 public class GeoStoreResourcesActivity extends SherlockFragmentActivity {
 	public class PARAMS {
 		public static final String GEOSTORE_URL = "geostore_url";
+		public static final String LAYERSTORE_NAME = "LAYERSTORE_NAME";
 	}
 
 	public static final int GET_MAP_CONFIG = 0;
@@ -43,9 +46,13 @@ public class GeoStoreResourcesActivity extends SherlockFragmentActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-
+		overridePendingTransition(R.anim.in_from_right, R.anim.out_to_left);
+		//set title
+		String layerStoreName = getIntent().getExtras().getString(PARAMS.LAYERSTORE_NAME);
+		setTitle(layerStoreName +  " - " + getString(R.string.available_maps));
 		super.onCreate(savedInstanceState);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		
 		if (savedInstanceState == null) {
 			// During initial setup, plug in the details fragment.
 			GeoStoreResourceListFragment resources = new GeoStoreResourceListFragment();
@@ -62,10 +69,17 @@ public class GeoStoreResourcesActivity extends SherlockFragmentActivity {
 		switch (item.getItemId()) {
 		case android.R.id.home:
 			finish();
+			overridePendingTransition(R.anim.in_from_left, R.anim.out_to_right);
 			return true;
 		}
 		return false;
 	}
+	
+	@Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.in_from_left, R.anim.out_to_right);
+    }
 	
 	@Override
 	protected void onActivityResult(int request_code, int resultCode, Intent data) {
@@ -74,6 +88,7 @@ public class GeoStoreResourcesActivity extends SherlockFragmentActivity {
 		if( RESULT_OK == resultCode ){
 			setResult(resultCode, data);
 			finish();
+			overridePendingTransition(R.anim.in_from_left, R.anim.out_to_right);
 		}
 	}
 }

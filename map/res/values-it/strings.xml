@@ -34,4 +34,6 @@
 	<string name="other">Altro</string>
 	<string name="edit">Modifica</string>
 	<string name="details">Dettagli</string>
+	<string name="available_maps">Mappe Disponibili</string>
+	<string name="map_details">Dettagli Mappa</string>
 </resources>
