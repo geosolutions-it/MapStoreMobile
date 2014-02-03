@@ -4,18 +4,8 @@
     <item
         android:id="@+id/action_use"
         android:orderInCategory="100"
-        android:showAsAction="ifRoom|withText"
-        android:title="Load All the Map"
-        
+        android:showAsAction="always|withText"
+        android:title="@string/add_selected_layers"
         />
-    <item
-        android:id="@+id/action_layers"
-        android:orderInCategory="100"
-        android:showAsAction="ifRoom|withText"
-        android:title="Select layers to add"
-        
-        />
-    
-
 </menu> 
 

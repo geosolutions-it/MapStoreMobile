@@ -37,4 +37,5 @@
 	<string name="available_maps">Available Maps</string>
 	<string name="map_details">Map Details</string>
 	<string name="empty_layers">No layer compatible in this map</string>
+	<string name="add_selected_layers">Aggiungi livelli selezionati</string>
 </resources>
