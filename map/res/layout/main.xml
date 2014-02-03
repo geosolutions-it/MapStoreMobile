@@ -27,13 +27,13 @@
     <!-- Not Used Yet - make the right_drawer visible  in map.xml to allow display this item 
          and set the visibility to visible in the Following oblect
          -->
-<!--     <LinearLayout android:id="@+id/right_drawer" -->
-<!--         android:orientation="vertical" -->
-<!--         android:layout_width="240dp" -->
-<!--         android:layout_height="match_parent" -->
-<!--         android:layout_gravity="end" -->
-<!--         android:dividerHeight="0dp" -->
-<!--         android:background="#111" > -->
-<!--     </LinearLayout> -->
+    <LinearLayout android:id="@+id/right_drawer"
+        android:orientation="vertical"
+        android:layout_width="240dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:dividerHeight="0dp"
+        android:background="#CFFF" >
+    </LinearLayout>
     
 </android.support.v4.widget.DrawerLayout>

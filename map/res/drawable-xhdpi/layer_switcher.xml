@@ -7,6 +7,7 @@
         android:layout_alignParentTop="true"  >
 
       <TextView
+            
             style="?android:attr/listSeparatorTextViewStyle"
             android:layout_marginRight="4dp"
             android:layout_width="fill_parent"
@@ -19,14 +20,14 @@
 		    android:background="@drawable/drawer_selectable_item"
 		    android:src="@drawable/ic_content_new_light"
 		    android:contentDescription="@string/menu_geostore"
-	        android:id="@+id/layer_add"
+	        android:id="@+id/mapstore_edit"
 	        android:layout_width="wrap_content"
 	        android:layout_gravity="right"
 	        android:layout_height="wrap_content"
 	         />
 		 <ImageButton
    		    android:background="@drawable/drawer_selectable_item"
-		    android:src="@drawable/ic_content_edit_light"
+		    android:src="@drawable/ic_action_edit_light"
 		    android:contentDescription="@string/menu_geostore"
 	        android:id="@+id/mapstore_detail"
 	        android:layout_width="wrap_content"

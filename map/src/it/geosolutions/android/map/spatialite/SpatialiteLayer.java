@@ -17,14 +17,12 @@
  */
 package it.geosolutions.android.map.spatialite;
 
-import eu.geopaparazzi.spatialite.database.spatial.core.ISpatialDatabaseHandler;
-import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
-import it.geosolutions.android.map.database.SpatialDataSourceHandler;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
 import it.geosolutions.android.map.model.Layer;
-import it.geosolutions.android.map.model.Source;
 import it.geosolutions.android.map.style.AdvancedStyle;
 import it.geosolutions.android.map.style.StyleManager;
+import eu.geopaparazzi.spatialite.database.spatial.core.ISpatialDatabaseHandler;
+import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
 
 public class SpatialiteLayer implements Layer<SpatialiteSource> {
 	private String title;

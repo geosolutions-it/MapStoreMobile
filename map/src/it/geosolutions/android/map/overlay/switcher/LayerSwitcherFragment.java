@@ -19,6 +19,7 @@ package it.geosolutions.android.map.overlay.switcher;
 
 import it.geosolutions.android.map.MapsActivity;
 import it.geosolutions.android.map.R;
+import it.geosolutions.android.map.activities.BrowseSourcesActivity;
 import it.geosolutions.android.map.adapters.LayerSwitcherAdapter;
 import it.geosolutions.android.map.geostore.activities.GeoStoreResourcesActivity;
 import it.geosolutions.android.map.listeners.LayerChangeListener;
@@ -100,14 +101,14 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
     final MapsActivity ac = (MapsActivity)getActivity(); 
     
     //the map selection activity launcher
-    ImageButton msEd = (ImageButton) view.findViewById(R.id.mapstore_edit);
+    ImageButton msEd = (ImageButton) view.findViewById(R.id.layer_add);
 	msEd.setOnClickListener(new OnClickListener() {
 		
 		@Override
 		public void onClick(View v) {
-		    Intent pref = new Intent(ac,GeoStoreResourcesActivity.class);
+		    Intent pref = new Intent(ac,BrowseSourcesActivity.class);
 			pref.putExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL,"http://mapstore.geo-solutions.it/geostore/rest/");
-		    ac.startActivityForResult(pref, MapsActivity.MAPSTORE_REQUEST_CODE);
+		    ac.startActivityForResult(pref, MapsActivity.LAYER_ADD);
 		}
 	});
 	

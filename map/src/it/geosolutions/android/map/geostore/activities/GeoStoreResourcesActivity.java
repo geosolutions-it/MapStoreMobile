@@ -68,17 +68,12 @@ public class GeoStoreResourcesActivity extends SherlockFragmentActivity {
 	}
 	
 	@Override
-	protected void onActivityResult(int request_code, int result_code, Intent result) {
+	protected void onActivityResult(int request_code, int resultCode, Intent data) {
 		// TODO Auto-generated method stub
-		super.onActivityResult(request_code, result_code, result);
-		if(request_code==GeoStoreResourcesActivity.GET_MAP_CONFIG){
-			if(result_code==RESULT_OK){
-				Bundle extras = getIntent().getExtras();
-			    String geoStoreUrl =  extras.getString(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL);
-			    result.putExtra(PARAMS.GEOSTORE_URL, geoStoreUrl);
-				setResult(Activity.RESULT_OK,result); 
-				finish();
-			}
+		super.onActivityResult(request_code, resultCode, data);
+		if( RESULT_OK == resultCode ){
+			setResult(resultCode, data);
+			finish();
 		}
 	}
 }

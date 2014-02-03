@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/action_use"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom|withText"
+        android:title="Load All the Map"
+        
+        />
+    <item
+        android:id="@+id/action_layers"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom|withText"
+        android:title="Select layers to add"
+        
+        />
+    
+
+</menu> 
+

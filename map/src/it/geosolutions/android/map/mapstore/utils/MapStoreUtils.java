@@ -62,39 +62,8 @@ public class MapStoreUtils {
 			
 		}
 		
-		AsyncTask<String, String, MapStoreConfiguration> task= new AsyncTask<String, String, MapStoreConfiguration>() {
+		AsyncTask<String, String, MapStoreConfiguration> task= new MapStoreConfigTask(resource.id, geoStoreUrl){
 
-			@Override
-			protected MapStoreConfiguration doInBackground(String... params) {
-				Long id = resource.id;
-				GeoStoreClient client = new GeoStoreClient();
-				client.setUrl(geoStoreUrl);
-				
-				String configString = client.getData(id);
-				MapStoreConfiguration ctnrl = null;
-				try{
-					//try to parse the downloaded MapStore Configuration
-					Gson gson = new GsonBuilder().create();
-					ctnrl = gson.fromJson(configString, MapStoreConfiguration.class);
-					//check "data" object if sources and map field are null)
-					if(ctnrl != null && !isValidConfiguration(ctnrl)){
-						if(ctnrl.data!=null){
-							MapStoreConfiguration config1 = gson.fromJson(ctnrl.data,  MapStoreConfiguration.class);
-							if(config1!=null && isValidConfiguration(config1)){
-								ctnrl=config1;
-							}
-						}
-					}
-				}catch(IllegalStateException e){
-					Log.e("MapStore","Unable to parse response");
-					//TODO Toast.makeText(mapsActivity, "ERROR PARSING MAPSTOREMAP", Toast.LENGTH_LONG).show();
-				}catch(JsonSyntaxException e){
-					Log.e("MapStore","Unable to parse response");
-					//TODO Toast.makeText(mapsActivity, "ERROR PARSING MAPSTOREMAP", Toast.LENGTH_LONG).show();
-				}
-				return ctnrl;
-			}
-			
 			@Override
 			protected void onPostExecute(MapStoreConfiguration result) {
 				Log.d("MapStore",result.toString());
@@ -105,23 +74,6 @@ public class MapStoreUtils {
 					mapsActivity.setPosition(p, (byte)result.map.zoom);
 				}
 			}
-
-			private GeoPoint getPoint(MapStoreConfiguration result) {
-				
-				if(result.map.center !=null){
-					if(result.map.center.length!=2) return null;
-					if("EPSG:900913".equals( result.map.projection )){
-						double y = ProjectionUtils.toGeographicY(result.map.center[1]);
-						double x = ProjectionUtils.toGeographicX(result.map.center[0]);
-						return new GeoPoint(y, x);
-					}
-					if ("EPSG:4326".equals( result.map.projection )){
-						return new GeoPoint(result.map.center[1], result.map.center[0]);
-					}
-					 
-				}
-				return null;
-			};
 		};
 		task.execute("");
 		return null;
@@ -133,7 +85,7 @@ public class MapStoreUtils {
 	 * @param ms the configuration to check
 	 * @return true if the configuration contains layers and sources
 	 */
-	private static boolean  isValidConfiguration(MapStoreConfiguration ms) {
+	public static boolean  isValidConfiguration(MapStoreConfiguration ms) {
 		if(ms==null) return false;
 		if(ms.map==null)return false;
 		if(ms.map.layers==null)return false;

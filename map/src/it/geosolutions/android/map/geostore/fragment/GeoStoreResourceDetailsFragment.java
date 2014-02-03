@@ -17,19 +17,31 @@
  */
 package it.geosolutions.android.map.geostore.fragment;
 
+import it.geosolutions.android.map.MapsActivity;
 import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.geostore.activities.GeoStoreResourceDetailActivity.PARAMS;
+import it.geosolutions.android.map.geostore.activities.GeoStoreResourceDetailActivity;
 import it.geosolutions.android.map.geostore.activities.GeoStoreResourcesActivity;
 import it.geosolutions.android.map.geostore.model.Resource;
+import it.geosolutions.android.map.mapstore.activities.MapStoreLayerListActivity;
+import it.geosolutions.android.map.mapstore.model.MapStoreConfiguration;
+import it.geosolutions.android.map.mapstore.utils.MapStoreConfigTask;
 
 import java.util.List;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
 
@@ -89,6 +101,45 @@ public View onCreateView(LayoutInflater inflater, ViewGroup container,
     //description
     TextView description = (TextView)v.findViewById(R.id.description);
     description.setText(resource.description);
+    
+    Button selectLayers = (Button)v.findViewById(R.id.select_layers);
+    selectLayers.setOnClickListener(new OnClickListener() {
+		GeoStoreResourceDetailActivity ac = (GeoStoreResourceDetailActivity)getActivity();
+		@Override
+		public void onClick(View v) {
+		
+				AsyncTask<String, String, MapStoreConfiguration> task = new MapStoreConfigTask(
+						resource.id, geoStoreUrl) {
+
+					@Override
+					protected void onPostExecute(MapStoreConfiguration result) {
+						Log.d("MapStore", result.toString());
+						// call the loadMapStore config on the Activity
+						Intent i  = new Intent(ac, MapStoreLayerListActivity.class);
+						//TODO put MapStore config
+						i.putExtra(MapsActivity.MAPSTORE_CONFIG	,result);
+						startActivityForResult(i, MapsActivity.MAPSTORE_REQUEST_CODE);
+					}
+				};
+				task.execute("");
+			
+			
+		}
+	});
+    
+    Button loadMap = (Button)v.findViewById(R.id.load_map);
+    loadMap.setOnClickListener(new OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			Intent data = new Intent();
+			data.putExtra(PARAMS.RESOURCE, resource);
+			data.putExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL, geoStoreUrl);
+			getActivity().setResult(Activity.RESULT_OK, data);
+			getActivity().finish();
+			
+		}
+	});
     return v;
 }
 

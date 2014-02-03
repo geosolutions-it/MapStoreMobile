@@ -5,6 +5,9 @@
     <string name="data">Dati</string>
     <string name="styles">Stili</string>
     <string name="markers">Marker</string>
+    <string name="sources">Sorgenti</string>
+    <string name="layers">Livelli</string>
+    <string name="menu_layers">Livelli</string>
     <string name="min_zoom">Minimo zoom level</string>
     <string name="max_zoom">Massimo zoom Level</string>
     <string name="style_point">Punto</string>
@@ -29,4 +32,6 @@
 	<string name="next">Successivo</string>
 	<string name="previous">Precedente</string>
 	<string name="other">Altro</string>
+	<string name="edit">Modifica</string>
+	<string name="details">Dettagli</string>
 </resources>

@@ -49,8 +49,6 @@ import eu.geopaparazzi.spatialite.database.spatial.core.GeometryIterator;
 import eu.geopaparazzi.spatialite.database.spatial.core.ISpatialDatabaseHandler;
 import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
 
-
-
 /**
  * 
  * @author Lorenzo Natali (www.geo-solutions.it)

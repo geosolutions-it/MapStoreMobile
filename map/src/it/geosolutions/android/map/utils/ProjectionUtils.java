@@ -22,7 +22,6 @@ import org.mapsforge.core.model.GeoPoint;
 import org.mapsforge.core.util.MercatorProjection;
 
 import android.graphics.Point;
-import android.util.Log;
 
 /**
  * Utility Class to convert WebMercator and Geographic coordinates
@@ -153,30 +152,24 @@ public class ProjectionUtils {
 	public static long[] calculateMapSize(long width,long height,Projection projection){
 		long[] lt = getMapLeftTopPoint(projection);
 		long[] rb = getMapRightBottom(projection);
-	    Log.v("WMS","Left-top:"+lt[0]+","+lt[1]);
-	    Log.v("WMS","Right-bottom:"+rb[0]+","+rb[1]);
 
 		long[] out =new long[2];
 		if(rb[0] < width){
 			width = rb[0]; 
-			Log.v("WMS","Width:"+width);
 		}
 		if(lt[0] > 0){
 			out[0] = width -lt[0];
 		}else{
 			out[0] = width;
 		}
-		Log.v("WMS","Width:"+width);
 		if(rb[1] < height){
 			height = rb[1]; 
-			Log.v("WMS","height:"+height);
 		}
 		if(lt[1] > 0){
 			out[1] = height -lt[1];
 		}else{
 			out[1] = height;
 		}
-		Log.v("WMS","height:"+height);
 		return out;
 		
 		

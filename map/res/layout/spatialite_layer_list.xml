@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+ xmlns:android="http://schemas.android.com/apk/res/android">
+
+ <LinearLayout 
+        android:id="@+id/buttonsLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="10dp" >
+		<!-- Buttons for select layers and load map -->
+        <include layout="@layout/toolbar_select_layers_load_map_merge"/>
+    </LinearLayout>
+    <LinearLayout 
+    android:layout_alignParentTop="true"
+    android:layout_above="@id/buttonsLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+	
+    <TextView
+        android:id="@+id/list_header_title"
+        style="?android:attr/listSeparatorTextViewStyle"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/layers" />
+
+    <ListView
+        android:id="@android:id/list"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent" >
+    </ListView>
+</LinearLayout>
+</RelativeLayout>

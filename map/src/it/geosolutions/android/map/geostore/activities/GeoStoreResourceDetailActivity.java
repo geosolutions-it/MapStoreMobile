@@ -17,16 +17,18 @@
  */
 package it.geosolutions.android.map.geostore.activities;
 
-import it.geosolutions.android.map.R;
+import java.util.ArrayList;
+
+import it.geosolutions.android.map.MapsActivity;
 import it.geosolutions.android.map.geostore.fragment.GeoStoreResourceDetailsFragment;
 import it.geosolutions.android.map.geostore.model.Resource;
-import android.app.Activity;
+import it.geosolutions.android.map.mapstore.model.MapStoreConfiguration;
+import it.geosolutions.android.map.mapstore.utils.MapStoreUtils;
+import it.geosolutions.android.map.model.Layer;
 import android.content.Intent;
 import android.os.Bundle;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 
@@ -61,21 +63,50 @@ public class GeoStoreResourceDetailActivity extends SherlockFragmentActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == android.R.id.home) {
-
 			finish();
-		} else if (item.getItemId() == R.id.action_use) {
-			Intent data = new Intent();
-			data.putExtra(PARAMS.RESOURCE, resource);
-			setResult(Activity.RESULT_OK, data);
-			finish();
-		}
+		} 
 		return false;
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see android.support.v4.app.FragmentActivity#onActivityResult(int, int, android.content.Intent)
+	 */
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getSupportMenuInflater();
-		inflater.inflate(R.menu.geostore_detail, menu);
-		return true;
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+			if(RESULT_OK==resultCode){
+				Bundle b;
+				if(data!=null){
+					 b= data.getExtras();
+					 if (b.containsKey(MapsActivity.MAPSTORE_CONFIG)) {
+							MapStoreConfiguration config = (MapStoreConfiguration)b.getSerializable(MapsActivity.MAPSTORE_CONFIG);
+							ArrayList<Layer> allLayers  = MapStoreUtils.buildWMSLayers(config);
+							ArrayList<Layer> layerToAdd = new ArrayList<Layer>();
+							for(Layer l : allLayers){
+								if(l.isVisibility()){
+									layerToAdd.add(l);
+								}
+							}
+							returnData(layerToAdd);
+						}
+				}
+			}
+			
+		
+		
 	}
+
+	/**
+	 * @param layerToAdd
+	 */
+	private void returnData(ArrayList<Layer> layerToAdd) {
+		Intent i = new Intent();
+		Bundle bundle = new Bundle();
+		bundle.putSerializable(MapsActivity.LAYERS_TO_ADD, layerToAdd) ;
+        i.putExtras(bundle);
+        setResult(RESULT_OK, i);
+        finish();
+		
+		
+	}
+	
 }

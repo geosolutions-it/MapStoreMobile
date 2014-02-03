@@ -1,0 +1,97 @@
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+<TableLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+        <!-- NAME -->
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:background="#BDBDBD" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_gravity="left"
+                android:text="@string/geostore_resource_name"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/name"
+                android:layout_width="wrap_content"
+                android:layout_marginLeft="20dip"
+                android:layout_marginRight="20dip" >
+            </TextView>
+        </TableRow>
+        
+         <!-- Owner -->
+
+        <TableRow  >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_gravity="left"
+                android:text="@string/geostore_resource_owner"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/owner"
+                android:layout_width="wrap_content"
+                android:layout_marginLeft="20dip"
+                android:layout_marginRight="20dip" >
+            </TextView>
+        </TableRow>
+        
+        <!-- creation -->
+         <TableRow  android:background="#BDBDBD">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_gravity="left"
+                android:text="@string/geostore_resource_creation"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/creation"
+                android:layout_width="wrap_content"
+                android:layout_marginLeft="20dip"
+                android:layout_marginRight="20dip" >
+            </TextView>
+        </TableRow>
+        
+         
+         <TableRow  >
+		<!-- lastUpdate -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_gravity="left"
+                android:text="@string/geostore_resource_last_updated"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/lastUpdate"
+                android:layout_width="wrap_content"
+                android:layout_marginLeft="20dip"
+                android:layout_marginRight="20dip" >
+            </TextView>
+        </TableRow>
+        
+         <!-- ID -->
+
+        <TableRow android:background="#BDBDBD">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_gravity="left"
+                android:text="@string/geostore_resource_id"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/id"
+                android:layout_width="wrap_content"
+                android:layout_marginLeft="20dip"
+                android:layout_marginRight="20dip" >
+            </TextView>
+        </TableRow>
+
+    </TableLayout>
+    </merge>

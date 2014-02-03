@@ -17,6 +17,7 @@
  */
 package it.geosolutions.android.map;
 
+import it.geosolutions.android.map.activities.BrowseSourcesActivity;
 import it.geosolutions.android.map.activities.GetFeatureInfoLayerListActivity;
 import it.geosolutions.android.map.activities.MapActivityBase;
 import it.geosolutions.android.map.control.CoordinateControl;
@@ -27,6 +28,7 @@ import it.geosolutions.android.map.control.MarkerControl;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
 import it.geosolutions.android.map.dto.MarkerDTO;
 import it.geosolutions.android.map.fragment.GenericMenuFragment;
+import it.geosolutions.android.map.fragment.sources.SourcesFragment;
 import it.geosolutions.android.map.geostore.activities.GeoStoreResourceDetailActivity;
 import it.geosolutions.android.map.geostore.activities.GeoStoreResourcesActivity;
 import it.geosolutions.android.map.geostore.model.Resource;
@@ -44,9 +46,11 @@ import it.geosolutions.android.map.overlay.managers.SimpleOverlayManager;
 import it.geosolutions.android.map.overlay.switcher.LayerSwitcherFragment;
 import it.geosolutions.android.map.overlay.switcher.OverlaySwitcherFragment;
 import it.geosolutions.android.map.style.StyleManager;
+import it.geosolutions.android.map.utils.LocalPersistence;
 import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.android.map.utils.MarkerUtils;
 import it.geosolutions.android.map.utils.SpatialDbUtils;
+import it.geosolutions.android.map.utils.StorageUtils;
 import it.geosolutions.android.map.view.AdvancedMapView;
 
 import java.io.File;
@@ -160,6 +164,9 @@ public class MapsActivity extends MapActivityBase {
     /** DATAPROPERTIES_REQUEST_CODE */
     public static final int DATAPROPERTIES_REQUEST_CODE = 671;
     
+    /** ADD LAYERS REQUEST_CODE */
+	public static final int LAYER_ADD = 98;
+    
     private static final String  FEATUREIDFIELD_FLAG = "fidField";
     /** choosen featureID field */
 	private String featureIdField;
@@ -169,6 +176,8 @@ public class MapsActivity extends MapActivityBase {
 	/** CANCONFRIM_FLAG */
 	private static final String CANCONFRIM_FLAG = "canConfirm_flag";
 	public static final String MAPSTORE_CONFIG = "MAPSTORE_CONFIG";
+	public static final String LAYERS_TO_ADD = "LAYERS_TO_ADD";
+	public static final String MSM_MAP = "MSM_MAP";
 	private static boolean canConfirm;
 
 	
@@ -179,6 +188,7 @@ public class MapsActivity extends MapActivityBase {
     private View mDrawerList;
     private ActionBarDrawerToggle mDrawerToggle;
 	private View mLayerMenu;
+	private MultiSourceOverlayManager layerManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -199,7 +209,7 @@ public class MapsActivity extends MapActivityBase {
 		//
 		//create overlay manager
 		boolean mapLoaded = initMap(savedInstanceState);
-		MultiSourceOverlayManager layerManager =  new MultiSourceOverlayManager(mapView);
+		layerManager =  new MultiSourceOverlayManager(mapView);
 		overlayManager=layerManager;
 		//setup slide menu(es)
 		setupDrawerLayout();
@@ -210,8 +220,6 @@ public class MapsActivity extends MapActivityBase {
 		        //TODO: notify the user the problem
 			this.finish();
 		}
-		
-		
 		// 
 		// LEFT MENU INITIALIZATION
 		//
@@ -233,7 +241,7 @@ public class MapsActivity extends MapActivityBase {
 			canConfirm = true;
 			this.addConfirmButton();
 		}
-		
+		addControls(savedInstanceState);
 		centerMapFile();
 		
         
@@ -260,9 +268,9 @@ public class MapsActivity extends MapActivityBase {
 			layerManager.restoreInstanceState(savedInstanceState);
 			
 		}else{
-			
 			layerManager.defaultInit();
 			MSMMap map = SpatialDbUtils.mapFromDb();
+			StorageUtils.setupSources(this);
 	        layerManager.loadMap(map);
 			//setup left drawer fragments
 	        osf =  new LayerSwitcherFragment();
@@ -270,9 +278,10 @@ public class MapsActivity extends MapActivityBase {
 			FragmentTransaction fragmentTransaction = fManager.beginTransaction();
 			fragmentTransaction.add(R.id.left_drawer_container,osf);
 			GenericMenuFragment other = new GenericMenuFragment();
-			fragmentTransaction.add(R.id.left_drawer_container_bottom, other);
+//			fragmentTransaction.add(R.id.right_drawer, other);
+			SourcesFragment sf = new SourcesFragment();
+			fragmentTransaction.add(R.id.right_drawer, sf);
 			fragmentTransaction.commit();
-			
 		}
 	}
 	
@@ -286,7 +295,7 @@ public class MapsActivity extends MapActivityBase {
         //remove comment the following line
         //and remove comment to right_drawer in main.xml (check also the comment about map.xml)
         //to enable also a right drawer
-        //mLayerMenu = (View) findViewById(R.id.right_drawer);
+        mLayerMenu = (View) findViewById(R.id.right_drawer);
         
         mDrawerToggle = new ActionBarDrawerToggle(
                 this,                  /* host Activity */
@@ -463,7 +472,7 @@ public class MapsActivity extends MapActivityBase {
         //layer menu part
 		}else if(item.getItemId() == R.id.layer_menu_action){
 			if (mDrawerLayout.isDrawerOpen(mLayerMenu)) {
-            	mDrawerLayout.closeDrawer(mDrawerList);
+            	mDrawerLayout.closeDrawer(mLayerMenu);
             } else {
             	if(mLayerMenu!=null){
             		mDrawerLayout.openDrawer(mLayerMenu);
@@ -561,7 +570,6 @@ public class MapsActivity extends MapActivityBase {
 		Log.v("MAP","Map Activated");
 		this.mapView =  (AdvancedMapView) findViewById(R.id.advancedMapView);
 		// TODO configurable controls
-		addControls(savedInstanceState);
 		mapView.setClickable(true);
 		mapView.setBuiltInZoomControls(true);
 
@@ -715,16 +723,26 @@ public class MapsActivity extends MapActivityBase {
 		Bundle b = data.getExtras();
 		if(requestCode==DATAPROPERTIES_REQUEST_CODE){
 			mapView.getOverlayController().redrawOverlays();
-		}else if(requestCode==MAPSTORE_REQUEST_CODE){
-			Resource resource = (Resource) data.getSerializableExtra(GeoStoreResourceDetailActivity.PARAMS.RESOURCE);
-			if(resource!=null){
-				String geoStoreUrl = data.getStringExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL);
-				MapStoreUtils.loadMapStoreConfig(geoStoreUrl, resource, this);
-			}
-			if(b.containsKey(MAPSTORE_CONFIG)){
-	        	overlayManager.loadMapStoreConfig((MapStoreConfiguration)b.getSerializable(MAPSTORE_CONFIG));
-	        }
 		}
+		Resource resource = (Resource) data.getSerializableExtra(GeoStoreResourceDetailActivity.PARAMS.RESOURCE);
+		if(resource!=null){
+			String geoStoreUrl = data.getStringExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL);
+			MapStoreUtils.loadMapStoreConfig(geoStoreUrl, resource, this);
+		}
+		if(b.containsKey(MAPSTORE_CONFIG)){
+        	overlayManager.loadMapStoreConfig((MapStoreConfiguration)b.getSerializable(MAPSTORE_CONFIG));
+        }
+		if(b.containsKey(MSM_MAP)){
+	        layerManager.loadMap((MSMMap)b.getSerializable(MSM_MAP));
+
+		}
+		ArrayList<Layer> layersToAdd = (ArrayList<Layer>) b.getSerializable(LAYERS_TO_ADD);
+		if(layersToAdd != null){
+			ArrayList<Layer> layers =new ArrayList<Layer> (layerManager.getLayers());
+			layers.addAll(layersToAdd);
+			layerManager.setLayers(layers);
+		}
+		
 		
 	}
 

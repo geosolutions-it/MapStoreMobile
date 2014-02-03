@@ -152,7 +152,7 @@ public class MultiSourceOverlayManager implements OverlayManager {
 			Log.v("LAYERS", "removing layer");
 		} else if (!present && enable) {
 			if (itemId == R.id.data) {
-			        //data layer is always at level 0
+			    //data layer is always at level 0
 				//mapView.getOverlays().add(0, spatialiteOverlay);
 				Log.v("LAYERS", "add data layer");
 			}else if(itemId == R.id.mapstore){
@@ -243,9 +243,7 @@ public class MultiSourceOverlayManager implements OverlayManager {
 	 */
 	public void loadMapStoreConfig(MapStoreConfiguration result){
 		if(result == null) return ;
-		ArrayList<Layer> l = MapStoreUtils.buildWMSLayers(result); //TODO used for test REMOVE IT
-				l.addAll(getLayers());
-				
+		ArrayList<Layer> l = MapStoreUtils.buildWMSLayers(result);
 		setLayers(l);
 		setMapStoreConfig(result);
 	}
@@ -283,20 +281,35 @@ public class MultiSourceOverlayManager implements OverlayManager {
 		
 	}
 
+	/**
+	 * Does the default initialization of the Manager
+	 */
 	public void defaultInit() {
 		
 		setMarkerVisible();
 		
 	}
 	
+	/**
+	 * Provides the listener attached to this Manager for Layer Changes
+	 * @return the listener
+	 */
 	public LayerChangeListener getLayerChangeListener() {
 		return listener;
 	}
 
+	/**
+	 * Attach the listener to the Manager
+	 * @param l
+	 */
 	public void setLayerChangeListener(LayerChangeListener l){
 		listener = l;
 	}
 	
+	/**
+	 * Load the layers containied ind the <MSMMap> provided as argument
+	 * @param m the MSMMap to load
+	 */
 	public void loadMap(MSMMap m){
 		setLayers(m.layers);
 	}

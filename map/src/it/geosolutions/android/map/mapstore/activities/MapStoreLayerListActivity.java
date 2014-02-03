@@ -38,6 +38,8 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
 
@@ -134,21 +136,18 @@ public class MapStoreLayerListActivity extends SherlockListActivity {
 
 	@Override
     public boolean onOptionsItemSelected(MenuItem item) {
-    	 switch (item.getItemId()) {
-    	 	//return data if home button clicked
-    	    case android.R.id.home:
-    	      returnData();
-    	      finish();
-    	      break;
-    	 }
+    	 if (item.getItemId() == android.R.id.home) {
+ 			finish();
+ 		} else if (item.getItemId() == R.id.action_use) {
+ 			 returnData();
+   	      finish();
+ 		}
 		return false;
     }
     
     @Override
     public void onBackPressed() {
     	//return data also if back button is pressed
-        returnData();
-
         super.onBackPressed();
     }
 
@@ -162,8 +161,7 @@ public class MapStoreLayerListActivity extends SherlockListActivity {
         Collections.reverse(mapStoreConfig.map.layers);
         bundle.putSerializable(MapsActivity.MAPSTORE_CONFIG	, mapStoreConfig) ;
         mIntent.putExtras(bundle);
-        setResult(RESULT_OK, mIntent);
-        
+        setResult(RESULT_OK, mIntent);        
     }
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -172,6 +170,13 @@ public class MapStoreLayerListActivity extends SherlockListActivity {
     	outState.putSerializable(MapsActivity.MAPSTORE_CONFIG	, mapStoreConfig) ;
     	
     }
+    
+    @Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getSupportMenuInflater();
+		inflater.inflate(R.menu.mapstore_resource_select, menu);
+		return true;
+	}
 }
 
 

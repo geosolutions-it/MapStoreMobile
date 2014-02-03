@@ -49,9 +49,9 @@ import eu.geopaparazzi.spatialite.database.spatial.core.ISpatialDatabaseHandler;
 import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
 
 /**
- * A Renderer for wms services that renders
+ * A Renderer for Spatialite Layers
  * 
- * @author Admin
+ * @author Lorenzo Natali(lorenzo.natali@geo-solutions.it)
  * 
  */
 
@@ -93,28 +93,26 @@ public class SpatialiteRenederer implements OverlayRenderer<SpatialiteLayer> {
 		long drawY= pxDp[1];
 		try {
 			// gets spatialite tables from the spatialite database manager
-			SpatialDataSourceManager sdManager = SpatialDataSourceManager
-					.getInstance();
+			SpatialDataSourceManager sdManager = SpatialDataSourceManager.getInstance();
 
-			// List<SpatialVectorTable> spatialTables =
-			// sdManager.getSpatialVectorTables(false);
-
+			
 			for (SpatialiteLayer l : layers) {
+				
+				//visibility checks
 				if(! l.isVisibility() ) continue;
 				if (isInterrupted() || sizeHasChanged()) {
 					// stop working
 					return;
 				}
+				
+				//check visibility range in style
 				AdvancedStyle style4Table = l.getStyle();
-				SpatialVectorTable spatialTable = sdManager
-						.getVectorTableByName(l.getTableName());
-
-				if (!StyleUtils.isVisible(style4Table, drawZoomLevel)) {
+				if (!StyleUtils.isInVisibilityRange(style4Table, drawZoomLevel)){
 					continue;
 				}
-
-				ISpatialDatabaseHandler spatialDatabaseHandler = sdManager
-						.getVectorHandler(spatialTable);
+				//retrieve the handler 
+				SpatialVectorTable spatialTable = sdManager.getVectorTableByName(l.getTableName());
+				ISpatialDatabaseHandler spatialDatabaseHandler = sdManager.getVectorHandler(spatialTable);
 
 				GeometryIterator geometryIterator = null;
 				try {

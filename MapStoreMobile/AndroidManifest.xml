@@ -15,7 +15,7 @@
     <!-- endo of Map Specific permission -->
     <uses-sdk
         android:minSdkVersion="10"
-        android:targetSdkVersion="17" />
+        android:targetSdkVersion="18" />
 
     <application
         android:allowBackup="true"
@@ -79,6 +79,9 @@
         <!-- End GeoStore -->
         <activity android:name="it.geosolutions.android.map.mapstore.activities.MapStoreLayerListActivity">
         </activity>
+        <!-- Layer add  -->
+        <activity android:name="it.geosolutions.android.map.activities.BrowseSourcesActivity"></activity>
+        <activity android:name="it.geosolutions.android.map.spatialite.activities.SpatialiteLayerListActivity"></activity>
     </application>
 
 </manifest>

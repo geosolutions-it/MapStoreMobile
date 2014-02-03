@@ -24,6 +24,8 @@
         android:focusable="false"
         android:focusableInTouchMode="false"
         android:paddingLeft="10dp"
+        android:maxLines="1"
+	    android:ellipsize="end"
          />
 
     <!--  <ImageButton

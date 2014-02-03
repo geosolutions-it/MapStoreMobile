@@ -82,9 +82,7 @@ public  class WMSUntiledRenderer implements WMSRenderer{
 			is = connection.getInputStream();
 			Bitmap img = BitmapFactory.decodeStream(is); 
 			if(img!=null){
-				Log.v("WMS","Map Updated");
 				long[] pxDp= ProjectionUtils.getMapLeftTopPoint(projection);
-				Log.v("WMS","Draw point:"+pxDp[0]+","+pxDp[1]);
 				c.drawBitmap(img, pxDp[0] >0 ?  pxDp[0] : 0 , pxDp[1] >0 ?  pxDp[1] : 0, null);
 			}else {
 				Log.e("WMS","null image from the request");
@@ -117,7 +115,6 @@ public  class WMSUntiledRenderer implements WMSRenderer{
 		    long[] pictureSize = ProjectionUtils.calculateMapSize(c.getWidth(), c.getHeight(), projection);
 		    params.put("width",(pictureSize[0])+"");
 		    params.put("height",(pictureSize[1])+"");
-		    Log.v("WMS","Picture Size:"+pictureSize[0]+","+pictureSize[1]);
 	    };
 	    //Log.v("WMSRenderer","request bbox:"+w+","+s+""+e +","+n);
 	    
