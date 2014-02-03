@@ -222,7 +222,7 @@ public class PolygonTapListener implements OnGestureListener, OnDoubleTapListene
 	public boolean onSingleTapUp(MotionEvent e) {
 		points.add(new_point);
 		acquisitionStarted = true;
-		view.redraw();
+		view.redraw(false);
 		return true;
 	}
 
@@ -264,6 +264,6 @@ public class PolygonTapListener implements OnGestureListener, OnDoubleTapListene
 		points.clear();     
 		pointsAcquired = false;
 		acquisitionStarted = false;
-		view.redraw();
+		view.redraw(false);
 	}
 }

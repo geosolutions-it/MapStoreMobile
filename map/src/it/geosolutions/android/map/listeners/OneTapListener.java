@@ -211,7 +211,7 @@ public class OneTapListener implements OnTouchListener, OnGestureListener {
 	public boolean onDown(MotionEvent e) {
 		startX = e.getX();
         startY = e.getY();
-       	view.redraw();
+       	view.redraw(false);
        	pointsAcquired = true;		
        	return false;
 	}
@@ -226,7 +226,7 @@ public class OneTapListener implements OnTouchListener, OnGestureListener {
 	public void onLongPress(MotionEvent e) {
 		query_layer();
 		pointsAcquired = false;
-		view.redraw();
+		view.redraw(false);
 	}
 
 	@Override
@@ -244,7 +244,7 @@ public class OneTapListener implements OnTouchListener, OnGestureListener {
 	public boolean onSingleTapUp(MotionEvent e) {
 		query_layer();
 		pointsAcquired = false;
-		view.redraw();
+		view.redraw(false);
 		
 		return true;
 	}

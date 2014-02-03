@@ -127,8 +127,7 @@ private void infoDialog(final double n, final double w, final double s,
         } else {
             i.setAction(Intent.ACTION_VIEW);
         }
-        activity.startActivityForResult(i,
-                GetFeatureInfoLayerListActivity.BBOX_REQUEST);
+        activity.startActivityForResult(i,GetFeatureInfoLayerListActivity.BBOX_REQUEST);
 
     } catch (Exception ex) {
         ex.printStackTrace();
@@ -226,7 +225,7 @@ public boolean onTouch(View v, MotionEvent event){
             endY = event.getY();
         
             // Force redraw   
-	        view.redraw();
+	        view.redraw(false);
 	        return true;
     } else if (dragStarted && action == MotionEvent.ACTION_UP) {
         	if (pointerCount > 1){

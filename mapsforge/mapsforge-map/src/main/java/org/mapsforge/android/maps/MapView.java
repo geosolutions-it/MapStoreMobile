@@ -356,9 +356,19 @@ public class MapView extends ViewGroup {
 	}
 
 	/**
-	 * Triggers a redraw process of the map.
+	 * redraw all the mapview, with also overlays
 	 */
 	public void redraw() {
+		redraw(true);
+	}
+
+	/**
+	 * Triggers a redraw process of the map.
+	 * 
+	 * @param forceOverlayRedraw
+	 *            if true, redraws the overlays
+	 */
+	public void redraw(boolean forceOverlayRedraw) {
 		if (this.getWidth() <= 0 || this.getHeight() <= 0 || isZoomAnimatorRunning()) {
 			return;
 		}
@@ -408,9 +418,9 @@ public class MapView extends ViewGroup {
 				this.mapWorker.notify();
 			}
 		}
-
-		this.overlayController.redrawOverlays();
-
+		if (forceOverlayRedraw == true) {
+			this.overlayController.redrawOverlays();
+		}
 		if (this.mapScaleBar.isShowMapScaleBar()) {
 			this.mapScaleBar.redrawScaleBar();
 		}
