@@ -77,21 +77,21 @@
         
          <!-- ID -->
 
-        <TableRow android:background="#BDBDBD">
+<!--         <TableRow android:background="#BDBDBD"> -->
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_gravity="left"
-                android:text="@string/geostore_resource_id"
-                android:textStyle="bold" />
+<!--             <TextView -->
+<!--                 android:layout_width="wrap_content" -->
+<!--                 android:layout_gravity="left" -->
+<!--                 android:text="@string/geostore_resource_id" -->
+<!--                 android:textStyle="bold" /> -->
 
-            <TextView
-                android:id="@+id/id"
-                android:layout_width="wrap_content"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip" >
-            </TextView>
-        </TableRow>
+<!--             <TextView -->
+<!--                 android:id="@+id/id" -->
+<!--                 android:layout_width="wrap_content" -->
+<!--                 android:layout_marginLeft="20dip" -->
+<!--                 android:layout_marginRight="20dip" > -->
+<!--             </TextView> -->
+<!--         </TableRow> -->
 
     </TableLayout>
     </merge>

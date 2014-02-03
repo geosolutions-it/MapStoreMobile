@@ -95,9 +95,7 @@ public View onCreateView(LayoutInflater inflater, ViewGroup container,
     //Last Update
     TextView update = (TextView)v.findViewById(R.id.lastUpdate);
     update.setText(resource.lastUpdate);
-    //id
-    TextView idt = (TextView)v.findViewById(R.id.id);
-    idt.setText(resource.id.toString());
+    
     //description
     TextView description = (TextView)v.findViewById(R.id.description);
     description.setText(resource.description);

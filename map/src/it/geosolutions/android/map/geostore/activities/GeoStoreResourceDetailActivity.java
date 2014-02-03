@@ -54,6 +54,14 @@ public class GeoStoreResourceDetailActivity extends SherlockFragmentActivity {
 			GeoStoreResourceDetailsFragment detail = new GeoStoreResourceDetailsFragment();
 			detail.setArguments(getIntent().getExtras());
 			resource = (Resource) getIntent().getSerializableExtra(PARAMS.RESOURCE);
+			
+			//set activity title
+			String title = resource.name;
+			if(title!=null){
+				setTitle(title + "-" + getString(R.string.details));
+			}else{
+				setTitle(getString(R.string.details));
+			}
 			getSupportFragmentManager().beginTransaction()
 					.add(android.R.id.content, detail).commit();
 
