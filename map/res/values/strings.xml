@@ -37,5 +37,10 @@
 	<string name="available_maps">Available Maps</string>
 	<string name="map_details">Map Details</string>
 	<string name="empty_layers">No layer compatible in this map</string>
-	<string name="add_selected_layers">Aggiungi livelli selezionati</string>
+	<string name="add_selected_layers">Add Selected Layers</string>
+	<string name="select_layers">Select Layers</string>
+	<string name="load_map">Load Map</string>
+	<string name="load_all_as_map">Load all layers as map</string>
+	<string name="select_layers_to_add">Select layers to add</string>
+	<string name="add_the_selected_layers_to_the_map">Add the selected layers to the map</string>
 </resources>
