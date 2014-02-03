@@ -84,8 +84,7 @@ public abstract class MapControl {
 		
 	//Listener for touch event on map.
 	protected OnTouchListener mapListener;
-	protected OnTouchListener oneTapListener;
-	protected OnTouchListener polygonTapListener;
+	
 	
 	/**
 	 * Creates the control.
@@ -163,21 +162,6 @@ public abstract class MapControl {
 		this.mapListener = mapListener;		
 	}
 	
-	public OnTouchListener getOneTapListener() {
-		return oneTapListener;
-	}
-	
-	public void setOneTapListener(OnTouchListener oneTapListener) {
-		this.oneTapListener = oneTapListener;		
-	}
-	
-	public OnTouchListener getPolygonTapListener() {
-		return polygonTapListener;
-	}
-	
-	public void setPolygonTapListener(OnTouchListener polygonTapListener) {
-		this.polygonTapListener = polygonTapListener;		
-	}
 	
 	/**
 	 * Get ImageButton identifier.

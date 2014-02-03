@@ -75,17 +75,25 @@ public class MapInfoControl extends MapControl{
 	//Overrides the MapListener
 	@Override
 	public OnTouchListener getMapListener() {
-		return this.mapListener;
+		OnTouchListener tl =null;
+		if(pref.getString("selectionShape", "").equals(array[2])){
+			tl = getOneTapListener();
+		}
+		else if(pref.getString("selectionShape", "").equals(array[3])){
+				tl = getPolygonTapListener();
+		}
+		else {
+			tl = this.mapListener;
+		}
+		return tl;
 	};
 	
 	//Override the OneTapListener
-	@Override
 	public OneTapListener getOneTapListener() {
 		return this.oneTapListener;
 	};
 	
 	//Override the OneTapListener
-	@Override
 	public PolygonTapListener getPolygonTapListener() {
 		return this.polygonTapListener;
 	};

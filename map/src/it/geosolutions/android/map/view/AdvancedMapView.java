@@ -46,8 +46,6 @@ public class AdvancedMapView extends MapView {
 	protected List<MapControl> controls =  new ArrayList<MapControl>();
 	protected MapsActivity activity;
 	public OverlayManager overlayManger;
-	private SharedPreferences pref;
-	private String[] array;
 	
 	public OverlayManager getOverlayManger() {
 		return overlayManger;
@@ -63,8 +61,7 @@ public class AdvancedMapView extends MapView {
 		if(context instanceof MapsActivity){
 			activity = (MapsActivity) context; 
 		}
-		pref = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
-		array = activity.getResources().getStringArray(R.array.preferences_selection_shape);
+
 	}
 	
 	/**
@@ -77,8 +74,7 @@ public class AdvancedMapView extends MapView {
 		if(context instanceof MapsActivity){
 			activity = (MapsActivity) context; 
 		}
-		pref = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
-		array = activity.getResources().getStringArray(R.array.preferences_selection_shape);
+
 	}
 	
 	/**
@@ -132,23 +128,15 @@ public class AdvancedMapView extends MapView {
 		boolean catched = false;
 		boolean touchResult =true;
 		for(MapControl cl : controls){
-			//If user chooses one point selection select listener for one tap event
-			OnTouchListener tl = null;
-			if(pref.getString("selectionShape", "").equals(array[2])){
-				tl = cl.getOneTapListener();
-			}
-			else 
-				if(pref.getString("selectionShape", "").equals(array[3])){
-					tl = cl.getPolygonTapListener();
-				}
-				else 
-					tl = cl.getMapListener();
-			
+			if(cl==null) continue;
+			//get the OnTouchListener from the controller
+			OnTouchListener tl = cl.getMapListener();
+			//call the event
 			if(cl.isEnabled() && tl !=null){
-				//if one controller returns true the event is not propagated to the map
 				catched = tl.onTouch(this, motionEvent) || catched;
 			}
 		}
+		//if the event was catched the result is not propagated to the map
 		if(!catched)
 			 touchResult = super.onTouchEvent(motionEvent);
 		
@@ -159,12 +147,7 @@ public class AdvancedMapView extends MapView {
 	 * Workaround for getting proper overlay
 	 */
 	public MarkerOverlay getMarkerOverlay(){
-		for(Overlay ov : getOverlays()){
-			if(ov instanceof MarkerOverlay){
-				return (MarkerOverlay) ov;
-			}
-		}
-		return null;
+		return overlayManger.getMarkerOverlay();
 		
 	}
 	
@@ -204,5 +187,14 @@ public class AdvancedMapView extends MapView {
 			
 			activity.setSupportProgressBarIndeterminateVisibility(false);
 		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.mapsforge.android.maps.MapView#redraw()
+	 */
+	@Override
+	public void redraw() {
+		// TODO Auto-generated method stub
+		super.redraw();
 	}
 }
