@@ -1,12 +1,14 @@
-package it.geosolutions.android.map.fragment;
+package it.geosolutions.android.map.fragment.featureinfo;
 
 import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.activities.GetFeatureInfoLayerListActivity;
 import it.geosolutions.android.map.adapters.FeatureInfoAttributesAdapter;
+import it.geosolutions.android.map.common.Constants;
 import it.geosolutions.android.map.loaders.FeatureCircleLoader;
 import it.geosolutions.android.map.model.Feature;
-import it.geosolutions.android.map.model.query.FeatureCircleQuery;
-import it.geosolutions.android.map.model.query.FeatureCircleTaskQuery;
+import it.geosolutions.android.map.model.Layer;
+import it.geosolutions.android.map.model.query.CircleQuery;
+import it.geosolutions.android.map.model.query.CircleTaskQuery;
 import it.geosolutions.android.map.model.query.FeatureInfoQueryResult;
 
 import it.geosolutions.android.map.utils.FeatureInfoUtils;
@@ -42,7 +44,7 @@ public class FeatureCircleAttributeListFragment extends SherlockListFragment
 implements LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>>{
 	
 	private FeatureInfoAttributesAdapter adapter;
-	private FeatureCircleTaskQuery[] queryQueue; 
+	private CircleTaskQuery[] queryQueue; 
 	
 	// The callbacks through which we will interact with the LoaderManager.
 	private LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>> mCallbacks;
@@ -51,9 +53,9 @@ implements LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>>{
 
 	protected Integer limit;
 
-	protected FeatureCircleQuery query; 
+	protected CircleQuery query; 
 
-	protected ArrayList<String> layers;
+	protected ArrayList<Layer> layers;
 
 	protected ArrayList<Feature> currentFeatures;
 
@@ -75,8 +77,8 @@ implements LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>>{
 	    Bundle extras = getActivity().getIntent().getExtras();
 	    ;
 	    // TODO get already loaded data;
-	    query = (FeatureCircleQuery) extras.getParcelable("query"); //  
-	    layers = extras.getStringArrayList("layers");
+	    query = (CircleQuery) extras.getParcelable("query"); //  
+	    layers = (ArrayList<Layer>) extras.getSerializable(Constants.ParamKeys.LAYERS);
 	    start = extras.getInt("start");
 	    limit = extras.getInt("limit");
 
@@ -172,14 +174,14 @@ implements LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>>{
 	 * initialize the loader
 	 * 
 	 * @param query the <FeatureInfoQuery> with bbox
-	 * @param layers array of <String> to generate the queryQueue
+	 * @param layers2 array of <String> to generate the queryQueue
 	 * @param start
 	 * @param limit
 	 */
-	private void startDataLoading(FeatureCircleQuery query, ArrayList<String> layers,
+	private void startDataLoading(CircleQuery query, ArrayList<Layer> layers2,
 	        Integer start, Integer limit) {
 	    // create task query
-	    queryQueue = FeatureInfoUtils.createTaskQueryQueue(layers, query, start,
+	    queryQueue = FeatureInfoUtils.createTaskQueryQueue(layers2, query, start,
 	            limit); 
 
 	    // initialize Load Manager

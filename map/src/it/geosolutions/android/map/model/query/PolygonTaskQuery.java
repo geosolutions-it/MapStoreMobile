@@ -19,18 +19,19 @@ package it.geosolutions.android.map.model.query;
 import android.os.Parcel;
 import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
 import it.geosolutions.android.map.database.SpatialDataSourceHandler;
+import it.geosolutions.android.map.model.Layer;
 
 /**
 * TaskQuery for polygonal selection.
 * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com).
 */
-public class FeaturePolygonTaskQuery extends FeaturePolygonQuery {
+public class PolygonTaskQuery extends PolygonQuery implements FeatureInfoTaskQuery{
 	
 	/**
 	 * Constructor for class FeaturePolygonTaskQuery.
 	 * @param source
 	 */
-	public FeaturePolygonTaskQuery(Parcel source) {
+	public PolygonTaskQuery(Parcel source) {
 		super(source);
 		
 	}
@@ -39,14 +40,12 @@ public class FeaturePolygonTaskQuery extends FeaturePolygonQuery {
 	 * Constructor for class FeaturePolygonTaskQuery.
 	 * @param source
 	 */
-	public FeaturePolygonTaskQuery(FeaturePolygonQuery q){
-		setPolygonPoints(q.getPolygonPoints());
-		setSrid(q.getSrid());
-		setZoomLevel(q.getZoomLevel());
+	public PolygonTaskQuery(PolygonQuery q){
+		super(q);
+		
 	}
 	
-	private SpatialDataSourceHandler handler;
-	private SpatialVectorTable table;
+	private Layer layer;
 	private Integer start;
 	private Integer limit;
 
@@ -82,19 +81,12 @@ public class FeaturePolygonTaskQuery extends FeaturePolygonQuery {
 		this.limit = limit;
 	}
 
-	public SpatialDataSourceHandler getHandler() {
-		return handler;
+	public Layer getLayer() {
+		return layer;
 	}
 
-	public void setHandler(SpatialDataSourceHandler handler) {
-		this.handler = handler;
+	public void setLayer(Layer layer) {
+		this.layer = layer;
 	}
-
-	public SpatialVectorTable getTable() {
-		return table;
-	}
-
-	public void setTable(SpatialVectorTable table) {
-		this.table = table;
-	}
+	
 }

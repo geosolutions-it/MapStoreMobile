@@ -20,34 +20,34 @@ package it.geosolutions.android.map.model.query;
 import android.os.Parcel;
 import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
 import it.geosolutions.android.map.database.SpatialDataSourceHandler;
+import it.geosolutions.android.map.model.Layer;
 
 /**
- * Task query for rectangular selection
+ * Task query on a bounding box selection
  * @author Lorenzo Natali (www.geo-solutions.it)
  */
-public class FeatureRectangularTaskQuery extends FeatureRectangularQuery {
+public class BBoxTaskQuery extends BBoxQuery implements FeatureInfoTaskQuery{
 	
 	/**
 	 * Constructor for class FeatureRectangularTaskQuery.
 	 * @param source
 	 */
-	public FeatureRectangularTaskQuery(Parcel source) {
+	public BBoxTaskQuery(Parcel source) {
 		super(source);	
 	}
 	
-	/**
-	 * Constructor for class FeatureRectangularTaskQuery.
-	 * @param q
-	 */
-	public FeatureRectangularTaskQuery(FeatureRectangularQuery q){
-		setE(q.getE());
-		setS(q.getS());
-		setW(q.getW());
-		setN(q.getN());
-	}
 	
-	private SpatialDataSourceHandler handler;
-	private SpatialVectorTable table;
+	
+	/**
+	 * @param query
+	 */
+	public BBoxTaskQuery(BBoxQuery query) {
+		super(query);
+	}
+
+
+
+	private Layer layer;
 	private Integer start;
 	private Integer limit;
 
@@ -83,19 +83,13 @@ public class FeatureRectangularTaskQuery extends FeatureRectangularQuery {
 		this.limit = limit;
 	}
 
-	public SpatialDataSourceHandler getHandler() {
-		return handler;
+	public Layer getLayer() {
+		return layer;
 	}
 
-	public void setHandler(SpatialDataSourceHandler handler) {
-		this.handler = handler;
+	public void setLayer(Layer layer) {
+		this.layer = layer;
 	}
 
-	public SpatialVectorTable getTable() {
-		return table;
-	}
 
-	public void setTable(SpatialVectorTable table) {
-		this.table = table;
-	}
 }

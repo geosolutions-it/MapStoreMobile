@@ -18,9 +18,13 @@
 package it.geosolutions.android.map.wms;
 
 import it.geosolutions.android.map.model.Source;
+import it.geosolutions.android.map.model.query.BaseFeatureInfoQuery;
+import it.geosolutions.android.map.model.query.FeatureInfoQueryResult;
+import it.geosolutions.android.map.model.query.FeatureInfoTaskQuery;
 import it.geosolutions.android.map.renderer.OverlayRenderer;
 
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Represents a WMS Source
@@ -62,6 +66,16 @@ public class WMSSource implements Source{
 
 	public void setTitle(String title) {
 		this.title = title;
+	}
+
+	/* (non-Javadoc)
+	 * @see it.geosolutions.android.map.model.Source#performQuery(it.geosolutions.android.map.model.query.FeatureInfoQuery, it.geosolutions.android.map.model.query.FeatureInfoQueryResult)
+	 */
+	@Override
+	public int performQuery(FeatureInfoTaskQuery q, List<FeatureInfoQueryResult> r) {
+		//TODO implement it;
+		return 0;
+		
 	}
 	
 }

@@ -18,9 +18,9 @@
 package it.geosolutions.android.map.activities;
 
 import it.geosolutions.android.map.R;
-import it.geosolutions.android.map.fragment.FeatureDetailsFragment;
-import it.geosolutions.android.map.fragment.FeatureInfoAttributeListFragment;
 import it.geosolutions.android.map.fragment.GetFeatureInfoFragment;
+import it.geosolutions.android.map.fragment.featureinfo.FeatureDetailsFragment;
+import it.geosolutions.android.map.fragment.featureinfo.FeatureInfoAttributeListFragment;
 import android.os.Bundle;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;

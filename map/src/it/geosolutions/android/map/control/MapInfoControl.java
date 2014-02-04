@@ -18,6 +18,8 @@
 package it.geosolutions.android.map.control;
 
 import it.geosolutions.android.map.R;
+import it.geosolutions.android.map.common.Constants;
+import it.geosolutions.android.map.common.Constants.Modes;
 import it.geosolutions.android.map.control.todraw.Circle;
 import it.geosolutions.android.map.control.todraw.Polygon;
 import it.geosolutions.android.map.control.todraw.Rectangle;
@@ -237,19 +239,19 @@ public class MapInfoControl extends MapControl{
 	    super.setMode(mode);
 	    if(mode == MODE_VIEW){
 	        if(mapListener != null) 
-	        	mapListener.setMode(MapInfoListener.MODE_VIEW);
+	        	mapListener.setMode(Constants.Modes.MODE_VIEW);
 	        if(oneTapListener != null) 
-	        	oneTapListener.setMode(OneTapListener.MODE_VIEW);
+	        	oneTapListener.setMode(Constants.Modes.MODE_VIEW);
 	        if(polygonTapListener !=null)
-	        	polygonTapListener.setMode(PolygonTapListener.MODE_VIEW);
+	        	polygonTapListener.setMode(Modes.MODE_VIEW);
 	    }
 	    else{
 	    	if(mapListener != null) 
-	    		mapListener.setMode(MapInfoListener.MODE_EDIT);	 
+	    		mapListener.setMode(Constants.Modes.MODE_EDIT);	 
 	        if(oneTapListener != null) 
-	        	oneTapListener.setMode(OneTapListener.MODE_EDIT);
+	        	oneTapListener.setMode(Constants.Modes.MODE_EDIT);
 	        if(polygonTapListener !=null)
-	        	polygonTapListener.setMode(PolygonTapListener.MODE_EDIT);
+	        	polygonTapListener.setMode(Modes.MODE_EDIT);
 	    }
 	}
 	

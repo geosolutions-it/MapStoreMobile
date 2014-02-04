@@ -17,18 +17,18 @@
  */
 package it.geosolutions.android.map.loaders;
 
-import it.geosolutions.android.map.database.SpatialDataSourceHandler;
-import it.geosolutions.android.map.model.Feature;
-import it.geosolutions.android.map.model.query.FeatureCircleTaskQuery;
+import it.geosolutions.android.map.model.Layer;
+import it.geosolutions.android.map.model.Source;
+import it.geosolutions.android.map.model.query.CircleTaskQuery;
 import it.geosolutions.android.map.model.query.FeatureInfoQueryResult;
+import it.geosolutions.android.map.model.query.FeatureInfoTaskQuery;
 
 import java.util.ArrayList;
 import java.util.List;
-import jsqlite.Exception;
+
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
-import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
 /**
  * Async query task to query layers. Updates an adapter with the results from a
  * query A query to the task is a "List of Lists of Maps", implemented with a
@@ -44,12 +44,12 @@ int features_loaded = 0;
 
 private List<FeatureInfoQueryResult> mData;
 
-private FeatureCircleTaskQuery[] queryQueue;
+private CircleTaskQuery[] queryQueue;
 
 // private FeatureCircleObserver mObserver;
 private static int MAX_FEATURES = 10;
 
-public FeatureCircleLoader(Context ctx, FeatureCircleTaskQuery[] queryQueue) {
+public FeatureCircleLoader(Context ctx, CircleTaskQuery[] queryQueue) {
     // Loaders may be used across multiple Activities (assuming they aren't
     // bound to the LoaderManager), so NEVER hold a reference to the context
     // directly. Doing so will cause you to leak an entire Activity's context.
@@ -60,11 +60,11 @@ public FeatureCircleLoader(Context ctx, FeatureCircleTaskQuery[] queryQueue) {
 
 }
 
-protected void doInBackground(FeatureCircleTaskQuery[] queryQueue,
+protected void doInBackground(FeatureInfoTaskQuery[] queryQueue,
         List<FeatureInfoQueryResult> data) {
     Log.d("FEATURE_Circle_TASK", "Circle Task Launched");
     //process all queries
-    for (FeatureCircleTaskQuery query : queryQueue) {
+    for (FeatureInfoTaskQuery query : queryQueue) {
         if (!processQuery(query, data)) {
             return;
         }
@@ -78,46 +78,12 @@ protected void doInBackground(FeatureCircleTaskQuery[] queryQueue,
  * @param query
  * @param data the result will be added to this array
  */
-private boolean processQuery(FeatureCircleTaskQuery query,
+private boolean processQuery(FeatureInfoTaskQuery query,
         List<FeatureInfoQueryResult> data) {
-    SpatialDataSourceHandler handler = query.getHandler();
-    SpatialVectorTable table = query.getTable();
-    String tableName = query.getTable().getName();
-    // check visibility before adding the table
-    // AdvancedStyle s = sm.getStyle(tableName);
-    // if ( !StyleUtils.isVisible(s, zoomLevel) ) {
-    // onProgressUpdate(0);
-    // continue;
-    // }
-    
-    double x = query.getX();
-    double y = query.getY();
-    double radius = query.getRadius();
-    
-    Integer start = query.getStart();
-    Integer limit = query.getLimit();
-    if (Log.isLoggable("FEATURE_Circle_TASK", Log.DEBUG)) { // Log check to avoid
-                                                          // string creation
-        Log.d("FEATURE_Circle_TASK", "starting query for table " + tableName);
-    }
-    // this is empty to skip geometries that returns errors
-    ArrayList<Feature> features = new ArrayList<Feature>();
-    try {
-        features = handler.intersectionToCircle("4326", table, x, y, radius, start, limit);
-    } catch (Exception e) {
-        Log.e("FEATURE_Circle_TASK", "unable to retrive data for table'"
-                + tableName + "\'.Error:" + e.getLocalizedMessage());
-        // TODO now simply skip, do better work
-    }
-    // add features
-    FeatureInfoQueryResult result = new FeatureInfoQueryResult();
-    result.setLayerName(tableName);
-    result.setFeatures(features);
-    Log.v("FEATURE_Circle_TASK", features.size() + " items found for table "
-            + tableName);
-    features_loaded += features.size();
-    // publishProgress(result);
-    data.add(result);
+    Layer<?> layer = query.getLayer();
+    Layer<?> l = query.getLayer();
+	Source s = l.getSource();
+	features_loaded += s.performQuery(query, data);
 
     return true;
 
@@ -138,7 +104,7 @@ public List<FeatureInfoQueryResult> loadInBackground() {
 }
 
 // ********************************************************/
-// ** Deliver the results to the registered listener **/
+// ** Deliver the results to the registered listener     **/
 // ********************************************************/
 @Override
 public void deliverResult(List<FeatureInfoQueryResult> data) {
@@ -165,7 +131,7 @@ public void deliverResult(List<FeatureInfoQueryResult> data) {
 }
 
 // ********************************************************/
-// ** Implement the Loader�s state-dependent behavior **/
+// ** Implement the Loader      state-dependent behavior **/
 // ********************************************************/
 @Override
 protected void onStartLoading() {

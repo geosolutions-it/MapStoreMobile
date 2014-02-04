@@ -24,7 +24,7 @@ import android.os.Parcelable;
  * Class to represent a query model to perform a search by a rectangle designed on map.
  * @author Lorenzo Natali (www.geo-solutions.it)
  */
-public class FeatureRectangularQuery extends FeatureInfoQuery{
+public class BBoxQuery extends BaseFeatureInfoQuery{
 	private double n;
 	private double s;
 	private double e;
@@ -107,6 +107,7 @@ public class FeatureRectangularQuery extends FeatureInfoQuery{
 	 */
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
+		super.writeToParcel(dest, flags);
 		dest.writeDouble(n);
 		dest.writeDouble(s);
 		dest.writeDouble(e);
@@ -117,7 +118,8 @@ public class FeatureRectangularQuery extends FeatureInfoQuery{
 	 * Constructor for class FeatureRectangularQuery.
 	 * @param source
 	 */
-	public FeatureRectangularQuery(Parcel source){
+	public BBoxQuery(Parcel source){
+		super(source);
 		n=source.readDouble();
 		s=source.readDouble();
 		e=source.readDouble();
@@ -127,16 +129,28 @@ public class FeatureRectangularQuery extends FeatureInfoQuery{
 	/**
 	 * Default constructor for class.
 	 */
-	public FeatureRectangularQuery(){}
-	
-	 public static final Parcelable.Creator<FeatureRectangularQuery> CREATOR
-     = new Parcelable.Creator<FeatureRectangularQuery>() {
-	 public FeatureRectangularQuery createFromParcel(Parcel in) {
-	     return new FeatureRectangularQuery(in);
+	public BBoxQuery(){}
+		
+	/**
+	 * Constructor for class FeatureRectangularTaskQuery.
+	 * @param q
+	 */
+	public BBoxQuery(BBoxQuery q){
+		super(q);
+		setE(q.getE());
+		setS(q.getS());
+		setW(q.getW());
+		setN(q.getN());
+	}
+
+	public static final Parcelable.Creator<BBoxQuery> CREATOR
+     = new Parcelable.Creator<BBoxQuery>() {
+	 public BBoxQuery createFromParcel(Parcel in) {
+	     return new BBoxQuery(in);
 	 }
 
-	 public FeatureRectangularQuery[] newArray(int size) {
-	     return new FeatureRectangularQuery[size];
+	 public BBoxQuery[] newArray(int size) {
+	     return new BBoxQuery[size];
 	 }	
 	};	
 }

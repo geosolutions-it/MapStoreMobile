@@ -20,18 +20,19 @@ package it.geosolutions.android.map.model.query;
 import android.os.Parcel;
 import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
 import it.geosolutions.android.map.database.SpatialDataSourceHandler;
+import it.geosolutions.android.map.model.Layer;
 
 /**
  * TaskQuery for circular selection.
  * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com).
  */
-public class FeatureCircleTaskQuery extends FeatureCircleQuery {
+public class CircleTaskQuery extends CircleQuery implements FeatureInfoTaskQuery {
 	
 	/**
 	 * Constructor for class FeatureCircleTaskQuery.
 	 * @param source
 	 */
-	public FeatureCircleTaskQuery(Parcel source) {
+	public CircleTaskQuery(Parcel source) {
 		super(source);
 		
 	}
@@ -40,16 +41,11 @@ public class FeatureCircleTaskQuery extends FeatureCircleQuery {
 	 * Constructor for class FeatureCircleTaskQuery.
 	 * @param q
 	 */
-	public FeatureCircleTaskQuery(FeatureCircleQuery q){
-		setX(q.getX());
-		setY(q.getY());
-		setRadius(q.getRadius());
-		setSrid(q.getSrid());
-		setZoomLevel(q.getZoomLevel());
+	public CircleTaskQuery(CircleQuery q){
+		super(q);
 	}
 	
-	private SpatialDataSourceHandler handler;
-	private SpatialVectorTable table;
+	private Layer layer;
 	private Integer start;
 	private Integer limit;
 
@@ -85,19 +81,20 @@ public class FeatureCircleTaskQuery extends FeatureCircleQuery {
 		this.limit = limit;
 	}
 
-	public SpatialDataSourceHandler getHandler() {
-		return handler;
+	/**
+	 * get the layer to query
+	 * @return
+	 */
+	public Layer getLayer() {
+		return layer;
 	}
 
-	public void setHandler(SpatialDataSourceHandler handler) {
-		this.handler = handler;
+	/**
+	 * set the layer to query
+	 * @param layer
+	 */
+	public void setLayer(Layer layer) {
+		this.layer = layer;
 	}
 
-	public SpatialVectorTable getTable() {
-		return table;
-	}
-
-	public void setTable(SpatialVectorTable table) {
-		this.table = table;
-	}
 }

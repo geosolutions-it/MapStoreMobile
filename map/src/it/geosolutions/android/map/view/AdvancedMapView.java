@@ -22,6 +22,7 @@ import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.control.MapControl;
 import it.geosolutions.android.map.overlay.FreezableOverlay;
 import it.geosolutions.android.map.overlay.MarkerOverlay;
+import it.geosolutions.android.map.overlay.managers.MultiSourceOverlayManager;
 import it.geosolutions.android.map.overlay.managers.OverlayManager;
 
 import java.util.ArrayList;
@@ -51,6 +52,17 @@ public class AdvancedMapView extends MapView {
 		return overlayManger;
 	}
 
+	/**
+	 * Provides the layer manager
+	 * @return
+	 */
+	public MultiSourceOverlayManager getLayerManager(){
+		if(overlayManger instanceof MultiSourceOverlayManager){
+			return (MultiSourceOverlayManager)overlayManger;
+		}else{
+			return null;
+		}
+	}
 	public void setOverlayManger(OverlayManager overlayManger) {
 		this.overlayManger = overlayManger;
 	}

@@ -1,14 +1,16 @@
-package it.geosolutions.android.map.fragment;
+package it.geosolutions.android.map.fragment.featureinfo;
 
 import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.activities.GetFeatureInfoLayerListActivity;
 import it.geosolutions.android.map.adapters.FeatureInfoAttributesAdapter;
+import it.geosolutions.android.map.common.Constants;
 
 import it.geosolutions.android.map.loaders.FeaturePolygonLoader;
 import it.geosolutions.android.map.model.Feature;
-import it.geosolutions.android.map.model.query.FeaturePolygonQuery;
+import it.geosolutions.android.map.model.Layer;
+import it.geosolutions.android.map.model.query.PolygonQuery;
 import it.geosolutions.android.map.model.query.FeatureInfoQueryResult;
-import it.geosolutions.android.map.model.query.FeaturePolygonTaskQuery;
+import it.geosolutions.android.map.model.query.PolygonTaskQuery;
 import it.geosolutions.android.map.utils.FeatureInfoUtils;
 
 import java.util.ArrayList;
@@ -43,7 +45,7 @@ public class FeaturePolygonAttributeListFragment extends SherlockListFragment
 implements LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>>{
 	
 	private FeatureInfoAttributesAdapter adapter;
-	private FeaturePolygonTaskQuery[] queryQueue; 
+	private PolygonTaskQuery[] queryQueue; 
 	
 	// The callbacks through which we will interact with the LoaderManager.
 	private LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>> mCallbacks;
@@ -52,9 +54,9 @@ implements LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>>{
 
 	protected Integer limit;
 
-	protected FeaturePolygonQuery query; 
+	protected PolygonQuery query; 
 
-	protected ArrayList<String> layers;
+	protected ArrayList<Layer> layers;
 
 	protected ArrayList<Feature> currentFeatures;
 
@@ -78,8 +80,8 @@ implements LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>>{
 	    Bundle extras = getActivity().getIntent().getExtras();
 	    ;
 	    // TODO get already loaded data;
-	    query = (FeaturePolygonQuery) extras.getParcelable("query");
-	    layers = extras.getStringArrayList("layers");
+	    query = (PolygonQuery) extras.getParcelable("query");
+	    layers = (ArrayList<Layer>) extras.getSerializable(Constants.ParamKeys.LAYERS);
 	    start = extras.getInt("start");
 	    limit = extras.getInt("limit");
 
@@ -179,7 +181,7 @@ implements LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>>{
 	 * @param start
 	 * @param limit
 	 */
-	private void startDataLoading(FeaturePolygonQuery query, ArrayList<String> layers,
+	private void startDataLoading(PolygonQuery query, ArrayList<Layer> layers,
 	        Integer start, Integer limit) {
 	    // create task query
 	    queryQueue = FeatureInfoUtils.createTaskQueryQueue(layers, query, start,

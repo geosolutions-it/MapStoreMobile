@@ -28,8 +28,11 @@ import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import it.geosolutions.android.map.activities.GetFeatureInfoLayerListActivity;
+import it.geosolutions.android.map.common.Constants;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
-import it.geosolutions.android.map.model.query.FeatureCircleQuery;
+import it.geosolutions.android.map.model.Layer;
+import it.geosolutions.android.map.model.query.CircleQuery;
+import it.geosolutions.android.map.overlay.managers.MultiSourceOverlayManager;
 import it.geosolutions.android.map.style.AdvancedStyle;
 import it.geosolutions.android.map.style.StyleManager;
 import it.geosolutions.android.map.utils.StyleUtils;
@@ -51,9 +54,8 @@ import android.view.View.OnTouchListener;
  */
 public class OneTapListener implements OnTouchListener, OnGestureListener {	
 	// MODES
-	public static final int MODE_VIEW = 0;
-	public static final int MODE_EDIT = 1;	
-	private int mode = MODE_EDIT;
+
+	private int mode = Constants.Modes.MODE_EDIT;
 	
 	private AdvancedMapView view;
 	private Activity activity;
@@ -139,33 +141,18 @@ public class OneTapListener implements OnTouchListener, OnGestureListener {
 	 */
 	private void infoDialogCircle(final double x, final double y, final double radius){
 	       try{
-			final SpatialDataSourceManager sdbManager = SpatialDataSourceManager
-	                .getInstance();
-	        final List<SpatialVectorTable> spatialTables = sdbManager
-	                .getSpatialVectorTables(false);
-	        final StyleManager styleManager = StyleManager.getInstance();
-	        final byte zoomLevel = view.getMapViewPosition().getZoomLevel();
-	        ArrayList<String> layerNames = new ArrayList<String>();
-	        for (SpatialVectorTable table : spatialTables) {
-	            String tableName = table.getName();
-	            AdvancedStyle style = styleManager.getStyle(tableName);
-
-	            // skip this table if not visible
-	            if (StyleUtils.isVisible(style, zoomLevel)) {
-	                layerNames.add(table.getName());
-	            }
-	        }
+    	    ArrayList<Layer> layerNames = getLayers();
 	        Intent i = new Intent(view.getContext(),
 	                GetFeatureInfoLayerListActivity.class);
-	        i.putExtra("layers", layerNames);
-	        FeatureCircleQuery query = new FeatureCircleQuery();
+	        i.putExtra(Constants.ParamKeys.LAYERS, layerNames);
+	        CircleQuery query = new CircleQuery();
 	        query.setX(x);
 	        query.setY(y);
 	        query.setRadius(radius);
 	        query.setSrid("4326");
 	        i.putExtra("query", query);
 	        i.putExtra("selection","Circular");
-	        if (mode == MODE_EDIT) {
+	        if (mode == Constants.Modes.MODE_EDIT) {
 	            i.setAction(Intent.ACTION_PICK);
 	        } else {
 	            i.setAction(Intent.ACTION_VIEW);
@@ -177,6 +164,22 @@ public class OneTapListener implements OnTouchListener, OnGestureListener {
 	        }
 	}
 
+	/**
+	 * Get layers from the mapView
+	 * @return an arrayList of layers
+	 */
+	private ArrayList<Layer> getLayers() {
+		MultiSourceOverlayManager manager =  view.getLayerManager();
+		ArrayList<Layer> layers = manager.getLayers();
+		ArrayList<Layer> result =new ArrayList<Layer>();
+		for(Layer layer:layers){
+			if(layer.isVisibility()){
+				result.add(layer);
+			}
+		}
+		return result;
+	}
+	
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		radius_pixel = (float)pref.getInt("OnePointSelectionRadius", 10);

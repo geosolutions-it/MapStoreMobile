@@ -18,8 +18,10 @@
 package it.geosolutions.android.map.adapters;
 
 import it.geosolutions.android.map.R;
+import it.geosolutions.android.map.model.Layer;
 import it.geosolutions.android.map.model.query.FeatureInfoQueryResult;
 import it.geosolutions.android.map.renderer.LegendRenderer;
+import it.geosolutions.android.map.spatialite.SpatialiteLayer;
 
 import java.util.ArrayList;
 
@@ -40,7 +42,7 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
  * 
  * @author Lorenzo Natali (www.geo-solutions.it)
  */
-public class FeatureInfoLayerLayerdapter extends
+public class FeatureInfoLayerAdapter extends
         ArrayAdapter<FeatureInfoQueryResult> {
 
 int resourceId = R.layout.feature_info_layer_list_row;
@@ -51,7 +53,7 @@ int resourceId = R.layout.feature_info_layer_list_row;
  * @param context
  * @param resource
  */
-public FeatureInfoLayerLayerdapter(Context context, int resource) {
+public FeatureInfoLayerAdapter(Context context, int resource) {
     super(context, resource);
     this.resourceId = resource;
 }
@@ -64,7 +66,7 @@ public FeatureInfoLayerLayerdapter(Context context, int resource) {
  * @param feature_layer_name
  * @param layers
  */
-public FeatureInfoLayerLayerdapter(SherlockFragmentActivity context, int resource,
+public FeatureInfoLayerAdapter(SherlockFragmentActivity context, int resource,
         ArrayList<FeatureInfoQueryResult> layers) {
     super(context, resource, layers);
     this.resourceId = resource;
@@ -97,16 +99,20 @@ public View getView(int position, View convertView, ViewGroup parent) {
         // These TextViews are created in the XML files we defined.
         // TODO use ViewHolder
         // display name
+    	Layer<?> layer= result.getLayer();
         TextView name = (TextView) v.findViewById(R.id.feature_layer_name);
         if (name != null) {
-            name.setText(result.getLayerName());
+            name.setText(result.getLayer().getTitle());
         }
         // display legend
         ImageView legend = (ImageView) v.findViewById(R.id.legend);
         if (legend != null) {
-            legend.setImageDrawable(new BitmapDrawable(getContext()
-                    .getResources(), LegendRenderer.getLegend(result
-                    .getLayerName())));
+        	if(layer instanceof SpatialiteLayer){
+        		SpatialiteLayer l = (SpatialiteLayer)layer;
+        		 legend.setImageDrawable(new BitmapDrawable(getContext()
+                         .getResources(), LegendRenderer.getLegend(l.getTableName() )));
+        	}
+           
         }
     }
 

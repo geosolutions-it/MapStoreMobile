@@ -19,27 +19,24 @@ package it.geosolutions.android.map.listeners;
 
 import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.activities.GetFeatureInfoLayerListActivity;
-import it.geosolutions.android.map.database.SpatialDataSourceManager;
-import it.geosolutions.android.map.model.query.FeatureCircleQuery;
-import it.geosolutions.android.map.model.query.FeatureRectangularQuery;
-import it.geosolutions.android.map.style.AdvancedStyle;
-import it.geosolutions.android.map.style.StyleManager;
-import it.geosolutions.android.map.utils.StyleUtils;
+import it.geosolutions.android.map.common.Constants;
+import it.geosolutions.android.map.model.Layer;
+import it.geosolutions.android.map.model.query.CircleQuery;
+import it.geosolutions.android.map.model.query.BBoxQuery;
+import it.geosolutions.android.map.overlay.managers.MultiSourceOverlayManager;
+import it.geosolutions.android.map.utils.ConversionUtilities;
 import it.geosolutions.android.map.view.AdvancedMapView;
+
 import java.util.ArrayList;
-import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
-
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
-import it.geosolutions.android.map.utils.ConversionUtilities;
 
 /**
  * Listener that implements OnTouch Event on map.
@@ -48,11 +45,9 @@ import it.geosolutions.android.map.utils.ConversionUtilities;
 public class MapInfoListener implements OnTouchListener{
 
 // MODES
-public static final int MODE_VIEW = 0;
 
-public static final int MODE_EDIT = 1;
 
-private int mode = MODE_EDIT;
+private int mode = Constants.Modes.MODE_EDIT;
 
 private boolean dragStarted;
 
@@ -92,37 +87,23 @@ public MapInfoListener(AdvancedMapView mapView, Activity activity) {
  * @param e
  */
 private void infoDialog(final double n, final double w, final double s,
-        final double e) {
+        final double e, byte zoomLevel) {
     try {
-        final SpatialDataSourceManager sdbManager = SpatialDataSourceManager
-                .getInstance();
-        final List<SpatialVectorTable> spatialTables = sdbManager
-                .getSpatialVectorTables(false);
-        final StyleManager styleManager = StyleManager.getInstance();
-        final byte zoomLevel = view.getMapViewPosition().getZoomLevel();
-        ArrayList<String> layerNames = new ArrayList<String>();
-        for (SpatialVectorTable table : spatialTables) {
-            String tableName = table.getName();
-            AdvancedStyle style = styleManager.getStyle(tableName);
-
-            // skip this table if not visible
-            if (StyleUtils.isVisible(style, zoomLevel)) {
-                layerNames.add(table.getName());
-
-            }
-        }
+        ArrayList<Layer> layerNames = getLayers();
         Intent i = new Intent(view.getContext(),
                 GetFeatureInfoLayerListActivity.class);
-        i.putExtra("layers", layerNames);
-        FeatureRectangularQuery query = new FeatureRectangularQuery();
+        i.putExtra(Constants.ParamKeys.LAYERS, layerNames);
+        BBoxQuery query = new BBoxQuery();
         query.setE(e);
         query.setN(n);
         query.setS(s);
         query.setW(w);
+        query.setZoomLevel(zoomLevel);
         query.setSrid("4326");
         i.putExtra("query", query);
         i.putExtra("selection","Rectangular");
-        if (mode == MODE_EDIT) {
+        
+        if (mode == Constants.Modes.MODE_EDIT) {
             i.setAction(Intent.ACTION_PICK);
         } else {
             i.setAction(Intent.ACTION_VIEW);
@@ -135,41 +116,42 @@ private void infoDialog(final double n, final double w, final double s,
 }
 
 /**
+ * Get layers from the mapView
+ * @return an arrayList of layers
+ */
+private ArrayList<Layer> getLayers() {
+	MultiSourceOverlayManager manager =  view.getLayerManager();
+	ArrayList<Layer> layers = manager.getLayers();
+	ArrayList<Layer> result =new ArrayList<Layer>();
+	for(Layer layer:layers){
+		if(layer.isVisibility()){
+			result.add(layer);
+		}
+	}
+	return result;
+}
+
+/**
  * Create a Feature Query for circular and on time selection and pass it to an activity via intent.
  * @param x
  * @param y
  * @param radius
  */
-private void infoDialogCircle(final double x, final double y, final double radius){
+private void infoDialogCircle(final double x, final double y, final double radius,byte zoomLevel){
        try{
-		final SpatialDataSourceManager sdbManager = SpatialDataSourceManager
-                .getInstance();
-        final List<SpatialVectorTable> spatialTables = sdbManager
-                .getSpatialVectorTables(false);
-        final StyleManager styleManager = StyleManager.getInstance();
-        final byte zoomLevel = view.getMapViewPosition().getZoomLevel();
-        ArrayList<String> layerNames = new ArrayList<String>();
-        for (SpatialVectorTable table : spatialTables) {
-            String tableName = table.getName();
-            AdvancedStyle style = styleManager.getStyle(tableName);
-
-            // skip this table if not visible
-            if (StyleUtils.isVisible(style, zoomLevel)) {
-                layerNames.add(table.getName());
-
-            }
-        }
+		ArrayList<Layer> layers = getLayers();
         Intent i = new Intent(view.getContext(),
                 GetFeatureInfoLayerListActivity.class);
-        i.putExtra("layers", layerNames);
-        FeatureCircleQuery query = new FeatureCircleQuery();
+        i.putExtra(Constants.ParamKeys.LAYERS, layers);
+        CircleQuery query = new CircleQuery();
         query.setX(x);
         query.setY(y);
         query.setRadius(radius);
         query.setSrid("4326");
+        query.setZoomLevel(zoomLevel);
         i.putExtra("query", query);
-        i.putExtra("selection","Circular"); //Indicate that user has choosed circular selection
-        if (mode == MODE_EDIT) {
+        i.putExtra("selection","Circular"); //Indicate that user has chose circular selection
+        if (mode == Constants.Modes.MODE_EDIT) {
             i.setAction(Intent.ACTION_PICK);
         } else {
             i.setAction(Intent.ACTION_VIEW);
@@ -259,7 +241,7 @@ public boolean onTouch(View v, MotionEvent event){
             	double e = ConversionUtilities.convertFromPixelsToLongitude(view, endX);
      
                 Log.v("MAPINFOTOOL", "bbox:" + w + "," + s + "," + e + "," + n);
-                infoDialog(n, w, s, e);
+                infoDialog(n, w, s, e,view.getMapViewPosition().getZoomLevel());
             }
             else {  
             	//Calculate radius and coordinates of circle
@@ -272,7 +254,7 @@ public boolean onTouch(View v, MotionEvent event){
                 double radius = Math.sqrt( (rad_x*rad_x) + (rad_y*rad_y));
         	
                 Log.v("MAPINFOTOOL", "circle: center (" + x + "," + y + ") radius " + radius);
-            	infoDialogCircle(x,y,radius);
+            	infoDialogCircle(x,y,radius,view.getMapViewPosition().getZoomLevel());
             	}
         }	
     

@@ -24,7 +24,7 @@ import android.os.Parcelable;
  * Class to represent a query model to perform a search by a circle designed on map.
  * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com).
  */
-public class FeatureCircleQuery extends FeatureInfoQuery{
+public class CircleQuery extends BaseFeatureInfoQuery{
 	
 	private double x, y, radius;
 	
@@ -84,6 +84,7 @@ public class FeatureCircleQuery extends FeatureInfoQuery{
 	 */
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
+		super.writeToParcel(dest, flags);
 		dest.writeDouble(x);
 		dest.writeDouble(y);
 		dest.writeDouble(radius);
@@ -93,7 +94,8 @@ public class FeatureCircleQuery extends FeatureInfoQuery{
 	 * Constructor for class FeatureCircleQuery.
 	 * @param source
 	 */
-	public FeatureCircleQuery(Parcel source){
+	public CircleQuery(Parcel source){
+		super(source);
 		x=source.readDouble();
 		y=source.readDouble();
 		radius=source.readDouble();
@@ -102,16 +104,28 @@ public class FeatureCircleQuery extends FeatureInfoQuery{
 	/**
 	 * Default constructor for class.
 	 */
-	public FeatureCircleQuery(){}
+	public CircleQuery(){}
 	
-	 public static final Parcelable.Creator<FeatureCircleQuery> CREATOR
-     = new Parcelable.Creator<FeatureCircleQuery>() {
-	 public FeatureCircleQuery createFromParcel(Parcel in) {
-	     return new FeatureCircleQuery(in);
+	 /**
+	 * @param q
+	 */
+	public CircleQuery(CircleQuery q) {
+		super(q);
+		setX(q.getX());
+		setY(q.getY());
+		setRadius(q.getRadius());
+		setSrid(q.getSrid());
+		setZoomLevel(q.getZoomLevel());
+	}
+
+	public static final Parcelable.Creator<CircleQuery> CREATOR
+     = new Parcelable.Creator<CircleQuery>() {
+	 public CircleQuery createFromParcel(Parcel in) {
+	     return new CircleQuery(in);
 	 }
 
-	 public FeatureCircleQuery[] newArray(int size) {
-	     return new FeatureCircleQuery[size];
+	 public CircleQuery[] newArray(int size) {
+	     return new CircleQuery[size];
 	 }	
 	};	
 }

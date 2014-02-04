@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.geosolutions.android.map.fragment;
+package it.geosolutions.android.map.fragment.featureinfo;
 
 import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.adapters.FeatureInfoAttributesAdapter;

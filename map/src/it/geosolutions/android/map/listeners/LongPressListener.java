@@ -1,15 +1,7 @@
 package it.geosolutions.android.map.listeners;
 
-import java.util.List;
-
-import jsqlite.Exception;
-import it.geosolutions.android.map.database.SpatialDataSourceManager;
-import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
 import it.geosolutions.android.map.overlay.SpatialiteOverlay;
 import it.geosolutions.android.map.view.AdvancedMapView;
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.os.AsyncTask;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -17,7 +9,6 @@ import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.widget.Toast;
 
 public class LongPressListener implements OnTouchListener, OnGestureListener {
 

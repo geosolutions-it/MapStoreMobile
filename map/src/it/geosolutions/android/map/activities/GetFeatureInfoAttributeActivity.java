@@ -17,10 +17,10 @@
  */
 package it.geosolutions.android.map.activities;
 
-import it.geosolutions.android.map.fragment.FeatureCircleAttributeListFragment;
-import it.geosolutions.android.map.fragment.FeatureInfoAttributeListFragment;
-import it.geosolutions.android.map.fragment.FeatureInfoLayerListFragment;
-import it.geosolutions.android.map.fragment.FeaturePolygonAttributeListFragment;
+import it.geosolutions.android.map.fragment.featureinfo.FeatureCircleAttributeListFragment;
+import it.geosolutions.android.map.fragment.featureinfo.FeatureInfoAttributeListFragment;
+import it.geosolutions.android.map.fragment.featureinfo.FeatureInfoLayerListFragment;
+import it.geosolutions.android.map.fragment.featureinfo.FeaturePolygonAttributeListFragment;
 
 import it.geosolutions.android.map.R;
 import android.os.Bundle;

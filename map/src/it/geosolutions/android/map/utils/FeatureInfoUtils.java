@@ -18,12 +18,13 @@
 package it.geosolutions.android.map.utils;
 
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
-import it.geosolutions.android.map.model.query.FeatureCircleQuery;
-import it.geosolutions.android.map.model.query.FeaturePolygonQuery;
-import it.geosolutions.android.map.model.query.FeatureCircleTaskQuery;
-import it.geosolutions.android.map.model.query.FeatureRectangularQuery;
-import it.geosolutions.android.map.model.query.FeatureRectangularTaskQuery;
-import it.geosolutions.android.map.model.query.FeaturePolygonTaskQuery;
+import it.geosolutions.android.map.model.Layer;
+import it.geosolutions.android.map.model.query.CircleQuery;
+import it.geosolutions.android.map.model.query.PolygonQuery;
+import it.geosolutions.android.map.model.query.CircleTaskQuery;
+import it.geosolutions.android.map.model.query.BBoxQuery;
+import it.geosolutions.android.map.model.query.BBoxTaskQuery;
+import it.geosolutions.android.map.model.query.PolygonTaskQuery;
 
 import java.util.ArrayList;
 import jsqlite.Exception;
@@ -45,23 +46,16 @@ public class FeatureInfoUtils {
 	 * @param start 
 	 * @return
 	 */
-	public static FeatureRectangularTaskQuery[] createTaskQueryQueue(ArrayList<String> layers, FeatureRectangularQuery query, Integer start, Integer limit) {
+	public static BBoxTaskQuery[] createTaskQueryQueue(ArrayList<Layer> layers, BBoxQuery query, Integer start, Integer limit) {
 		final SpatialDataSourceManager sdbManager = SpatialDataSourceManager
 				.getInstance();
 		int querySize = layers.size();
-		FeatureRectangularTaskQuery[] queryQueue = new FeatureRectangularTaskQuery[querySize];
+		BBoxTaskQuery[] queryQueue = new BBoxTaskQuery[querySize];
 		int index = 0;
-		for (String layer : layers) {
-			SpatialVectorTable table;
-			try {
-				table = sdbManager.getVectorTableByName(layer);
-			} catch (Exception e1) {
-				Log.e("FEATUREINFO", "unable to get table:" + layer);
-				continue;
-			}
-			FeatureRectangularTaskQuery taskquery = new FeatureRectangularTaskQuery(query);
-			taskquery.setTable(table);
-			taskquery.setHandler(sdbManager.getSpatialDataSourceHandler(table));
+		for (Layer<?> layer : layers) {
+			
+			BBoxTaskQuery taskquery = new BBoxTaskQuery(query);
+			taskquery.setLayer(layer);
 			taskquery.setStart(start);
 			taskquery.setLimit(limit);
 
@@ -72,7 +66,7 @@ public class FeatureInfoUtils {
 	}
 	
 	/**
-	 * Creates a task query queue from the original query, adding start and limit and the proper layer handlers.
+	 * Creates a task query queue from the original query, adding start and limit and the  layer.
 	 * @param sdbManager
 	 * @param layers
 	 * @param querySize
@@ -81,23 +75,15 @@ public class FeatureInfoUtils {
 	 * @param start 
 	 * @return
 	 */
-	public static FeatureCircleTaskQuery[] createTaskQueryQueue(ArrayList<String> layers, FeatureCircleQuery query, Integer start, Integer limit) {
-		final SpatialDataSourceManager sdbManager = SpatialDataSourceManager
-				.getInstance();
+	public static CircleTaskQuery[] createTaskQueryQueue(ArrayList<Layer> layers, CircleQuery query, Integer start, Integer limit) {
+		
 		int querySize = layers.size();
-		FeatureCircleTaskQuery[] queryQueue = new FeatureCircleTaskQuery[querySize];
+		CircleTaskQuery[] queryQueue = new CircleTaskQuery[querySize];
 		int index = 0;
-		for (String layer : layers) {
+		for (Layer layer : layers) {
 			SpatialVectorTable table;
-			try {
-				table = sdbManager.getVectorTableByName(layer);
-			} catch (Exception e1) {
-				Log.e("FEATUREINFO", "unable to get table:" + layer);
-				continue;
-			}
-			FeatureCircleTaskQuery taskquery = new FeatureCircleTaskQuery(query);
-			taskquery.setTable(table);
-			taskquery.setHandler(sdbManager.getSpatialDataSourceHandler(table));
+			CircleTaskQuery taskquery = new CircleTaskQuery(query);
+			taskquery.setLayer(layer);
 			taskquery.setStart(start);
 			taskquery.setLimit(limit);
 
@@ -108,7 +94,7 @@ public class FeatureInfoUtils {
 	}
 	
 	/**
-	 * Creates a task query queue from the original query, adding start and limit and the proper layer handlers.
+	 * Creates a task query queue from the original query, adding start and limit and the layer.
 	 * @param sdbManager
 	 * @param layers
 	 * @param querySize
@@ -117,23 +103,13 @@ public class FeatureInfoUtils {
 	 * @param start 
 	 * @return
 	 */
-	public static FeaturePolygonTaskQuery[] createTaskQueryQueue(ArrayList<String> layers, FeaturePolygonQuery query, Integer start, Integer limit) {
-		final SpatialDataSourceManager sdbManager = SpatialDataSourceManager
-				.getInstance();
+	public static PolygonTaskQuery[] createTaskQueryQueue(ArrayList<Layer> layers, PolygonQuery query, Integer start, Integer limit) {
 		int querySize = layers.size();
-		FeaturePolygonTaskQuery[] queryQueue = new FeaturePolygonTaskQuery[querySize];
+		PolygonTaskQuery[] queryQueue = new PolygonTaskQuery[querySize];
 		int index = 0;
-		for (String layer : layers) {
-			SpatialVectorTable table;
-			try {
-				table = sdbManager.getVectorTableByName(layer);
-			} catch (Exception e1) {
-				Log.e("FEATUREINFO", "unable to get table:" + layer);
-				continue;
-			}
-			FeaturePolygonTaskQuery taskquery = new FeaturePolygonTaskQuery(query);
-			taskquery.setTable(table);
-			taskquery.setHandler(sdbManager.getSpatialDataSourceHandler(table));
+		for (Layer layer : layers) {
+			PolygonTaskQuery taskquery = new PolygonTaskQuery(query);
+			taskquery.setLayer(layer);
 			taskquery.setStart(start);
 			taskquery.setLimit(limit);
 

@@ -15,16 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.geosolutions.android.map.fragment;
+package it.geosolutions.android.map.fragment.featureinfo;
 
 import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.activities.GetFeatureInfoLayerListActivity;
 import it.geosolutions.android.map.adapters.FeatureInfoAttributesAdapter;
+import it.geosolutions.android.map.common.Constants;
 import it.geosolutions.android.map.loaders.FeatureInfoLoader;
 import it.geosolutions.android.map.model.Feature;
+import it.geosolutions.android.map.model.Layer;
 import it.geosolutions.android.map.model.query.FeatureInfoQueryResult;
-import it.geosolutions.android.map.model.query.FeatureRectangularQuery;
-import it.geosolutions.android.map.model.query.FeatureRectangularTaskQuery;
+import it.geosolutions.android.map.model.query.BBoxQuery;
+import it.geosolutions.android.map.model.query.BBoxTaskQuery;
 import it.geosolutions.android.map.utils.FeatureInfoUtils;
 
 import java.util.ArrayList;
@@ -59,7 +61,7 @@ public class FeatureInfoAttributeListFragment extends SherlockListFragment
         implements LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>> {
 private FeatureInfoAttributesAdapter adapter;
 
-FeatureRectangularTaskQuery[] queryQueue;
+BBoxTaskQuery[] queryQueue;
 
 // The callbacks through which we will interact with the LoaderManager.
 
@@ -69,9 +71,9 @@ protected Integer start;
 
 protected Integer limit;
 
-protected FeatureRectangularQuery query;
+protected BBoxQuery query;
 
-protected ArrayList<String> layers;
+protected ArrayList<Layer> layers;
 
 protected ArrayList<Feature> currentFeatures;
 
@@ -93,8 +95,8 @@ public void onCreate(Bundle savedInstanceState) {
     Bundle extras = getActivity().getIntent().getExtras();
     ;
     // TODO get already loaded data;
-    query = (FeatureRectangularQuery) extras.getParcelable("query");
-    layers = extras.getStringArrayList("layers");
+    query = (BBoxQuery) extras.getParcelable("query");
+    layers = (ArrayList<Layer>) extras.getSerializable(Constants.ParamKeys.LAYERS);
     start = extras.getInt("start");
     limit = extras.getInt("limit");
 
@@ -195,7 +197,7 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
  * @param start
  * @param limit
  */
-private void startDataLoading(FeatureRectangularQuery query, ArrayList<String> layers,
+private void startDataLoading(BBoxQuery query, ArrayList<Layer> layers,
         Integer start, Integer limit) {
     // create task query
     queryQueue = FeatureInfoUtils.createTaskQueryQueue(layers, query, start,

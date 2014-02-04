@@ -19,8 +19,11 @@ package it.geosolutions.android.map.loaders;
 
 import it.geosolutions.android.map.database.SpatialDataSourceHandler;
 import it.geosolutions.android.map.model.Feature;
+import it.geosolutions.android.map.model.Layer;
+import it.geosolutions.android.map.model.Source;
 import it.geosolutions.android.map.model.query.FeatureInfoQueryResult;
-import it.geosolutions.android.map.model.query.FeatureRectangularTaskQuery;
+import it.geosolutions.android.map.model.query.FeatureInfoTaskQuery;
+import it.geosolutions.android.map.model.query.BBoxTaskQuery;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +52,7 @@ int features_loaded = 0;
 
 private List<FeatureInfoQueryResult> mData;
 
-private FeatureRectangularTaskQuery[] queryQueue;
+private BBoxTaskQuery[] queryQueue;
 
 // private FeatureInfoObserver mObserver;
 private static int MAX_FEATURES = 10;
@@ -59,7 +62,7 @@ private static int MAX_FEATURES = 10;
  * @param ctx
  * @param queryQueue
  */
-public FeatureInfoLoader(Context ctx, FeatureRectangularTaskQuery[] queryQueue) {
+public FeatureInfoLoader(Context ctx, BBoxTaskQuery[] queryQueue) {
     // Loaders may be used across multiple Activities (assuming they aren't
     // bound to the LoaderManager), so NEVER hold a reference to the context
     // directly. Doing so will cause you to leak an entire Activity's context.
@@ -70,11 +73,11 @@ public FeatureInfoLoader(Context ctx, FeatureRectangularTaskQuery[] queryQueue) 
 
 }
 
-protected void doInBackground(FeatureRectangularTaskQuery[] queryQueue,
+protected void doInBackground(FeatureInfoTaskQuery[] queryQueue,
         List<FeatureInfoQueryResult> data) {
     Log.d("FEATURE_INFO_TASK", "Info Task Launched");
     //process all queries
-    for (FeatureRectangularTaskQuery query : queryQueue) {
+    for (FeatureInfoTaskQuery query : queryQueue) {
         if (!processQuery(query, data)) {
             return;
         }
@@ -88,46 +91,12 @@ protected void doInBackground(FeatureRectangularTaskQuery[] queryQueue,
  * @param query
  * @param data the result will be added to this array
  */
-private boolean processQuery(FeatureRectangularTaskQuery query,
+private boolean processQuery(FeatureInfoTaskQuery query,
         List<FeatureInfoQueryResult> data) {
-    SpatialDataSourceHandler handler = query.getHandler();
-    SpatialVectorTable table = query.getTable();
-    String tableName = query.getTable().getName();
-    // check visibility before adding the table
-    // AdvancedStyle s = sm.getStyle(tableName);
-    // if ( !StyleUtils.isVisible(s, zoomLevel) ) {
-    // onProgressUpdate(0);
-    // continue;
-    // }
-    double north = query.getN();
-    double south = query.getS();
-    double east = query.getE();
-    double west = query.getW();
-    Integer start = query.getStart();
-    Integer limit = query.getLimit();
-    if (Log.isLoggable("FEATURE_INFO_TASK", Log.DEBUG)) { // Log check to avoid
-                                                          // string creation
-        Log.d("FEATURE_INFO_TASK", "starting query for table " + tableName);
-    }
-    // this is empty to skip geometries that returns errors
-    ArrayList<Feature> features = new ArrayList<Feature>();
-    try {
-        features = handler.intersectionToFeatureListBBOX("4326", table, north,
-                south, east, west, start, limit);
-    } catch (Exception e) {
-        Log.e("FEATURE_INFO_TASK", "unable to retrive data for table'"
-                + tableName + "\'.Error:" + e.getLocalizedMessage());
-        // TODO now simply skip, do better work
-    }
-    // add features
-    FeatureInfoQueryResult result = new FeatureInfoQueryResult();
-    result.setLayerName(tableName);
-    result.setFeatures(features);
-    Log.v("FEATURE_INFO_TASK", features.size() + " items found for table "
-            + tableName);
-    features_loaded += features.size();
-    // publishProgress(result);
-    data.add(result);
+	Layer<?> l = query.getLayer();
+	Source s = l.getSource();
+	features_loaded += s.performQuery(query, data);
+    
 
     return true;
 

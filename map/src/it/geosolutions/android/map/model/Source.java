@@ -17,7 +17,11 @@
  */
 package it.geosolutions.android.map.model;
 
+import it.geosolutions.android.map.model.query.FeatureInfoQueryResult;
+import it.geosolutions.android.map.model.query.FeatureInfoTaskQuery;
+
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Abstract Layer Source interface
@@ -35,4 +39,13 @@ public interface Source extends Serializable {
 	 * @param title 
 	 */
 	public void setTitle(String title);
+	
+	/**
+	 * Perform a query on the source
+	 * @param q the query to perform
+	 * @param r the result to provide
+	 * @return the number of items found
+	 */
+	public int performQuery(FeatureInfoTaskQuery q,List<FeatureInfoQueryResult> r);
+
 }

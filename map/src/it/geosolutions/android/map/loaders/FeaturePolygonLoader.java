@@ -19,8 +19,11 @@ package it.geosolutions.android.map.loaders;
 
 import it.geosolutions.android.map.database.SpatialDataSourceHandler;
 import it.geosolutions.android.map.model.Feature;
+import it.geosolutions.android.map.model.Layer;
+import it.geosolutions.android.map.model.Source;
 import it.geosolutions.android.map.model.query.FeatureInfoQueryResult;
-import it.geosolutions.android.map.model.query.FeaturePolygonTaskQuery;
+import it.geosolutions.android.map.model.query.FeatureInfoTaskQuery;
+import it.geosolutions.android.map.model.query.PolygonTaskQuery;
 import it.geosolutions.android.map.utils.Coordinates.Coordinates_Query;
 
 import java.util.ArrayList;
@@ -45,7 +48,7 @@ int features_loaded = 0;
 
 private List<FeatureInfoQueryResult> mData;
 
-private FeaturePolygonTaskQuery[] queryQueue;
+private PolygonTaskQuery[] queryQueue;
 
 // private FeaturePolygonObserver mObserver;
 private static int MAX_FEATURES = 10;
@@ -55,7 +58,7 @@ private static int MAX_FEATURES = 10;
  * @param ctx
  * @param queryQueue
  */
-public FeaturePolygonLoader(Context ctx, FeaturePolygonTaskQuery[] queryQueue) {
+public FeaturePolygonLoader(Context ctx, PolygonTaskQuery[] queryQueue) {
     // Loaders may be used across multiple Activities (assuming they aren't
     // bound to the LoaderManager), so NEVER hold a reference to the context
     // directly. Doing so will cause you to leak an entire Activity's context.
@@ -66,11 +69,11 @@ public FeaturePolygonLoader(Context ctx, FeaturePolygonTaskQuery[] queryQueue) {
 
 }
 
-protected void doInBackground(FeaturePolygonTaskQuery[] queryQueue,
+protected void doInBackground(PolygonTaskQuery[] queryQueue,
         List<FeatureInfoQueryResult> data) {
     Log.d("FEATURE_Polygon_TASK", "Polygon Task Launched");
     //process all queries
-    for (FeaturePolygonTaskQuery query : queryQueue) {
+    for (PolygonTaskQuery query : queryQueue) {
         if (!processQuery(query, data)) {
             return;
         }
@@ -84,38 +87,11 @@ protected void doInBackground(FeaturePolygonTaskQuery[] queryQueue,
  * @param query
  * @param data the result will be added to this array
  */
-private boolean processQuery(FeaturePolygonTaskQuery query,
+private boolean processQuery(FeatureInfoTaskQuery query,
         List<FeatureInfoQueryResult> data) {
-    SpatialDataSourceHandler handler = query.getHandler();
-    SpatialVectorTable table = query.getTable();
-    String tableName = query.getTable().getName();
-    
-    ArrayList<Coordinates_Query> polygon_points = query.getPolygonPoints(); //get points in format (long/lat).
-    
-    Integer start = query.getStart();
-    Integer limit = query.getLimit();
-    if (Log.isLoggable("FEATURE_Polygon_TASK", Log.DEBUG)) { // Log check to avoid
-                                                          // string creation
-        Log.d("FEATURE_Polygon_TASK", "starting query for table " + tableName);
-    }
-    // this is empty to skip geometries that returns errors
-    ArrayList<Feature> features = new ArrayList<Feature>();
-    try {
-        features = handler.intersectionToPolygon("4326", table, polygon_points, start, limit);
-    } catch (Exception e) {
-        Log.e("FEATURE_Polygon_TASK", "unable to retrive data for table'"
-                + tableName + "\'.Error:" + e.getLocalizedMessage());
-        // TODO now simply skip, do better work
-    }
-    // add features
-    FeatureInfoQueryResult result = new FeatureInfoQueryResult();
-    result.setLayerName(tableName);
-    result.setFeatures(features);
-    Log.v("FEATURE_Polygon_TASK", features.size() + " items found for table "
-            + tableName);
-    features_loaded += features.size();
-    // publishProgress(result);
-    data.add(result);
+	Layer<?> l = query.getLayer();
+	Source s = l.getSource();
+	features_loaded += s.performQuery(query, data);
 
     return true;
 

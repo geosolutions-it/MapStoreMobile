@@ -26,13 +26,13 @@ import it.geosolutions.android.map.utils.Coordinates.Coordinates_Query;
  * Class to represent a query model to perform a search by polygon designed on map.
  * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com).
  */
-public class FeaturePolygonQuery extends FeatureInfoQuery{
+public class PolygonQuery extends BaseFeatureInfoQuery{
 	private ArrayList<Coordinates_Query> polygon_points;  //Store coordinates of polygon points
 	
 	/**
 	 * Default constructor for class
 	 */
-	public FeaturePolygonQuery(){
+	public PolygonQuery(){
 		polygon_points = new ArrayList<Coordinates_Query>();
 	}
 	/**
@@ -65,6 +65,7 @@ public class FeaturePolygonQuery extends FeatureInfoQuery{
 	
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
+		super.writeToParcel(dest, flags);
 		dest.writeTypedList(polygon_points);
 	}
 	
@@ -72,19 +73,30 @@ public class FeaturePolygonQuery extends FeatureInfoQuery{
 	 * Constructor for class FeaturePolygonQuery
 	 * @param source
 	 */
-	public FeaturePolygonQuery(Parcel source){
+	public PolygonQuery(Parcel source){
+		super(source);
 		polygon_points = new ArrayList<Coordinates_Query>();
 		source.readTypedList(polygon_points,Coordinates_Query.CREATOR);
 	}
 		
-	 public static final Parcelable.Creator<FeaturePolygonQuery> CREATOR
-     = new Parcelable.Creator<FeaturePolygonQuery>() {
-	 public FeaturePolygonQuery createFromParcel(Parcel in) {
-	     return new FeaturePolygonQuery(in);
+	 /**
+	 * @param q
+	 */
+	public PolygonQuery(PolygonQuery q) {
+		super(q);
+		setPolygonPoints(q.getPolygonPoints());
+		setSrid(q.getSrid());
+		setZoomLevel(q.getZoomLevel());
+	}
+
+	public static final Parcelable.Creator<PolygonQuery> CREATOR
+     = new Parcelable.Creator<PolygonQuery>() {
+	 public PolygonQuery createFromParcel(Parcel in) {
+	     return new PolygonQuery(in);
 	 }
 
-	 public FeaturePolygonQuery[] newArray(int size) {
-	     return new FeaturePolygonQuery[size];
+	 public PolygonQuery[] newArray(int size) {
+	     return new PolygonQuery[size];
 	 }	
 	};
 }

@@ -15,22 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.geosolutions.android.map.fragment;
+package it.geosolutions.android.map.fragment.featureinfo;
 
 import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.activities.GetFeatureInfoAttributeActivity;
-import it.geosolutions.android.map.adapters.FeatureInfoLayerLayerdapter;
+import it.geosolutions.android.map.adapters.FeatureInfoLayerAdapter;
+import it.geosolutions.android.map.common.Constants;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
 import it.geosolutions.android.map.loaders.FeatureCircleLoader;
 import it.geosolutions.android.map.loaders.FeatureInfoLoader;
 import it.geosolutions.android.map.loaders.FeaturePolygonLoader;
-import it.geosolutions.android.map.model.query.FeatureCircleQuery;
-import it.geosolutions.android.map.model.query.FeatureCircleTaskQuery;
+import it.geosolutions.android.map.model.Layer;
+import it.geosolutions.android.map.model.query.CircleQuery;
+import it.geosolutions.android.map.model.query.CircleTaskQuery;
 import it.geosolutions.android.map.model.query.FeatureInfoQueryResult;
-import it.geosolutions.android.map.model.query.FeaturePolygonQuery;
-import it.geosolutions.android.map.model.query.FeaturePolygonTaskQuery;
-import it.geosolutions.android.map.model.query.FeatureRectangularQuery;
-import it.geosolutions.android.map.model.query.FeatureRectangularTaskQuery;
+import it.geosolutions.android.map.model.query.PolygonQuery;
+import it.geosolutions.android.map.model.query.PolygonTaskQuery;
+import it.geosolutions.android.map.model.query.BBoxQuery;
+import it.geosolutions.android.map.model.query.BBoxTaskQuery;
 import it.geosolutions.android.map.utils.FeatureInfoUtils;
 
 import java.util.ArrayList;
@@ -63,13 +65,13 @@ import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
 public class FeatureInfoLayerListFragment extends SherlockListFragment
         implements LoaderCallbacks<List<FeatureInfoQueryResult>> {
 	
-private FeatureInfoLayerLayerdapter adapter;
+private FeatureInfoLayerAdapter adapter;
 private static final int LOADER_INDEX =0;
 
 private String selection_type;
-private FeatureRectangularTaskQuery[] queryQueueRect;
-private FeatureCircleTaskQuery[] queryQueueCircle;
-private FeaturePolygonTaskQuery[] queryQueuePolygon;
+private BBoxTaskQuery[] queryQueueRect;
+private CircleTaskQuery[] queryQueueCircle;
+private PolygonTaskQuery[] queryQueuePolygon;
 
 // The callbacks through which we will interact with the LoaderManager.
 
@@ -90,34 +92,34 @@ public void onCreate(Bundle savedInstanceState) {
     // TODO use arguments instead
     Bundle extras = getActivity().getIntent().getExtras();
     selection_type = extras.getString("selection"); //Discover which selection user has selected
-    ArrayList<String> layers = extras.getStringArrayList("layers");
+    ArrayList<Layer> layers = (ArrayList<Layer>)extras.getSerializable(Constants.ParamKeys.LAYERS);
     // create a unique loader index
     // TODO use a better system to get the proper loader
     // TODO check if needed,maybe the activity has only one loader
       
-    FeatureRectangularQuery query_r;
-    FeatureCircleQuery query_c;
-    FeaturePolygonQuery query_p;
+    BBoxQuery query_r;
+    CircleQuery query_c;
+    PolygonQuery query_p;
     
     // create task query
     if(selection_type.equals("Rectangular")){
-    	query_r = (FeatureRectangularQuery) extras.getParcelable("query");
+    	query_r = (BBoxQuery) extras.getParcelable("query");
     	queryQueueRect = FeatureInfoUtils.createTaskQueryQueue(layers, query_r, null, 1);
     }
     else 
     	if(selection_type.equals("Circular")){
-	    	query_c = (FeatureCircleQuery) extras.getParcelable("query");
+	    	query_c = (CircleQuery) extras.getParcelable("query");
 	    	queryQueueCircle = FeatureInfoUtils.createTaskQueryQueue(layers, query_c, null, 1);
     	}
     	else{
-    		query_p = (FeaturePolygonQuery) extras.getParcelable("query");
+    		query_p = (PolygonQuery) extras.getParcelable("query");
         	queryQueuePolygon = FeatureInfoUtils.createTaskQueryQueue(layers, query_p, null, 1);
     	}
     
     // Initialize loader and callbacks for the parent activity
 
     // setup the listView
-    adapter = new FeatureInfoLayerLayerdapter(getSherlockActivity(),
+    adapter = new FeatureInfoLayerAdapter(getSherlockActivity(),
             R.layout.feature_info_layer_list_row);
     setListAdapter(adapter);
 
@@ -181,7 +183,7 @@ private void setNoData() {
  * @param query array of <FeatureInfoTaskQuery> to pass to the loader
  * @param loaderIndex a unique id for query loader
  */
-private void startDataLoading(FeatureRectangularTaskQuery[] query, int loaderIndex) {
+private void startDataLoading(BBoxTaskQuery[] query, int loaderIndex) {
     // create task query
 
     // initialize Load Manager
@@ -199,7 +201,7 @@ private void startDataLoading(FeatureRectangularTaskQuery[] query, int loaderInd
  * @param query array of <FeatureCircleTaskQuery> to pass to the loader
  * @param loaderIndex a unique id for query loader
  */
-private void startDataLoading(FeatureCircleTaskQuery[] query, int loaderIndex) {
+private void startDataLoading(CircleTaskQuery[] query, int loaderIndex) {
     // create task query
 
     // initialize Load Manager
@@ -217,7 +219,7 @@ private void startDataLoading(FeatureCircleTaskQuery[] query, int loaderIndex) {
  * @param queryQueue2 array of <FeaturePolygonTaskQuery> to pass to the loader
  * @param loaderIndex a unique id for query loader
  */
-private void startDataLoading(FeaturePolygonTaskQuery[] queryQueue2, int loaderIndex) {
+private void startDataLoading(PolygonTaskQuery[] queryQueue2, int loaderIndex) {
     // create task query
 
     // initialize Load Manager
@@ -249,13 +251,13 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
             Intent i = new Intent(view.getContext(),
                     GetFeatureInfoAttributeActivity.class);
             i.putExtras(getActivity().getIntent().getExtras());
-            i.removeExtra("layers");
+            i.removeExtra(Constants.ParamKeys.LAYERS);
             // add a list with only one layer
-            ArrayList<String> subList = new ArrayList<String>();
+            ArrayList<Layer<?>> subList = new ArrayList<Layer<?>>();
             FeatureInfoQueryResult item = (FeatureInfoQueryResult) parent
                     .getAdapter().getItem(position);
-            subList.add(item.getLayerName());
-            i.putExtra("layers", subList);
+            subList.add(item.getLayer());
+            i.putExtra(Constants.ParamKeys.LAYERS, subList);
             i.putExtra("start", 0);
             i.putExtra("limit", 1);
             //don't allow picking the position 
@@ -267,110 +269,6 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
     });
 }
 
-/**
- * create an array of <FeatureRectangularTaskQuery> from the <FeatureRectangularQuery>
- * and the list of layers. This array can be passed to the loader to perform
- * a query 
- * @param layers a list of <String> for whom to generate the query
- * @param query the base query (bounding box etc..) 
- * @return an array of <FeatureRectangularTaskQuery> to pass to a loader
- */
-private FeatureRectangularTaskQuery[] createTaskQueryQueue(ArrayList<String> layers,
-        FeatureRectangularQuery query) {
-    final SpatialDataSourceManager sdbManager = SpatialDataSourceManager
-            .getInstance();
-    int querySize = layers.size();
-    FeatureRectangularTaskQuery[] queryQueue = new FeatureRectangularTaskQuery[querySize];
-    int index = 0;
-    for (String layer : layers) {
-        SpatialVectorTable table;
-        try {
-            table = sdbManager.getVectorTableByName(layer);
-        } catch (Exception e1) {
-            Log.e("FEATUREINFO", "unable to get table:" + layer);
-            continue;
-        }
-        FeatureRectangularTaskQuery taskquery = new FeatureRectangularTaskQuery(query);
-        taskquery.setTable(table);
-        taskquery.setHandler(sdbManager.getSpatialDataSourceHandler(table));
-        // query.setStart(0);
-        taskquery.setLimit(1);
-
-        queryQueue[index] = taskquery;
-        index++;
-    }
-    return queryQueue;
-}
-
-/**
- * create an array of <FeatureCircleTaskQuery> from the <FeatureCircleQuery>
- * and the list of layers. This array can be passed to the loader to perform
- * a query 
- * @param layers a list of <String> for whom to generate the query
- * @param query the base query (bounding box etc..) 
- * @return an array of <FeatureCircleTaskQuery> to pass to a loader
- */
-private FeatureCircleTaskQuery[] createTaskQueryQueue(ArrayList<String> layers,
-        FeatureCircleQuery query) {
-    final SpatialDataSourceManager sdbManager = SpatialDataSourceManager
-            .getInstance();
-    int querySize = layers.size();
-    FeatureCircleTaskQuery[] queryQueue = new FeatureCircleTaskQuery[querySize];  
-    int index = 0;
-    for (String layer : layers) {
-        SpatialVectorTable table;
-        try {
-            table = sdbManager.getVectorTableByName(layer);
-        } catch (Exception e1) {
-            Log.e("FEATURECircle", "unable to get table:" + layer);
-            continue;
-        }
-        FeatureCircleTaskQuery taskquery = new FeatureCircleTaskQuery(query);
-        taskquery.setTable(table);
-        taskquery.setHandler(sdbManager.getSpatialDataSourceHandler(table));
-        // query.setStart(0);
-        taskquery.setLimit(1);
-
-        queryQueue[index] = taskquery;
-        index++;
-    }
-    return queryQueue;
-}
-
-/**
- * create an array of <FeaturePolygonTaskQuery> from the <FeaturePolygonQuery>
- * and the list of layers. This array can be passed to the loader to perform
- * a query 
- * @param layers a list of <String> for whom to generate the query
- * @param query the base query (bounding box etc..) 
- * @return an array of <FeaturePolygonTaskQuery> to pass to a loader
- */
-private FeaturePolygonTaskQuery[] createTaskQueryQueue(ArrayList<String> layers,
-        FeaturePolygonQuery query) {
-    final SpatialDataSourceManager sdbManager = SpatialDataSourceManager
-            .getInstance();
-    int querySize = layers.size();
-    FeaturePolygonTaskQuery[] queryQueue = new FeaturePolygonTaskQuery[querySize];
-    int index = 0;
-    for (String layer : layers) {
-        SpatialVectorTable table;
-        try {
-            table = sdbManager.getVectorTableByName(layer);
-        } catch (Exception e1) {
-            Log.e("FEATUREPolygon", "unable to get table:" + layer);
-            continue;
-        }
-        FeaturePolygonTaskQuery taskquery = new FeaturePolygonTaskQuery(query); 
-        taskquery.setTable(table);
-        taskquery.setHandler(sdbManager.getSpatialDataSourceHandler(table));
-        // query.setStart(0);
-        taskquery.setLimit(1);
-
-        queryQueue[index] = taskquery;
-        index++;
-    }
-    return queryQueue;
-}
 
 /**
  * Create the loader

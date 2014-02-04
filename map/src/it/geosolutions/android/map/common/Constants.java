@@ -15,16 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.geosolutions.android.map.model.query;
+package it.geosolutions.android.map.common;
 
 /**
+ * This class provides constants for common interface between activities and other useful constants
+ * like request codes and result codes used in the application
+ * We don't use string parameters because we don't want to go in conflict with internationalization
  * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
  *
  */
-public interface FeatureInfoQuery {
-	String getSrid();
-	void setSrid(String s);
-	
-	byte getZoomLevel();
-	void setZoomLevel(byte b);
+public class Constants {
+	public class ParamKeys{
+		/**
+		 * Used to pass layers to the feature info query
+		 */
+		public static final String LAYERS = "layers";
+	}
+
+	public static class Modes{
+
+		// MODES
+		public static final int MODE_VIEW = 0;
+		public static final int MODE_EDIT = 1;
+		
+	}
 }

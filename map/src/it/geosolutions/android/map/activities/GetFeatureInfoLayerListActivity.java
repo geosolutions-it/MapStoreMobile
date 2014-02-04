@@ -17,7 +17,7 @@
  */
 package it.geosolutions.android.map.activities;
 
-import it.geosolutions.android.map.fragment.FeatureInfoLayerListFragment;
+import it.geosolutions.android.map.fragment.featureinfo.FeatureInfoLayerListFragment;
 
 import java.util.ArrayList;
 import android.app.Activity;
