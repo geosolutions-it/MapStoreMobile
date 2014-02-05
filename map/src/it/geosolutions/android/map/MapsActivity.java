@@ -45,6 +45,7 @@ import it.geosolutions.android.map.overlay.managers.OverlayManager;
 import it.geosolutions.android.map.overlay.managers.SimpleOverlayManager;
 import it.geosolutions.android.map.overlay.switcher.LayerSwitcherFragment;
 import it.geosolutions.android.map.overlay.switcher.OverlaySwitcherFragment;
+import it.geosolutions.android.map.preferences.EditPreferences;
 import it.geosolutions.android.map.style.StyleManager;
 import it.geosolutions.android.map.utils.LocalPersistence;
 import it.geosolutions.android.map.utils.MapFilesProvider;
@@ -278,7 +279,7 @@ public class MapsActivity extends MapActivityBase {
 			FragmentTransaction fragmentTransaction = fManager.beginTransaction();
 			fragmentTransaction.add(R.id.left_drawer_container,osf);
 			GenericMenuFragment other = new GenericMenuFragment();
-//			fragmentTransaction.add(R.id.right_drawer, other);
+			//fragmentTransaction.add(R.id.right_drawer, other);
 			SourcesFragment sf = new SourcesFragment();
 			fragmentTransaction.add(R.id.right_drawer, sf);
 			fragmentTransaction.commit();
@@ -435,8 +436,7 @@ public class MapsActivity extends MapActivityBase {
 	}
 
 	/**
-	 * creates the list of overlays as a checkbox list and set the items checked
-         * or not
+	 * creates the menu of the map
 	 */
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
@@ -479,6 +479,9 @@ public class MapsActivity extends MapActivityBase {
             	}
             	mDrawerLayout.closeDrawer(mDrawerList);
             }
+		}else if(item.getItemId() == R.id.settings){
+			Intent pref = new Intent(this,EditPreferences.class);
+			 startActivity(pref);
 		}
         return super.onOptionsItemSelected(item);
 		 
@@ -879,8 +882,9 @@ public class MapsActivity extends MapActivityBase {
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 	    if (keyCode == KeyEvent.KEYCODE_MENU) {
-	        mDrawerLayout.openDrawer(mDrawerList);
-	        return true;
+//	        mDrawerLayout.openDrawer(mDrawerList);
+//	        return true;
+	    	
 	    }
 	    return super.onKeyUp(keyCode, event);
 	}

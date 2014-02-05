@@ -9,6 +9,10 @@
            <item android:id="@+id/layer_menu_action"
           android:title="Layers"
           android:icon="@drawable/ic_location_map"
-          android:showAsAction="never"
+          android:showAsAction="always"
            /> 
+           <item android:id="@+id/settings"
+               android:title="Settings"
+               android:showAsAction="never"
+               android:icon="@drawable/ic_action_settings"></item>
 </menu>
