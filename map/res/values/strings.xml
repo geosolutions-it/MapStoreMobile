@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="map_name">map</string>
+    <string name="map_name">Map</string>
     <string name="action_settings">Settings</string>
     <string name="data">Data</string>
     <string name="styles">Styles</string>
@@ -43,4 +43,12 @@
 	<string name="load_all_as_map">Load all layers as map</string>
 	<string name="select_layers_to_add">Select layers to add</string>
 	<string name="add_the_selected_layers_to_the_map">Add the selected layers to the map</string>
+	<string name="name">Name</string>
+	<string name="description">Description</string>
+	<string name="url">URL</string>
+	<string name="test">Test</string>
+	<string name="geostore_url">GeoStore URL</string>
+	<string name="name_for_the_new_source">Name for the new resource</string>
+	<string name="description_for_the_new_source">A short description of the new resource (optional)</string>
+	<string name="geostore_url_sample">(e.g. http://test.org/geostore/rest/)</string>
 </resources>

@@ -43,5 +43,11 @@
 	<string name="load_all_as_map">Carica tutto come mappa</string>
 	<string name="select_layers_to_add">Seleziona livelli da aggiungere</string>
 	<string name="add_the_selected_layers_to_the_map">Aggiungi alla mappa i livelli selezionati</string>
-	
+	<string name="name">Nome</string>
+	<string name="description">Description</string>
+	<string name="test">Prova</string>
+	<string name="geostore_url">URL di GeoStore</string>
+	<string name="name_for_the_new_source">Nome per la nuova sorgente</string>
+	<string name="description_for_the_new_source">Descrizione nella nuova risorsa (opzionale)</string>
+	<string name="geostore_url_sample">(e.g. http://mapstore.geo-solutions.it/geostore/rest/)</string>
 </resources>

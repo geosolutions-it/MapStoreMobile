@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:scrollbars="vertical" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <!-- NAME -->
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/name" />
+
+        <EditText
+            android:id="@+id/name"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/name_for_the_new_source" >
+        </EditText>
+        <!-- Description -->
+		 <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/description" />
+        <EditText
+            android:id="@+id/description"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/description_for_the_new_source"
+            android:inputType="textMultiLine"
+            android:lines="3" >
+        </EditText>
+        <!-- URL -->
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/geostore_url" />
+
+        <EditText
+            android:id="@+id/url"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/geostore_url_sample"
+            android:inputType="textUri" >
+        </EditText>
+
+        <Button
+            android:id="@+id/button_test"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/test" >
+  
+	</Button>  
+            
+        
+    </LinearLayout>
+    <!-- name -->
+
+</ScrollView>

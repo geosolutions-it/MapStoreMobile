@@ -199,9 +199,6 @@ public class GeoStoreClient {
 			if (resEntity != null) {
 				// parse response.
 				responseText = EntityUtils.toString(resEntity);
-				Log.d("GeoStore", "remote service response:");
-				Log.d("GeoStore", responseText);
-				
 				return responseText;
 
 			}
@@ -212,6 +209,40 @@ public class GeoStoreClient {
 			Log.e("GeoStore", "IOException during HTTP request");
 		}
 		return null;
+	}
+
+	/**
+	 * 
+	 */
+	public boolean test() {
+		HttpClient httpclient = new DefaultHttpClient();
+		HttpGet get = new HttpGet(url);
+		get.addHeader("Accept", "application/json");
+		HttpResponse response;
+		// TODO support pagination, filtering, account
+		try {
+			response = httpclient.execute(get);
+
+			HttpEntity resEntity = response.getEntity();
+			
+			String responseText;
+			if (resEntity != null) {
+				// parse response.
+				responseText = EntityUtils.toString(resEntity);
+				Log.d("GeoStore", "remote service response:");
+				
+				//Workaround for html page
+				if(responseText.contains("RESTful")){
+					return true;
+				}
+			}
+
+		}catch (Exception e) {
+			Log.w("GeoStore Client","the test url returned an exception");
+			
+		}
+		return false;
+		
 	}
 
 }
