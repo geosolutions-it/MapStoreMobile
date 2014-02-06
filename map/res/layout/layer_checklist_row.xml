@@ -3,7 +3,8 @@
     android:id="@+id/row_container"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:padding="5dp" >
+    android:padding="5dp"
+    android:background="@drawable/multiselect_list"  >
 	
     <CheckBox
         android:id="@+id/visible"

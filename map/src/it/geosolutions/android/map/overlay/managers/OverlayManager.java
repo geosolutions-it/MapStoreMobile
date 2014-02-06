@@ -89,5 +89,7 @@ public interface OverlayManager {
 	 * @param overlay
 	 */
 	void addLocationOverlay(MyLocationOverlay overlay);
+	
+	void forceRedraw();
 
 }

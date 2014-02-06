@@ -313,4 +313,19 @@ public class MultiSourceOverlayManager implements OverlayManager {
 	public void loadMap(MSMMap m){
 		setLayers(m.layers);
 	}
+
+	/* (non-Javadoc)
+	 * @see it.geosolutions.android.map.overlay.managers.OverlayManager#forceRedraw()
+	 */
+	@Override
+	public void forceRedraw() {
+		if(layerOverlay!=null){
+			layerOverlay.refresh();
+		}
+		mapView.getOverlayController().redrawOverlays();
+		
+		
+	}
+	
+	
 }

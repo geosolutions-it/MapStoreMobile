@@ -21,9 +21,11 @@ import it.geosolutions.android.map.MapsActivity;
 import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.activities.BrowseSourcesActivity;
 import it.geosolutions.android.map.adapters.LayerSwitcherAdapter;
+import it.geosolutions.android.map.fragment.sources.SourcesFragment;
 import it.geosolutions.android.map.geostore.activities.GeoStoreResourcesActivity;
 import it.geosolutions.android.map.listeners.LayerChangeListener;
 import it.geosolutions.android.map.model.Layer;
+import it.geosolutions.android.map.model.stores.LayerStore;
 import it.geosolutions.android.map.overlay.managers.MultiSourceOverlayManager;
 import it.geosolutions.android.map.overlay.managers.OverlayManager;
 
@@ -32,6 +34,7 @@ import java.util.Collections;
 import java.util.List;
 
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
@@ -40,10 +43,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemLongClickListener;
 
 import com.actionbarsherlock.app.SherlockListFragment;
+import com.actionbarsherlock.view.ActionMode;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 
 /**
  * This fragment shows a view o the attributes of a single feature from a
@@ -61,11 +70,13 @@ import com.actionbarsherlock.app.SherlockListFragment;
  * 
  * @author Lorenzo Natali (www.geo-solutions.it)
  */
-public class LayerSwitcherFragment extends SherlockListFragment implements LayerChangeListener, LoaderCallbacks<List<Layer>>, LayerProvider {
+public class LayerSwitcherFragment extends SherlockListFragment implements LayerChangeListener, LoaderCallbacks<List<Layer>>, LayerProvider,ActionMode.Callback {
 private int LOADER_INDEX =1290;
 private LayerSwitcherAdapter adapter;
 private LayerListLoader loader;
 private boolean isLoading = false;
+private ActionMode actionMode;
+private ArrayList<Layer<?>> selected = new ArrayList<Layer<?>>();
 
 /**
  * Called only once
@@ -125,6 +136,53 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
 	
 	//force reload
 	reload();
+	
+	//
+    //Set Contextual ACTION BAR CALLBACKS
+    //
+    final LayerSwitcherFragment callback = this;
+    ListView lv = getListView();
+    lv.setLongClickable(true);
+    lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE); 
+    
+    lv.setOnItemLongClickListener(new OnItemLongClickListener() {
+    	   public boolean onItemLongClick (AdapterView<?> parent, View view, int position, long id) {
+    	     System.out.println("Long click");
+    	     Layer<?> sel = adapter.getItem(position);
+    	     
+    	     if(!selected.contains(sel)){
+    	    	 getListView().setItemChecked(position, true);
+    	    	 selected.add(sel);
+    	    	 
+    	     }else{
+    	    	 getListView().setItemChecked(position, false);
+    	    	 selected.remove(sel);
+    	     }
+    	     if(selected.size()>0){
+    	    	 actionMode = getSherlockActivity().startActionMode(callback);
+    	    	 //override the done button to deselect all when the button is pressed
+    	    	 int doneButtonId = Resources.getSystem().getIdentifier("action_mode_close_button", "id", "android");
+    	    	 View doneButton = getActivity().findViewById(doneButtonId);
+    	    	 doneButton.setOnClickListener(new View.OnClickListener() {
+
+    	    	     @Override
+    	    	     public void onClick(View v) {
+    	    	         getListView().clearChoices();
+    	    	         selected = new ArrayList<Layer<?>>();
+    	    	         actionMode.finish();
+    	    	     }
+    	    	 });
+    	    	 
+    	     }else{
+    	    	 if(actionMode !=null){
+    	    		 actionMode.finish();
+    	    	 }
+    	     }
+    	     view.setSelected(true);
+    	     return true;
+    	   }
+	});
+    
     super.onViewCreated(view, savedInstanceState);
     // setup of the checkboxes
 }
@@ -165,7 +223,7 @@ private void reload() {
 	if(adapter !=null){
 		adapter.clear();
 		//force reload
-		Loader l = getSherlockActivity().getSupportLoaderManager().getLoader(LOADER_INDEX);
+		Loader<?> l = getSherlockActivity().getSupportLoaderManager().getLoader(LOADER_INDEX);
 		if(l!=null){
 			l.forceLoad();
 		}else{
@@ -193,12 +251,54 @@ public void onLayerVisibilityChange(Layer layer) {
 }
 
 @Override
-public List<Layer> getLayers() {
+public ArrayList<Layer> getLayers() {
 	//returns the layers from the current overlayManager
 	//NOTE: this is needed because the instance of the overlay manager
 	// can change during time. It needs to be get from the current
 	// activity.
 	return getOverlayManager().getLayers();
+}
+
+//ACTION MODE CALLBACKS
+public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+	ListView lv = getListView();
+	Resources res = getResources();
+	int number =selected.size();
+	String title = res.getQuantityString(R.plurals.quantity_sources_selected,number,number );
+	mode.setTitle(title);
+	
+	return false;
+}
+
+
+public void onDestroyActionMode(ActionMode mode) {
+	adapter.notifyDataSetChanged();
+}
+
+public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+	mode.getMenuInflater().inflate(R.menu.delete_menu, menu);
+	this.actionMode =mode;
+	
+	return true;
+}
+
+public boolean onActionItemClicked(ActionMode mode, MenuItem menu) {
+	
+	if(menu.getItemId()==R.id.delete){
+		ArrayList<Layer> layers = getLayers();
+		layers.removeAll(selected);
+		getOverlayManager().setLayers(new ArrayList<Layer>(layers));
+		getOverlayManager().forceRedraw();
+		
+
+	}
+	selected = new ArrayList<Layer<?>>();
+	mode.finish();
+	getListView().clearChoices();
+	getListView().clearFocus();
+	actionMode=null;
+	return true;
+
 }
 
 }

@@ -132,5 +132,9 @@ public  class MultiSourceOverlay implements Overlay,FreezableOverlay {
 		
 	}
 	
+	public void refresh(){
+		renderer.refresh();
+	}
+	
 
 }

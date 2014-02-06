@@ -40,7 +40,9 @@
         android:id="@android:id/list"
         android:layout_width="fill_parent"
         android:layout_height="match_parent"
-        android:drawSelectorOnTop="true" >
+        android:drawSelectorOnTop="true" 
+        android:choiceMode="multipleChoice"
+        android:descendantFocusability="beforeDescendants"  >
 
     </ListView>
 <!--    	<LinearLayout -->

@@ -287,6 +287,15 @@ public class SimpleOverlayManager implements OverlayManager {
 		
 	}
 
+	/* (non-Javadoc)
+	 * @see it.geosolutions.android.map.overlay.managers.OverlayManager#forceRedraw()
+	 */
+	@Override
+	public void forceRedraw() {
+		mapView.getOverlayController().redrawOverlays();
+		
+	}
+
 	
 	
 }
