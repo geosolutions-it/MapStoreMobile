@@ -25,7 +25,10 @@ import android.content.Intent;
 
 import it.geosolutions.android.map.DataListActivity;
 import it.geosolutions.android.map.MapsActivity;
+import it.geosolutions.android.map.activities.NewSourceActivity;
+import it.geosolutions.android.map.common.Constants;
 import it.geosolutions.android.map.geostore.activities.GeoStoreResourcesActivity;
+import it.geosolutions.android.map.mapstore.fragment.NewMapStoreSourceFragment;
 import it.geosolutions.android.map.model.Layer;
 
 /**
@@ -49,6 +52,16 @@ public class MapStoreLayerStore extends BaseLayerStore {
 		this.url = url;
 		
 	}
+	
+
+	/**
+	 * 
+	 * @return the URL
+	 */
+	public String getUrl() {
+		return this.url;
+		
+	}
 
 	@Override
 	public void openDetails(Activity ac) {
@@ -61,6 +74,46 @@ public class MapStoreLayerStore extends BaseLayerStore {
 
 	@Override
 	public void openEdit(Activity ac) {
-		
+		Intent i = new Intent(ac,NewSourceActivity.class);
+		i.putExtra(NewMapStoreSourceFragment.PARAMS.STORE, this);
+		ac.startActivityForResult(i,Constants.requestCodes.CREATE_SOURCE);
+	}
+
+	/* (non-Javadoc)
+	 * @see it.geosolutions.android.map.model.stores.LayerStore#canEdit()
+	 */
+	@Override
+	public boolean canEdit() {
+		return true;
+	}
+	
+	
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((url == null) ? 0 : url.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(!super.equals(obj)){
+			return false;
+		}
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MapStoreLayerStore other = (MapStoreLayerStore) obj;
+		if (url == null) {
+			if (other.url != null)
+				return false;
+		} else if (!url.equals(other.url))
+			return false;
+		return true;
 	}
 }

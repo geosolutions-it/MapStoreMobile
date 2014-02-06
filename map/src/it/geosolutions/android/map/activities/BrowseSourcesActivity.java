@@ -93,6 +93,10 @@ public class BrowseSourcesActivity extends SherlockFragmentActivity {
     }
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		//reload stores
+		if(sources!=null){
+			sources.reloadStores();
+		}
 		if( RESULT_OK == resultCode ){
 			setResult(resultCode, data);
 			finish();

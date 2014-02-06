@@ -381,7 +381,7 @@ public class MapsActivity extends MapActivityBase {
 			        	 ArrayList<DescribedMarker> markers = overlayManager.getMarkerOverlay().getMarkers();
 			        	 //serialize markers in the response
 			        	 returnIntent.putParcelableArrayListExtra(MapsActivity.PARAMETERS.MARKERS,MarkerUtils.getMarkersDTO(markers));
-			        	 setResult(RESULT_OK,returnIntent);     
+			        	 setResult(RESULT_OK,returnIntent);
 			        	 finish();
 			        	 return;
 			        	//if you don't want to return data:
@@ -518,13 +518,7 @@ public class MapsActivity extends MapActivityBase {
 		    }
 		}
 		// create an ItemizedOverlay with the default marker
-		
 		overlayManager.getMarkerOverlay().getOverlayItems().addAll(markers);
-		//TODO uncomment this if an element is present already
-		
-		// add the ArrayItemizedOverlay to the MapView
-		
-
 	}
 
 	
@@ -719,7 +713,11 @@ public class MapsActivity extends MapActivityBase {
 		for(MapControl control : mapView.getControls()){
 			control.refreshControl(requestCode,resultCode, data);
 		}
-		
+		// reload stores in the panel (we do it everyTime, maybe there is a better way
+		SourcesFragment sf = (SourcesFragment) getSupportFragmentManager().findFragmentById(R.id.right_drawer);
+		if(sf!=null){
+			sf.reloadStores();
+		}
 		//manager mapstore configuration load 
 		//TODO: with the new interface this will load a map instead of the mapstoreconfig
 		if(data==null)return;
@@ -745,7 +743,6 @@ public class MapsActivity extends MapActivityBase {
 			layers.addAll(layersToAdd);
 			layerManager.setLayers(layers);
 		}
-		
 		
 	}
 

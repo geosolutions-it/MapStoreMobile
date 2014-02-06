@@ -51,4 +51,13 @@
 	<string name="name_for_the_new_source">Name for the new resource</string>
 	<string name="description_for_the_new_source">A short description of the new resource (optional)</string>
 	<string name="geostore_url_sample">(e.g. http://test.org/geostore/rest/)</string>
+	<string name="warning_geostore_url_not_verified">it was not possible to verify the validity of the URL.</string>
+	<string name="question_do_you_want_to_continue_saving">Do you want to save anyway?</string>
+	<string name="remove">Remove</string>
+	<string name="mapstore_url_correct">The URL of mapstore is correct</string>
+	<string name="saving_source">Saving Source&#8230;</string>
+	<string name="error_during_save_process">Error during save process</string>
+	<string name="verifying_mapstore_url">Verifying MapStore URL&#8230;</string>
+	<string name="field_required">This field is required!</string>
+	
 </resources>

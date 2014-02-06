@@ -17,50 +17,53 @@
  */
 package it.geosolutions.android.map.fragment.sources;
 
+import it.geosolutions.android.map.R;
+import it.geosolutions.android.map.activities.NewSourceActivity;
+import it.geosolutions.android.map.adapters.LayerStoreAdapter;
+import it.geosolutions.android.map.common.Constants;
+import it.geosolutions.android.map.model.stores.LayerStore;
+import it.geosolutions.android.map.utils.LocalPersistence;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import it.geosolutions.android.map.DataListActivity;
-import it.geosolutions.android.map.MapsActivity;
-import it.geosolutions.android.map.R;
-import it.geosolutions.android.map.adapters.LayerStoreAdapter;
-import it.geosolutions.android.map.adapters.LayerSwitcherAdapter;
-import it.geosolutions.android.map.geostore.activities.GeoStoreResourcesActivity;
-import it.geosolutions.android.map.listeners.OverlayChangeListener;
-import it.geosolutions.android.map.mapstore.activities.MapStoreLayerListActivity;
-import it.geosolutions.android.map.model.Layer;
-import it.geosolutions.android.map.model.stores.LayerStore;
-import it.geosolutions.android.map.overlay.managers.SimpleOverlayManager;
-import it.geosolutions.android.map.overlay.switcher.LayerListLoader;
-import it.geosolutions.android.map.utils.LocalPersistence;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ImageButton;
+import android.widget.ListView;
 
-import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockListFragment;
+import com.actionbarsherlock.view.ActionMode;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 
 /**
  * This fragment shows a list of Sources from the local storage.
+ * Allow to edit and add new Sources. Implements CAB for long press 
+ * and item selection allow source delete.
+ * 
  * 
  * @author Lorenzo Natali (www.geo-solutions.it)
  */
-public class SourcesFragment extends SherlockListFragment implements LayerStoreProvider,LoaderCallbacks<List<LayerStore>> {
+public class SourcesFragment extends SherlockListFragment implements LayerStoreProvider,LoaderCallbacks<List<LayerStore>>,ActionMode.Callback {
 
 private static final int LOADER_INDEX = 50;
 private static final String CONTENTS = "MSM_CONTENT";
 private LayerStoreAdapter adapter;
+private ActionMode actionMode = null;
+private ArrayList<LayerStore> selected = new ArrayList<LayerStore>();
+private List<LayerStore> stores = null;
 /**
  * Called only once
  */
@@ -86,6 +89,64 @@ public View onCreateView(LayoutInflater inflater, ViewGroup container,
 
 @Override
 public void onViewCreated(View view, Bundle savedInstanceState) {
+	//set the listener for add button
+    ImageButton add = (ImageButton) view.findViewById(R.id.sources_add);
+    add.setOnClickListener(new OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			Intent i = new Intent(getActivity(),NewSourceActivity.class);
+			getActivity().startActivityForResult(i,Constants.requestCodes.CREATE_SOURCE);
+			
+		}
+	});
+    
+    //
+    //Set Contextual ACTION BAR CALLBACKS
+    //
+    final SourcesFragment callback = this;
+    ListView lv = getListView();
+    lv.setLongClickable(true);
+    lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE); 
+    
+    lv.setOnItemLongClickListener(new OnItemLongClickListener() {
+    	   public boolean onItemLongClick (AdapterView<?> parent, View view, int position, long id) {
+    	     System.out.println("Long click");
+    	     LayerStore sel = adapter.getItem(position);
+    	     
+    	     if(!selected.contains(sel)){
+    	    	 getListView().setItemChecked(position, true);
+    	    	 selected.add(sel);
+    	    	 
+    	     }else{
+    	    	 getListView().setItemChecked(position, false);
+    	    	 selected.remove(sel);
+    	     }
+    	     if(selected.size()>0){
+    	    	 actionMode = getSherlockActivity().startActionMode(callback);
+    	    	 //override the done button to deselect all when the button is pressed
+    	    	 int doneButtonId = Resources.getSystem().getIdentifier("action_mode_close_button", "id", "android");
+    	    	 View doneButton = getActivity().findViewById(doneButtonId);
+    	    	 doneButton.setOnClickListener(new View.OnClickListener() {
+
+    	    	     @Override
+    	    	     public void onClick(View v) {
+    	    	         getListView().clearChoices();
+    	    	         selected = new ArrayList<LayerStore>();
+    	    	         actionMode.finish();
+    	    	     }
+    	    	 });
+    	    	 
+    	     }else{
+    	    	 if(actionMode !=null){
+    	    		 actionMode.finish();
+    	    	 }
+    	     }
+    	     view.setSelected(true);
+    	     return true;
+    	   }
+	});
+
     super.onViewCreated(view, savedInstanceState);
 }
 
@@ -94,8 +155,7 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
  */
 @Override
 public List<LayerStore> getSources() {
-	@SuppressWarnings("unchecked")
-	List<LayerStore> stores = (List<LayerStore>)LocalPersistence.readObjectFromFile(getSherlockActivity(), LocalPersistence.SOURCES);
+	stores = (List<LayerStore>)LocalPersistence.readObjectFromFile(getSherlockActivity(), LocalPersistence.SOURCES);
 	return stores;
 }
 
@@ -118,8 +178,7 @@ public void onLoadFinished(Loader<List<LayerStore>> loader, List<LayerStore> res
 	adapter.clear();
 	ArrayList<LayerStore> ll = new ArrayList<LayerStore>();
 	int size = result.size();
-	//reverse add to the layer list to 
-	//have the checkbox stacked as the layers
+	
 	Log.v("SOURCES","Loaded sources:"+size);
 	if(size > 0){
 		for(LayerStore ls : result){
@@ -140,5 +199,65 @@ public void onLoaderReset(Loader<List<LayerStore>> arg0) {
 	
 }
 
+/**
+ * reloadStores and clean Contextual Action Bar if present
+ */
+public void reloadStores(){
+	Log.v("SOURCES","reloading sources");
+	Loader l = getSherlockActivity().getSupportLoaderManager().getLoader(LOADER_INDEX);
+	if(l!=null){
+		adapter.clear();
+		l.forceLoad();
+	}
+	if(actionMode!=null){
+		actionMode.finish();
+		selected = new ArrayList<LayerStore>();
+		getListView().clearChoices();
+		getListView().clearFocus();
+	}
+}
 
+// ACTION MODE CALLBACKS
+public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+	ListView lv = getListView();
+	Resources res = getResources();
+	int number =selected.size();
+	String title = res.getQuantityString(R.plurals.quantity_sources_selected,number,number );
+	mode.setTitle(title);
+	
+	return false;
+}
+
+
+public void onDestroyActionMode(ActionMode mode) {
+	adapter.notifyDataSetChanged();
+}
+
+public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+	mode.getMenuInflater().inflate(R.menu.delete_menu, menu);
+	this.actionMode =mode;
+	
+	return true;
+}
+
+public boolean onActionItemClicked(ActionMode mode, MenuItem menu) {
+	
+	if(menu.getItemId()==R.id.delete){
+		stores.removeAll(selected);
+		saveSources(stores);
+	}
+	selected = new ArrayList<LayerStore>();
+	mode.finish();
+	getListView().clearChoices();
+	getListView().clearFocus();
+	reloadStores();
+	actionMode=null;
+	return true;
+
+}
+
+	private void saveSources(List<LayerStore> sources) {
+	 LocalPersistence.witeObjectToFile(this.getActivity(), sources, LocalPersistence.SOURCES);
+	
+	}
 }

@@ -20,7 +20,7 @@
 		    android:background="@drawable/drawer_selectable_item"
 		    android:src="@drawable/ic_content_new_light"
 		    android:contentDescription="@string/menu_geostore"
-	        android:id="@+id/mapstore_edit"
+	        android:id="@+id/sources_add"
 	        android:layout_width="wrap_content"
 	        android:layout_gravity="right"
 	        android:layout_height="wrap_content"
@@ -29,7 +29,7 @@
    		    android:background="@drawable/drawer_selectable_item"
 		    android:src="@drawable/ic_content_edit_light"
 		    android:contentDescription="@string/menu_geostore"
-	        android:id="@+id/mapstore_detail"
+	        android:id="@+id/sources_edit"
 	        android:layout_width="wrap_content"
 	        android:layout_gravity="right"
 	        android:layout_height="wrap_content"
@@ -41,7 +41,9 @@
         android:id="@android:id/list"
         android:layout_width="fill_parent"
         android:layout_height="match_parent"
-        android:drawSelectorOnTop="true" >
+       android:choiceMode="multipleChoice"
+       
+       android:descendantFocusability="beforeDescendants" >
 
     </ListView>
 <!--    	<LinearLayout -->
