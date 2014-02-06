@@ -21,24 +21,19 @@ import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.activities.GetFeatureInfoAttributeActivity;
 import it.geosolutions.android.map.adapters.FeatureInfoLayerAdapter;
 import it.geosolutions.android.map.common.Constants;
-import it.geosolutions.android.map.database.SpatialDataSourceManager;
-import it.geosolutions.android.map.loaders.FeatureCircleLoader;
 import it.geosolutions.android.map.loaders.FeatureInfoLoader;
-import it.geosolutions.android.map.loaders.FeaturePolygonLoader;
 import it.geosolutions.android.map.model.Layer;
+import it.geosolutions.android.map.model.query.BaseFeatureInfoQuery;
 import it.geosolutions.android.map.model.query.CircleQuery;
-import it.geosolutions.android.map.model.query.CircleTaskQuery;
 import it.geosolutions.android.map.model.query.FeatureInfoQueryResult;
+import it.geosolutions.android.map.model.query.FeatureInfoTaskQuery;
 import it.geosolutions.android.map.model.query.PolygonQuery;
-import it.geosolutions.android.map.model.query.PolygonTaskQuery;
 import it.geosolutions.android.map.model.query.BBoxQuery;
-import it.geosolutions.android.map.model.query.BBoxTaskQuery;
 import it.geosolutions.android.map.utils.FeatureInfoUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import jsqlite.Exception;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
@@ -54,8 +49,6 @@ import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockListFragment;
 
-import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
-
 /**
  * Show a list of the layers from a feature info query This fragment is
  * optimized to get only the available features doing a query on the visible
@@ -68,10 +61,10 @@ public class FeatureInfoLayerListFragment extends SherlockListFragment
 private FeatureInfoLayerAdapter adapter;
 private static final int LOADER_INDEX =0;
 
-private String selection_type;
-private BBoxTaskQuery[] queryQueueRect;
+private FeatureInfoTaskQuery[] queryQueue;
+/*private BBoxTaskQuery[] queryQueueRect;
 private CircleTaskQuery[] queryQueueCircle;
-private PolygonTaskQuery[] queryQueuePolygon;
+private PolygonTaskQuery[] queryQueuePolygon;*/
 
 // The callbacks through which we will interact with the LoaderManager.
 
@@ -91,29 +84,23 @@ public void onCreate(Bundle savedInstanceState) {
     // get parameters to create the task query
     // TODO use arguments instead
     Bundle extras = getActivity().getIntent().getExtras();
-    selection_type = extras.getString("selection"); //Discover which selection user has selected
     ArrayList<Layer> layers = (ArrayList<Layer>)extras.getSerializable(Constants.ParamKeys.LAYERS);
     // create a unique loader index
     // TODO use a better system to get the proper loader
     // TODO check if needed,maybe the activity has only one loader
       
-    BBoxQuery query_r;
-    CircleQuery query_c;
-    PolygonQuery query_p;
+    BaseFeatureInfoQuery query = extras.getParcelable("query");
     
-    // create task query
-    if(selection_type.equals("Rectangular")){
-    	query_r = (BBoxQuery) extras.getParcelable("query");
-    	queryQueueRect = FeatureInfoUtils.createTaskQueryQueue(layers, query_r, null, 1);
+    // Create task query
+    if(query instanceof BBoxQuery){
+    	queryQueue = FeatureInfoUtils.createTaskQueryQueue(layers, (BBoxQuery) query, null, 1);
     }
     else 
-    	if(selection_type.equals("Circular")){
-	    	query_c = (CircleQuery) extras.getParcelable("query");
-	    	queryQueueCircle = FeatureInfoUtils.createTaskQueryQueue(layers, query_c, null, 1);
+    	if(query instanceof CircleQuery){
+	    	queryQueue = FeatureInfoUtils.createTaskQueryQueue(layers, (CircleQuery) query, null, 1);
     	}
     	else{
-    		query_p = (PolygonQuery) extras.getParcelable("query");
-        	queryQueuePolygon = FeatureInfoUtils.createTaskQueryQueue(layers, query_p, null, 1);
+        	queryQueue = FeatureInfoUtils.createTaskQueryQueue(layers, (PolygonQuery) query, null, 1);
     	}
     
     // Initialize loader and callbacks for the parent activity
@@ -122,24 +109,14 @@ public void onCreate(Bundle savedInstanceState) {
     adapter = new FeatureInfoLayerAdapter(getSherlockActivity(),
             R.layout.feature_info_layer_list_row);
     setListAdapter(adapter);
-
 }
 
 @Override
 public View onCreateView(LayoutInflater inflater, ViewGroup container,
         Bundle savedInstanceState) {
 	
-	if(selection_type.equals("Rectangular")){
-	    startDataLoading(queryQueueRect, LOADER_INDEX);
-    }
-    else 
-    	if(selection_type.equals("Circular")){
-    	    startDataLoading(queryQueueCircle, LOADER_INDEX);
-    	}
-    	else{
-    	    startDataLoading(queryQueuePolygon, LOADER_INDEX);
-    	}
-
+	startDataLoading(queryQueue, LOADER_INDEX);
+    
     return inflater.inflate(R.layout.feature_info_layer_list, container, false);
 }
 
@@ -182,44 +159,8 @@ private void setNoData() {
  * parent callbacks
  * @param query array of <FeatureInfoTaskQuery> to pass to the loader
  * @param loaderIndex a unique id for query loader
- */
-private void startDataLoading(BBoxTaskQuery[] query, int loaderIndex) {
-    // create task query
-
-    // initialize Load Manager
-    mCallbacks = this;
-    LoaderManager lm = getSherlockActivity().getSupportLoaderManager();
-    // NOTE: use the start variable as index in the loadermanager
-    // if you use more than one
-    adapter.clear();
-    lm.initLoader(loaderIndex, null, this); // uses start to get the
-}
-
-/**
- * Create the data loader and bind the loader to the
- * parent callbacks
- * @param query array of <FeatureCircleTaskQuery> to pass to the loader
- * @param loaderIndex a unique id for query loader
- */
-private void startDataLoading(CircleTaskQuery[] query, int loaderIndex) {
-    // create task query
-
-    // initialize Load Manager
-    mCallbacks = this;
-    LoaderManager lm = getSherlockActivity().getSupportLoaderManager();
-    // NOTE: use the start variable as index in the loadermanager
-    // if you use more than one
-    adapter.clear();
-    lm.initLoader(loaderIndex, null, this); // uses start to get the
-}
-
-/**
- * Create the data loader and bind the loader to the
- * parent callbacks
- * @param queryQueue2 array of <FeaturePolygonTaskQuery> to pass to the loader
- * @param loaderIndex a unique id for query loader
- */
-private void startDataLoading(PolygonTaskQuery[] queryQueue2, int loaderIndex) {
+ */ 
+private void startDataLoading(FeatureInfoTaskQuery[] query, int loaderIndex) {
     // create task query
 
     // initialize Load Manager
@@ -275,16 +216,8 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
  */
 @Override
 public Loader<List<FeatureInfoQueryResult>> onCreateLoader(int id, Bundle args) {
-
-	if(selection_type.equals("Rectangular")){
-		return new FeatureInfoLoader(getSherlockActivity(), queryQueueRect);
-    }
-    else 
-    	if(selection_type.equals("Circular")){
-    		return new FeatureCircleLoader(getSherlockActivity(), queryQueueCircle);
-    	}
   
-    return new FeaturePolygonLoader(getSherlockActivity(), queryQueuePolygon);
+    return new FeatureInfoLoader(getSherlockActivity(), queryQueue);
 }
 
 @Override
@@ -303,7 +236,6 @@ public void onLoadFinished(Loader<List<FeatureInfoQueryResult>> loader,
     stopLoadingGUI();
 
 }
-
 
 
 @Override

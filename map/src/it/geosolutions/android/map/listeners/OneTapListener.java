@@ -18,24 +18,16 @@
 package it.geosolutions.android.map.listeners;
 
 import java.util.ArrayList;
-import java.util.List;
+import it.geosolutions.android.map.utils.ConversionUtilities;
 
-import org.mapsforge.core.model.GeoPoint;
-import org.mapsforge.core.model.MapPosition;
-import org.mapsforge.core.util.MercatorProjection;
-
-import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import it.geosolutions.android.map.activities.GetFeatureInfoLayerListActivity;
 import it.geosolutions.android.map.common.Constants;
-import it.geosolutions.android.map.database.SpatialDataSourceManager;
 import it.geosolutions.android.map.model.Layer;
 import it.geosolutions.android.map.model.query.CircleQuery;
 import it.geosolutions.android.map.overlay.managers.MultiSourceOverlayManager;
-import it.geosolutions.android.map.style.AdvancedStyle;
-import it.geosolutions.android.map.style.StyleManager;
-import it.geosolutions.android.map.utils.StyleUtils;
+
 import it.geosolutions.android.map.view.AdvancedMapView;
 import android.app.Activity;
 import android.content.Intent;
@@ -107,30 +99,17 @@ public class OneTapListener implements OnTouchListener, OnGestureListener {
 	 */
 	public void query_layer(){
 		if(!pointsAcquired) return;
+	   
+		double x,y, radius;
+		x = ConversionUtilities.convertFromPixelsToLongitude(view, startX);
+		y = ConversionUtilities.convertFromPixelsToLatitude(view, startY);
 		
-		MapPosition mapPosition = this.view.getMapViewPosition()
-                .getMapPosition();
-        byte zoomLevel = view.getMapViewPosition().getZoomLevel();
-        GeoPoint geoPoint = mapPosition.geoPoint;
-        
-        double pixelLeft = MercatorProjection.longitudeToPixelX(
-                geoPoint.longitude, mapPosition.zoomLevel);
-        double pixelTop = MercatorProjection.latitudeToPixelY(
-                geoPoint.latitude, mapPosition.zoomLevel);
-        pixelLeft -= view.getWidth() >> 1;
-        pixelTop -= view.getHeight() >> 1;
-        
-        double x = 0.0 , y = 0.0, radius = 0.0, fin_x = 0.0;      
-    	x = MercatorProjection.pixelXToLongitude(pixelLeft + startX, zoomLevel);
-        y = MercatorProjection.pixelYToLatitude(pixelTop + startY, zoomLevel);
-        
-        //Calculate radius of one point selection
-        radius_pixel = (float)pref.getInt("OnePointSelectionRadius", 10);
-        fin_x = MercatorProjection.pixelXToLongitude(pixelLeft + startX + radius_pixel, zoomLevel);
+		//Calculate radius of one point selection
+        float radius_pixel = (float)pref.getInt("OnePointSelectionRadius", 10);
+        double fin_x = ConversionUtilities.convertFromPixelsToLongitude(view, startX+radius_pixel); 
         radius = Math.abs(fin_x - x);
-    	
         Log.v("MAPINFOTOOL", "circle: center (" + x + "," + y + ") radius " + radius);
-    	infoDialogCircle(x,y,radius);
+    	infoDialogCircle(x,y,radius,view.getMapViewPosition().getZoomLevel());
 	}
 	
 	/**
@@ -138,8 +117,9 @@ public class OneTapListener implements OnTouchListener, OnGestureListener {
 	 * @param x
 	 * @param y
 	 * @param radius
+	 * @param zooomLevel
 	 */
-	private void infoDialogCircle(final double x, final double y, final double radius){
+	private void infoDialogCircle(final double x, final double y, final double radius, byte zoomLevel){
 	       try{
     	    ArrayList<Layer> layerNames = getLayers();
 	        Intent i = new Intent(view.getContext(),
@@ -150,8 +130,8 @@ public class OneTapListener implements OnTouchListener, OnGestureListener {
 	        query.setY(y);
 	        query.setRadius(radius);
 	        query.setSrid("4326");
+	        query.setZoomLevel(zoomLevel);
 	        i.putExtra("query", query);
-	        i.putExtra("selection","Circular");
 	        if (mode == Constants.Modes.MODE_EDIT) {
 	            i.setAction(Intent.ACTION_PICK);
 	        } else {

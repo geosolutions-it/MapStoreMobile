@@ -40,7 +40,7 @@ import android.view.View.OnTouchListener;
 
 /**
  * Listener that implements OnTouch Event on map.
- * @author Lorenzo Natali (www.geo-solutions.it.
+ * @author Lorenzo Natali (www.geo-solutions.it)
  */
 public class MapInfoListener implements OnTouchListener{
 
@@ -85,6 +85,7 @@ public MapInfoListener(AdvancedMapView mapView, Activity activity) {
  * @param w
  * @param s
  * @param e
+ * @param zoomLevel
  */
 private void infoDialog(final double n, final double w, final double s,
         final double e, byte zoomLevel) {
@@ -100,9 +101,7 @@ private void infoDialog(final double n, final double w, final double s,
         query.setW(w);
         query.setZoomLevel(zoomLevel);
         query.setSrid("4326");
-        i.putExtra("query", query);
-        i.putExtra("selection","Rectangular");
-        
+        i.putExtra("query", query);      
         if (mode == Constants.Modes.MODE_EDIT) {
             i.setAction(Intent.ACTION_PICK);
         } else {
@@ -132,12 +131,14 @@ private ArrayList<Layer> getLayers() {
 }
 
 /**
- * Create a Feature Query for circular and on time selection and pass it to an activity via intent.
+ * Create a Feature Query for circular selection and pass it to an activity via intent.
  * @param x
  * @param y
  * @param radius
+ * @param zoomLevel
  */
-private void infoDialogCircle(final double x, final double y, final double radius,byte zoomLevel){
+private void infoDialogCircle(final double x, final double y, final double radius,
+		byte zoomLevel){
        try{
 		ArrayList<Layer> layers = getLayers();
         Intent i = new Intent(view.getContext(),
@@ -150,7 +151,6 @@ private void infoDialogCircle(final double x, final double y, final double radiu
         query.setSrid("4326");
         query.setZoomLevel(zoomLevel);
         i.putExtra("query", query);
-        i.putExtra("selection","Circular"); //Indicate that user has chose circular selection
         if (mode == Constants.Modes.MODE_EDIT) {
             i.setAction(Intent.ACTION_PICK);
         } else {

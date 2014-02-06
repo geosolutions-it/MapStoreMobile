@@ -17,10 +17,8 @@
  */
 package it.geosolutions.android.map.activities;
 
-import it.geosolutions.android.map.fragment.featureinfo.FeatureCircleAttributeListFragment;
 import it.geosolutions.android.map.fragment.featureinfo.FeatureInfoAttributeListFragment;
 import it.geosolutions.android.map.fragment.featureinfo.FeatureInfoLayerListFragment;
-import it.geosolutions.android.map.fragment.featureinfo.FeaturePolygonAttributeListFragment;
 
 import it.geosolutions.android.map.R;
 import android.os.Bundle;
@@ -40,12 +38,8 @@ public class GetFeatureInfoAttributeActivity  extends SherlockFragmentActivity {
 
 	public static final int GET_ITEM = 0;
 	
-	//Fragment for rectangular selection
 	FeatureInfoAttributeListFragment mTaskFragment;
-	//Fragment for circular selection
-	FeatureCircleAttributeListFragment cTaskFragment;
-	//Fragment for polygonal selection
-	FeaturePolygonAttributeListFragment pTaskFragment;
+	
 	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,47 +50,18 @@ public class GetFeatureInfoAttributeActivity  extends SherlockFragmentActivity {
         requestWindowFeature(Window.FEATURE_PROGRESS);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     	FragmentManager fm = getSupportFragmentManager();
- 	
-    	String sel = "";
-        if(getIntent()!=null)
-        	sel = getIntent().getStringExtra("selection"); //Discover which selection user has selected
-                
-        if(sel!=null && sel.equals("Circular")){
-        	// During initial setup, plug in the details fragment.
-        	FeatureInfoLayerListFragment details = new FeatureInfoLayerListFragment();
-        	//details.setArguments(getIntent().getExtras());
-        	//fm.beginTransaction().add(android.R.id.content, details).commit(); 
-        	cTaskFragment = (FeatureCircleAttributeListFragment) fm.findFragmentByTag("featureInfoLayerList");
-        	if(cTaskFragment == null){
-        		cTaskFragment = new FeatureCircleAttributeListFragment();
-            	details.setArguments(getIntent().getExtras());
-        		fm.beginTransaction().add(android.R.id.content,cTaskFragment, "featureInfoLayerList").commit();
-        	}
-        }
-        else if(sel!=null && sel.equals("Rectangular")){
-        	// During initial setup, plug in the details fragment.
-        	FeatureInfoLayerListFragment details = new FeatureInfoLayerListFragment();
-        	//fm.beginTransaction().add(android.R.id.content, details).commit();
-        	mTaskFragment = (FeatureInfoAttributeListFragment) fm.findFragmentByTag("featureInfoLayerList");
-        	if(mTaskFragment == null){
-	        	mTaskFragment = new FeatureInfoAttributeListFragment();
-	        	details.setArguments(getIntent().getExtras());
-	        	//TODO add empty layers to the view
-	            //TODO add missing layers
-	    		fm.beginTransaction().add(android.R.id.content,mTaskFragment, "featureInfoLayerList").commit();
-        	}
-        }
-        
-       else if(sel!=null && sel.equals("Polygonal")){
-	    	FeatureInfoLayerListFragment details = new FeatureInfoLayerListFragment();
-	    	
-	    	pTaskFragment = (FeaturePolygonAttributeListFragment) fm.findFragmentByTag("featureInfoLayerList");
-	    	if(pTaskFragment == null){
-	        	pTaskFragment = new FeaturePolygonAttributeListFragment();
-	            details.setArguments(getIntent().getExtras());
-	    		fm.beginTransaction().add(android.R.id.content,pTaskFragment, "featureInfoLayerList").commit();
-	    	}
-        }
+ 	  	
+    	// During initial setup, plug in the details fragment.
+    	FeatureInfoLayerListFragment details = new FeatureInfoLayerListFragment();
+    	//fm.beginTransaction().add(android.R.id.content, details).commit();
+    	mTaskFragment = (FeatureInfoAttributeListFragment) fm.findFragmentByTag("featureInfoLayerList");
+    	if(mTaskFragment == null){
+        	mTaskFragment = new FeatureInfoAttributeListFragment();
+        	details.setArguments(getIntent().getExtras());
+        	//TODO add empty layers to the view
+            //TODO add missing layers
+    		fm.beginTransaction().add(android.R.id.content,mTaskFragment, "featureInfoLayerList").commit();
+    	}
     }
 	
 	 @Override
