@@ -28,8 +28,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
+
 import android.widget.Spinner;
 import android.widget.TextView;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
@@ -42,7 +41,7 @@ import eu.geopaparazzi.spatialite.util.SpatialiteLibraryConstants;
  * @author Lorenzo Natali (www.geo-solutions.it)
  */
 
-public class PointsDataPropertiesActivity extends BaseStyleActivity implements OnItemSelectedListener {
+public class PointsDataPropertiesActivity extends BaseStyleActivity /*implements OnItemSelectedListener*/ {
     private SpatialVectorTable spatialTable;
     private Spinner shapesSpinner;
     private Spinner sizeSpinner;
@@ -55,6 +54,7 @@ public class PointsDataPropertiesActivity extends BaseStyleActivity implements O
     private TextView colorFill;
     private Integer colorSelFill;
     private Integer colorSelStroke;
+    private String[] array;
 
 
     public void onCreate( Bundle icicle ) {
@@ -69,7 +69,6 @@ public class PointsDataPropertiesActivity extends BaseStyleActivity implements O
 		colorSelFill = Color.parseColor(style.fillcolor); 
    
         shapesSpinner = (Spinner) findViewById(R.id.shape_spinner);
-        shapesSpinner.setOnItemSelectedListener(this);
         String shape = style.shape;
         int count = shapesSpinner.getCount();
         for( int i = 0; i < count; i++ ) {
@@ -80,7 +79,6 @@ public class PointsDataPropertiesActivity extends BaseStyleActivity implements O
         }
         String size = String.valueOf((int) style.size);
         sizeSpinner = (Spinner) findViewById(R.id.size_spinner);
-        sizeSpinner.setOnItemSelectedListener(this);
         count = sizeSpinner.getCount();
         for( int i = 0; i < count; i++ ) {
             if (sizeSpinner.getItemAtPosition(i).equals(size)) {
@@ -101,7 +99,6 @@ public class PointsDataPropertiesActivity extends BaseStyleActivity implements O
                 
         String width = String.valueOf((int) style.width);
         widthSpinner = (Spinner) findViewById(R.id.width_spinner);
-        widthSpinner.setOnItemSelectedListener(this);
         count = widthSpinner.getCount();
         for( int i = 0; i < count; i++ ) {
             if (widthSpinner.getItemAtPosition(i).equals(width)) {
@@ -111,7 +108,6 @@ public class PointsDataPropertiesActivity extends BaseStyleActivity implements O
         }
         String alpha = String.valueOf((int) (style.strokealpha * 100f));
         alphaSpinner = (Spinner) findViewById(R.id.alpha_spinner);
-        alphaSpinner.setOnItemSelectedListener(this);
         count = alphaSpinner.getCount();
         for( int i = 0; i < count; i++ ) {
             if (alphaSpinner.getItemAtPosition(i).equals(alpha)) {
@@ -132,7 +128,6 @@ public class PointsDataPropertiesActivity extends BaseStyleActivity implements O
         
         String fillAlpha = String.valueOf((int) (style.fillalpha * 100f));
         fillAlphaSpinner = (Spinner) findViewById(R.id.fill_alpha_spinner);
-        fillAlphaSpinner.setOnItemSelectedListener(this);
         count = fillAlphaSpinner.getCount();
         for( int i = 0; i < count; i++ ) {
             if (fillAlphaSpinner.getItemAtPosition(i).equals(fillAlpha)) {
@@ -141,21 +136,74 @@ public class PointsDataPropertiesActivity extends BaseStyleActivity implements O
             }
         }
         
-       String dashed = String.valueOf(style.dashed);
-       dashSpinner = (Spinner)findViewById(R.id.dash_spinner);
-       dashSpinner.setOnItemSelectedListener(this);
-       count = dashSpinner.getCount();
-       for( int i = 0; i < count; i++ ) {
-           if (dashSpinner.getItemAtPosition(i).equals(dashed)) {
-               dashSpinner.setSelection(i);
-               break;
-           }
-       }
+        boolean dashed = style.dashed;
+        array = this.getResources().getStringArray(R.array.array_dashes);
+       
+        dashSpinner = (Spinner) findViewById(R.id.dash_spinner);        
+        if (dashSpinner.getItemAtPosition(0).equals(array[0]) && !dashed)
+            dashSpinner.setSelection(0);
+        else
+        	dashSpinner.setSelection(1); 
+        
     }
 
     public void onOkClick( View view ) {
+    	AdvancedStyle style =getStyle(); 
+    	String alphaString, sizeString; 
     	
-    	updateStyle(getStyle());
+    	//Shape of point
+        String shape = (String) shapesSpinner.getSelectedItem();
+        style.shape = shape;
+        
+        //Size of point
+        sizeString = (String) sizeSpinner.getSelectedItem();
+        try {
+        	style.size = Float.parseFloat(sizeString);
+        } catch (NumberFormatException e) {
+        	Log.e("STYLE","input parse error");
+        }     
+        
+        //Stroke color 
+        String color = String.format("#%06X", (0xFFFFFF & colorSelStroke)); //Convert from hex to #RRGGBB format      
+        style.strokecolor = color;
+        
+        //Width of stroke
+        String widthString = (String) widthSpinner.getSelectedItem();
+        try {
+        	style.width = Float.parseFloat(widthString);
+        } catch (NumberFormatException e) {
+        	Log.e("STYLE","input parse error");
+        }     
+      
+        
+        //Stroke alpha
+        alphaString = (String) alphaSpinner.getSelectedItem();
+        try{
+        	 style.strokealpha = (Float.parseFloat(alphaString))/100f;
+        }catch (NumberFormatException e) {
+        	Log.e("STYLE","input parse error");
+        }            
+        
+        //Dash of stroke
+        String dashed = (String) dashSpinner.getSelectedItem();
+    	if(dashed.equals(array[1]))
+    		style.dashed = true;
+    	else
+    		style.dashed = false;
+    	
+    	//Fill color
+    	color = String.format("#%06X", (0xFFFFFF & colorSelFill)); //Convert from hex to #RRGGBB format      
+        style.fillcolor = color;
+        
+        //alpha spinner
+        alphaString = (String) fillAlphaSpinner.getSelectedItem();      
+        try{
+        	 style.fillalpha = (Float.parseFloat(alphaString))/100f;
+        }catch (NumberFormatException e) {
+        	Log.e("STYLE","input parse error");
+        }       
+        
+    	updateStyle(style);
     }
     
     @Override
@@ -175,44 +223,9 @@ public class PointsDataPropertiesActivity extends BaseStyleActivity implements O
         
         return style;
     } 
+    
     public void onCancelClick( View view ) {
         finish();
-    }
-
-    @Override 
-    public void onItemSelected( AdapterView< ? > callingView, View view, int arg2, long arg3 ) {
-    	style = getStyle();
-   
-    	if (callingView.equals(sizeSpinner)) {
-            String sizeString = (String) sizeSpinner.getSelectedItem();
-            float size = Float.parseFloat(sizeString);
-            style.size = size;
-        } else if (callingView.equals(widthSpinner)) {
-            String widthString = (String) widthSpinner.getSelectedItem();
-            float width = Float.parseFloat(widthString);
-            style.width = width;
-        } else if (callingView.equals(alphaSpinner)) {
-            String alphaString = (String) alphaSpinner.getSelectedItem();
-            float alpha100 = Float.parseFloat(alphaString);
-            style.strokealpha = alpha100 / 100f;
-        } else if (callingView.equals(fillAlphaSpinner)) {
-            String alphaString = (String) fillAlphaSpinner.getSelectedItem();
-            float alpha100 = Float.parseFloat(alphaString);
-            style.fillalpha = alpha100 / 100f;
-        } else if (callingView.equals(shapesSpinner)) {
-            String color = (String) shapesSpinner.getSelectedItem();
-            style.shape = color;
-        } else if(callingView.equals(dashSpinner)){
-        	String dash = (String) dashSpinner.getSelectedItem();
-        	if(dash.equals("Ok"))
-        		style.dashed = true;
-        	else
-        		style.dashed = false;
-        }
-    }
-
-    @Override
-    public void onNothingSelected( AdapterView< ? > arg0 ) {
     }
 
     /**
@@ -227,16 +240,10 @@ public class PointsDataPropertiesActivity extends BaseStyleActivity implements O
 
 			@Override
 			public void onOk(AmbilWarnaDialog dialog, int color){ //Return color selected by user
-				if(sel==who.Fill) {
+				if(sel==who.Fill)
 					colorSelFill = color;
-					String col = String.format("#%06X", (0xFFFFFF & colorSelFill)); //Convert from hex to #RRGGBB format      
-			        style.fillcolor = col;
-				}
-				else {
+				else
 					colorSelStroke = color;
-					String col = String.format("#%06X", (0xFFFFFF & colorSelStroke)); //Convert from hex to #RRGGBB format      
-			        style.strokecolor = col;
-				}
 			} 		
     	});
     	
