@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals
+        name="quantity_sources_selected">
+        <item quantity="zero">Nessuna sorgente selezionata</item>
+        <item quantity="one">Una sorgente selezionata</item>
+        <item quantity="other">%d sorgenti selezionate</item>
+    </plurals>
+</resources>

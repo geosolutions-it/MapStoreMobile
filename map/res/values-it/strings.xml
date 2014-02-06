@@ -45,9 +45,19 @@
 	<string name="add_the_selected_layers_to_the_map">Aggiungi alla mappa i livelli selezionati</string>
 	<string name="name">Nome</string>
 	<string name="description">Description</string>
+	<string name="url">URL</string>
 	<string name="test">Prova</string>
 	<string name="geostore_url">URL di GeoStore</string>
 	<string name="name_for_the_new_source">Nome per la nuova sorgente</string>
 	<string name="description_for_the_new_source">Descrizione nella nuova risorsa (opzionale)</string>
-	<string name="geostore_url_sample">(e.g. http://mapstore.geo-solutions.it/geostore/rest/)</string>
+	<string name="geostore_url_sample">(e.g. http://test.org/geostore/rest/)</string>
+	<string name="warning_geostore_url_not_verified">Non è stato possibile verificare la validità dell\'URL.</string>
+	<string name="question_do_you_want_to_continue_saving">Si desidera salvare ugualmente?</string>
+	<string name="remove">Rimuovi</string>
+	<string name="mapstore_url_correct">L\'URL di MapStore è Corretto.</string>
+	<string name="saving_source">Salvataggio Sorgente&#8230;</string>
+	<string name="error_during_save_process">Errore durante il salvataggio</string>
+	<string name="verifying_mapstore_url">Verifica dell\'URL di MapStore&#8230;</string>
+	<string name="field_required">Questo campo deve essere riempito</string>
+	
 </resources>

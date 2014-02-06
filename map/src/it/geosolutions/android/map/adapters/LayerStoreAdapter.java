@@ -116,7 +116,7 @@ public View getView(int position, View convertView, ViewGroup parent) {
 			});
         }
         ImageButton edit = (ImageButton) v.findViewById(R.id.edit);
-        if(edit != null){
+        if(store.canEdit() && edit != null){
 	        edit.setOnClickListener(new OnClickListener() {
 				
 				@Override
@@ -125,6 +125,8 @@ public View getView(int position, View convertView, ViewGroup parent) {
 					
 				}
 			});
+        }else if(edit !=null){
+        	edit.setVisibility(ImageButton.GONE);
         }
     }
 

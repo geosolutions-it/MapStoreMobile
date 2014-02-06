@@ -6,11 +6,6 @@
         android:icon="@drawable/ic_content_save"
         android:showAsAction="always"
         android:title="@string/save"/>
-    <item
-        android:id="@+id/discard"
-        android:icon="@drawable/ic_content_remove_light"
-        android:showAsAction="always"
-        android:title="@string/cancel">
-    </item>
+    
 
 </menu>

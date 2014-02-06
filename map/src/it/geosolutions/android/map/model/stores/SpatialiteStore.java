@@ -61,5 +61,14 @@ public class SpatialiteStore extends BaseLayerStore{
 		// TODO Auto-generated method stub
 		
 	}
+
+	/* (non-Javadoc)
+	 * @see it.geosolutions.android.map.model.stores.LayerStore#canEdit()
+	 */
+	@Override
+	public boolean canEdit() {
+		//for now you can't edit this kind of sourcer
+		return false;
+	}
 	
 }
