@@ -82,6 +82,8 @@
         <!-- Layer add  -->
         <activity android:name="it.geosolutions.android.map.activities.BrowseSourcesActivity"></activity>
         <activity android:name="it.geosolutions.android.map.spatialite.activities.SpatialiteLayerListActivity"></activity>
+        <!-- Source Add -->
+        <activity android:name="it.geosolutions.android.map.activities.NewSourceActivity"></activity>
     </application>
 
 </manifest>
