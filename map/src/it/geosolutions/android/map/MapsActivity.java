@@ -17,7 +17,6 @@
  */
 package it.geosolutions.android.map;
 
-import it.geosolutions.android.map.activities.BrowseSourcesActivity;
 import it.geosolutions.android.map.activities.GetFeatureInfoLayerListActivity;
 import it.geosolutions.android.map.activities.MapActivityBase;
 import it.geosolutions.android.map.control.CoordinateControl;
@@ -42,12 +41,9 @@ import it.geosolutions.android.map.overlay.MarkerOverlay;
 import it.geosolutions.android.map.overlay.items.DescribedMarker;
 import it.geosolutions.android.map.overlay.managers.MultiSourceOverlayManager;
 import it.geosolutions.android.map.overlay.managers.OverlayManager;
-import it.geosolutions.android.map.overlay.managers.SimpleOverlayManager;
 import it.geosolutions.android.map.overlay.switcher.LayerSwitcherFragment;
-import it.geosolutions.android.map.overlay.switcher.OverlaySwitcherFragment;
 import it.geosolutions.android.map.preferences.EditPreferences;
 import it.geosolutions.android.map.style.StyleManager;
-import it.geosolutions.android.map.utils.LocalPersistence;
 import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.android.map.utils.MarkerUtils;
 import it.geosolutions.android.map.utils.SpatialDbUtils;
@@ -71,7 +67,6 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
@@ -84,7 +79,6 @@ import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;

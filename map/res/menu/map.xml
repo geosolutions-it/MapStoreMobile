@@ -7,12 +7,12 @@
           android:actionViewClass="android.widget.SearchView" />
            -->
            <item android:id="@+id/layer_menu_action"
-          android:title="Layers"
-          android:icon="@drawable/ic_location_map"
+          android:title="@string/sources"
+          android:icon="@drawable/ic_location_map_add"
           android:showAsAction="always"
            /> 
            <item android:id="@+id/settings"
-               android:title="Settings"
+               android:title="@string/action_settings"
                android:showAsAction="never"
                android:icon="@drawable/ic_action_settings"></item>
 </menu>
