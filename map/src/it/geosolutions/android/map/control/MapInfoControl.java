@@ -228,7 +228,7 @@ public class MapInfoControl extends MapControl{
 					polygonTapListener.getNumberOfPoints()< 1) return;
 			
 			Polygon p = new Polygon(canvas,view);
-			p.buildPolygon(polygonTapListener);
+			p.buildPolygon(polygonTapListener,paint_stroke);
 			p.draw(paint_fill);
 			p.draw(paint_stroke);
 		}

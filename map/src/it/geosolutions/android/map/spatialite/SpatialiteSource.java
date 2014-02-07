@@ -156,15 +156,19 @@ public class SpatialiteSource implements Source {
 	 */
 	private boolean checkisVisible(SpatialVectorTable table, byte zoomLevel) {
 		AdvancedStyle s = StyleManager.getInstance().getStyle(table.getName());
-		Log.v("Spatialite_Source","zoom level:"+zoomLevel);
+		//Log.v("Spatialite_Source","zoom level:"+zoomLevel);
 	     if ( !StyleUtils.isInVisibilityRange(s, zoomLevel) ) {
 	    	 return false;
 	     }
 		return true;
 	}
 
-	
-
+	/**
+	 * Perform a query on a circle.
+	 * @param query
+	 * @param data
+	 * @return
+	 */
 	private int	performQuery_circle(CircleTaskQuery query,
 	        List<FeatureInfoQueryResult> data) {
 	    Layer<?> layer = query.getLayer();
@@ -207,6 +211,12 @@ public class SpatialiteSource implements Source {
 	    return features.size();
 	}
 	
+	/**
+	 * Perform a query on a polygon.
+	 * @param query
+	 * @param data
+	 * @return
+	 */
 	private int performQuery_poly(PolygonTaskQuery query,
 	        List<FeatureInfoQueryResult> data) {
 		 Layer<?> layer = query.getLayer();

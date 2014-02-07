@@ -1215,7 +1215,7 @@ public class SpatialiteDataSourceHandler implements SpatialDataSourceHandler{
 	 */
 	public Stmt buildFeatureCircleQuery(String destSrid, SpatialVectorTable table, double x,
 			double y, double radius, Integer start, Integer limit) throws Exception {
-		boolean doTransform = false;
+		boolean doTransform = false;		
         if (!table.getSrid().equals(destSrid)) {
             doTransform = true;
         }
@@ -1224,13 +1224,16 @@ public class SpatialiteDataSourceHandler implements SpatialDataSourceHandler{
         if (doTransform)
             mbrSb.append("ST_Transform(");
         
-        mbrSb.append("MakePoint(");
+        mbrSb.append("BuildCircleMBR(");
         mbrSb.append(x);
         mbrSb.append(" , ");
         mbrSb.append(y);
-        if (doTransform) {
-            mbrSb.append(", ");
-            mbrSb.append(destSrid);
+        mbrSb.append(" , ");
+        mbrSb.append(Double.toString(radius));
+        mbrSb.append(" , ");
+        mbrSb.append(destSrid);
+        
+        if (doTransform) {        
             mbrSb.append("), ");
             mbrSb.append(table.getSrid());
         }
@@ -1252,14 +1255,19 @@ public class SpatialiteDataSourceHandler implements SpatialDataSourceHandler{
        
         qSb.append(" FROM \"");
         qSb.append(table.getName());
-        qSb.append("\" WHERE ST_Distance(");
+        qSb.append("\" WHERE ST_Intersects(");
         qSb.append(table.getGeomName());
         qSb.append(", ");
         qSb.append(mbr);
-        qSb.append(") <= ");
-        qSb.append(Double.toString(radius));
-        qSb.append(" ");
+        qSb.append(") = 1");
         
+        qSb.append("   AND ROWID IN (");
+        qSb.append("     SELECT ROWID FROM Spatialindex WHERE f_table_name ='");
+        qSb.append(table.getName());
+        qSb.append("'");
+        qSb.append("     AND search_frame = ");
+        qSb.append(mbr);
+        qSb.append(" )");
         if(limit != null){
             if(start !=null){
             	qSb.append(" ORDER BY  ");
@@ -1277,7 +1285,6 @@ public class SpatialiteDataSourceHandler implements SpatialDataSourceHandler{
         }
         qSb.append(";");
         String q = qSb.toString();
-
         Stmt stmt = db.prepare(q);
 		return stmt;		
 	}
@@ -1335,11 +1342,21 @@ public class SpatialiteDataSourceHandler implements SpatialDataSourceHandler{
         return features;
 	}
 
+	/**
+	 * Intersect a polygon using spatial index.
+	 * @param destSrid
+	 * @param table
+	 * @param polygon_points
+	 * @param start
+	 * @param limit
+	 * @return
+	 * @throws Exception
+	 */
 	public Stmt buildFeaturePolygonQuery(String destSrid,
 			SpatialVectorTable table,
 			ArrayList<Coordinates_Query> polygon_points, Integer start,
 			Integer limit) throws Exception {
-		
+
 		boolean doTransform = false;
         if (!table.getSrid().equals(destSrid)) {
             doTransform = true;
@@ -1366,15 +1383,14 @@ public class SpatialiteDataSourceHandler implements SpatialDataSourceHandler{
             }
         }
         
-        if (doTransform) {
-        	mbrSb.append(" , ");
-            mbrSb.append(destSrid);
-            mbrSb.append("))', ");
+        mbrSb.append("))'");
+        mbrSb.append(",");
+        mbrSb.append(destSrid);
+        
+        if (doTransform) {       	
+        	mbrSb.append("), "); 
             mbrSb.append(table.getSrid());
         }
-        
-        else
-        	mbrSb.append("))'");
         
         mbrSb.append(")");
 
@@ -1423,6 +1439,7 @@ public class SpatialiteDataSourceHandler implements SpatialDataSourceHandler{
         }
         qSb.append(";");
         String q = qSb.toString();
+        Log.v("Polygon",q);
         Stmt stmt = db.prepare(q);
 		return stmt;		
 	}
