@@ -24,6 +24,7 @@ import android.content.Intent;
 
 import it.geosolutions.android.map.DataListActivity;
 import it.geosolutions.android.map.MapsActivity;
+import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.model.Layer;
 import it.geosolutions.android.map.spatialite.activities.SpatialiteLayerListActivity;
 
@@ -69,6 +70,14 @@ public class SpatialiteStore extends BaseLayerStore{
 	public boolean canEdit() {
 		//for now you can't edit this kind of sourcer
 		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see it.geosolutions.android.map.model.stores.LayerStore#getIconId()
+	 */
+	@Override
+	public int getIconId() {
+		return R.drawable.icon_spatialite;
 	}
 	
 }

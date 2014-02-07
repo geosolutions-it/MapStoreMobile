@@ -59,6 +59,7 @@
 	<string name="error_during_save_process">Error during save process</string>
 	<string name="verifying_mapstore_url">Verifying MapStore URL&#8230;</string>
 	<string name="field_required">This field is required!</string>
+	<string name="source_type">Source Type</string>
 	
 	
 </resources>

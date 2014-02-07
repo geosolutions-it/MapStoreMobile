@@ -111,7 +111,6 @@ public View getView(int position, View convertView, ViewGroup parent) {
 				@Override
 				public void onClick(View v) {
 					store.openDetails(listener.getActivity());
-					
 				}
 			});
         }
@@ -128,6 +127,8 @@ public View getView(int position, View convertView, ViewGroup parent) {
         }else if(edit !=null){
         	edit.setVisibility(ImageButton.GONE);
         }
+        ImageView icon = (ImageView) v.findViewById(R.id.source_icon);
+        icon.setImageResource(store.getIconId());
     }
 
     // the view must be returned to our activity

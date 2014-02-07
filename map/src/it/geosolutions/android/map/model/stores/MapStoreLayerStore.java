@@ -25,6 +25,7 @@ import android.content.Intent;
 
 import it.geosolutions.android.map.DataListActivity;
 import it.geosolutions.android.map.MapsActivity;
+import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.activities.NewSourceActivity;
 import it.geosolutions.android.map.common.Constants;
 import it.geosolutions.android.map.geostore.activities.GeoStoreResourcesActivity;
@@ -115,5 +116,14 @@ public class MapStoreLayerStore extends BaseLayerStore {
 		} else if (!url.equals(other.url))
 			return false;
 		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see it.geosolutions.android.map.model.stores.LayerStore#getIconId()
+	 */
+	@Override
+	public int getIconId() {
+		// TODO Auto-generated method stub
+		return R.drawable.ic_mapstore;
 	}
 }

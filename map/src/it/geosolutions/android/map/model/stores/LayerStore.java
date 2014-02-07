@@ -39,4 +39,5 @@ public interface LayerStore extends Serializable {
 	public void openDetails(Activity ac);
 	public void openEdit(Activity ac);
 	public boolean canEdit();
+	public int getIconId();
 }
