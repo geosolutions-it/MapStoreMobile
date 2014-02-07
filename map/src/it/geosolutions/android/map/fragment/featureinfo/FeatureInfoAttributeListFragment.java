@@ -24,9 +24,12 @@ import it.geosolutions.android.map.common.Constants;
 import it.geosolutions.android.map.loaders.FeatureInfoLoader;
 import it.geosolutions.android.map.model.Feature;
 import it.geosolutions.android.map.model.Layer;
+import it.geosolutions.android.map.model.query.BaseFeatureInfoQuery;
+import it.geosolutions.android.map.model.query.CircleQuery;
 import it.geosolutions.android.map.model.query.FeatureInfoQueryResult;
 import it.geosolutions.android.map.model.query.BBoxQuery;
-import it.geosolutions.android.map.model.query.BBoxTaskQuery;
+import it.geosolutions.android.map.model.query.FeatureInfoTaskQuery;
+import it.geosolutions.android.map.model.query.PolygonQuery;
 import it.geosolutions.android.map.utils.FeatureInfoUtils;
 
 import java.util.ArrayList;
@@ -61,8 +64,7 @@ public class FeatureInfoAttributeListFragment extends SherlockListFragment
         implements LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>> {
 private FeatureInfoAttributesAdapter adapter;
 
-BBoxTaskQuery[] queryQueue;
-
+private FeatureInfoTaskQuery[] queryQueue;
 // The callbacks through which we will interact with the LoaderManager.
 
 private LoaderManager.LoaderCallbacks<List<FeatureInfoQueryResult>> mCallbacks;
@@ -71,11 +73,11 @@ protected Integer start;
 
 protected Integer limit;
 
-protected BBoxQuery query;
+protected BaseFeatureInfoQuery query;
 
 protected ArrayList<Layer> layers;
-
 protected ArrayList<Feature> currentFeatures;
+
 
 /**
  * Called only once
@@ -94,8 +96,7 @@ public void onCreate(Bundle savedInstanceState) {
     // TODO get them from arguments
     Bundle extras = getActivity().getIntent().getExtras();
     ;
-    // TODO get already loaded data;
-    query = (BBoxQuery) extras.getParcelable("query");
+    
     layers = (ArrayList<Layer>) extras.getSerializable(Constants.ParamKeys.LAYERS);
     start = extras.getInt("start");
     limit = extras.getInt("limit");
@@ -104,15 +105,18 @@ public void onCreate(Bundle savedInstanceState) {
     adapter = new FeatureInfoAttributesAdapter(getSherlockActivity(),
             R.layout.feature_info_attribute_row);
     setListAdapter(adapter);
-    startDataLoading(query, layers, start, 2);// use 2 to check availability of
-                                              // the next page
+	query = extras.getParcelable("query");
 
+	// TODO get already loaded data;
+	startDataLoading(query, layers, start, 2);// use 2 to check availability of the next page
 }
 
 @Override
 public View onCreateView(LayoutInflater inflater, ViewGroup container,
         Bundle savedInstanceState) {
-    startDataLoading(query, layers, start, 2);
+    
+	startDataLoading(query, layers, start, 2);
+  
     return inflater.inflate(R.layout.feature_info_attribute_list, container,
             false);
 }
@@ -137,12 +141,10 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
 
         @Override
         public void onClick(View v) {
-
             startLoadingGUI();
             adapter.clear();
             start--;
-            startDataLoading(query, layers, start, 2);
-
+            startDataLoading(query, layers, start, 2);        
         }
     });
 
@@ -156,7 +158,7 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
             adapter.clear();
             start++;
             startDataLoading(query, layers, start, 2);
-
+           
         }
     });
     // show a dialog and return if ok
@@ -189,19 +191,28 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
 }
 
 /**
- * Create an array of <FeatureInfoTaskQuery> to pass to the loader and
+ * Create an array of <BaseFeatureInfoQuery> to pass to the loader and
  * initialize the loader
  * 
- * @param query the <FeatureInfoQuery> with bbox
+ * @param query the <BaseFeatureInfoQuery>
  * @param layers array of <String> to generate the queryQueue
  * @param start
  * @param limit
  */
-private void startDataLoading(BBoxQuery query, ArrayList<Layer> layers,
+private void startDataLoading(BaseFeatureInfoQuery query, ArrayList<Layer> layers,
         Integer start, Integer limit) {
+	
     // create task query
-    queryQueue = FeatureInfoUtils.createTaskQueryQueue(layers, query, start,
-            limit);
+	if(query instanceof BBoxQuery)
+		queryQueue = FeatureInfoUtils.createTaskQueryQueue(layers, (BBoxQuery) query, start,
+	            limit);
+    else 
+    	if(query instanceof CircleQuery)
+    		queryQueue = FeatureInfoUtils.createTaskQueryQueue(layers, (CircleQuery) query, start,
+                limit);
+    else
+    	queryQueue = FeatureInfoUtils.createTaskQueryQueue(layers, (PolygonQuery) query, start,
+                limit);
 
     // initialize Load Manager
     mCallbacks = this;
@@ -238,8 +249,8 @@ public void onDetach() {
  */
 @Override
 public Loader<List<FeatureInfoQueryResult>> onCreateLoader(int id, Bundle args) {
-
-    return new FeatureInfoLoader(getSherlockActivity(), queryQueue);
+    
+	return new FeatureInfoLoader(getSherlockActivity(), queryQueue);
 }
 
 // populate the list and set buttonbar visibility options

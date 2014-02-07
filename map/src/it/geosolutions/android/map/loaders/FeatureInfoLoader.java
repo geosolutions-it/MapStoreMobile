@@ -17,26 +17,20 @@
  */
 package it.geosolutions.android.map.loaders;
 
-import it.geosolutions.android.map.database.SpatialDataSourceHandler;
-import it.geosolutions.android.map.model.Feature;
+
 import it.geosolutions.android.map.model.Layer;
 import it.geosolutions.android.map.model.Source;
 import it.geosolutions.android.map.model.query.FeatureInfoQueryResult;
 import it.geosolutions.android.map.model.query.FeatureInfoTaskQuery;
-import it.geosolutions.android.map.model.query.BBoxTaskQuery;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import jsqlite.Exception;
 import android.content.Context;
-import android.os.AsyncTask;
-import android.os.Bundle;
+
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
-import android.widget.ArrayAdapter;
-import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
+
 
 /**
  * Async query task to query layers. Updates an adapter with the results from a
@@ -52,17 +46,17 @@ int features_loaded = 0;
 
 private List<FeatureInfoQueryResult> mData;
 
-private BBoxTaskQuery[] queryQueue;
+private FeatureInfoTaskQuery[] queryQueue;
 
 // private FeatureInfoObserver mObserver;
 private static int MAX_FEATURES = 10;
 
 /**
- * Constructor for class FeatureInfoLoader
+ * Constructor for class FeatureInfoLoader with FeatureInfoTaskQuery
  * @param ctx
  * @param queryQueue
  */
-public FeatureInfoLoader(Context ctx, BBoxTaskQuery[] queryQueue) {
+public FeatureInfoLoader(Context ctx, FeatureInfoTaskQuery[] queryQueue) {
     // Loaders may be used across multiple Activities (assuming they aren't
     // bound to the LoaderManager), so NEVER hold a reference to the context
     // directly. Doing so will cause you to leak an entire Activity's context.
@@ -70,7 +64,6 @@ public FeatureInfoLoader(Context ctx, BBoxTaskQuery[] queryQueue) {
     // Context instead, and can be retrieved with a call to getContext().
     super(ctx);
     this.queryQueue = queryQueue;
-
 }
 
 protected void doInBackground(FeatureInfoTaskQuery[] queryQueue,
@@ -111,8 +104,9 @@ public List<FeatureInfoQueryResult> loadInBackground() {
     List<FeatureInfoQueryResult> data = new ArrayList<FeatureInfoQueryResult>();
 
     // TODO: Perform the query here and add the results to 'data'.
-    doInBackground(queryQueue, data);
 
+    doInBackground(queryQueue, data);
+    
     return data;
 }
 

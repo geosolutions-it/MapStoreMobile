@@ -46,22 +46,27 @@ public class Polygon extends ObjectToDraw {
 	/**
 	 * Build a polygon object by points stored by listener.
 	 * @param polygonTapListener
+	 * @param paint used for style of circle put over polygon points.
 	 */
-	public void buildPolygon(PolygonTapListener polygonTapListener){
+	public void buildPolygon(PolygonTapListener polygonTapListener,Paint paint){
 		float x, y;
-		for(int i = 0;i < polygonTapListener.getNumberOfPoints();i++){
+		int n_points = polygonTapListener.getNumberOfPoints();
+		for(int i = 0;i <n_points;i++){
 			if(i==0){
 				x = (float) ConversionUtilities.convertFromLongitudeToPixels(view, polygonTapListener.getXPoint(i));
 				y = (float) ConversionUtilities.convertFromLatitudeToPixels(view, polygonTapListener.getYPoint(i));
-				polygon.moveTo(x, y);	
-				polygon.addCircle(x, y, 8, Direction.CW);
+				polygon.moveTo(x, y);
 			} 
 				
 			else{
 				x = (float) ConversionUtilities.convertFromLongitudeToPixels(view, polygonTapListener.getXPoint(i));
 				y = (float) ConversionUtilities.convertFromLatitudeToPixels(view, polygonTapListener.getYPoint(i));
-				polygon.lineTo(x,y);	
-			} 
+				polygon.lineTo(x,y);
+				if(i==n_points-1)
+					break;
+			}
+				
+			canvas.drawCircle(x, y, 8 , paint);
 		}
 		
 		//Close perimeter of polygon

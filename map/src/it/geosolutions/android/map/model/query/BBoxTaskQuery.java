@@ -18,8 +18,6 @@
 package it.geosolutions.android.map.model.query;
 
 import android.os.Parcel;
-import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
-import it.geosolutions.android.map.database.SpatialDataSourceHandler;
 import it.geosolutions.android.map.model.Layer;
 
 /**

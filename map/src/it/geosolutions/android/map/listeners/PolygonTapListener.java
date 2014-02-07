@@ -98,6 +98,7 @@ public class PolygonTapListener implements OnGestureListener, OnDoubleTapListene
 	/**
 	 * Create a Feature Query for polygonal selection and passes to an GetFeatureInfoLayerListActivity via intent.
 	 * @param polygon_points
+	 * @param zoomLevel
 	 */
 	private void infoDialogPolygon(final ArrayList<Coordinates_Query> polygon_points,byte zoomLevel){
 		try {
@@ -110,7 +111,6 @@ public class PolygonTapListener implements OnGestureListener, OnDoubleTapListene
 	        query.setSrid("4326");
 	        query.setZoomLevel(zoomLevel);
 	        i.putExtra("query", query);
-	        i.putExtra("selection","Polygonal"); //Indicate that user has choosed polygonal selection
 	        if (mode == Modes.MODE_EDIT) {
 	            i.setAction(Intent.ACTION_PICK);
 	        } else {
