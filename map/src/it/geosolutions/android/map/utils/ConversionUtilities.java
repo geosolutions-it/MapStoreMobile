@@ -44,8 +44,13 @@ public class ConversionUtilities {
         double pixelLeft = MercatorProjection.longitudeToPixelX(
                 geoPoint.longitude, mapPosition.zoomLevel);      
         pixelLeft -= view.getWidth() >> 1;
-        
-    	return MercatorProjection.pixelXToLongitude(pixelLeft + pixel_x, zoomLevel);
+        double ret = 0;
+        try{
+        	ret = MercatorProjection.pixelXToLongitude(pixelLeft + pixel_x, zoomLevel);
+        }catch(IllegalArgumentException e){
+        	ret = 180;
+        }
+    	return ret;
 	}
 	
 	/**
@@ -54,7 +59,7 @@ public class ConversionUtilities {
 	 * @param pixel_y pixels of the point.
 	 * @return latitude value for point.
 	 */
-	public static float convertFromPixelsToLatitude(AdvancedMapView view, double pixel_y){
+	public static double convertFromPixelsToLatitude(AdvancedMapView view, double pixel_y){
 		MapPosition mapPosition = view.getMapViewPosition()
                 .getMapPosition();
         byte zoomLevel = view.getMapViewPosition().getZoomLevel();
@@ -63,8 +68,13 @@ public class ConversionUtilities {
         double pixelTop = MercatorProjection.latitudeToPixelY(
                 geoPoint.latitude, mapPosition.zoomLevel);        
         pixelTop -= view.getHeight() >> 1;
-        
-    	return (float) MercatorProjection.pixelYToLatitude(pixelTop + pixel_y, zoomLevel);
+        double ret=0;
+        try{
+           ret  = MercatorProjection.pixelYToLatitude(pixelTop + pixel_y, zoomLevel);
+        }catch(IllegalArgumentException e){
+        	ret = MercatorProjection.LATITUDE_MAX;
+        }
+    	return  ret;
 	}	
 	
 	/**
