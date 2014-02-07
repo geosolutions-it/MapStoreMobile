@@ -52,6 +52,7 @@ public class PolygonsDataPropertiesActivity extends BaseStyleActivity {
     private TextView colorFill;
     private Integer colorSelStroke;
     private Integer colorSelFill;
+    private String[] array;
 
     public void onCreate( Bundle icicle ) {
         super.onCreate(icicle);
@@ -116,15 +117,15 @@ public class PolygonsDataPropertiesActivity extends BaseStyleActivity {
         decimationText = (EditText) findViewById(R.id.decimation_text);
         decimationText.setText(decimation);
      
-        String dash = String.valueOf(style.dashed);
-        dashSpinner = (Spinner) findViewById(R.id.dash_spinner);
-        count = dashSpinner.getCount();
-        for( int i = 0; i < count; i++ ) {
-            if (dashSpinner.getItemAtPosition(i).equals(dash)) {
-                dashSpinner.setSelection(i);
-                break;
-            }
-        }
+        boolean dashed = style.dashed;
+        array = this.getResources().getStringArray(R.array.array_dashes);
+       
+        dashSpinner = (Spinner) findViewById(R.id.dash_spinner);        
+        if (dashSpinner.getItemAtPosition(0).equals(array[0]) && !dashed)
+            dashSpinner.setSelection(0);
+        else
+        	dashSpinner.setSelection(1); 
+        
     }
 
     public void onOkClick( View view ) {
@@ -156,8 +157,8 @@ public class PolygonsDataPropertiesActivity extends BaseStyleActivity {
         }
         style.decimationFactor = decimation;
         
-        String dash = (String) dashSpinner.getSelectedItem();
-    	if(dash.equals("Ok"))
+        String dashed = (String) dashSpinner.getSelectedItem();
+    	if(dashed.equals(array[1]))
     		style.dashed = true;
     	else
     		style.dashed = false;
@@ -189,11 +190,13 @@ public class PolygonsDataPropertiesActivity extends BaseStyleActivity {
 
 			@Override
 			public void onOk(AmbilWarnaDialog dialog, int color){ //Return color selected by user
-				if(sel==who.Fill) 
+				if(sel==who.Fill) {
 					colorSelFill = color;
-				else 
+				}
+				else {
 					colorSelStroke = color;
-			} 		
+				}	
+			}
     	});
     	
     	dialog.show();
