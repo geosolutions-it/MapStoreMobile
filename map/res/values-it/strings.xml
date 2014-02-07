@@ -18,6 +18,7 @@
     <string name="error_reading_style">Lettura stile fallito</string>
     <string name="error_unable_getfeature_db">Sede tecnica non trovata nel database locale</string>
     <string name="error_getting_data_from_database">Errore nel prelevare la sede tecnica dal database</string>
+    <string name="error_connectivity_problem">Problema di connettività</string>
     <string name="use_this_feature">Modifica sede tecnica</string>
     <string name="use_this_feature_description">Vuoi utilizzare questa sede tecnica per la segnalazione corrente?</string>
     <string name="menu_preferences">Impostazioni Mappa</string>
@@ -46,7 +47,7 @@
 	<string name="name">Nome</string>
 	<string name="description">Description</string>
 	<string name="url">URL</string>
-	<string name="test">Prova</string>
+	<string name="test">Test</string>
 	<string name="geostore_url">URL di GeoStore</string>
 	<string name="name_for_the_new_source">Nome per la nuova sorgente</string>
 	<string name="description_for_the_new_source">Descrizione nella nuova risorsa (opzionale)</string>

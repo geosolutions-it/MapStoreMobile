@@ -18,6 +18,7 @@
     <string name="error_reading_style">Couldn\'t read Style</string>
     <string name="error_unable_getfeature_db">Unable to get the feature from the local database</string>
     <string name="error_getting_data_from_database">Error getting data from database</string>
+    <string name="error_connectivity_problem">Connectivity problem</string>
     <string name="use_this_feature">Use This Feature</string>
     <string name="use_this_feature_description">Do you want to place a marker on this feature?</string>
     <string name="menu_preferences">Map Preferences</string>

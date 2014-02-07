@@ -41,22 +41,22 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" 
         android:choiceMode="multipleChoice"
-        android:descendantFocusability="beforeDescendants"  >
+        android:descendantFocusability="beforeDescendants" android:visibility="gone" >
 
     </ListView>
-<!--    	<LinearLayout -->
-<!-- 	    android:id="@android:id/empty" -->
-<!-- 	    android:layout_width="fill_parent" -->
-<!-- 	    android:layout_height="fill_parent" -->
-	   
-<!-- 		android:gravity="center" -->
-<!-- 	    android:visibility="gone"> -->
-
-<!-- 	    <TextView android:id="@+id/empty_text" -->
-<!-- 	               android:layout_width="match_parent" -->
-<!-- 	               android:layout_height="match_parent" -->
-<!-- 	               android:layout_gravity="center" -->
-<!-- 	               android:text="@string/feature_info_extracting_information"/> -->
-         
-<!--   	</LinearLayout> -->
+<LinearLayout
+	    android:id="@android:id/empty"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+		android:gravity="center"
+	    android:visibility="visible">
+          
+	    <ProgressBar
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_gravity="center"
+         style="@android:style/Widget.ProgressBar.Small"
+         android:layout_marginRight="5dp" />
+	    
+  	</LinearLayout>
     </LinearLayout>
