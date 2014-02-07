@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <plurals
-        name="quantity_sources_selected">
+
+    <plurals name="quantity_sources_selected">
         <item quantity="zero">Nessuna sorgente selezionata</item>
         <item quantity="one">Una sorgente selezionata</item>
         <item quantity="other">%d sorgenti selezionate</item>
     </plurals>
+    <plurals name="quantity_layers_selected">
+        <item quantity="zero">Nessun livello selezionato</item>
+        <item quantity="one">1 livello selezionato</item>
+        <item quantity="other">%d livelli selezionati</item>
+    </plurals>
+
 </resources>

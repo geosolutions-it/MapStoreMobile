@@ -44,6 +44,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -151,13 +152,11 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
     	     Layer<?> sel = adapter.getItem(position);
     	     
     	     if(!selected.contains(sel)){
-    	    	 getListView().setItemChecked(position, true);
     	    	 selected.add(sel);
-    	    	 
     	     }else{
-    	    	 getListView().setItemChecked(position, false);
     	    	 selected.remove(sel);
     	     }
+    	     updateSelected();
     	     if(selected.size()>0){
     	    	 actionMode = getSherlockActivity().startActionMode(callback);
     	    	 //override the done button to deselect all when the button is pressed
@@ -167,20 +166,26 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
 
     	    	     @Override
     	    	     public void onClick(View v) {
-    	    	         getListView().clearChoices();
-    	    	         selected = new ArrayList<Layer<?>>();
-    	    	         actionMode.finish();
+    	    	         closeActionMode();
     	    	     }
     	    	 });
     	    	 
     	     }else{
-    	    	 if(actionMode !=null){
-    	    		 actionMode.finish();
-    	    	 }
+    	    	 closeActionMode();
     	     }
-    	     view.setSelected(true);
+    	     
     	     return true;
     	   }
+	});
+    lv.setOnItemClickListener(new OnItemClickListener() {
+
+		@Override
+		public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+				long arg3) {
+			updateSelected();
+			
+			
+		}
 	});
     
     super.onViewCreated(view, savedInstanceState);
@@ -264,7 +269,17 @@ public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
 	ListView lv = getListView();
 	Resources res = getResources();
 	int number =selected.size();
-	String title = res.getQuantityString(R.plurals.quantity_sources_selected,number,number );
+	if(number > 1){
+		menu.findItem(R.id.up).setVisible(false);
+		menu.findItem(R.id.down).setVisible(false);
+		
+	}else{
+		menu.findItem(R.id.up).setVisible(true);
+		menu.findItem(R.id.down).setVisible(true);
+	}
+	
+	
+	String title = res.getQuantityString(R.plurals.quantity_layers_selected,number,number );
 	mode.setTitle(title);
 	
 	return false;
@@ -276,31 +291,86 @@ public void onDestroyActionMode(ActionMode mode) {
 }
 
 public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-	mode.getMenuInflater().inflate(R.menu.delete_menu, menu);
+	mode.getMenuInflater().inflate(R.menu.delete_up_down, menu);
 	this.actionMode =mode;
 	
 	return true;
 }
 
 public boolean onActionItemClicked(ActionMode mode, MenuItem menu) {
+	int itemId = menu.getItemId();
+	ArrayList<Layer> layers = getLayers();
 	
-	if(menu.getItemId()==R.id.delete){
-		ArrayList<Layer> layers = getLayers();
+	ListView lv = getListView();
+	MultiSourceOverlayManager om = getOverlayManager();
+	if( itemId == R.id.delete){
 		layers.removeAll(selected);
-		getOverlayManager().setLayers(new ArrayList<Layer>(layers));
-		getOverlayManager().forceRedraw();
-		
+		om.setLayers(new ArrayList<Layer>(layers));
+		om.forceRedraw();
+		closeActionMode();
+	
+	}else if(itemId == R.id.up||itemId == R.id.down ){
+		//check if already on tom or bottom
+		int size = layers.size();
+		List<Integer> indexes = new ArrayList<Integer>();
+		for (Layer<?> l: selected){
+			indexes.add(layers.indexOf(l));
+		}
+		int min = Collections.min(indexes);
+		int max = Collections.max(indexes);
+		if (max < size -1 && itemId == R.id.up) {
 
+			for (Layer<?> l : selected) {
+				int i = layers.indexOf(l);
+				layers.remove(l);
+				layers.add(Math.min(i + 1, size - 1), l);
+			}
+			om.setLayers(new ArrayList<Layer>(layers));
+			om.forceRedraw();
+		} else if (min > 0 &&itemId == R.id.down) {
+			// NOTE:the listView is in the reverse order
+			for (Layer<?> l : selected) {
+				int i = layers.indexOf(l);
+				layers.remove(l);		
+				layers.add(Math.max(i - 1, 0), l);
+			}
+			om.setLayers(new ArrayList<Layer>(layers));
+			om.forceRedraw();
+		}
+		updateSelected();
 	}
-	selected = new ArrayList<Layer<?>>();
-	mode.finish();
-	getListView().clearChoices();
-	getListView().clearFocus();
-	actionMode=null;
 	return true;
 
 }
 
+/**
+ * Clear selections and close the action mode
+ */
+private void closeActionMode() {
+	ListView lv = getListView();
+	lv.clearFocus();
+	lv.clearChoices();
+	selected = new ArrayList<Layer<?>>();
+	if(actionMode!=null){
+		actionMode.finish();
+	}
+}
+
+/**
+ * Update the selected layers in the list view
+ */
+private void updateSelected(){
+	ListView lv = getListView();
+	lv.clearFocus();
+	lv.clearChoices();
+	ArrayList<Layer> layers = getLayers();
+	int size = layers.size();
+	for(Layer l : selected){
+		int i = layers.indexOf(l);
+		lv.setItemChecked(size -1 -i, true);
+		
+	}
+}
 }
 
 

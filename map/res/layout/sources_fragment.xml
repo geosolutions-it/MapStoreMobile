@@ -27,13 +27,13 @@
 	         />
 </LinearLayout>
        
-	<!-- Layer list -->	
+	
+	<!-- Sources list -->	
     <ListView
         android:id="@android:id/list"
         android:layout_width="fill_parent"
-        android:layout_height="match_parent"
-       android:choiceMode="multipleChoice"
-       
+        android:layout_height="fill_parent"
+       android:choiceMode="multipleChoice"  
        android:descendantFocusability="beforeDescendants" >
 
     </ListView>
