@@ -38,7 +38,6 @@ public class Shapes {
 	private Canvas canvas;
 	private AdvancedStyle style4Table;
 	private GeometryIterator geometryIterator;
-	private ShapeWriter wr;
 	
 	/**
 	 * Constructor for class shapes
@@ -52,10 +51,7 @@ public class Shapes {
 		this.canvas = canvas;
 		this.style4Table = style4Table;
 		this.geometryIterator = geometryIterator;
-		
-		wr = new ShapeWriter(pointTransformer);
-        wr.setRemoveDuplicatePoints(true);
-        wr.setDecimation(style4Table.decimationFactor);
+
 	}
 	
 	/**
@@ -63,6 +59,9 @@ public class Shapes {
 	 * @param stroke
 	 */
 	public void drawLine(Paint stroke){
+		ShapeWriter wr = new ShapeWriter(pointTransformer);
+        wr.setRemoveDuplicatePoints(true);
+        wr.setDecimation(style4Table.decimationFactor);
         while( geometryIterator.hasNext() ) {
             Geometry geom = geometryIterator.next();
             DrawableShape shape = wr.toShape(geom);
@@ -78,6 +77,9 @@ public class Shapes {
 	 * @param stroke
 	 */
 	public void drawPoint(Paint fill, Paint stroke){
+		ShapeWriter wr = new ShapeWriter(pointTransformer,style4Table.shape,style4Table.size);
+        wr.setRemoveDuplicatePoints(true);
+        wr.setDecimation(style4Table.decimationFactor);
         while( geometryIterator.hasNext() ) {
             Geometry geom = geometryIterator.next();
             geom.getCoordinate();
@@ -98,7 +100,11 @@ public class Shapes {
 	 * @param stroke
 	 */
 	public void drawPolygon(Paint fill, Paint stroke){
+		ShapeWriter wr = new ShapeWriter(pointTransformer);
+        wr.setRemoveDuplicatePoints(true);
+        wr.setDecimation(style4Table.decimationFactor);
 		while( geometryIterator.hasNext() ) {
+			
             Geometry geom = geometryIterator.next();
             if (geom != null) {
                 DrawableShape shape = wr.toShape(geom);
