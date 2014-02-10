@@ -18,11 +18,9 @@
 package it.geosolutions.android.map.overlay;
 
 import it.geosolutions.android.map.model.Layer;
+import it.geosolutions.android.map.overlay.managers.MultiSourceOverlayManager;
 import it.geosolutions.android.map.renderer.MultiSourceRenderer;
-import it.geosolutions.android.map.renderer.OverlayRenderer;
-import it.geosolutions.android.map.wms.WMSLayer;
-import it.geosolutions.android.map.wms.renderer.WMSRenderer;
-import it.geosolutions.android.map.wms.renderer.WMSUntiledRenderer;
+import it.geosolutions.android.map.renderer.RenderingException;
 
 import java.util.ArrayList;
 
@@ -48,6 +46,16 @@ public  class MultiSourceOverlay implements Overlay,FreezableOverlay {
     private MultiSourceRenderer renderer =new MultiSourceRenderer();
     
     ArrayList<Layer> layers = new ArrayList<Layer>();
+	private MultiSourceOverlayManager manager;
+	private boolean problemsNotified=false;
+
+	/**
+	 * @param multiSourceOverlayManager
+	 */
+	public MultiSourceOverlay(
+			MultiSourceOverlayManager multiSourceOverlayManager) {
+			manager = multiSourceOverlayManager;
+	}
 
 	public ArrayList<Layer> getLayers() {
 		return layers;
@@ -102,10 +110,21 @@ public  class MultiSourceOverlay implements Overlay,FreezableOverlay {
      * @param zoomLevel
      */
 	private void drawLayers(Canvas c, BoundingBox boundingBox, byte zoomLevel) {
-		renderer.render(c, boundingBox, zoomLevel);
+		try {
+			renderer.render(c, boundingBox, zoomLevel);
+			if(problemsNotified == true){
+				problemsNotified = false;
+				//TODO change status of the layers.
+				//manager.getLayerChangeListener().onLayerStatusChange();
+			}
+			
+		} catch (RenderingException e) {
+			if(problemsNotified == false){
+				problemsNotified = true;
+				manager.notifyRenederingException(e);
+			}
+		}
 	}
-	
-
 
     @Override
     public void freeze() {

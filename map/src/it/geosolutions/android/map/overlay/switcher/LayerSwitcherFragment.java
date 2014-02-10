@@ -47,6 +47,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemLongClickListener;
 
@@ -204,17 +205,36 @@ public void onLoadFinished(Loader<List<Layer>> arg0, List<Layer> layers) {
 	adapter.clear();
 	ArrayList<Layer> ll = new ArrayList<Layer>();
 	int size = layers.size();
+	setLoading();
 	//reverse add to the layer list to 
 	//have the checkbox stacked as the layers
 	if(size > 0){
 		for(int i = size-1 ; i >=0 ; i--){
 			adapter.add( layers.get(i) );
 		}
+	}else{
+		setNoData();
 	}
 	isLoading =false;
 	adapter.notifyDataSetChanged();
 }
 
+/**
+ * Set the GUI to display loading info
+ */
+private void setLoading() {
+    getView().findViewById(R.id.progress_bar).setVisibility(TextView.VISIBLE);
+    ((TextView) getView().findViewById(R.id.empty_text))
+    .setText(R.string.loading_layers);
+}
+/**
+ * Set the GUI to show no data is present
+ */
+private void setNoData() {
+    getView().findViewById(R.id.progress_bar).setVisibility(TextView.GONE);
+    ((TextView) getView().findViewById(R.id.empty_text))
+    .setText(R.string.no_layer_loaded);
+}
 @Override
 public void onLoaderReset(Loader<List<Layer>> layers) {
 	adapter.clear();
@@ -370,6 +390,15 @@ private void updateSelected(){
 		lv.setItemChecked(size -1 -i, true);
 		
 	}
+}
+
+/* (non-Javadoc)
+ * @see it.geosolutions.android.map.listeners.LayerChangeListener#onLayerStatusChange()
+ */
+@Override
+public void onLayerStatusChange() {
+	reload();
+	
 }
 }
 

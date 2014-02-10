@@ -56,6 +56,12 @@ public class MultiSourceRenderer implements OverlayRenderer<Layer> {
 					//Start new Chunk
 					s = l.getSource();
 					layerChunk =new ArrayList<Layer>();
+					//if the list is finished, the last
+					//renderer have to be generated 
+					if(!iterator.hasNext()){
+						layerChunk.add(l);
+						generateRenderer(layerChunk, s);
+					}
 					break;
 				}
 			}
@@ -74,18 +80,37 @@ public class MultiSourceRenderer implements OverlayRenderer<Layer> {
 		OverlayRenderer r = RendererProvider.getRenderer(s);
 		r.setProjection(projection);
 		r.setLayers(layerChunk);
-		renderers.add(r);
+		synchronized (renderers) {
+			renderers.add(r);
+		}
+		
 	}
 	
 	/**
 	 * Renders the layers associated to the renerer calling his internal 
 	 * <OverlayRenderer> objects
+	 * @throws RenderingException 
 	 */
-	public void render(Canvas c, BoundingBox boundingBox, byte zoomLevel) {
+	public void render(Canvas c, BoundingBox boundingBox, byte zoomLevel) throws RenderingException {
 		//TODO add a method to prepare request to start them at the same time
 		//the render methods will wait
-		for(OverlayRenderer r : renderers){
-			r.render(c, boundingBox, zoomLevel);
+		
+		//render anyway
+		RenderingException lastException =null;
+		synchronized (renderers) {
+			for(OverlayRenderer r : renderers){
+				try{
+					r.render(c, boundingBox, zoomLevel);
+				}catch(RenderingException e){
+					lastException = e;
+				}
+			}
+		}
+		
+		
+		//notify only the last exception
+		if(lastException !=null){
+			throw lastException;
 		}
 		
 	}
@@ -95,12 +120,15 @@ public class MultiSourceRenderer implements OverlayRenderer<Layer> {
 	 * @param layer
 	 */
 	public void refreshLayer(Layer layer) {
-		for(OverlayRenderer r:renderers){
-			if(r.getLayers().contains(layer)){
-				r.refresh();
-				return;
+		synchronized (renderers) {
+			for(OverlayRenderer r:renderers){
+				if(r.getLayers().contains(layer)){
+					r.refresh();
+					return;
+				}
 			}
 		}
+		
 		
 	}
 	@Override
@@ -109,14 +137,17 @@ public class MultiSourceRenderer implements OverlayRenderer<Layer> {
 	}
 	@Override
 	public void refresh() {
-		for(OverlayRenderer r:renderers){
-			r.refresh();
-			
+		synchronized (renderers) {
+			for(OverlayRenderer<?> r:renderers){
+				r.refresh();
+			}
 		}
+		
 	}
 	@Override
 	public void setProjection(Projection projection) {
 		this.projection = projection;
 		
 	}
+	
 }
