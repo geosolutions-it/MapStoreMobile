@@ -1,6 +1,6 @@
 /*
- * GeoSolutions Android map Library - Digital field mapping on Android based devices
- * Copyright (C) 2013  GeoSolutions (www.geo-solutions.it)
+ * GeoSolutions - MapstoreMobile - GeoSpatial Framework on Android based devices
+ * Copyright (C) 2014  GeoSolutions (www.geo-solutions.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,17 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.geosolutions.android.map.listeners;
+package it.geosolutions.android.map.renderer;
 
-import it.geosolutions.android.map.model.Layer;
-
-import java.util.ArrayList;
-
-public interface LayerChangeListener {
-	void onSetLayers(ArrayList<Layer> layers);
-	void onLayerVisibilityChange(Layer layer);
-	/**
-	 * when the status of the layer changes
-	 */
-	void onLayerStatusChange();
+/**
+ * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
+ *
+ */
+public class RenderingException extends Exception {
+	int message;
+	public RenderingException(int message){
+		super();
+		this.message = message;
+	}
+	public int getToastMessage(){
+		return this.message;
+	}
 }

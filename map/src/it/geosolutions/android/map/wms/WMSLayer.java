@@ -111,6 +111,7 @@ public class WMSLayer implements Layer<WMSSource>{
 	 * Parameters like style and cql_filter
 	 */
 	public HashMap<String,String> baseParams;
+	private int status;
 	
 	
 	/**
@@ -150,5 +151,23 @@ public class WMSLayer implements Layer<WMSSource>{
 	 */
 	public void setTiled(boolean tiled) {
 		this.tiled = tiled;
+	}
+	
+	/* (non-Javadoc)
+	 * @see it.geosolutions.android.map.model.Layer#setStatus(int)
+	 */
+	@Override
+	public void setStatus(int status) {
+		this.status = status;
+		
+	}
+
+
+	/* (non-Javadoc)
+	 * @see it.geosolutions.android.map.model.Layer#getStatus()
+	 */
+	@Override
+	public int getStatus() {
+		return status;
 	}
 }

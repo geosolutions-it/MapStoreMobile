@@ -32,5 +32,6 @@ import android.graphics.Canvas;
  *
  */
 public interface WMSRenderer extends OverlayRenderer<WMSLayer>{
-	
+	public void notifyError(Exception e);
+	public void notifySuccess();
 }

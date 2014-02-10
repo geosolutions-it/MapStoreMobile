@@ -17,6 +17,7 @@
  */
 package it.geosolutions.android.map.overlay;
 
+import it.geosolutions.android.map.renderer.RenderingException;
 import it.geosolutions.android.map.wms.WMSLayer;
 import it.geosolutions.android.map.wms.renderer.WMSRenderer;
 import it.geosolutions.android.map.wms.renderer.WMSUntiledRenderer;
@@ -30,6 +31,7 @@ import org.mapsforge.core.model.BoundingBox;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.util.Log;
+import android.widget.Toast;
 
 
 /** 
@@ -114,7 +116,11 @@ public  class WMSOverlay implements Overlay,FreezableOverlay {
      * @param zoomLevel
      */
 	private void drawLayers(Canvas c, BoundingBox boundingBox, byte zoomLevel) {
-		renderer.render(c, boundingBox, zoomLevel);
+		try{
+			renderer.render(c, boundingBox, zoomLevel);
+		}catch (RenderingException e){
+			
+		}
 	}
 	
 	

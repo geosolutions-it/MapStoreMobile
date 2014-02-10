@@ -58,7 +58,10 @@
 	<string name="mapstore_url_correct">L\'URL di MapStore è Corretto.</string>
 	<string name="saving_source">Salvataggio Sorgente&#8230;</string>
 	<string name="error_during_save_process">Errore durante il salvataggio</string>
+	<string name="error_rendering">Alcuni Layer non possono essere mostrati</string>
 	<string name="verifying_mapstore_url">Verifica dell\'URL di MapStore&#8230;</string>
 	<string name="field_required">Questo campo deve essere riempito</string>
 	<string name="source_type">Tipo Sorgente</string>
+	<string name="loading_layers">Caricamento&#8230;</string>
+	<string name="no_layer_loaded">Nessun Layer Caricato</string>
 </resources>

@@ -58,4 +58,13 @@ public interface Layer <T extends Source> extends Serializable{
 	 */
 	public void setVisibility(boolean visibility);
 	
+	/**
+	 * The status is ok if status is 0
+	 * if different, it contains the message string
+	 * @param status
+	 */
+	public void setStatus(int status);
+	
+	public int getStatus();
+	
 }

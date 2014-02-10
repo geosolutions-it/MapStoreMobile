@@ -42,6 +42,7 @@ public class SpatialiteLayer implements Layer<SpatialiteSource> {
 	}
 	
 	boolean visibility =true;
+	private int status;
 	public SpatialiteSource getSource() {
 		return source;
 	}
@@ -82,6 +83,25 @@ public class SpatialiteLayer implements Layer<SpatialiteSource> {
 
 	public void setTableName(String tableName) {
 		this.tableName = tableName;
+	}
+
+
+	/* (non-Javadoc)
+	 * @see it.geosolutions.android.map.model.Layer#setStatus(int)
+	 */
+	@Override
+	public void setStatus(int status) {
+		this.status = status;
+		
+	}
+
+
+	/* (non-Javadoc)
+	 * @see it.geosolutions.android.map.model.Layer#getStatus()
+	 */
+	@Override
+	public int getStatus() {
+		return status;
 	}
 
 }

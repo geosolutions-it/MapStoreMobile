@@ -58,9 +58,10 @@
 	<string name="mapstore_url_correct">The URL of mapstore is correct</string>
 	<string name="saving_source">Saving Source&#8230;</string>
 	<string name="error_during_save_process">Error during save process</string>
+	<string name="error_rendering">Some layers can not be displayed</string>
 	<string name="verifying_mapstore_url">Verifying MapStore URL&#8230;</string>
 	<string name="field_required">This field is required!</string>
 	<string name="source_type">Source Type</string>
-	
-	
+	<string name="loading_layers">Loading&#8230;</string>
+	<string name="no_layer_loaded">No layer loaded</string>
 </resources>

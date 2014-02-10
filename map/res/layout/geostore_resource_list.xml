@@ -30,6 +30,7 @@
 	               android:layout_gravity="center"
 	               android:text="@string/geostore_extracting_information"/>
 	    <ProgressBar
+         android:id="@+id/progress_bar"
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
          style="@android:style/Widget.ProgressBar.Small"

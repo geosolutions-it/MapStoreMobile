@@ -10,6 +10,7 @@
     <string name="geostore_extracting_information">Loading maps from MapStore&#x2026;</string>
     <string name="geostore_extracting_no_result">No map found</string>
     <string name="geostore_more_results">More</string>
-    	<string formatted="false" name="geostore_info_format">Displaying %d maps of %d</string>
+    <string name="error_retrieving_resources_from_mapstore">Error retrieving resources from MapStore</string>
+    <string formatted="false" name="geostore_info_format">Displaying %d maps of %d</string>
 	
 </resources>

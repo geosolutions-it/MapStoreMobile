@@ -169,6 +169,7 @@ private void stopLoadingGUI() {
 private void setNoData() {
     ((TextView) getView().findViewById(R.id.empty_text))
             .setText(R.string.geostore_extracting_no_result);
+    getView().findViewById(R.id.progress_bar).setVisibility(TextView.GONE);
 }
 
 /**
@@ -256,7 +257,7 @@ public Loader<List<Resource>> onCreateLoader(int id, Bundle args) {
 public void onLoadFinished(Loader<List<Resource>> loader,
         List<Resource> results) {
    if(results == null){
-	   Toast.makeText(getSherlockActivity(), "error retrieving the resources", Toast.LENGTH_SHORT).show();//TODO i18n
+	   Toast.makeText(getSherlockActivity(), R.string.error_retrieving_resources_from_mapstore, Toast.LENGTH_SHORT).show();//TODO i18n
 	   setNoData();
    }else{
 	   //add loaded resources to the listView

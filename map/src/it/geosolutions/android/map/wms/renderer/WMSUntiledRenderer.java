@@ -17,6 +17,8 @@
  */
 package it.geosolutions.android.map.wms.renderer;
 
+import it.geosolutions.android.map.R;
+import it.geosolutions.android.map.renderer.RenderingException;
 import it.geosolutions.android.map.utils.ProjectionUtils;
 import it.geosolutions.android.map.wms.WMSLayer;
 import it.geosolutions.android.map.wms.WMSLayerChunker;
@@ -24,6 +26,7 @@ import it.geosolutions.android.map.wms.WMSRequest;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -45,10 +48,11 @@ import android.util.Log;
  */
 public  class WMSUntiledRenderer implements WMSRenderer{
 	ArrayList<WMSRequest> requests;
-	private ArrayList layers;
+	private ArrayList<WMSLayer> layers;
 	private Projection projection;
-	
-	public void render(Canvas c, BoundingBox boundingBox, byte zoomLevel){
+	private int status =0;
+	private HttpURLConnection connection;
+	public void render(Canvas c, BoundingBox boundingBox, byte zoomLevel) throws RenderingException{
 		if(requests ==null){
 			Log.d("WMS","request is missing, draw skipped");
 			return;
@@ -67,14 +71,19 @@ public  class WMSUntiledRenderer implements WMSRenderer{
 	 * @param url
 	 * @param zoomLevel 
 	 * @param boundingBox 
+	 * @throws RenderingException 
 	 */
-	private void draw(Canvas c, URL url, BoundingBox boundingBox, byte zoomLevel) {
+	private void draw(Canvas c, URL url, BoundingBox boundingBox, byte zoomLevel) throws RenderingException {
 		if(url == null) return; //TODO notify
-	    HttpURLConnection connection;
+	    if(connection !=null){
+	    	connection.disconnect();
+	    }
 		try {
 			connection = (HttpURLConnection) url.openConnection();
+			connection.setConnectTimeout(1000);//TODO Make this configurable
 		} catch (IOException e2) {
 			Log.e("WMS","error opening connection");
+			notifyError(e2);
 			return;
 		}
 	    InputStream is;
@@ -83,12 +92,20 @@ public  class WMSUntiledRenderer implements WMSRenderer{
 			Bitmap img = BitmapFactory.decodeStream(is); 
 			if(img!=null){
 				long[] pxDp= ProjectionUtils.getMapLeftTopPoint(projection);
+				
 				c.drawBitmap(img, pxDp[0] >0 ?  pxDp[0] : 0 , pxDp[1] >0 ?  pxDp[1] : 0, null);
+				notifySuccess();
 			}else {
 				Log.e("WMS","null image from the request");
 			}
 		} catch (IOException e1) {
+			notifyError(e1);
 			Log.e("WMS","unable to read from the wms service");
+		}finally{
+			//if the status has changed during draw. the exception is raised
+			if(this.status != 0){
+				throw new RenderingException(R.string.error_connectivity_problem);
+			}
 		}
 	}
 	
@@ -124,8 +141,6 @@ public  class WMSUntiledRenderer implements WMSRenderer{
 	    params.put("request","GetMap");
 	    params.put("version","1.1.1");
 
-	    
-	    
 	    return params;
 	    
 	}
@@ -152,6 +167,33 @@ public  class WMSUntiledRenderer implements WMSRenderer{
 	@Override
 	public void setProjection(Projection projection) {
 		this.projection = projection;
+	}
+
+
+	/* (non-Javadoc)
+	 * @see it.geosolutions.android.map.wms.renderer.WMSRenderer#notifyError(java.lang.Exception)
+	 */
+	@Override
+	public void notifyError(Exception e) {
+		this.status = R.string.error_connectivity_problem;
+		for(WMSLayer l : layers){
+			l.setStatus(this.status);
+		}	
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see it.geosolutions.android.map.wms.renderer.WMSRenderer#notifySuccess()
+	 */
+	@Override
+	public void notifySuccess() {
+		if(status!=0){
+			status = 0;
+			for(WMSLayer l : layers){
+				l.setStatus(0);
+			}
+		}
+		
 	}
 	
 }

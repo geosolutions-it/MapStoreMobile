@@ -28,6 +28,7 @@ import it.geosolutions.android.map.overlay.MarkerOverlay;
 import it.geosolutions.android.map.overlay.MultiSourceOverlay;
 import it.geosolutions.android.map.overlay.SpatialiteOverlay;
 import it.geosolutions.android.map.overlay.items.DescribedMarker;
+import it.geosolutions.android.map.renderer.RenderingException;
 import it.geosolutions.android.map.utils.MarkerUtils;
 import it.geosolutions.android.map.view.AdvancedMapView;
 
@@ -36,8 +37,10 @@ import java.util.ArrayList;
 import org.mapsforge.android.maps.overlay.MyLocationOverlay;
 import org.mapsforge.android.maps.overlay.Overlay;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 /**
  * Manages overlays of the AdvancedMapView
  * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
@@ -103,7 +106,7 @@ public class MultiSourceOverlayManager implements OverlayManager {
 		mapView.setOverlayManger(this);
 		this.spatialiteOverlay = new SpatialiteOverlay();
 		spatialiteOverlay.setProjection(mapView.getProjection());
-		layerOverlay = new MultiSourceOverlay();
+		layerOverlay = new MultiSourceOverlay(this);
 		layerOverlay.setProjection(mapView.getProjection());
 		setMarkerOverlay(new MarkerOverlay());
 	}
@@ -212,7 +215,7 @@ public class MultiSourceOverlayManager implements OverlayManager {
 	}
 	public void setLayers(ArrayList<Layer> layers){
 		if(layerOverlay == null){
-			layerOverlay=new MultiSourceOverlay();
+			layerOverlay=new MultiSourceOverlay(this);
 		}
 		layerOverlay.setLayers(layers);
 		toggleOverlayVisibility(R.id.mapstore, true);
@@ -323,8 +326,23 @@ public class MultiSourceOverlayManager implements OverlayManager {
 			layerOverlay.refresh();
 		}
 		mapView.getOverlayController().redrawOverlays();
-		
-		
+
+	}
+
+	/**
+	 * @param e
+	 */
+	public void notifyRenederingException(final RenderingException e) {
+		// this is called from another thread to the UI Thread
+		// so it needs to be posted to the view
+		//TODO: move this in a more complex system for notification on UI
+		final Context c = mapView.getContext();
+		mapView.post(new Runnable() {
+            public void run() {
+                Toast.makeText(c, e.getToastMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(c, R.string.error_rendering, Toast.LENGTH_SHORT).show();
+            }
+        });
 	}
 	
 	
