@@ -36,10 +36,20 @@ public class MultiSourceRenderer implements OverlayRenderer<Layer> {
 		if(iterator.hasNext()){
 			 l = iterator.next();
 			 s = l.getSource();
+			//only one layer case
+			if(!iterator.hasNext()){
+				layerChunk.add(l);
+				generateRenderer(layerChunk, s);
+			}
 		}
+		
 		while (iterator.hasNext()){
 			
 			layerChunk.add(l);
+			if(!iterator.hasNext()){
+				layerChunk.add(l);
+				generateRenderer(layerChunk, s);
+			}
 			//get all next layers with the same source
 			while(iterator.hasNext()){
 				l = iterator.next();
