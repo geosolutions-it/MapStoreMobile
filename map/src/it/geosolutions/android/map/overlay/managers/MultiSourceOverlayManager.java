@@ -113,8 +113,17 @@ public class MultiSourceOverlayManager implements OverlayManager {
 
 	
 	public void redrawLayer(Layer layer) {
-		layerOverlay.refreshLayer(layer);
-		mapView.getOverlayController().redrawOverlays();
+		final Layer l = layer;
+		//This does not causes problems 
+		//because the argument is used only to choose the 
+		//renderer to refresh
+		 new Thread(new Runnable() {
+		        public void run() {
+		        	layerOverlay.refreshLayer(l);
+		    		mapView.getOverlayController().redrawOverlays();
+		        }
+		    }).start();
+		
 	}
 
 	/**
@@ -188,41 +197,71 @@ public class MultiSourceOverlayManager implements OverlayManager {
 		
 	}
 	
-	/**
-	 * get the markerOverlay
-	 * @return the <MarkerOverlay>
-	 */
+	@Override
 	public MarkerOverlay getMarkerOverlay() {
 		return markerOverlay;
 	}
+	
+	/**
+	 * Returns the data overlay (deprecated)
+	 * @return
+	 */
 	public SpatialiteOverlay getDataOverlay() {
 		return spatialiteOverlay;
 	}
+	
+	@Override
 	public void setMarkerOverlay(MarkerOverlay markerOverlay) {
 		this.markerOverlay= markerOverlay;
 	}
+	
+	/**
+	 * Make the marker overlay visible
+	 */
 	public void setMarkerVisible() {
+		//add the marker overlay to the mapView
 		markerActivated =true;
 		mapView.getOverlays().add(markerOverlay);
 		
 	}
+	
+	@Override
 	public void addLocationOverlay(MyLocationOverlay overlay) {
 		mapView.getOverlays().add(mapView.getOverlays().size(), overlay);
 		
 	}
+	
+	@Override
 	public void removeOverlay(Overlay overlay) {
 		mapView.getOverlays().remove(overlay);	
 	}
-	public void setLayers(ArrayList<Layer> layers){
+	
+	public void setLayers (ArrayList<Layer> layers){
+		setLayers(layers,true);
+	}
+	/**
+	 * Set the layers and notify the listener if notify flag is true.
+	 * NOTE To Notify the process must be an UI thread!!!
+	 * @param layers set the layers in the <MultiSourceOverlay>
+	 * @param notify if true, notifies the layers
+	 */
+	public void setLayers(final ArrayList<Layer> layers,boolean notify){
 		if(layerOverlay == null){
 			layerOverlay=new MultiSourceOverlay(this);
 		}
 		layerOverlay.setLayers(layers);
 		toggleOverlayVisibility(R.id.mapstore, true);
-		onSetLayers(layers);
+		if(notify){
+			onSetLayers(layers);
+			
+		}
 		Log.v("LAYERS","TOTAL LAYERS:" + layerOverlay.getLayers().size());
 	}
 	
+	/**
+	 * launch the proper events to the layers list
+	 * @param layers
+	 */
 	private void onSetLayers(ArrayList<Layer> layers) {
 		LayerChangeListener lcl = getLayerChangeListener();
 		if(lcl!= null){
@@ -328,6 +367,7 @@ public class MultiSourceOverlayManager implements OverlayManager {
 		mapView.getOverlayController().redrawOverlays();
 
 	}
+	
 
 	/**
 	 * @param e

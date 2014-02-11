@@ -26,7 +26,6 @@ import it.geosolutions.android.map.wms.WMSRequest;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -34,7 +33,6 @@ import java.util.HashMap;
 
 import org.mapsforge.android.maps.Projection;
 import org.mapsforge.core.model.BoundingBox;
-import org.mapsforge.core.model.GeoPoint;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -92,8 +90,10 @@ public  class WMSUntiledRenderer implements WMSRenderer{
 			Bitmap img = BitmapFactory.decodeStream(is); 
 			if(img!=null){
 				long[] pxDp= ProjectionUtils.getMapLeftTopPoint(projection);
-				
 				c.drawBitmap(img, pxDp[0] >0 ?  pxDp[0] : 0 , pxDp[1] >0 ?  pxDp[1] : 0, null);
+				if(Log.isLoggable("WMS", Log.VERBOSE)){
+					Log.v("WMS","Draw downloaded bitmap for "+ layers.size() + "layers from" +url.getHost());
+				}
 				notifySuccess();
 			}else {
 				Log.e("WMS","null image from the request");
@@ -149,8 +149,6 @@ public  class WMSUntiledRenderer implements WMSRenderer{
 	public void setLayers(ArrayList layers) {
 		this.layers = layers;
 		refresh();
-		Log.v("WMS","request models created:"+ requests.size());
-
 	}
 
 	@Override

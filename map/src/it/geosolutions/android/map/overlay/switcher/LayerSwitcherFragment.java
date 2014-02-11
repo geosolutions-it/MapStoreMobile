@@ -270,7 +270,7 @@ public MultiSourceOverlayManager getOverlayManager(){
 
 @Override
 public void onLayerVisibilityChange(Layer layer) {
-	if(!isLoading ){
+	if(!isLoading){
 		getOverlayManager().redrawLayer(layer);
 	}
 }
@@ -325,7 +325,7 @@ public boolean onActionItemClicked(ActionMode mode, MenuItem menu) {
 	MultiSourceOverlayManager om = getOverlayManager();
 	if( itemId == R.id.delete){
 		layers.removeAll(selected);
-		om.setLayers(new ArrayList<Layer>(layers));
+		om.setLayers(new ArrayList<Layer>(layers),true);
 		om.forceRedraw();
 		closeActionMode();
 	
@@ -344,23 +344,46 @@ public boolean onActionItemClicked(ActionMode mode, MenuItem menu) {
 				int i = layers.indexOf(l);
 				layers.remove(l);
 				layers.add(Math.min(i + 1, size - 1), l);
+				//keep adapter sync
+				adapter.remove(l);
+				adapter.insert(l, Math.max(size -2 - i, 0));
 			}
-			om.setLayers(new ArrayList<Layer>(layers));
-			om.forceRedraw();
+			refreshOverlays(layers, om);
 		} else if (min > 0 &&itemId == R.id.down) {
 			// NOTE:the listView is in the reverse order
 			for (Layer<?> l : selected) {
 				int i = layers.indexOf(l);
 				layers.remove(l);		
 				layers.add(Math.max(i - 1, 0), l);
+				//keep adapter sync
+				adapter.remove(l);
+				adapter.insert(l,Math.min(size - i, size -1));
 			}
-			om.setLayers(new ArrayList<Layer>(layers));
-			om.forceRedraw();
+			refreshOverlays(layers, om);
 		}
 		updateSelected();
+
 	}
 	return true;
 
+}
+
+/** 
+ * Launch a thread to update the layers
+ * @param layers
+ * @param om
+ */
+private void refreshOverlays(final ArrayList<Layer> layers,
+		final MultiSourceOverlayManager om) {
+	new Thread(new Runnable(){
+		
+		@Override
+		public void run() {
+			om.setLayers(new ArrayList<Layer>(layers),false);
+			om.forceRedraw();
+			
+		}
+	}).start();	
 }
 
 /**
@@ -387,7 +410,7 @@ private void updateSelected(){
 	int size = layers.size();
 	for(Layer l : selected){
 		int i = layers.indexOf(l);
-		lv.setItemChecked(size -1 -i, true);
+		lv.setItemChecked(size -1 - i, true);
 		
 	}
 }

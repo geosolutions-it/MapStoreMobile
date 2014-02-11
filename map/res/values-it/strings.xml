@@ -63,5 +63,7 @@
 	<string name="field_required">Questo campo deve essere riempito</string>
 	<string name="source_type">Tipo Sorgente</string>
 	<string name="loading_layers">Caricamento&#8230;</string>
-	<string name="no_layer_loaded">Nessun Layer Caricato</string>
+	<string name="no_layer_loaded">Nessun livello caricato</string>
+	<string name="move_up">Sposta in alto</string>
+	<string name="move_down">Sposta in basso</string>
 </resources>

@@ -99,7 +99,6 @@ public  class WMSOverlay implements Overlay,FreezableOverlay {
                 canvas.drawBitmap(cacheBitmap, 0, 0, null);
             }else{
                 //normal behiviour
-            	Log.v("WMS","draw action");
                 drawLayers(canvas, bbox,  zoomLevel);
             }
 		
