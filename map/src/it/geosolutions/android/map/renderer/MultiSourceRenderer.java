@@ -23,8 +23,11 @@ public class MultiSourceRenderer implements OverlayRenderer<Layer> {
 	private ArrayList<OverlayRenderer> renderers = new ArrayList<OverlayRenderer>();
 	private Projection projection;
 	public void setLayers(ArrayList<Layer> layers){
-		this.layers =layers;
-		updateRenderers();
+		synchronized (layers) {
+			this.layers =layers;
+			updateRenderers();
+		}
+		
 	}
 	private void updateRenderers() {
 		renderers = new ArrayList<OverlayRenderer>();

@@ -4,7 +4,8 @@
     <item
         android:id="@+id/action_use"
         android:orderInCategory="100"
-        android:showAsAction="always|withText"
+        android:showAsAction="always"
+        android:icon="@drawable/ic_navigation_accept"
         android:title="@string/add_selected_layers"
         />
 </menu> 

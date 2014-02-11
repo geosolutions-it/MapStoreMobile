@@ -17,17 +17,28 @@
  */
 package it.geosolutions.android.map.geostore.fragment;
 
+import it.geosolutions.android.map.MapsActivity;
 import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.geostore.activities.GeoStoreResourceDetailActivity;
 import it.geosolutions.android.map.geostore.activities.GeoStoreResourcesActivity;
+import it.geosolutions.android.map.geostore.activities.GeoStoreResourceDetailActivity.PARAMS;
 import it.geosolutions.android.map.geostore.adapters.GeoStoreResourceAdapter;
 import it.geosolutions.android.map.geostore.loaders.GeoStoreResourceLoader;
 import it.geosolutions.android.map.geostore.model.Resource;
+import it.geosolutions.android.map.mapstore.activities.MapStoreLayerListActivity;
+import it.geosolutions.android.map.mapstore.model.MapStoreConfiguration;
+import it.geosolutions.android.map.mapstore.utils.MapStoreConfigTask;
+import it.geosolutions.android.map.model.stores.LayerStore;
 
+import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -36,17 +47,21 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockListFragment;
+import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.widget.SearchView;
 
 /**
@@ -61,7 +76,7 @@ public class GeoStoreResourceListFragment extends SherlockListFragment
         implements 	LoaderCallbacks<List<Resource>>,
         			SearchView.OnQueryTextListener,
         			SearchView.OnCloseListener,
-        			OnScrollListener  {
+        			OnScrollListener,ActionMode.Callback {
 /**
  * The adapter to show resources
  */
@@ -78,6 +93,9 @@ private String geoStoreUrl;
 // The callbacks through which we will interact with the LoaderManager.
 private LoaderManager.LoaderCallbacks<List<Resource>> mCallbacks;
 
+//actionMode
+private ActionMode actionMode = null;
+private Resource selected;
 //the string to search
 private String filter;
 
@@ -201,24 +219,55 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
     
     //init progress bar and loading text
     startLoadingGUI();
+    final GeoStoreResourceListFragment callback =this;
     
-    //set the click listener for the items
-    getListView().setOnItemClickListener(new OnItemClickListener() {
+    //long click starts the action mode
+    getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
 
         @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position,
+        public boolean onItemLongClick(AdapterView<?> parent, View view, int position,
                 long id) {
-            Intent i = new Intent(view.getContext(),
-                    GeoStoreResourceDetailActivity.class);
-            i.putExtras(getActivity().getIntent().getExtras());
-            Resource item = (Resource) parent.getAdapter().getItem(position);
-            i.putExtra(GeoStoreResourceDetailActivity.PARAMS.RESOURCE,item);
-            String action = getActivity().getIntent().getAction();
-            i.setAction(action);
-            getActivity().startActivityForResult(i, GeoStoreResourcesActivity.GET_MAP_CONFIG);
-
+        	Resource current = (Resource) parent.getAdapter().getItem(position);
+        	if(current == selected){
+        		 closeActionMode();
+        		 getListView().setItemChecked(position, false);
+   	         	
+        	}else{
+        		selected = (Resource) parent.getAdapter().getItem(position);
+        		getListView().setItemChecked(position, true);
+	        	actionMode = getSherlockActivity().startActionMode(callback);
+		    	 //override the done button to clear selection all when the button is pressed
+		    	 int doneButtonId = Resources.getSystem().getIdentifier("action_mode_close_button", "id", "android");
+		    	 View doneButton = getActivity().findViewById(doneButtonId);
+		    	 if(doneButton != null){
+			    	 doneButton.setOnClickListener(new View.OnClickListener() {
+		
+			    	     @Override
+			    	     public void onClick(View v) {
+			    	    	 closeActionMode();
+			    	     }
+			    	 });
+		    	 }
+        	}
+        	return true;
         }
+        
+		
     });
+    
+    //single click open layer list
+    getListView().setOnItemClickListener(new OnItemClickListener() {
+		
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position,
+				long id) {
+			closeActionMode();
+			Resource r = (Resource) parent.getAdapter().getItem(position);
+			getListView().setItemChecked(position, true);
+			startLayerSelection(r.id);
+			
+		}
+	});
     //associate scroll listener to implement infinite scroll
     getListView().setOnScrollListener(this);
 
@@ -405,10 +454,124 @@ public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCoun
 }
 @Override
 public void onScrollStateChanged(AbsListView view, int scrollState) {
-	// TODO Auto-generated method stub
+	//Nothing to do for now
 	
 }
 
+//
+// ACTION MODE CALLBACKS
+//
+/* (non-Javadoc)
+ * @see com.actionbarsherlock.view.ActionMode.Callback#onCreateActionMode(com.actionbarsherlock.view.ActionMode, com.actionbarsherlock.view.Menu)
+ */
+@Override
+public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+	mode.getMenuInflater().inflate(R.menu.details_loadmap_selectlayers, menu);
+	this.actionMode =mode;
+	return true;
+}
+/* (non-Javadoc)
+ * @see com.actionbarsherlock.view.ActionMode.Callback#onPrepareActionMode(com.actionbarsherlock.view.ActionMode, com.actionbarsherlock.view.Menu)
+ */
+@Override
+public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+	// TODO Auto-generated method stub
+	return false;
+}
+/* (non-Javadoc)
+ * @see com.actionbarsherlock.view.ActionMode.Callback#onActionItemClicked(com.actionbarsherlock.view.ActionMode, com.actionbarsherlock.view.MenuItem)
+ */
+@Override
+public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+	int itemId = item.getItemId();
+	if(selected == null) return true;
+	if(itemId == R.id.details){
+		showDetailsActivity(selected);
+		return true;
+	}else if( itemId == R.id.load_map){
+		loadAllMap();
+		//TODO
+	}else if ( itemId == R.id.select_layers){
+		startLayerSelection(selected.id);
+			
+			
+	}
+	return true;
+	
+	
 
+}
 
+/**
+ * return the resource and the GeoStore URL to make the
+ * map load the map itself
+ */
+private void loadAllMap() {
+	Intent data = new Intent();
+	data.putExtra(PARAMS.RESOURCE, selected);
+	data.putExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL, geoStoreUrl);
+	getActivity().setResult(Activity.RESULT_OK, data);
+	getActivity().finish();
+}
+
+/**
+ * Start the activity that shows layer selection
+ */
+private void startLayerSelection(Long id) {
+	//TODO loading
+	final Activity ac = getActivity();
+			AsyncTask<String, String, MapStoreConfiguration> task = new MapStoreConfigTask(
+					id, geoStoreUrl) {
+
+				@Override
+				protected void onPostExecute(MapStoreConfiguration result) {
+					Log.d("MapStore", result.toString());
+					// call the loadMapStore config on the Activity
+					Intent i  = new Intent(ac, MapStoreLayerListActivity.class);
+					//TODO put MapStore config
+					i.putExtra(MapsActivity.MAPSTORE_CONFIG	,result);
+					startActivityForResult(i, MapsActivity.MAPSTORE_REQUEST_CODE);
+					getSherlockActivity().overridePendingTransition(R.anim.in_from_right, R.anim.out_to_left);
+				}
+			};
+			task.execute("");
+}
+
+/* (non-Javadoc)
+ * @see com.actionbarsherlock.view.ActionMode.Callback#onDestroyActionMode(com.actionbarsherlock.view.ActionMode)
+ */
+@Override
+public void onDestroyActionMode(ActionMode mode) {
+	//nothing to do
+	
+}
+
+/**
+ * Open the Activity that shows details about the map
+ * @param ctx
+ * @param item
+ */
+private void showDetailsActivity(Resource item) {
+	Intent i = new Intent(this.getSherlockActivity(),
+            GeoStoreResourceDetailActivity.class);
+    i.putExtras(getActivity().getIntent().getExtras());
+   
+    i.putExtra(GeoStoreResourceDetailActivity.PARAMS.RESOURCE,item);
+    String action = getActivity().getIntent().getAction();
+    i.setAction(action);
+    getActivity().startActivityForResult(i, GeoStoreResourcesActivity.GET_MAP_CONFIG);
+}
+
+/**
+ * Close the action mode and clear selection
+ */
+private void closeActionMode() {
+	 getListView().clearChoices();
+	 getListView().clearFocus();	
+	 selected = null;
+	 if(actionMode!=null){
+		 actionMode.finish();
+	 }
+
+}
 }

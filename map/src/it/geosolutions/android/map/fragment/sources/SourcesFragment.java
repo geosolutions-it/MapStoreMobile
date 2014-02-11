@@ -33,12 +33,12 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.util.Log;
-import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -107,11 +107,11 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
     final SourcesFragment callback = this;
     ListView lv = getListView();
     lv.setLongClickable(true);
+    lv.setClickable(true);
     lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE); 
-    
+    //edit - delete
     lv.setOnItemLongClickListener(new OnItemLongClickListener() {
     	   public boolean onItemLongClick (AdapterView<?> parent, View view, int position, long id) {
-    	     System.out.println("Long click");
     	     LayerStore sel = adapter.getItem(position);
     	     
     	     if(!selected.contains(sel)){
@@ -145,6 +145,16 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
     	     view.setSelected(true);
     	     return true;
     	   }
+	});
+    //browse
+    lv.setOnItemClickListener(new OnItemClickListener() {
+
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position,
+				long id) {
+			LayerStore s  = (LayerStore)adapter.getItem(position);
+			s.openDetails(getSherlockActivity());
+		}
 	});
 
     super.onViewCreated(view, savedInstanceState);
@@ -222,6 +232,15 @@ public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
 	ListView lv = getListView();
 	Resources res = getResources();
 	int number =selected.size();
+	if(number == 1){
+		if(selected.get(0).canEdit()){
+			menu.findItem(R.id.edit).setVisible(true);
+		}else{
+			menu.findItem(R.id.edit).setVisible(false);
+		}
+	}else{
+		menu.findItem(R.id.edit).setVisible(false);
+	}
 	String title = res.getQuantityString(R.plurals.quantity_sources_selected,number,number );
 	mode.setTitle(title);
 	
@@ -245,6 +264,11 @@ public boolean onActionItemClicked(ActionMode mode, MenuItem menu) {
 	if(menu.getItemId()==R.id.delete){
 		stores.removeAll(selected);
 		saveSources(stores);
+	}else if(menu.getItemId() == R.id.edit){
+		LayerStore ls = selected.get(0);
+		if(ls!=null){
+			ls.openEdit(getSherlockActivity());
+		}
 	}
 	selected = new ArrayList<LayerStore>();
 	mode.finish();

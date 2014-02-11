@@ -17,8 +17,14 @@
  */
 package it.geosolutions.android.map.geostore.activities;
 
+import java.util.ArrayList;
+
+import it.geosolutions.android.map.MapsActivity;
 import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.geostore.fragment.GeoStoreResourceListFragment;
+import it.geosolutions.android.map.mapstore.model.MapStoreConfiguration;
+import it.geosolutions.android.map.mapstore.utils.MapStoreUtils;
+import it.geosolutions.android.map.model.Layer;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -85,10 +91,39 @@ public class GeoStoreResourcesActivity extends SherlockFragmentActivity {
 	protected void onActivityResult(int request_code, int resultCode, Intent data) {
 		// TODO Auto-generated method stub
 		super.onActivityResult(request_code, resultCode, data);
-		if( RESULT_OK == resultCode ){
-			setResult(resultCode, data);
-			finish();
-			overridePendingTransition(R.anim.in_from_left, R.anim.out_to_right);
+		if(RESULT_OK==resultCode){
+			Bundle b;
+			if(data!=null){
+				 b= data.getExtras();
+				 if (b.containsKey(MapsActivity.MAPSTORE_CONFIG)) {
+					MapStoreConfiguration config = (MapStoreConfiguration)b.getSerializable(MapsActivity.MAPSTORE_CONFIG);
+					ArrayList<Layer> allLayers  = MapStoreUtils.buildWMSLayers(config);
+					ArrayList<Layer> layerToAdd = new ArrayList<Layer>();
+					for(Layer l : allLayers){
+						if(l.isVisibility()){
+							layerToAdd.add(l);
+						}
+					}
+					returnData(layerToAdd);
+				}else{
+					setResult(resultCode, data);
+					finish();
+					
+				}
+				 overridePendingTransition(R.anim.in_from_left, R.anim.out_to_right);	 
+			}
 		}
+		
+	}
+	/**
+	 * @param layerToAdd
+	 */
+	private void returnData(ArrayList<Layer> layerToAdd) {
+		Intent i = new Intent();
+		Bundle bundle = new Bundle();
+		bundle.putSerializable(MapsActivity.LAYERS_TO_ADD, layerToAdd) ;
+        i.putExtras(bundle);
+        setResult(RESULT_OK, i);
+        finish();
 	}
 }

@@ -19,8 +19,8 @@ package it.geosolutions.android.map.geostore.fragment;
 
 import it.geosolutions.android.map.MapsActivity;
 import it.geosolutions.android.map.R;
-import it.geosolutions.android.map.geostore.activities.GeoStoreResourceDetailActivity.PARAMS;
 import it.geosolutions.android.map.geostore.activities.GeoStoreResourceDetailActivity;
+import it.geosolutions.android.map.geostore.activities.GeoStoreResourceDetailActivity.PARAMS;
 import it.geosolutions.android.map.geostore.activities.GeoStoreResourcesActivity;
 import it.geosolutions.android.map.geostore.model.Resource;
 import it.geosolutions.android.map.mapstore.activities.MapStoreLayerListActivity;
@@ -41,7 +41,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
 
@@ -117,7 +116,6 @@ public View onCreateView(LayoutInflater inflater, ViewGroup container,
 						//TODO put MapStore config
 						i.putExtra(MapsActivity.MAPSTORE_CONFIG	,result);
 						startActivityForResult(i, MapsActivity.MAPSTORE_REQUEST_CODE);
-						getSherlockActivity().overridePendingTransition(R.anim.in_from_right, R.anim.out_to_left);
 					}
 				};
 				task.execute("");

@@ -7,7 +7,8 @@
 	android:paddingBottom="2dip" 
 	android:paddingLeft="4dip" 
 	android:longClickable="true" 
-	android:background="@drawable/multiselect_list" >
+	android:background="@drawable/multiselect_list"
+	android:clickable="true" >
     <ImageView 
         android:id="@+id/source_icon"
         android:contentDescription="@string/source_type"
@@ -27,18 +28,18 @@
 	<ImageButton 
 			android:contentDescription="@string/details"
 			android:id="@+id/details"
-			android:src="@drawable/ic_collections_as_list_light"
+			android:src="@drawable/ic_navigation_next_item_gray"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_alignParentRight="true"
 			android:background="@drawable/drawer_selectable_item" />
-	<ImageButton 
-	    	android:id="@+id/edit"
-		    android:contentDescription="@string/edit"
-		    android:src="@drawable/ic_content_edit_light"
-			android:layout_width="wrap_content"
-   			android:layout_height="wrap_content"
-    		android:layout_toLeftOf="@+id/details"
-    		android:background="@drawable/drawer_selectable_item" />
+<!-- 	<ImageButton  -->
+<!-- 	    	android:id="@+id/edit" -->
+<!-- 		    android:contentDescription="@string/edit" -->
+<!-- 		    android:src="@drawable/ic_content_edit_light" -->
+<!-- 			android:layout_width="wrap_content" -->
+<!--    			android:layout_height="wrap_content" -->
+<!--     		android:layout_toLeftOf="@+id/details" -->
+<!--     		android:background="@drawable/drawer_selectable_item" /> -->
  
 </RelativeLayout>

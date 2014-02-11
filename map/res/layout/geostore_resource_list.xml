@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
- android:orientation="vertical" 
- android:layout_width="fill_parent"
-  android:layout_height="fill_parent">
+   android:orientation="vertical" 
+   android:layout_width="fill_parent"
+   android:layout_height="fill_parent" 
+   android:longClickable="true" 
+   android:background="@drawable/multiselect_list"
+  >
 	<TextView 
 	    android:id="@+id/info"
 	    android:layout_height="wrap_content"
@@ -14,7 +17,8 @@
         android:id="@android:id/list"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:drawSelectorOnTop="true" >
+        android:drawSelectorOnTop="true"
+         android:choiceMode="singleChoice" >
     </ListView>
    
    	<LinearLayout
