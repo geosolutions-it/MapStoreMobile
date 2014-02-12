@@ -46,7 +46,6 @@ public class GeoStoreResourceDetailActivity extends SherlockFragmentActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-		overridePendingTransition(R.anim.in_from_right, R.anim.out_to_left);
 		super.onCreate(savedInstanceState);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		if (savedInstanceState == null) {
@@ -87,6 +86,7 @@ public class GeoStoreResourceDetailActivity extends SherlockFragmentActivity {
 				Bundle b;
 				if(data!=null){
 					 b= data.getExtras();
+					 //return only the selected layers from mapstore config (visible = true)
 					 if (b.containsKey(MapsActivity.MAPSTORE_CONFIG)) {
 							MapStoreConfiguration config = (MapStoreConfiguration)b.getSerializable(MapsActivity.MAPSTORE_CONFIG);
 							ArrayList<Layer> allLayers  = MapStoreUtils.buildWMSLayers(config);

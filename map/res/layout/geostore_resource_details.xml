@@ -8,22 +8,23 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_margin="10dp" >
+        android:layout_margin="10dp" 
+        android:orientation="horizontal">
 		<!-- Buttons for select layers and load map -->
-        <Button
-            android:id="@+id/load_map"
-            android:layout_width="match_parent"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:text="@string/load_map" />
+<!--         <Button -->
+<!--             android:id="@+id/load_map" -->
+<!--             android:layout_width="match_parent" -->
+<!--             android:layout_height="fill_parent" -->
+<!--             android:layout_weight="1" -->
+<!--             android:text="@string/load_map" /> -->
 
-        <Button
-            android:id="@+id/select_layers"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:onClick="onCancelClick"
-            android:text="@string/select_layers_to_add" />
+<!--         <Button -->
+<!--             android:id="@+id/select_layers" -->
+<!--             android:layout_width="match_parent" -->
+<!--             android:layout_height="match_parent" -->
+<!--             android:layout_weight="1" -->
+<!--             android:onClick="onCancelClick" -->
+<!--             android:text="@string/select_layers_to_add" /> -->
     </LinearLayout>
      <ScrollView 
     android:id="@+id/scrollView1"

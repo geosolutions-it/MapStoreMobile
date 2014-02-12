@@ -8,22 +8,23 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
         android:layout_margin="10dp" >
 		<!-- Buttons for select layers and load map -->
-        <Button
-            android:id="@+id/load_map"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="@string/load_all_as_map" />
+<!--         <Button -->
+<!--             android:id="@+id/load_map" -->
+<!--             android:layout_width="match_parent" -->
+<!--             android:layout_height="match_parent" -->
+<!--             android:layout_weight="1" -->
+<!--             android:text="@string/load_all_as_map" /> -->
 
-        <Button
-            android:id="@+id/select_layers"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:onClick="onCancelClick"
-            android:text="@string/add_the_selected_layers_to_the_map" />
+<!--         <Button -->
+<!--             android:id="@+id/select_layers" -->
+<!--             android:layout_width="match_parent" -->
+<!--             android:layout_height="match_parent" -->
+<!--             android:layout_weight="1" -->
+<!--             android:onClick="onCancelClick" -->
+<!--             android:text="@string/add_the_selected_layers_to_the_map" /> -->
     </LinearLayout>
     <LinearLayout 
     android:layout_alignParentTop="true"

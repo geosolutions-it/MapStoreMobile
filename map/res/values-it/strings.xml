@@ -40,7 +40,7 @@
 	<string name="empty_layers">Nessun layer compatibile in questa mappa</string>
 	<string name="add_selected_layers">Aggiungi livelli selezionati</string>
 	<string name="select_layers">Seleziona Livelli</string>
-	<string name="load_map">Carica</string>
+	<string name="load_map">Carica Mappa</string>
 	<string name="load_all_as_map">Carica tutto</string>
 	<string name="select_layers_to_add">Seleziona livelli da aggiungere</string>
 	<string name="add_the_selected_layers_to_the_map">Aggiungi alla mappa i livelli selezionati</string>
@@ -62,8 +62,12 @@
 	<string name="verifying_mapstore_url">Verifica dell\'URL di MapStore&#8230;</string>
 	<string name="field_required">Questo campo deve essere riempito</string>
 	<string name="source_type">Tipo Sorgente</string>
-	<string name="loading_layers">Caricamento&#8230;</string>
+	<string name="loading_layers">Caricamento livelli&#8230;</string>
 	<string name="no_layer_loaded">Nessun livello caricato</string>
 	<string name="move_up">Sposta in alto</string>
 	<string name="move_down">Sposta in basso</string>
+	<string name="loading_layer_list">Caricamento lista dei livelli</string>
+	<string name="please_wait">Attendere &#8230;</string>
+	<string name="are_you_sure_to_load_this_map">Sei sicuro di voler caricare l\'intera mappa. Questa operazione rimpiazzerà tutti i livelli attualmente caricati sulla mappa.</string>
+	
 </resources>

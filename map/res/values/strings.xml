@@ -40,7 +40,7 @@
 	<string name="empty_layers">No layer compatible in this map</string>
 	<string name="add_selected_layers">Add Selected Layers</string>
 	<string name="select_layers">Select Layers</string>
-	<string name="load_map">Load</string>
+	<string name="load_map">Load Map</string>
 	<string name="load_all_as_map">Load all layers</string>
 	<string name="select_layers_to_add">Select layers to add</string>
 	<string name="add_the_selected_layers_to_the_map">Add the selected layers to the map</string>
@@ -62,8 +62,11 @@
 	<string name="verifying_mapstore_url">Verifying MapStore URL&#8230;</string>
 	<string name="field_required">This field is required!</string>
 	<string name="source_type">Source Type</string>
-	<string name="loading_layers">Loading&#8230;</string>
+	<string name="loading_layers">Loading layer&#8230;</string>
 	<string name="no_layer_loaded">No layer loaded</string>
 	<string name="move_up">Move up</string>
 	<string name="move_down">Move down</string>
+	<string name="loading_layer_list">Loading layer list</string>
+	<string name="please_wait">Please wait &#8230;</string>
+	<string name="are_you_sure_to_load_this_map">Are you sure to load this map? this operation will replace all the current selected layers</string>
 </resources>

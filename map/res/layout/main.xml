@@ -23,10 +23,7 @@
        <include layout="@layout/left_drawer"/>
         
      </RelativeLayout>
-    
-    <!-- Not Used Yet - make the right_drawer visible  in map.xml to allow display this item 
-         and set the visibility to visible in the Following oblect
-         -->
+
     <LinearLayout android:id="@+id/right_drawer"
         android:orientation="vertical"
         android:layout_width="240dp"

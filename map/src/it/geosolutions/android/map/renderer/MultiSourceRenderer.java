@@ -23,8 +23,10 @@ public class MultiSourceRenderer implements OverlayRenderer<Layer> {
 	private ArrayList<OverlayRenderer> renderers = new ArrayList<OverlayRenderer>();
 	private Projection projection;
 	public void setLayers(ArrayList<Layer> layers){
-		synchronized (layers) {
+		synchronized(this.layers){
 			this.layers =layers;
+		}
+		synchronized (renderers) {
 			updateRenderers();
 		}
 		
@@ -146,7 +148,9 @@ public class MultiSourceRenderer implements OverlayRenderer<Layer> {
 	}
 	@Override
 	public ArrayList<Layer> getLayers() {
-		return layers;
+		synchronized (layers){
+			return layers;
+		}
 	}
 	@Override
 	public void refresh() {

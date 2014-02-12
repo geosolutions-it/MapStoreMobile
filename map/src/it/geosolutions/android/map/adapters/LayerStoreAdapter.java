@@ -114,19 +114,7 @@ public View getView(int position, View convertView, ViewGroup parent) {
 				}
 			});
         }
-        ImageButton edit = (ImageButton) v.findViewById(R.id.edit);
-        if(store.canEdit() && edit != null){
-	        edit.setOnClickListener(new OnClickListener() {
-				
-				@Override
-				public void onClick(View v) {
-					store.openEdit(listener.getActivity());
-					
-				}
-			});
-        }else if(edit !=null){
-        	edit.setVisibility(ImageButton.GONE);
-        }
+        
         ImageView icon = (ImageView) v.findViewById(R.id.source_icon);
         icon.setImageResource(store.getIconId());
     }

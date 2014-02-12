@@ -26,10 +26,15 @@ import it.geosolutions.android.map.geostore.model.Resource;
 import it.geosolutions.android.map.mapstore.activities.MapStoreLayerListActivity;
 import it.geosolutions.android.map.mapstore.model.MapStoreConfiguration;
 import it.geosolutions.android.map.mapstore.utils.MapStoreConfigTask;
+import it.geosolutions.android.map.model.MSMMap;
+import it.geosolutions.android.map.utils.SpatialDbUtils;
 
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -43,6 +48,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 
 /**
  * Show a list of the layers from a feature info query This fragment is
@@ -67,7 +75,7 @@ private LoaderManager.LoaderCallbacks<List<Resource>> mCallbacks;
 public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     // view operations
-
+    
     setRetainInstance(true);
 
     // get parameters to create the task query
@@ -75,6 +83,7 @@ public void onCreate(Bundle savedInstanceState) {
     Bundle extras = getActivity().getIntent().getExtras();
     geoStoreUrl =  extras.getString(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL);
     resource = (Resource) getArguments().getSerializable(PARAMS.RESOURCE);
+    setHasOptionsMenu(true);
 }
 
 @Override
@@ -100,44 +109,104 @@ public View onCreateView(LayoutInflater inflater, ViewGroup container,
     description.setText(resource.description);
     
     Button selectLayers = (Button)v.findViewById(R.id.select_layers);
-    selectLayers.setOnClickListener(new OnClickListener() {
-		GeoStoreResourceDetailActivity ac = (GeoStoreResourceDetailActivity)getActivity();
-		@Override
-		public void onClick(View v) {
-		
-				AsyncTask<String, String, MapStoreConfiguration> task = new MapStoreConfigTask(
-						resource.id, geoStoreUrl) {
-
-					@Override
-					protected void onPostExecute(MapStoreConfiguration result) {
-						Log.d("MapStore", result.toString());
-						// call the loadMapStore config on the Activity
-						Intent i  = new Intent(ac, MapStoreLayerListActivity.class);
-						//TODO put MapStore config
-						i.putExtra(MapsActivity.MAPSTORE_CONFIG	,result);
-						startActivityForResult(i, MapsActivity.MAPSTORE_REQUEST_CODE);
-					}
-				};
-				task.execute("");
-			
-			
-		}
-	});
-    
+    if(selectLayers!=null){
+	    selectLayers.setOnClickListener(new OnClickListener() {
+			GeoStoreResourceDetailActivity ac = (GeoStoreResourceDetailActivity)getActivity();
+			@Override
+			public void onClick(View v) {
+					selectLayers();
+				
+				
+			}
+		});
+    }
     Button loadMap = (Button)v.findViewById(R.id.load_map);
-    loadMap.setOnClickListener(new OnClickListener() {
-		
-		@Override
-		public void onClick(View v) {
-			Intent data = new Intent();
-			data.putExtra(PARAMS.RESOURCE, resource);
-			data.putExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL, geoStoreUrl);
-			getActivity().setResult(Activity.RESULT_OK, data);
-			getActivity().finish();
+    if(loadMap!=null){
+	    loadMap.setOnClickListener(new OnClickListener() {
 			
-		}
-	});
+			@Override
+			public void onClick(View v) {
+				loadMap();
+				
+			}
+	
+			
+		});
+    }
     return v;
 }
 
+@Override
+public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    // TODO Auto-generated method stub
+    super.onCreateOptionsMenu(menu, inflater);
+    inflater.inflate(R.menu.loadmap_selectlayers, menu);
+}
+/* (non-Javadoc)
+	 * @see com.actionbarsherlock.app.SherlockFragment#onOptionsItemSelected(com.actionbarsherlock.view.MenuItem)
+	 */
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		int itemId = item.getItemId();
+		if(itemId == R.id.load_map){
+			confirmLoadMap();
+			return true;
+		}else if(itemId == R.id.select_layers){
+			selectLayers();
+			return true;
+		}
+		return false;
+	}
+	/**
+	 * show a confirm dialog for load map
+	 */
+	public void confirmLoadMap(){
+		new AlertDialog.Builder(getActivity())
+        .setIcon(android.R.drawable.ic_dialog_alert)
+        .setTitle(R.string.load_map)
+        .setMessage(R.string.are_you_sure_to_load_this_map)
+        .setNegativeButton(R.string.no, null)
+        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            	loadMap();
+            }
+
+        })
+        
+        .show();
+	}
+	
+	/**
+	 * close the activity returning the whole map
+	 */
+	private void loadMap() {
+		Intent data = new Intent();
+		data.putExtra(PARAMS.RESOURCE, resource);
+		data.putExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL, geoStoreUrl);
+		getActivity().setResult(Activity.RESULT_OK, data);
+		getActivity().finish();
+	}
+
+	private void selectLayers() {
+		final ProgressDialog dialog = ProgressDialog.show(getSherlockActivity(), getString(R.string.please_wait), 
+			getString(R.string.loading_layer_list), true);
+		AsyncTask<String, String, MapStoreConfiguration> task = new MapStoreConfigTask(
+				resource.id, geoStoreUrl) {
+
+			@Override
+			protected void onPostExecute(MapStoreConfiguration result) {
+				Log.d("MapStore", result.toString());
+				// call the loadMapStore config on the Activity
+				Intent i  = new Intent(getActivity(), MapStoreLayerListActivity.class);
+				//TODO put MapStore config
+				i.putExtra(MapsActivity.MAPSTORE_CONFIG	,result);
+				startActivityForResult(i, MapsActivity.MAPSTORE_REQUEST_CODE);
+				dialog.dismiss();
+			}
+		};
+		task.execute("");
+	}
 }

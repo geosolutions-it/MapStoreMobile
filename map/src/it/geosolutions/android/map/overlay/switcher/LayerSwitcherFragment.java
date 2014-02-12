@@ -131,11 +131,12 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
 		
 		@Override
 		public void onClick(View v) {
+			closeActionMode();
 		    Intent pref = new Intent(ac,BrowseSourcesActivity.class);
 		    ac.startActivityForResult(pref, MapsActivity.LAYER_ADD);
 		}
 	});
-	
+	closeActionMode();
 	//force reload
 	reload();
 	
@@ -158,26 +159,34 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
     	    	 selected.remove(sel);
     	     }
     	     updateSelected();
-    	     if(selected.size()>0){
-    	    	 actionMode = getSherlockActivity().startActionMode(callback);
-    	    	 //override the done button to deselect all when the button is pressed
-    	    	 int doneButtonId = Resources.getSystem().getIdentifier("action_mode_close_button", "id", "android");
-    	    	 View doneButton = getActivity().findViewById(doneButtonId);
-    	    	 doneButton.setOnClickListener(new View.OnClickListener() {
-
-    	    	     @Override
-    	    	     public void onClick(View v) {
-    	    	         closeActionMode();
-    	    	     }
-    	    	 });
-    	    	 
+    	     int numSelected =selected.size();
+    	     if(numSelected>0){
+    	    	 if(actionMode != null){
+    	    		 	updateCAB(numSelected);
+    	    	 }else{
+	    	    	 actionMode = getSherlockActivity().startActionMode(callback);
+	    	    	 //override the done button to deselect all when the button is pressed
+	    	    	 int doneButtonId = Resources.getSystem().getIdentifier("action_mode_close_button", "id", "android");
+	    	    	 View doneButton = getActivity().findViewById(doneButtonId);
+	    	    	 doneButton.setOnClickListener(new View.OnClickListener() {
+	
+	    	    	     @Override
+	    	    	     public void onClick(View v) {
+	    	    	         closeActionMode();
+	    	    	     }
+	    	    	 });
+    	    	 }
     	     }else{
     	    	 closeActionMode();
     	     }
     	     
     	     return true;
     	   }
+
+		
 	});
+    
+    
     lv.setOnItemClickListener(new OnItemClickListener() {
 
 		@Override
@@ -242,6 +251,7 @@ public void onLoaderReset(Loader<List<Layer>> layers) {
 
 @Override
 public void onSetLayers(ArrayList<Layer> layers) {
+	
 	reload();
 }
 private void reload() {
@@ -289,24 +299,20 @@ public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
 	ListView lv = getListView();
 	Resources res = getResources();
 	int number =selected.size();
-	if(number > 1){
-		menu.findItem(R.id.up).setVisible(false);
-		menu.findItem(R.id.down).setVisible(false);
-		
-	}else{
-		menu.findItem(R.id.up).setVisible(true);
-		menu.findItem(R.id.down).setVisible(true);
-	}
-	
-	
-	String title = res.getQuantityString(R.plurals.quantity_layers_selected,number,number );
-	mode.setTitle(title);
+	updateCAB(number);
 	
 	return false;
 }
 
 
 public void onDestroyActionMode(ActionMode mode) {
+	ListView lv = getListView();
+	lv.clearFocus();
+	lv.clearChoices();
+	selected = new ArrayList<Layer<?>>();
+	if(this.actionMode != null){
+		this.actionMode = null;
+	}
 	adapter.notifyDataSetChanged();
 }
 
@@ -375,27 +381,22 @@ public boolean onActionItemClicked(ActionMode mode, MenuItem menu) {
  */
 private void refreshOverlays(final ArrayList<Layer> layers,
 		final MultiSourceOverlayManager om) {
-	new Thread(new Runnable(){
-		
-		@Override
-		public void run() {
-			om.setLayers(new ArrayList<Layer>(layers),false);
-			om.forceRedraw();
+	
+		om.setLayers(new ArrayList<Layer>(layers),false);
+		om.forceRedraw();
 			
-		}
-	}).start();	
+		
+	
 }
 
 /**
  * Clear selections and close the action mode
  */
 private void closeActionMode() {
-	ListView lv = getListView();
-	lv.clearFocus();
-	lv.clearChoices();
 	selected = new ArrayList<Layer<?>>();
 	if(actionMode!=null){
 		actionMode.finish();
+		actionMode = null;
 	}
 }
 
@@ -423,6 +424,22 @@ public void onLayerStatusChange() {
 	reload();
 	
 }
+
+private void updateCAB(int numSelected) {
+	if(actionMode == null) return ;
+	String title = getResources().getQuantityString(R.plurals.quantity_layers_selected,numSelected,numSelected);
+	actionMode.setTitle(title);
+	Menu menu = actionMode.getMenu();
+	if(numSelected > 1){
+		menu.findItem(R.id.up).setVisible(false);
+		menu.findItem(R.id.down).setVisible(false);
+		
+	}else{
+		menu.findItem(R.id.up).setVisible(true);
+		menu.findItem(R.id.down).setVisible(true);
+	}
+}
+
 }
 
 

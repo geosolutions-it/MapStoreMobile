@@ -122,21 +122,25 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
     	    	 getListView().setItemChecked(position, false);
     	    	 selected.remove(sel);
     	     }
-    	     if(selected.size()>0){
-    	    	 actionMode = getSherlockActivity().startActionMode(callback);
-    	    	 //override the done button to deselect all when the button is pressed
-    	    	 int doneButtonId = Resources.getSystem().getIdentifier("action_mode_close_button", "id", "android");
-    	    	 View doneButton = getActivity().findViewById(doneButtonId);
-    	    	 doneButton.setOnClickListener(new View.OnClickListener() {
-
-    	    	     @Override
-    	    	     public void onClick(View v) {
-    	    	         getListView().clearChoices();
-    	    	         selected = new ArrayList<LayerStore>();
-    	    	         actionMode.finish();
-    	    	     }
-    	    	 });
-    	    	 
+    	     int numSelected = selected.size();
+    	     if(numSelected>0){
+    	    	 if(actionMode != null){
+    	    		 updateCAB(numSelected);
+    	    	 }else{
+	    	    	 actionMode = getSherlockActivity().startActionMode(callback);
+	    	    	 //override the done button to deselect all when the button is pressed
+	    	    	 int doneButtonId = Resources.getSystem().getIdentifier("action_mode_close_button", "id", "android");
+	    	    	 View doneButton = getActivity().findViewById(doneButtonId);
+	    	    	 doneButton.setOnClickListener(new View.OnClickListener() {
+	
+	    	    	     @Override
+	    	    	     public void onClick(View v) {
+	    	    	         getListView().clearChoices();
+	    	    	         selected = new ArrayList<LayerStore>();
+	    	    	         actionMode.finish();
+	    	    	     }
+	    	    	 });
+    	    	 }
     	     }else{
     	    	 if(actionMode !=null){
     	    		 actionMode.finish();
@@ -229,26 +233,17 @@ public void reloadStores(){
 
 // ACTION MODE CALLBACKS
 public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-	ListView lv = getListView();
-	Resources res = getResources();
 	int number =selected.size();
-	if(number == 1){
-		if(selected.get(0).canEdit()){
-			menu.findItem(R.id.edit).setVisible(true);
-		}else{
-			menu.findItem(R.id.edit).setVisible(false);
-		}
-	}else{
-		menu.findItem(R.id.edit).setVisible(false);
-	}
-	String title = res.getQuantityString(R.plurals.quantity_sources_selected,number,number );
-	mode.setTitle(title);
-	
+	updateCAB(number);
 	return false;
 }
 
 
 public void onDestroyActionMode(ActionMode mode) {
+	selected = new ArrayList<LayerStore>();
+	getListView().clearChoices();
+	getListView().clearFocus();
+	actionMode = null;
 	adapter.notifyDataSetChanged();
 }
 
@@ -271,9 +266,9 @@ public boolean onActionItemClicked(ActionMode mode, MenuItem menu) {
 		}
 	}
 	selected = new ArrayList<LayerStore>();
-	mode.finish();
 	getListView().clearChoices();
 	getListView().clearFocus();
+	mode.finish();
 	reloadStores();
 	actionMode=null;
 	return true;
@@ -284,4 +279,25 @@ public boolean onActionItemClicked(ActionMode mode, MenuItem menu) {
 	 LocalPersistence.witeObjectToFile(this.getActivity(), sources, LocalPersistence.SOURCES);
 	
 	}
+
+/**
+ * Update the contextual action bar for the number of item selected
+ * @param numSelected
+ */
+private void updateCAB(int numSelected) {
+	if(actionMode == null) return ;
+
+	Menu menu = actionMode.getMenu();
+	if(numSelected == 1){
+		if(selected.get(0).canEdit()){
+			menu.findItem(R.id.edit).setVisible(true);
+		}else{
+			menu.findItem(R.id.edit).setVisible(false);
+		}
+	}else{
+		menu.findItem(R.id.edit).setVisible(false);
+	}
+	String title = getResources().getQuantityString(R.plurals.quantity_sources_selected,numSelected,numSelected );
+	actionMode.setTitle(title);
+}
 }

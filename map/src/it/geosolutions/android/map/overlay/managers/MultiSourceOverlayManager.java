@@ -236,7 +236,7 @@ public class MultiSourceOverlayManager implements OverlayManager {
 		mapView.getOverlays().remove(overlay);	
 	}
 	
-	public void setLayers (ArrayList<Layer> layers){
+	public void setLayers(ArrayList<Layer> layers){
 		setLayers(layers,true);
 	}
 	/**
@@ -249,11 +249,11 @@ public class MultiSourceOverlayManager implements OverlayManager {
 		if(layerOverlay == null){
 			layerOverlay=new MultiSourceOverlay(this);
 		}
-		layerOverlay.setLayers(layers);
 		toggleOverlayVisibility(R.id.mapstore, true);
+		layerOverlay.setLayers(layers);
+		
 		if(notify){
 			onSetLayers(layers);
-			
 		}
 		Log.v("LAYERS","TOTAL LAYERS:" + layerOverlay.getLayers().size());
 	}

@@ -35,7 +35,10 @@ import java.util.Formatter;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.AsyncTask;
@@ -266,8 +269,10 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
 			getListView().setItemChecked(position, true);
 			startLayerSelection(r.id);
 			
+			
 		}
 	});
+    
     //associate scroll listener to implement infinite scroll
     getListView().setOnScrollListener(this);
 
@@ -489,12 +494,13 @@ public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 		showDetailsActivity(selected);
 		return true;
 	}else if( itemId == R.id.load_map){
-		loadAllMap();
+		/**
+		 * show a confirm dialog for load map
+		 */
+		confirmLoadMap();
 		//TODO
 	}else if ( itemId == R.id.select_layers){
 		startLayerSelection(selected.id);
-			
-			
 	}
 	return true;
 	
@@ -513,28 +519,51 @@ private void loadAllMap() {
 	getActivity().setResult(Activity.RESULT_OK, data);
 	getActivity().finish();
 }
+/**
+ * Show A confirm dialog before load map
+ */
+public void confirmLoadMap(){
+	new AlertDialog.Builder(getActivity())
+    .setIcon(android.R.drawable.ic_dialog_alert)
+    .setTitle(R.string.load_map)
+    .setMessage(R.string.are_you_sure_to_load_this_map)
+    .setNegativeButton(R.string.no, null)
+    .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+
+        	loadAllMap();
+        }
+
+    })
+    
+    .show();
+}
 /**
  * Start the activity that shows layer selection
  */
 private void startLayerSelection(Long id) {
 	//TODO loading
 	final Activity ac = getActivity();
-			AsyncTask<String, String, MapStoreConfiguration> task = new MapStoreConfigTask(
-					id, geoStoreUrl) {
+	final ProgressDialog dialog = ProgressDialog.show(getSherlockActivity(), getString(R.string.please_wait), 
+			getString(R.string.loading_layer_list), true);
+	AsyncTask<String, String, MapStoreConfiguration> task = new MapStoreConfigTask(
+			id, geoStoreUrl) {
 
-				@Override
-				protected void onPostExecute(MapStoreConfiguration result) {
-					Log.d("MapStore", result.toString());
-					// call the loadMapStore config on the Activity
-					Intent i  = new Intent(ac, MapStoreLayerListActivity.class);
-					//TODO put MapStore config
-					i.putExtra(MapsActivity.MAPSTORE_CONFIG	,result);
-					startActivityForResult(i, MapsActivity.MAPSTORE_REQUEST_CODE);
-					getSherlockActivity().overridePendingTransition(R.anim.in_from_right, R.anim.out_to_left);
-				}
-			};
-			task.execute("");
+		@Override
+		protected void onPostExecute(MapStoreConfiguration result) {
+			Log.d("MapStore", result.toString());
+			// call the loadMapStore config on the Activity
+			Intent i  = new Intent(ac, MapStoreLayerListActivity.class);
+			//TODO put MapStore config
+			i.putExtra(MapsActivity.MAPSTORE_CONFIG	,result);
+			startActivityForResult(i, MapsActivity.MAPSTORE_REQUEST_CODE);
+			getSherlockActivity().overridePendingTransition(R.anim.in_from_right, R.anim.out_to_left);
+			dialog.dismiss();
+		}
+	};
+	task.execute("");
 }
 
 /* (non-Javadoc)

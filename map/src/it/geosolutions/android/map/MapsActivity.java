@@ -79,6 +79,7 @@ import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
@@ -185,6 +186,7 @@ public class MapsActivity extends MapActivityBase {
 	private View mLayerMenu;
 	private MultiSourceOverlayManager layerManager;
 
+	private ActionMode currentActionMode;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		 // setup loading 
@@ -286,10 +288,7 @@ public class MapsActivity extends MapActivityBase {
 	private void setupDrawerLayout() {
 		
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList = (View) findViewById(R.id.left_drawer);
-        //remove comment the following line
-        //and remove comment to right_drawer in main.xml (check also the comment about map.xml)
-        //to enable also a right drawer
+        mDrawerList = (View) findViewById(R.id.left_drawer); 
         mLayerMenu = (View) findViewById(R.id.right_drawer);
         
         mDrawerToggle = new ActionBarDrawerToggle(
@@ -304,8 +303,12 @@ public class MapsActivity extends MapActivityBase {
 
 			/** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
-                getSupportActionBar().setTitle(mTitle);
+                //getSupportActionBar().setTitle(mTitle);
                 supportInvalidateOptionsMenu();
+                if (currentActionMode != null){
+                	currentActionMode.finish();
+                }
+                
             }
 
             /** Called when a drawer has settled in a completely open state. */
@@ -880,4 +883,17 @@ public class MapsActivity extends MapActivityBase {
 	    return super.onKeyUp(keyCode, event);
 	}
 	
+	/**
+	 * Get the current action mode if present
+	 */
+	 @Override
+    public void onActionModeStarted(ActionMode mode) {
+		 currentActionMode =mode;
+	 }
+
+    @Override
+    public void onActionModeFinished(ActionMode mode) {
+    	currentActionMode = null;
+    }
+
 }

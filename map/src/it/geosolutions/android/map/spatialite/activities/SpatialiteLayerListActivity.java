@@ -39,7 +39,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
@@ -58,6 +60,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
 import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
@@ -93,26 +97,27 @@ public class SpatialiteLayerListActivity extends SherlockListActivity {
         setContentView(R.layout.spatialite_layer_list);
         //set the handler for the select layers button 
         Button selectLayers = (Button) findViewById(R.id.select_layers);
-        selectLayers.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				returnSelected();
-				overridePendingTransition(R.anim.in_from_left, R.anim.out_to_right);
+        if(selectLayers != null){
+	        selectLayers.setOnClickListener(new OnClickListener() {
 				
-			}
-		});
+				@Override
+				public void onClick(View v) {
+					returnSelected();
+				}
+			});
+        }
       //set the handler for the select layers button 
         Button loadMap = (Button) findViewById(R.id.load_map);
-        loadMap.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				returnAll();
-				overridePendingTransition(R.anim.in_from_left, R.anim.out_to_right);
+        if(loadMap !=null){
+	        loadMap.setOnClickListener(new OnClickListener() {
 				
-			}
-		});
+				@Override
+				public void onClick(View v) {
+					returnAll();
+					
+				}
+			});
+        }
     }
 
 	@Override
@@ -206,11 +211,17 @@ public class SpatialiteLayerListActivity extends SherlockListActivity {
     
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-    	 switch (item.getItemId()) {
+    	int itemId = item.getItemId();
+    	 switch (itemId) {
     	    case android.R.id.home:
     	      finish();
     	      overridePendingTransition(R.anim.in_from_left, R.anim.out_to_right);
     	      break;
+    	 }
+    	 if(itemId == R.id.load_map){
+    		 returnAll();
+    	 }else if(itemId == R.id.add_layers){
+    		 returnSelected();
     	 }
 		return false;
     }
@@ -249,6 +260,7 @@ public class SpatialiteLayerListActivity extends SherlockListActivity {
         mIntent.putExtra(MapsActivity.LAYERS_TO_ADD, layers);
         setResult(RESULT_OK, mIntent);
         finish();
+	    overridePendingTransition(R.anim.in_from_left, R.anim.out_to_right);
         
         
     }
@@ -257,12 +269,37 @@ public class SpatialiteLayerListActivity extends SherlockListActivity {
      * returns all the a <MSMMap> from the source
      */
     private void returnAll() {
-        Intent mIntent = new Intent();
-        MSMMap m = SpatialDbUtils.mapFromDb();
-        mIntent.putExtra(MapsActivity.MSM_MAP, m);
-        setResult(RESULT_OK, mIntent);
-        finish();
+    	new AlertDialog.Builder(this)
+        .setIcon(android.R.drawable.ic_dialog_alert)
+        .setTitle(R.string.load_map)
+        .setMessage(R.string.are_you_sure_to_load_this_map)
+        .setNegativeButton(R.string.no, null)
+        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            	Intent mIntent = new Intent();
+                MSMMap m = SpatialDbUtils.mapFromDb();
+                mIntent.putExtra(MapsActivity.MSM_MAP, m);
+                setResult(RESULT_OK, mIntent);
+                finish();
+        		overridePendingTransition(R.anim.in_from_left, R.anim.out_to_right);
+            }
+
+        })
         
+        .show();
+
+        
+        
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu items for use in the action bar
+        MenuInflater inflater = getSherlock().getMenuInflater();
+        inflater.inflate(R.menu.loadmap_addlayers, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 }
 

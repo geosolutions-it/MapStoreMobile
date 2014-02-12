@@ -33,8 +33,9 @@
         android:id="@android:id/list"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-       android:choiceMode="multipleChoice"  
-       android:descendantFocusability="beforeDescendants" >
+        android:choiceMode="multipleChoice"
+        android:drawSelectorOnTop="true"
+        android:descendantFocusability="beforeDescendants"  >
 
     </ListView>
 <!--    	<LinearLayout -->
