@@ -19,6 +19,7 @@ package it.geosolutions.android.map;
 
 import it.geosolutions.android.map.activities.GetFeatureInfoLayerListActivity;
 import it.geosolutions.android.map.activities.MapActivityBase;
+import it.geosolutions.android.map.activities.about.InfoView;
 import it.geosolutions.android.map.control.CoordinateControl;
 import it.geosolutions.android.map.control.LocationControl;
 import it.geosolutions.android.map.control.MapControl;
@@ -215,7 +216,7 @@ public class MapsActivity extends MapActivityBase {
 		// we should stop
 		if (!mapLoaded && !dbLoaded) {
 		        //TODO: notify the user the problem
-			this.finish();
+			Toast.makeText(this, "DB not loaded", Toast.LENGTH_LONG).show();//TODO i18n
 		}
 		// 
 		// LEFT MENU INITIALIZATION
@@ -479,6 +480,9 @@ public class MapsActivity extends MapActivityBase {
 		}else if(item.getItemId() == R.id.settings){
 			Intent pref = new Intent(this,EditPreferences.class);
 			 startActivity(pref);
+		}else if(item.getItemId() == R.id.infoview){
+			Intent info = new Intent(this,InfoView.class);
+			 startActivity(info);
 		}
         return super.onOptionsItemSelected(item);
 		 
@@ -576,6 +580,7 @@ public class MapsActivity extends MapActivityBase {
 		if (MAP_FILE!=null) {
 			Log.i("MAP","setting background file");
 			mapView.setMapFile(MAP_FILE);
+			loadPersistencePreferences();
 		} else {
 			Log.i("MAP","unable to set background file");
 			//return false;

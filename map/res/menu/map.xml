@@ -15,4 +15,8 @@
                android:title="@string/action_settings"
                android:showAsAction="never"
                android:icon="@drawable/ic_action_settings"></item>
+           <item android:id="@+id/infoview"
+               android:title="@string/about_mapstore"
+               android:showAsAction="never"
+               android:icon="@drawable/ic_action_about"></item>
 </menu>
