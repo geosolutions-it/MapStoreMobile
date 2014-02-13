@@ -10,25 +10,12 @@
 	<string name="preferences_fullscreen">Full screen mode</string>
 	<string name="preferences_fullscreen_desc">Hide the status bar</string>
 	<string name="preferences_map">Map settings</string>
-	<string name="preferences_move_speed">Move speed</string>
-	<string name="preferences_move_speed_desc">Adjust the move speed of the map</string>
-	<string name="preferences_move_speed_value">%d %% move speed</string>
 	<string name="preferences_scale_bar_unit">Scale bar unit</string>
 	<string name="preferences_scale_bar_unit_desc">Select the unit for the map scale bar</string>
 	<string name="preferences_show_fps_counter">Frame rate</string>
 	<string name="preferences_show_fps_counter_desc">Enable frames per second counter</string>
 	<string name="preferences_show_scale_bar">Map scale bar</string>
 	<string name="preferences_show_scale_bar_desc">Show the scale of the map</string>
-	<string name="preferences_show_tile_coordinates">Tile coordinates</string>
-	<string name="preferences_show_tile_coordinates_desc">Show coordinates on tiles</string>
-	<string name="preferences_show_tile_frames">Tile boundaries</string>
-	<string name="preferences_show_tile_frames_desc">Draw tile boundaries</string>
-	<string name="preferences_show_water_tiles">Water tiles</string>
-	<string name="preferences_show_water_tiles_desc">Highlight tiles which have the water flag set</string>
-	<string name="preferences_text_scale">Font size</string>
-	<string name="preferences_text_scale_desc">Select the text size of map labels</string>
-	<string name="preferences_wake_lock">Stay awake</string>
-	<string name="preferences_wake_lock_desc">Stop the screen from dimming</string>
 	<string-array name="preferences_text_scale_values">
 		<item>tiny</item>
 		<item>small</item>
