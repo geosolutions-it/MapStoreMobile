@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-   <string name="url_data_test_archive">http://demo.geo-solutions.it/share/mapstoremobile/MapStoreMobile-test-data.zip</string> 
+   <string  translatable="false" name="url_data_test_archive">http://demo.geo-solutions.it/share/mapstoremobile/MapStoreMobile_demo_data.zip</string> 
 </resources>

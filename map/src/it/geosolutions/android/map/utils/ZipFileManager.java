@@ -54,14 +54,14 @@ public class ZipFileManager {
 		this.activity = activity;
 		
 		//Check if folder of data already exists, otherwise it will be downloaded and unzipped.
-		File f = new File(dir_path+"/maps");
+		File f = new File(dir_path+"/mapstore");
 		if(!f.isDirectory()){
 			AlertDialog.Builder download_dialog_builder;
 			download_dialog_builder = new AlertDialog.Builder(activity);
 			download_dialog_builder.setTitle(R.string.dialog_title);
 			download_dialog_builder.setMessage(R.string.dialog_message);
 			download_dialog_builder.setCancelable(false);
-			download_dialog_builder.setNegativeButton(R.string.button_download, new DialogInterface.OnClickListener() {
+			download_dialog_builder.setPositiveButton(R.string.button_download, new DialogInterface.OnClickListener() {
 				
 				@Override
 				public void onClick(DialogInterface dialog, int which) {	
@@ -71,10 +71,11 @@ public class ZipFileManager {
 				}
 			});
 			
-			download_dialog_builder.setPositiveButton(R.string.button_undownload, new DialogInterface.OnClickListener() {		
+			download_dialog_builder.setNegativeButton(R.string.button_undownload, new DialogInterface.OnClickListener() {		
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					download_dialog.dismiss();
+					launchMainActivity();
 				}
 			});
 			
@@ -82,10 +83,9 @@ public class ZipFileManager {
 			
 			//Show an alert dialog to ask user if wants to download data test archive from web
 			download_dialog.show();
-			}
-		
-		else
+		}else{
 			launchMainActivity();
+		}
 	}
 	
 	/**

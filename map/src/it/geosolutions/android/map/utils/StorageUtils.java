@@ -50,9 +50,9 @@ public class StorageUtils {
 		sources = new ArrayList<LayerStore>();
 		MapStoreLayerStore mapStoreDemo = new MapStoreLayerStore();
 		mapStoreDemo.setUrl("http://mapstore.geo-solutions.it/geostore/rest/");
-		mapStoreDemo.setName("mapstore demo");
+		mapStoreDemo.setName("MapStore Demo");
 		LayerStore defaultDb = new SpatialiteStore();
-		defaultDb.setName("local database");
+		defaultDb.setName("Local Database");
 		sources.add(mapStoreDemo); sources.add(defaultDb);
 		LocalPersistence.witeObjectToFile(context, sources, LocalPersistence.SOURCES);
 		Log.v("Storage","saved sources to local file");

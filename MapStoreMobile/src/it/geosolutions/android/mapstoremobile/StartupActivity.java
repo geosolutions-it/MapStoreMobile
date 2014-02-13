@@ -52,7 +52,7 @@ public class StartupActivity extends Activity {
 	protected void onDestroy(){
 		super.onDestroy();
 		
-		//If an incompleted archive file exists it will be deleted and re-downloaded
+		//If an incomplete archive file exists it will be deleted
 		File archive = new File(dir_path + "/data_test_archive.zip");
 		if(archive.exists())
 			archive.delete();

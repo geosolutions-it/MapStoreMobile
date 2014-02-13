@@ -8,6 +8,7 @@
     <string name="sources">Sources</string>
     <string name="layers">Layers</string>
     <string name="menu_layers">Layers</string>
+    <string name="about_mapstore">About MapStore</string>
     <string name="min_zoom">Minimum zoom level</string>
     <string name="max_zoom">Maximum zoom Level</string>
     <string name="style_point">Point</string>
@@ -69,4 +70,7 @@
 	<string name="loading_layer_list">Loading layer list</string>
 	<string name="please_wait">Please wait &#8230;</string>
 	<string name="are_you_sure_to_load_this_map">Are you sure to load this map? this operation will replace all the current selected layers</string>
+    <string name="drawer_open">Open Menu</string>
+    <string name="drawer_close">Close Menu</string>
+    <string name="drawer_title">Menu</string>
 </resources>

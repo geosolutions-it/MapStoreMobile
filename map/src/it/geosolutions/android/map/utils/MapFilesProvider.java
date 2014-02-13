@@ -27,9 +27,9 @@ import android.util.Log;
  *
  */
 public class MapFilesProvider {
-	private static String baseDir ="/maps";
-	private static String baseStyle = "/maps/styles/";
-	private static String backgroundFilePath = "/maps/italy.map";
+	private static String baseDir ="/mapstore";
+	private static String baseStyle = "/mapstore/styles/";
+	private static String backgroundFilePath = "/mapstore/bg.map";
 	
 	public static File getBaseDirectoryFile(){
 		File f = new File(Environment

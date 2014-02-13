@@ -8,6 +8,7 @@
     <string name="sources">Sorgenti</string>
     <string name="layers">Livelli</string>
     <string name="menu_layers">Livelli</string>
+    <string name="about_mapstore">Informazioni su MapStore</string>
     <string name="min_zoom">Minimo zoom level</string>
     <string name="max_zoom">Massimo zoom Level</string>
     <string name="style_point">Punto</string>
@@ -16,11 +17,11 @@
     <string name="style_visibility">Visibilità</string>
     <string name="error_saving_style">Salvataggio stile fallito</string>
     <string name="error_reading_style">Lettura stile fallito</string>
-    <string name="error_unable_getfeature_db">Sede tecnica non trovata nel database locale</string>
-    <string name="error_getting_data_from_database">Errore nel prelevare la sede tecnica dal database</string>
+    <string name="error_unable_getfeature_db">feature non trovata nel database locale</string>
+    <string name="error_getting_data_from_database">Errore nel prelevare la feature dal database</string>
     <string name="error_connectivity_problem">Problema di connettività</string>
-    <string name="use_this_feature">Modifica sede tecnica</string>
-    <string name="use_this_feature_description">Vuoi utilizzare questa sede tecnica per la segnalazione corrente?</string>
+    <string name="use_this_feature">Usa questa feature</string>
+    <string name="use_this_feature_description">Vuoi piazzare il marker su questa feature?</string>
     <string name="menu_preferences">Impostazioni Mappa</string>
     <string name="menu_geostore">MapStore</string>
     <string name="dialog_title">Avviso</string>
@@ -69,5 +70,7 @@
 	<string name="loading_layer_list">Caricamento lista dei livelli</string>
 	<string name="please_wait">Attendere &#8230;</string>
 	<string name="are_you_sure_to_load_this_map">Sei sicuro di voler caricare l\'intera mappa. Questa operazione rimpiazzerà tutti i livelli attualmente caricati sulla mappa.</string>
-	
+    <string name="drawer_open">Apri Menu</string>
+    <string name="drawer_close">Chiudi Menu</string>
+    <string name="drawer_title">Menu</string>
 </resources>
