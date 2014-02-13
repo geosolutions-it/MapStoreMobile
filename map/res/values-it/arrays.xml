@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources >
-	<string-array name="array_dashes">
-        <item>No</item>
-        <item>Si</item>
-	</string-array>
-	<string-array name="preferences_selection_shape">
+	<string-array name="preferences_selection_shape_values">
 		<item >Rettangolare</item>
 		<item >Circolare</item>
 		<item >Puntuale</item>
 		<item >Poligonale</item>
 	</string-array>
-	<string name="preferences_selection_shape_default">Rettangolare</string>
+	<string-array name="preferences_line_joins_stroke_values">
+		<item >Arrotondati</item>
+		<item >Quadrati</item>
+		<item >Smussati</item>
+	</string-array>
 </resources>

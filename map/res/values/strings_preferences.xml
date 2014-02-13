@@ -16,6 +16,8 @@
 	<string name="preferences_show_fps_counter_desc">Enable frames per second counter</string>
 	<string name="preferences_show_scale_bar">Map scale bar</string>
 	<string name="preferences_show_scale_bar_desc">Show the scale of the map</string>
+	<string name="preferences_text_scale">Size of carachters</string>
+	<string name="preferences_text_scale_desc">Set labels size</string>
 	<string-array name="preferences_text_scale_values">
 		<item>tiny</item>
 		<item>small</item>
@@ -39,11 +41,6 @@
 	<string name="preferences_advanced_desc">Settings of map info selector</string>
 	<string name="preferences_line_joins_stroke">Corners</string>
 	<string name="preferences_line_joins_stroke_desc">Set border corners style</string>
-	<string-array name="preferences_line_joins_stroke_values">
-		<item >Rounded</item>
-		<item >Squared</item>
-		<item >Beveled</item>
-	</string-array>
 	<string name="preferences_dashed_stroke">Dashed border</string>
 	<string name="preferences_dashed_stroke_desc">Click here if you want dashed border</string>
 	<string name="preferences_stroke_spaces">Spacing</string>
