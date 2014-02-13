@@ -31,7 +31,7 @@
 		    	<PreferenceCategory android:key="selectionStyle" android:title="@string/preferences_selector_style" android:summary="@string/preferences_selector_style_desc"
 			    android:persistent="false">
 			    	<ListPreference android:title="@string/preferences_shape_selection" android:summary="@string/preferences_shape_selection_desc"
-					android:entryValues="@array/preferences_selection_shape" android:entries="@array/preferences_selection_shape"
+					android:entryValues="@array/preferences_selection_shape" android:entries="@array/preferences_selection_shape_values"
 					android:key="selectionShape" android:defaultValue="@string/preferences_selection_shape_default" /> 	
 			    	<it.geosolutions.android.map.preferences.SetRadiusPreference android:key="OnePointSelectionRadius" android:title="@string/preferences_radius" android:summary="@string/preferences_radius_desc" />
 			    </PreferenceCategory>

@@ -45,16 +45,27 @@
 		<item >MITER</item>
 		<item >BEVEL</item>
 	</string-array>
+	<string-array name="preferences_line_joins_stroke_values">
+		<item >Rounded</item>
+		<item >Squared</item>
+		<item >Beveled</item>
+	</string-array>
 	<string name="preferences_line_joins_stroke_default" translatable="false">BEVEL</string>
 	<string-array name="array_dashes" translatable="false">
         <item>No</item>
         <item>Ok</item>
     </string-array>
-	<string-array name="preferences_selection_shape">
+    <string-array name="preferences_selection_shape" translatable="false">
 		<item >Rectangular</item>
 		<item >Circular</item>
 		<item >One point</item>
 		<item >Polygonal</item>
 	</string-array>
-	<string name="preferences_selection_shape_default">Rectangular</string>
+	<string-array name="preferences_selection_shape_values">
+		<item >Rectangular</item>
+		<item >Circular</item>
+		<item >One point</item>
+		<item >Polygonal</item>
+	</string-array>
+	<string name="preferences_selection_shape_default" translatable="false">Rectangular</string>
 </resources>

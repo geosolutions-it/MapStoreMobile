@@ -56,11 +56,6 @@
 	<string name="preferences_advanced_desc">Impostazioni per la selezione sulla mappa</string>
 	<string name="preferences_line_joins_stroke">Angoli</string>
 	<string name="preferences_line_joins_stroke_desc">Imposta lo stile per gli angoli del bordo</string>
-	<string-array name="preferences_line_joins_stroke_values">
-		<item >Arrotondati</item>
-		<item >Quadrati</item>
-		<item >Smussati</item>
-	</string-array>
 	<string name="preferences_dashed_stroke">Bordo tratteggiato</string>
 	<string name="preferences_dashed_stroke_desc">Clicca qui se vuoi il bordo tratteggiato</string>
 	<string name="preferences_stroke_spaces">Spaziatura</string>
