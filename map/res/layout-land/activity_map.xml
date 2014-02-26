@@ -24,7 +24,7 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_toLeftOf="@id/map_buttonbar" />
-     
+
 	 <ImageButton 
          	android:contentDescription="@string/button_confirm_marker_position"
          	android:padding="15dip" 
@@ -37,8 +37,13 @@
 	        android:layout_alignParentRight="true"
 	        android:layout_toRightOf="@id/advancedMapView"
         	android:src="@drawable/ic_navigation_accept"
+        	android:visibility="invisible"
         	
         />
+
+        
+     <!--  <include layout="@layout/button_close_merge" /> -->
+        
 	 <LinearLayout
         android:id="@+id/secondary_map_controls"
         android:layout_width="wrap_content"

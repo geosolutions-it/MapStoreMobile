@@ -19,4 +19,8 @@
                android:title="@string/about_mapstore"
                android:showAsAction="never"
                android:icon="@drawable/ic_action_about"></item>
+           <item android:id="@+id/exitview"
+               android:title="@string/exit"
+               android:showAsAction="never"
+               android:icon="@drawable/ic_content_remove"></item>
 </menu>

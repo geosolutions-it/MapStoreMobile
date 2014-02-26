@@ -73,4 +73,8 @@
     <string name="drawer_open">Open Menu</string>
     <string name="drawer_close">Close Menu</string>
     <string name="drawer_title">Menu</string>
+    <string name="button_close_content">Close</string>
+    <string name="exit">Exit</string>
+    <string name="button_confirm_exit">Do you really want to exit?</string>
+    <string name="button_confirm_exit_title">Exit</string>
 </resources>
