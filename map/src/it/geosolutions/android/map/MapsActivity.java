@@ -483,6 +483,23 @@ public class MapsActivity extends MapActivityBase {
 		}else if(item.getItemId() == R.id.infoview){
 			Intent info = new Intent(this,InfoView.class);
 			 startActivity(info);
+		}else if(item.getItemId() == R.id.exitview){
+			
+			new AlertDialog.Builder(this)
+		    .setTitle(R.string.button_confirm_exit_title)
+		    .setMessage(R.string.button_confirm_exit)
+		    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+		        public void onClick(DialogInterface dialog, int which) { 
+		        	 finish();
+		        	 return;
+		        }
+		     })
+		    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+		        public void onClick(DialogInterface dialog, int which) { 
+		            // do nothing
+		        }
+		     })
+		     .show();
 		}
         return super.onOptionsItemSelected(item);
 		 
@@ -858,7 +875,7 @@ public class MapsActivity extends MapActivityBase {
     }
 
     /**
-     * Save tile caching preferences
+     * Load tile caching preferences
      * used sharedPreferences :
      * * TileCachePersistence
      * * TileCacheSize
