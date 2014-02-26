@@ -39,13 +39,13 @@ public class StorageUtils {
 		
 		ArrayList<LayerStore> sources = (ArrayList<LayerStore>) LocalPersistence.readObjectFromFile(context, LocalPersistence.SOURCES);
 		if(sources == null){
-			reloadDefalutSources(context);
+			reloadDefaultSources(context);
 		}else{
 			Log.v("Storage","sources available");
 		}
 	}
 
-	private static void reloadDefalutSources(Context context) {
+	private static void reloadDefaultSources(Context context) {
 		ArrayList<LayerStore> sources;
 		sources = new ArrayList<LayerStore>();
 		MapStoreLayerStore mapStoreDemo = new MapStoreLayerStore();
@@ -54,7 +54,7 @@ public class StorageUtils {
 		LayerStore defaultDb = new SpatialiteStore();
 		defaultDb.setName("Local Database");
 		sources.add(mapStoreDemo); sources.add(defaultDb);
-		LocalPersistence.witeObjectToFile(context, sources, LocalPersistence.SOURCES);
+		LocalPersistence.writeObjectToFile(context, sources, LocalPersistence.SOURCES);
 		Log.v("Storage","saved sources to local file");
 	}
 	

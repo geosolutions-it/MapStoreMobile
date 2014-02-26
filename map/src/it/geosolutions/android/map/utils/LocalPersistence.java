@@ -52,7 +52,7 @@ public class LocalPersistence {
      * @param object
      * @param filename
      */
-    public static void witeObjectToFile(Context context, Object object, String filename) {
+    public static void writeObjectToFile(Context context, Object object, String filename) {
     	
         ObjectOutputStream objectOut = null;
         try {
