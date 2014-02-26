@@ -276,7 +276,7 @@ public boolean onActionItemClicked(ActionMode mode, MenuItem menu) {
 }
 
 	private void saveSources(List<LayerStore> sources) {
-	 LocalPersistence.witeObjectToFile(this.getActivity(), sources, LocalPersistence.SOURCES);
+	 LocalPersistence.writeObjectToFile(this.getActivity(), sources, LocalPersistence.SOURCES);
 	
 	}
 

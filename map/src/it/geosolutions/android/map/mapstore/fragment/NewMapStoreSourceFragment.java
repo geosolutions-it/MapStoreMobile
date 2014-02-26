@@ -140,7 +140,7 @@ public class NewMapStoreSourceFragment extends SherlockFragment implements
 	}
 
 	private void saveSources(List<LayerStore> sources) {
-		 LocalPersistence.witeObjectToFile(this.getActivity(), sources, LocalPersistence.SOURCES);
+		 LocalPersistence.writeObjectToFile(this.getActivity(), sources, LocalPersistence.SOURCES);
 		
 	}
 	@Override
