@@ -73,6 +73,7 @@
     <string name="drawer_open">Apri Menu</string>
     <string name="drawer_close">Chiudi Menu</string>
     <string name="drawer_title">Menu</string>
+    <string name="button_close_content">Chiudi</string>
     <string name="exit">Esci</string>
     <string name="button_confirm_exit">Vuoi uscire dall\'applicazione?</string>
     <string name="button_confirm_exit_title">Uscita</string>
