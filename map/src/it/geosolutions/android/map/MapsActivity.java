@@ -811,7 +811,7 @@ public class MapsActivity extends MapActivityBase {
 		}
 		
 		//controls can be refreshed getting the result of an intent, in this case
-		// each control knows wich intent he sent with their requestCode/resultCode
+		// each control knows which intent he sent with their requestCode/resultCode
 		for(MapControl control : mapView.getControls()){
 			control.refreshControl(requestCode,resultCode, data);
 		}
@@ -844,6 +844,10 @@ public class MapsActivity extends MapActivityBase {
 			ArrayList<Layer> layers =new ArrayList<Layer> (layerManager.getLayers());
 			layers.addAll(layersToAdd);
 			layerManager.setLayers(layers);
+			// close right drawer
+            if (mDrawerLayout.isDrawerOpen(mLayerMenu)) {
+            	mDrawerLayout.closeDrawer(mLayerMenu);
+            }
 		}
 		
 	}
