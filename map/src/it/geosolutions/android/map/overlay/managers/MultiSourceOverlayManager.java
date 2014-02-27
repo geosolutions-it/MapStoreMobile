@@ -380,7 +380,7 @@ public class MultiSourceOverlayManager implements OverlayManager {
 		mapView.post(new Runnable() {
             public void run() {
                 Toast.makeText(c, e.getToastMessage(), Toast.LENGTH_SHORT).show();
-                Toast.makeText(c, R.string.error_rendering, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(c, R.string.error_rendering, Toast.LENGTH_SHORT).show();
             }
         });
 	}
