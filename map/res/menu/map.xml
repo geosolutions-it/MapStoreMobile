@@ -8,7 +8,7 @@
            -->
            <item android:id="@+id/layer_menu_action"
           android:title="@string/sources"
-          android:icon="@drawable/ic_location_map_add"
+          android:icon="@drawable/ic_add_to_queue"
           android:showAsAction="always"
            /> 
            <item android:id="@+id/settings"
