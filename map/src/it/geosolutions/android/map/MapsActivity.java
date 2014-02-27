@@ -45,6 +45,7 @@ import it.geosolutions.android.map.overlay.managers.OverlayManager;
 import it.geosolutions.android.map.overlay.switcher.LayerSwitcherFragment;
 import it.geosolutions.android.map.preferences.EditPreferences;
 import it.geosolutions.android.map.style.StyleManager;
+import it.geosolutions.android.map.utils.LocalPersistence;
 import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.android.map.utils.MarkerUtils;
 import it.geosolutions.android.map.utils.SpatialDbUtils;
@@ -66,6 +67,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.FragmentManager;
@@ -188,6 +190,25 @@ public class MapsActivity extends MapActivityBase {
 	private MultiSourceOverlayManager layerManager;
 
 	private ActionMode currentActionMode;
+	
+	/**
+	 * BACK BUTTON PARAMETER
+
+    private static final long delay = 2000L;
+    private boolean mRecentlyBackPressed = false;
+    private Handler mExitHandler = new Handler();
+    
+    private Runnable mExitRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mRecentlyBackPressed=false;   
+        }
+    };
+	 */
+	
+	/**
+	 * Initialize Application and restores state
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		 // setup loading 
@@ -267,9 +288,15 @@ public class MapsActivity extends MapActivityBase {
 			
 		}else{
 			layerManager.defaultInit();
-			MSMMap map = SpatialDbUtils.mapFromDb();
-			StorageUtils.setupSources(this);
-	        layerManager.loadMap(map);
+			@SuppressWarnings("unchecked")
+			ArrayList<Layer> layers =  (ArrayList<Layer>) LocalPersistence.readObjectFromFile(this, LocalPersistence.CURRENT_MAP);
+			if(layers != null){
+				layerManager.setLayers(layers);
+			}else{
+				MSMMap map = SpatialDbUtils.mapFromDb();
+				StorageUtils.setupSources(this);
+		        layerManager.loadMap(map);
+			}
 			//setup left drawer fragments
 	        osf =  new LayerSwitcherFragment();
 	        layerManager.setLayerChangeListener(osf);
@@ -418,6 +445,62 @@ public class MapsActivity extends MapActivityBase {
 		}
 	}
 
+	/**
+	 * Save the layer state 
+	 */
+	@Override
+	public void onPause() {
+		super.onPause();
+		LocalPersistence.writeObjectToFile(this, layerManager.getLayers() , LocalPersistence.CURRENT_MAP);
+		
+	}
+	
+	/**
+	 * Force a double tap to close the app
+
+    @Override
+    public void onBackPressed() {
+
+        //You may also add condition if (doubleBackToExitPressedOnce || fragmentManager.getBackStackEntryCount() != 0) // in case of Fragment-based add
+        if (mRecentlyBackPressed) {
+            mExitHandler.removeCallbacks(mExitRunnable);
+            mExitHandler = null;
+            super.onBackPressed();
+        }
+        else
+        {
+            mRecentlyBackPressed = true;
+            Toast.makeText(this, "press again to exit", Toast.LENGTH_SHORT).show();
+            mExitHandler.postDelayed(mExitRunnable, delay);
+        }
+    }
+
+	 */	
+	
+	/**
+	 * Ask to confirm when exit
+	 */
+    @Override
+    public void onBackPressed() {
+    	
+		new AlertDialog.Builder(this)
+	    .setTitle(R.string.button_confirm_exit_title)
+	    .setMessage(R.string.button_confirm_exit)
+	    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+	        public void onClick(DialogInterface dialog, int which) { 
+	        	 MapsActivity.super.onBackPressed();
+	        	 return;
+	        }
+	     })
+	    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+	        public void onClick(DialogInterface dialog, int which) { 
+	            // do nothing
+	        }
+	     })
+	     .show();
+
+    }
+	
 	@Override
 	public void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
@@ -454,7 +537,7 @@ public class MapsActivity extends MapActivityBase {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 
-		int itemId = item.getItemId();
+		//int itemId = item.getItemId();
 		
 		//Drawer part
         if (item.getItemId() == android.R.id.home) {
@@ -521,7 +604,7 @@ public class MapsActivity extends MapActivityBase {
 		}else{
 		    markerDTOs = getIntent().getParcelableArrayListExtra(MapsActivity.PARAMETERS.MARKERS);
 		    markers= MarkerUtils.markerDTO2DescribedMarkers(this,markerDTOs);
-		    //retieve geopoint if missing
+		    //retrieve geopoint if missing
 		    if(getIntent().getExtras() == null){
 		    	return;
 		    }
