@@ -835,6 +835,10 @@ public class MapsActivity extends MapActivityBase {
 		if(resource!=null){
 			String geoStoreUrl = data.getStringExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL);
 			MapStoreUtils.loadMapStoreConfig(geoStoreUrl, resource, this);
+			// close right drawer
+            if (mDrawerLayout.isDrawerOpen(mLayerMenu)) {
+            	mDrawerLayout.closeDrawer(mLayerMenu);
+            }
 		}
 		if(b.containsKey(MAPSTORE_CONFIG)){
         	overlayManager.loadMapStoreConfig((MapStoreConfiguration)b.getSerializable(MAPSTORE_CONFIG));
