@@ -6,6 +6,6 @@
         android:title="@string/load_map" android:showAsAction="always"/>
     <item
         android:id="@+id/add_layers"
-        android:icon="@drawable/ic_add_to_queue"
+        android:icon="@drawable/ic_navigation_accept"
         android:title="@string/add_the_selected_layers_to_the_map" android:showAsAction="always"/>
 </menu>
