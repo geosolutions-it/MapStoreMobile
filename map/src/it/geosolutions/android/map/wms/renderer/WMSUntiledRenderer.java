@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -100,11 +101,11 @@ public  class WMSUntiledRenderer implements WMSRenderer{
 			}
 		} catch (IOException e1) {
 			notifyError(e1);
-			Log.e("WMS","unable to read from the wms service");
+			Log.e("WMS","unable to read from the wms service for url"+url);
 		}finally{
 			//if the status has changed during draw. the exception is raised
 			if(this.status != 0){
-				throw new RenderingException(R.string.error_connectivity_problem);
+				throw new RenderingException(this.status);
 			}
 		}
 	}
@@ -173,7 +174,11 @@ public  class WMSUntiledRenderer implements WMSRenderer{
 	 */
 	@Override
 	public void notifyError(Exception e) {
-		this.status = R.string.error_connectivity_problem;
+		if(e instanceof UnknownHostException){
+			this.status = R.string.error_connectivity_problem;
+		}else{
+			this.status = R.string.error_rendering;
+		}
 		for(WMSLayer l : layers){
 			l.setStatus(this.status);
 		}	
