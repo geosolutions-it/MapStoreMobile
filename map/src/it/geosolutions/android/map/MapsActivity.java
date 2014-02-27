@@ -826,6 +826,10 @@ public class MapsActivity extends MapActivityBase {
 		Bundle b = data.getExtras();
 		if(requestCode==DATAPROPERTIES_REQUEST_CODE){
 			mapView.getOverlayController().redrawOverlays();
+			// close right drawer
+            if (mDrawerLayout.isDrawerOpen(mLayerMenu)) {
+            	mDrawerLayout.closeDrawer(mLayerMenu);
+            }
 		}
 		Resource resource = (Resource) data.getSerializableExtra(GeoStoreResourceDetailActivity.PARAMS.RESOURCE);
 		if(resource!=null){
