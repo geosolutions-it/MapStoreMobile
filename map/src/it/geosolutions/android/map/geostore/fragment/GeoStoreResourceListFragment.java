@@ -311,7 +311,7 @@ public Loader<List<Resource>> onCreateLoader(int id, Bundle args) {
 public void onLoadFinished(Loader<List<Resource>> loader,
         List<Resource> results) {
    if(results == null){
-	   Toast.makeText(getSherlockActivity(), R.string.error_retrieving_resources_from_mapstore, Toast.LENGTH_SHORT).show();//TODO i18n
+	   Toast.makeText(getSherlockActivity(), R.string.error_retrieving_resources_from_mapstore, Toast.LENGTH_SHORT).show();
 	   setNoData();
    }else{
 	   //add loaded resources to the listView
@@ -372,7 +372,6 @@ public void onDestroy() {
 @Override
 public void onCreateOptionsMenu(Menu menu,MenuInflater inflater) {
 	super.onCreateOptionsMenu(menu, inflater);
-	// TODO Auto-generated method stub
 	    inflater.inflate(R.menu.geostore_list, menu);
         searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
         if(searchView !=null){
@@ -544,7 +543,6 @@ public void confirmLoadMap(){
  * Start the activity that shows layer selection
  */
 private void startLayerSelection(Long id) {
-	//TODO loading
 	final Activity ac = getActivity();
 	final ProgressDialog dialog = ProgressDialog.show(getSherlockActivity(), getString(R.string.please_wait), 
 			getString(R.string.loading_layer_list), true);
@@ -553,12 +551,16 @@ private void startLayerSelection(Long id) {
 
 		@Override
 		protected void onPostExecute(MapStoreConfiguration result) {
-			Log.d("MapStore", result.toString());
+			//Log.d("MapStore", result.toString());
 			// call the loadMapStore config on the Activity
-			Intent i  = new Intent(ac, MapStoreLayerListActivity.class);
-			//TODO put MapStore config
-			i.putExtra(MapsActivity.MAPSTORE_CONFIG	,result);
-			startActivityForResult(i, MapsActivity.MAPSTORE_REQUEST_CODE);
+			if(result != null){
+				Intent i  = new Intent(ac, MapStoreLayerListActivity.class);
+				//TODO put MapStore config
+				i.putExtra(MapsActivity.MAPSTORE_CONFIG ,result);
+				startActivityForResult(i, MapsActivity.MAPSTORE_REQUEST_CODE);
+			}else{
+		        Toast.makeText(ac, R.string.error_retrieving_resources_from_mapstore, Toast.LENGTH_LONG).show();
+			}
 			getSherlockActivity().overridePendingTransition(R.anim.in_from_right, R.anim.out_to_left);
 			dialog.dismiss();
 		}
