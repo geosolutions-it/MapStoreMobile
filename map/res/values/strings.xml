@@ -77,4 +77,5 @@
     <string name="exit">Exit</string>
     <string name="button_confirm_exit">Do you really want to exit?</string>
     <string name="button_confirm_exit_title">Exit</string>
+    <string name="error_parsing_request">There was an error parsing the request</string>
 </resources>

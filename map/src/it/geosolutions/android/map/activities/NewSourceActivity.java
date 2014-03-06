@@ -17,32 +17,13 @@
  */
 package it.geosolutions.android.map.activities;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
-import it.geosolutions.android.map.MapsActivity;
 import it.geosolutions.android.map.R;
-import it.geosolutions.android.map.fragment.sources.SourcesFragment;
-import it.geosolutions.android.map.geostore.activities.GeoStoreResourceDetailActivity;
-import it.geosolutions.android.map.geostore.activities.GeoStoreResourcesActivity;
-import it.geosolutions.android.map.geostore.model.Resource;
-import it.geosolutions.android.map.mapstore.activities.MapStoreLayerListActivity;
 import it.geosolutions.android.map.mapstore.fragment.NewMapStoreSourceFragment;
-import it.geosolutions.android.map.mapstore.model.MapStoreConfiguration;
-import it.geosolutions.android.map.mapstore.model.MapStoreLayer;
-import it.geosolutions.android.map.mapstore.utils.MapStoreConfigTask;
-import it.geosolutions.android.map.mapstore.utils.MapStoreUtils;
-import it.geosolutions.android.map.model.Layer;
-import it.geosolutions.android.map.wms.WMSLayer;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
-import com.vividsolutions.jts.operation.valid.IsValidOp;
 
 /**
  * This activity Allows to add layers from a source

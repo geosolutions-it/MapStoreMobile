@@ -26,13 +26,11 @@ import org.mapsforge.android.maps.MapView;
 import org.mapsforge.core.model.GeoPoint;
 import org.mapsforge.core.model.MapPosition;
 
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 
 /**
  * MapActivity is the abstract base class which must be extended in order to use a {@link MapView}. There are no

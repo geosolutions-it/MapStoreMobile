@@ -6,6 +6,7 @@ import it.geosolutions.android.map.geostore.model.GeoStoreAttributeTypeAdapter;
 import it.geosolutions.android.map.geostore.model.GeoStoreResourceTypeAdapter;
 import it.geosolutions.android.map.geostore.model.GeoStoreTypeAdapter;
 import it.geosolutions.android.map.geostore.model.Resource;
+import it.geosolutions.android.map.geostore.model.ResourceContainer;
 import it.geosolutions.android.map.geostore.model.ResourceList;
 import it.geosolutions.android.map.geostore.model.SearchResult;
 
@@ -159,6 +160,43 @@ public class GeoStoreClient {
 		}
 		return null;
 	}
+	
+	public Resource getResource(int id){
+		HttpClient httpclient = new DefaultHttpClient();
+		HttpGet get = new HttpGet(url + "resources/resource/"+id);
+		if (url == null)
+			;
+		{
+			Log.w("GeoStore", "URL Not Present. Unable to submit the request");
+		}
+		get.addHeader("Accept", "application/json");
+		HttpResponse response;
+		// TODO support pagination, filtering, account
+		try {
+			response = httpclient.execute(get);
+
+			HttpEntity resEntity = response.getEntity();
+			String responseText;
+			if (resEntity != null) {
+				// parse response.
+				responseText = EntityUtils.toString(resEntity);
+				Log.d("GeoStore", "remote service response:");
+				Log.d("GeoStore", responseText);
+				Gson gson = getGeoStoreGsonBuilder();
+				ResourceContainer resc = gson.fromJson(responseText, ResourceContainer.class);
+				
+				return resc.resource;
+			}
+
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			Log.e("GeoStore", "HTTP Protocol error");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			Log.e("GeoStore", "IOException during HTTP request");
+		}
+		return null;
+	}
 
 	/**
 	 * Provides the Gson object that recongnize Resource and Attributes as arrays or single object.
@@ -177,7 +215,7 @@ public class GeoStoreClient {
 				new GeoStoreAttributeTypeAdapter()).create();
 	}
 	
-
+	
 	public String getData(Long id) {
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpGet get = new HttpGet(url + "data/" + id);

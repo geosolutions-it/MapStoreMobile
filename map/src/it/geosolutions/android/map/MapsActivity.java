@@ -124,6 +124,8 @@ public class MapsActivity extends MapActivityBase {
 		public static final String LON = "LON";
 		public static final String LAT = "LAT";
 		public static final String ZOOM_LEVEL = "ZOOM_LEVEL";
+		public static final String RESOURCE = "RESOURCE";
+		public static final String GEOSTORE_URL = "GEOSTORE_URL";
 	}
 
 	
@@ -261,10 +263,23 @@ public class MapsActivity extends MapActivityBase {
 			this.addConfirmButton();
 		}
 		addControls(savedInstanceState);
-		centerMapFile();
-		
-        
 
+		centerMapFile();
+		loadFromBundle();
+	}
+
+	/**
+	 * load a map from bundle
+	 */
+	private void loadFromBundle() {
+		Bundle data = getIntent().getExtras();
+		if(data == null) return;
+		Resource resource = (Resource) data.getSerializable(PARAMETERS.RESOURCE);
+		if(resource!=null){
+			String geoStoreUrl = data.getString(PARAMETERS.GEOSTORE_URL);
+			loadGeoStoreResource(resource, geoStoreUrl);
+		}
+		
 	}
 
 	/**
@@ -834,11 +849,7 @@ public class MapsActivity extends MapActivityBase {
 		Resource resource = (Resource) data.getSerializableExtra(GeoStoreResourceDetailActivity.PARAMS.RESOURCE);
 		if(resource!=null){
 			String geoStoreUrl = data.getStringExtra(GeoStoreResourcesActivity.PARAMS.GEOSTORE_URL);
-			MapStoreUtils.loadMapStoreConfig(geoStoreUrl, resource, this);
-			// close right drawer
-            if (mDrawerLayout.isDrawerOpen(mLayerMenu)) {
-            	mDrawerLayout.closeDrawer(mLayerMenu);
-            }
+			loadGeoStoreResource(resource, geoStoreUrl);
 		}
 		if(b.containsKey(MAPSTORE_CONFIG)){
         	overlayManager.loadMapStoreConfig((MapStoreConfiguration)b.getSerializable(MAPSTORE_CONFIG));
@@ -849,15 +860,36 @@ public class MapsActivity extends MapActivityBase {
 		}
 		ArrayList<Layer> layersToAdd = (ArrayList<Layer>) b.getSerializable(LAYERS_TO_ADD);
 		if(layersToAdd != null){
-			ArrayList<Layer> layers =new ArrayList<Layer> (layerManager.getLayers());
-			layers.addAll(layersToAdd);
-			layerManager.setLayers(layers);
-			// close right drawer
-            if (mDrawerLayout.isDrawerOpen(mLayerMenu)) {
-            	mDrawerLayout.closeDrawer(mLayerMenu);
-            }
+			addLayers(layersToAdd);
 		}
 		
+	}
+
+	/**
+	 * Add layers to the map
+	 * @param layersToAdd
+	 */
+	private void addLayers(ArrayList<Layer> layersToAdd) {
+		ArrayList<Layer> layers =new ArrayList<Layer> (layerManager.getLayers());
+		layers.addAll(layersToAdd);
+		layerManager.setLayers(layers);
+		// close right drawer
+		if (mDrawerLayout.isDrawerOpen(mLayerMenu)) {
+			mDrawerLayout.closeDrawer(mLayerMenu);
+		}
+	}
+
+	/**
+	 * Load a geostore resource on the map
+	 * @param resource the resource id
+	 * @param geoStoreUrl
+	 */
+	private void loadGeoStoreResource(Resource resource, String geoStoreUrl) {
+		MapStoreUtils.loadMapStoreConfig(geoStoreUrl, resource, this);
+		// close right drawer
+		if (mDrawerLayout.isDrawerOpen(mLayerMenu)) {
+			mDrawerLayout.closeDrawer(mLayerMenu);
+		}
 	}
 
 	/**
@@ -882,6 +914,7 @@ public class MapsActivity extends MapActivityBase {
 	}
 
     /**
+     * Replace the default marker with position and properties from the arguments
      * @param layer
      * @param attributeName
      * @param attributeValue

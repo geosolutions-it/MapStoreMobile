@@ -86,6 +86,28 @@
         <activity android:name="it.geosolutions.android.map.activities.NewSourceActivity"></activity>
         <!-- About  -->
         <activity android:name="it.geosolutions.android.map.activities.about.InfoView"></activity>
+        
+   		<!-- ********** -->
+        <!--  STARTERS  -->
+		<!-- ********** -->
+        <!-- Add source -->
+        <activity android:name="it.geosolutions.android.map.activities.starters.LoadMapStoreSource">    
+            <intent-filter>
+	        <action android:name="android.intent.action.VIEW"/>
+	        <category android:name="android.intent.category.DEFAULT"/>
+	        <category android:name="android.intent.category.BROWSABLE"/>
+	        <data android:scheme="mapstoresource"  android:pathPattern="/rest/"  />
+	        </intent-filter>
+        </activity>
+        <!-- Load Map -->
+        <activity android:name="it.geosolutions.android.map.activities.starters.LoadMapStoreMap">
+            <intent-filter>
+	        <action android:name="android.intent.action.VIEW"/>
+	        <category android:name="android.intent.category.DEFAULT"/>
+	        <category android:name="android.intent.category.BROWSABLE"/>
+	        <data android:scheme="mapstore" android:pathPattern="/rest/data/" /> />
+    	</intent-filter>
+        </activity>
     </application>
     
 

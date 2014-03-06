@@ -77,10 +77,6 @@ public class NewMapStoreSourceFragment extends SherlockFragment implements
 			//if a store is equal so is the same.
 			//this workaround allow to edit the source
 			//and add it to the list with the changes
-			
-			
-      	  	
-			
 		}
 	}
 
