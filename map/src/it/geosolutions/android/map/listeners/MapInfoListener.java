@@ -234,7 +234,7 @@ public boolean onTouch(View v, MotionEvent event){
             Log.d("MAPINFOTOOL", "start query layer");
 
             //Use utility class to perform conversion from pixels to latitude/longitude.
-            if(pref.getString("selectionShape", "").equals(array[0])){
+            if(pref.getString("selectionShape", activity.getResources().getString(R.string.preferences_selection_shape_default)).equals(array[0])){
             	double n = ConversionUtilities.convertFromPixelsToLatitude(view, startY);
             	double w = ConversionUtilities.convertFromPixelsToLongitude(view, startX);
             	double s = ConversionUtilities.convertFromPixelsToLatitude(view, endY);

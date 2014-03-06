@@ -77,5 +77,5 @@
     <string name="exit">Esci</string>
     <string name="button_confirm_exit">Vuoi uscire dall\'applicazione?</string>
     <string name="button_confirm_exit_title">Uscita</string>
-    <string name="error_parsing_request_uri">Errore nella lettura dell a richiesta.</string>
+    <string name="error_parsing_request">Errore nella lettura della richiesta.</string>
 </resources>

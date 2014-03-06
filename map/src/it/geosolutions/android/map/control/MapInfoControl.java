@@ -67,7 +67,7 @@ public class MapInfoControl extends MapControl{
 	private static float STROKE_SPACES = 10f;
 	private static float STROKE_SHAPE_DIMENSION = 15f;
 	private static Paint.Join STROKE_ANGLES = Paint.Join.ROUND;
-	private static String Shape_Selection;
+	private static String defaultShapeSelection;
 
 	private Activity activity; 	
 	private String[] array;
@@ -112,7 +112,7 @@ public class MapInfoControl extends MapControl{
 		
 		pref  = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
 		array = activity.getResources().getStringArray(R.array.preferences_selection_shape);
-		Shape_Selection = array[0]; //default selection rectangular
+		defaultShapeSelection = activity.getResources().getString(R.string.preferences_selection_shape_default); //default selection rectangular
 		
 		instantiateListener();
 		setMode(mode);
@@ -159,10 +159,10 @@ public class MapInfoControl extends MapControl{
 			else if(angles_shape.equals("ROUND")) STROKE_ANGLES = Paint.Join.ROUND;
 		}
 		
-		String shape_sel = pref.getString("selectionShape", this.Shape_Selection);
-		if(!shape_sel.equals(Shape_Selection))
+		String shape_sel = pref.getString("selectionShape", this.defaultShapeSelection);
+		if(!shape_sel.equals(defaultShapeSelection))
 			//Control if the user has choosed a new shape for selection
-			Shape_Selection = shape_sel;
+			defaultShapeSelection = shape_sel;
 		
 		if(stroke_dashed != STROKE_DASHED || stroke_spaces != STROKE_SPACES || stroke_shape_dim != STROKE_SHAPE_DIMENSION || has_changed){
 			STROKE_DASHED = stroke_dashed;
@@ -196,7 +196,7 @@ public class MapInfoControl extends MapControl{
 	    if(STROKE_DASHED==true)
 	 	    paint_stroke.setPathEffect(new DashPathEffect(new float[]{STROKE_SHAPE_DIMENSION,STROKE_SPACES}, 0));
 		
-		if(Shape_Selection.equals(array[0])){
+		if(defaultShapeSelection.equals(array[0])){
 			if(!mapListener.isDragStarted()) return;
 
 			Rectangle r = new Rectangle(canvas);
@@ -205,7 +205,7 @@ public class MapInfoControl extends MapControl{
 			r.draw(paint_stroke);
 		}
 		
-		else if(Shape_Selection.equals(array[1])){
+		else if(defaultShapeSelection.equals(array[1])){
 			if(!mapListener.isDragStarted()) return;
 
 			Circle c = new Circle(canvas);
@@ -214,7 +214,7 @@ public class MapInfoControl extends MapControl{
 			c.draw(paint_stroke);
 			c.drawInfo(mapView, 0);
 		}
-		else if(Shape_Selection.equals(array[2])){
+		else if(defaultShapeSelection.equals(array[2])){
 			if(!oneTapListener.pointsAcquired()) return;
 			
 			Circle c = new Circle(canvas);
@@ -271,16 +271,14 @@ public class MapInfoControl extends MapControl{
 	 * Instantiate listener for selection choosed by user.
 	 */
 	private void instantiateListener(){
-		if(pref.getString("selectionShape", Shape_Selection).equals(array[3]) 
-				&& polygonTapListener == null)
+		String shapeSelection = pref.getString("selectionShape", defaultShapeSelection);
+		if(shapeSelection.equals(array[3]) && polygonTapListener == null){
 			this.polygonTapListener = new PolygonTapListener(mapView,activity);
-		else
-			if(pref.getString("selectionShape", Shape_Selection).equals(array[2])
-					&& oneTapListener == null)
-				this.oneTapListener = new OneTapListener(mapView,activity);
-			else
-				if(this.mapListener == null)
-					this.mapListener = new MapInfoListener(mapView,activity);
+		}else if(shapeSelection.equals(array[2]) && oneTapListener == null){
+			this.oneTapListener = new OneTapListener(mapView,activity);
+		}else if(this.mapListener == null){
+				this.mapListener = new MapInfoListener(mapView,activity);
+		}
 	}
 	
 	/**

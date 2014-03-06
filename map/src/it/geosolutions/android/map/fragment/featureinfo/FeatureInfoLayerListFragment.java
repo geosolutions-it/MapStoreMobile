@@ -95,13 +95,12 @@ public void onCreate(Bundle savedInstanceState) {
     if(query instanceof BBoxQuery){
     	queryQueue = FeatureInfoUtils.createTaskQueryQueue(layers, (BBoxQuery) query, null, 1);
     }
-    else 
-    	if(query instanceof CircleQuery){
-	    	queryQueue = FeatureInfoUtils.createTaskQueryQueue(layers, (CircleQuery) query, null, 1);
-    	}
-    	else{
-        	queryQueue = FeatureInfoUtils.createTaskQueryQueue(layers, (PolygonQuery) query, null, 1);
-    	}
+    else if(query instanceof CircleQuery){
+    	queryQueue = FeatureInfoUtils.createTaskQueryQueue(layers, (CircleQuery) query, null, 1);
+	}
+	else{
+    	queryQueue = FeatureInfoUtils.createTaskQueryQueue(layers, (PolygonQuery) query, null, 1);
+	}
     
     // Initialize loader and callbacks for the parent activity
 
