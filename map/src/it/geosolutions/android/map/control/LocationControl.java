@@ -24,6 +24,8 @@ import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.overlay.Marker;
 import org.mapsforge.android.maps.overlay.MyLocationOverlay;
 
+import eu.geopaparazzi.library.gpx.parser.LocationPoint;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -33,9 +35,11 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
+import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -44,13 +48,17 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 /**
- * Control that manage GeoLocation overlay. * Add and remove the
- * <MyLocationOverlay> on the map. * allow controlling snap to location, using
- * long click. *
+ * Control that manage GeoLocation overlay.
+ * Add and remove the <MyLocationOverlay> on the map.
+ * Allow controlling snap to location, using long click. 
+ * 
+ * NOTE: This control does not receives gps position events
  * 
  * @author Lorenzo Natali (www.geo-solutions.it)
  */
 public class LocationControl extends MapControl implements OnLongClickListener {
+	
+	// MapsForge Overlay to display device position
 MyLocationOverlay overlay = null;
 
 boolean centerAtFirst = false;
@@ -69,7 +77,9 @@ private static final int MESSAGE_SNAP_ACTIVATED = R.string.location_snap_activat
 
 private static final int MESSAGE_SNAP_DEACTIVATED = R.string.location_snap_deactivated_message;
 
-private static final int MESSAGE_PROMPT_GPS_ACTIVATION = R.string.location_promt_gps_acrivation;
+private static final int MESSAGE_PROMPT_GPS_ACTIVATION = R.string.location_promt_gps_activation;
+
+private static final int MESSAGE_NETWORK_LOCATION_AVAILABLE = R.string.location_network_available_message;
 
 private static final String DEFAULT_CONTROL_ID = "LOCATION_CONTROL_STATE";
 
@@ -77,22 +87,39 @@ private static final String ENABLED = "ENABLED";
 
 private static final String SNAP = "SNAP";
 
+/** 
+ * Location provider status 
+ */
+private int locationProviderStatus = LocationProvider.OUT_OF_SERVICE;
+
+/**
+ * Animation for the fixing gps icon
+ */
+AnimationDrawable animation;
+
+
 /**
  * @param view
  */
 public LocationControl(AdvancedMapView view) {
     super(view);
-
+    animation = new AnimationDrawable();
+    animation.addFrame(view.getResources().getDrawable(R.drawable.ic_device_access_location_searching), 500);
+    animation.addFrame(view.getResources().getDrawable(R.drawable.ic_device_access_location_found), 500);
+    animation.setOneShot(false);
 }
 
 @Override
 public void setEnabled(boolean enabled) {
     super.setEnabled(enabled);
 
+    Log.v("Location", "Setting from "+isEnabled()+" to "+enabled);
     if (enabled) {
         // check if GPS is activated
         initMyLocationOverlay();
         addOverlay();
+        locationProviderStatus=LocationProvider.TEMPORARILY_UNAVAILABLE;
+        refreshIcon();
         checkGpsEnabled(true);
     } else {
         if(overlay != null){
@@ -131,10 +158,18 @@ private void initMyLocationOverlay() {
         overlay = new MyLocationOverlay(view.getContext(), (MapView) view,
                 drawable, getDefaultCircleFill(), getDefaultCircleStroke()) {
 
+
+			/*
+        	 * TODO: JAVADOC (non-Javadoc)
+        	 * @see org.mapsforge.android.maps.overlay.MyLocationOverlay#onLocationChanged(android.location.Location)
+        	 */
             @Override
             public void onLocationChanged(Location location) {
                 try{
                     super.onLocationChanged(location);
+                    Log.v("LOCATION","Location changed, setting AVAILABLE");
+                    locationProviderStatus = LocationProvider.AVAILABLE;
+                    refreshIcon();
                 }catch(IllegalStateException e){
                     //avoid exception and centering the map
                     Log.w("LOCATION","problem during map redraw");
@@ -142,36 +177,59 @@ private void initMyLocationOverlay() {
 
             }
 
+        	/*
+        	 * TODO: JAVADOC (non-Javadoc)
+        	 * @see org.mapsforge.android.maps.overlay.MyLocationOverlay#onLocationChanged(android.location.Location)
+        	 */
             @Override
             public void onProviderDisabled(String provider) {
                 super.onProviderDisabled(provider);
                 if (isEnabled()) {
-                    Log.v("LOCATION", "provider disabled:" + provider);
+                    Log.v("LOCATION", "provider disabled: " + provider);
                     enableMyLocation(false);
+                    // TODO: better management of this short lived object
+                    LocationManager locationManager = (LocationManager) view.getContext().getSystemService(Activity.LOCATION_SERVICE);
+                    if (  !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+                       && !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    	locationProviderStatus = LocationProvider.OUT_OF_SERVICE;
+                    } else{
+                    	// TODO check confidence
+                    	locationProviderStatus = LocationProvider.TEMPORARILY_UNAVAILABLE;
+                    }
+
                     refreshStatus();
                 }
 
             }
 
+        	/*
+        	 * TODO: JAVADOC (non-Javadoc)
+        	 * @see org.mapsforge.android.maps.overlay.MyLocationOverlay#onLocationChanged(android.location.Location)
+        	 */
             @Override
             public void onProviderEnabled(String provider) {
                 super.onProviderEnabled(provider);
                 if (isEnabled()) {
                     enableMyLocation(false);
                     enableMyLocation(true);
-                    
-                    Log.v("LOCATION", "provider enabled:" + provider);
+                    locationProviderStatus = LocationProvider.TEMPORARILY_UNAVAILABLE;
+                    Log.v("LOCATION", "provider enabled: " + provider);
                     refreshStatus();
                 }
 
             }
 
+        	/*
+        	 * TODO: JAVADOC (non-Javadoc)
+        	 * @see org.mapsforge.android.maps.overlay.MyLocationOverlay#onLocationChanged(android.location.Location)
+        	 */
             @Override
-            public void onStatusChanged(String provider, int status,
-                    Bundle extras) {
+            public void onStatusChanged(String provider, int status, Bundle extras) {
                 super.onStatusChanged(provider, status, extras);
                 if (isEnabled()) {
                     enableMyLocation(false);
+                    Log.v("LOCATION","Status changed, setting "+status);
+                    locationProviderStatus = status;
                     refreshStatus();
                 }
 
@@ -251,34 +309,60 @@ private int refreshIcon() {
 
     int currentStatus = previousStatus;
     if (!isEnabled()) {
+    	// Location is turned off
         currentStatus = MESSAGE_DEACTIVATED;
+		animation.stop();
         activationButton
                 .setImageResource(R.drawable.ic_device_access_location_searching);
     } else if (overlay == null) {
-        currentStatus = 0;
-        activationButton
-                .setImageResource(R.drawable.ic_device_access_location_searching);
+    	// Location is turned on but no overlay is found
+    	Log.w("LOCATION", "Location is turned on but no overlay is found");
+    	currentStatus = 0;
+		animation.stop();
+        activationButton.setImageResource(R.drawable.ic_device_access_location_off);
     } else if (overlay.isMyLocationEnabled()) {
-        if (overlay.isSnapToLocationEnabled()) {
-            activationButton
-                    .setImageResource(R.drawable.ic_device_access_location_found);
-
-        } else {
-            activationButton
-                    .setImageResource(R.drawable.ic_device_access_location_searching);
-        }
-        // my location unavailable
+        // Check LocationProvider status
+    	switch (locationProviderStatus) {
+		case LocationProvider.OUT_OF_SERVICE:
+			animation.stop();
+			activationButton.setImageResource(R.drawable.ic_device_access_location_off);
+			break;
+		case LocationProvider.TEMPORARILY_UNAVAILABLE:
+			// TODO: start animation
+            Log.v("LOCATION","This should be blinking now");
+			activationButton.setImageDrawable(animation);
+			animation.start();
+			break;
+		case LocationProvider.AVAILABLE:
+			animation.stop();
+	    	if (overlay.isSnapToLocationEnabled()) {
+	        	// TODO: change icon with a different one
+	        	activationButton.setImageResource(R.drawable.ic_device_access_location_found);
+	        } else {
+	            activationButton.setImageResource(R.drawable.ic_device_access_location_found);
+	        }
+	    	break;
+		default:
+			animation.stop();
+			Log.w("LOCATION", "LocationProviderStatus is "+locationProviderStatus+" but value does not means anything");
+			break;
+		}
+    	
+      // my location unavailable
     } else {
         currentStatus = MESSAGE_UNAVAILABLE;
-        activationButton
-                .setImageResource(R.drawable.ic_device_access_location_off);
+        Log.v("LOCATION","MESSAGE_UNAVAILABLE");
+        activationButton.setImageResource(R.drawable.ic_device_access_location_off);
 
     }
+    /*
+     * Why a view method act as a control method?
     if(isEnabled()){
         activationButton.setSelected(true);
     }else{
         activationButton.setSelected(false);
     }
+    */
     return currentStatus;
 
 }
@@ -367,30 +451,41 @@ private void buildAlertMessageNoGps(final boolean enable) {
                         public void onClick(final DialogInterface dialog,
                                 final int id) {
                             Context c = view.getContext();
+                            
+                            // TODO: use startActivityForResult
+                            // Can't use startactivityforResult because this is not an activity
                             c.startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
 
-                            setEnabled(false);
+                            overlay.enableMyLocation(true);
                             // activationButton.setSelected(false);
-                            refreshIcon();
+                            
+                            // TODO: set a timer or an onActivityResult
+                            //refreshIcon();
                         }
                     })
             // the negative button event
             .setNegativeButton(android.R.string.no,
                     new DialogInterface.OnClickListener() {
-                        public void onClick(final DialogInterface dialog,
-                                final int id) {
+                        public void onClick(final DialogInterface dialog, final int id) {
+                        	
                             dialog.cancel();
                             if(enable){
-                                overlay.enableMyLocation(false);
+                                overlay.enableMyLocation(true);
                             }
-                            if (!overlay.isMyLocationEnabled()) {
-                                sendMessageIfNeeded(MESSAGE_UNAVAILABLE);
+                            // TODO: better management of this short lived object
+                            LocationManager locationManager = (LocationManager) view.getContext().getSystemService(Activity.LOCATION_SERVICE);
+                            if (!locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                            	locationProviderStatus = LocationProvider.OUT_OF_SERVICE;
+                            	sendMessageIfNeeded(MESSAGE_UNAVAILABLE);
+                            } else{
+                            	locationProviderStatus = LocationProvider.TEMPORARILY_UNAVAILABLE;
+                                if (!overlay.isMyLocationEnabled()) {
+                                    sendMessageIfNeeded(MESSAGE_UNAVAILABLE);
 
-                            } else {
-                                int currentStatus = overlay
-                                        .isSnapToLocationEnabled() ? MESSAGE_SNAP_ACTIVATED
-                                        : MESSAGE_ACTIVATED;
-                                sendMessageIfNeeded(currentStatus);
+                                } else {
+                                    int currentStatus = overlay.isSnapToLocationEnabled() ? MESSAGE_SNAP_ACTIVATED : MESSAGE_NETWORK_LOCATION_AVAILABLE;
+                                    sendMessageIfNeeded(currentStatus);
+                                }
                             }
                             refreshIcon();
 
@@ -444,11 +539,13 @@ public void saveState(Bundle savedInstanceState) {
     }
    
     savedInstanceState.putBundle(id, b);
+    Log.d("LOCATION", "State saved");
 }
 
 @Override
 public void restoreState(Bundle savedInstanceState) {
     super.restoreState(savedInstanceState);
+    Log.d("LOCATION", "State restored");
     if(savedInstanceState==null){
         return;
     }
@@ -460,12 +557,22 @@ public void restoreState(Bundle savedInstanceState) {
         setSnap(b.getBoolean(SNAP,false));
         restoring = false;
     }
-    
+
 }
 
 @Override
 public void refreshControl(int requestCode, int resultCode, Intent data) {
-	// TODO Auto-generated method stub
-	
+    Log.d("LOCATION", "Resfreshing control");
+    if(isEnabled()){
+        LocationManager locationManager = (LocationManager) view.getContext().getSystemService(Activity.LOCATION_SERVICE);
+        if (  !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+           && !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+        	locationProviderStatus = LocationProvider.OUT_OF_SERVICE;
+        } else{
+        	// TODO check confidence
+        	locationProviderStatus = LocationProvider.TEMPORARILY_UNAVAILABLE;
+        }
+        refreshStatus();
+    }
 }
 }
