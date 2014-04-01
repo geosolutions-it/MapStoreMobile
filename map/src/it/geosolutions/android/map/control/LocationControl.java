@@ -328,7 +328,6 @@ private int refreshIcon() {
 			activationButton.setImageResource(R.drawable.ic_device_access_location_off);
 			break;
 		case LocationProvider.TEMPORARILY_UNAVAILABLE:
-			// TODO: start animation
             Log.v("LOCATION","This should be blinking now");
 			activationButton.setImageDrawable(animation);
 			animation.start();
@@ -458,8 +457,7 @@ private void buildAlertMessageNoGps(final boolean enable) {
 
                             overlay.enableMyLocation(true);
                             // activationButton.setSelected(false);
-                            
-                            // TODO: set a timer or an onActivityResult
+
                             //refreshIcon();
                         }
                     })
@@ -477,6 +475,7 @@ private void buildAlertMessageNoGps(final boolean enable) {
                             if (!locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
                             	locationProviderStatus = LocationProvider.OUT_OF_SERVICE;
                             	sendMessageIfNeeded(MESSAGE_UNAVAILABLE);
+                            	// TODO: disable button?
                             } else{
                             	locationProviderStatus = LocationProvider.TEMPORARILY_UNAVAILABLE;
                                 if (!overlay.isMyLocationEnabled()) {
@@ -563,6 +562,8 @@ public void restoreState(Bundle savedInstanceState) {
 @Override
 public void refreshControl(int requestCode, int resultCode, Intent data) {
     Log.d("LOCATION", "Resfreshing control");
+    // I cannot use the result of the "enable gps" activity 
+    // so I re-set the icon each time the control is refreshed
     if(isEnabled()){
         LocationManager locationManager = (LocationManager) view.getContext().getSystemService(Activity.LOCATION_SERVICE);
         if (  !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
