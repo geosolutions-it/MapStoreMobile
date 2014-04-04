@@ -24,8 +24,6 @@ import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.overlay.Marker;
 import org.mapsforge.android.maps.overlay.MyLocationOverlay;
 
-import eu.geopaparazzi.library.gpx.parser.LocationPoint;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -42,8 +40,10 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnLongClickListener;
+import android.view.View.OnTouchListener;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -56,7 +56,7 @@ import android.widget.Toast;
  * 
  * @author Lorenzo Natali (www.geo-solutions.it)
  */
-public class LocationControl extends MapControl implements OnLongClickListener {
+public class LocationControl extends MapControl implements OnLongClickListener, OnTouchListener {
 	
 	// MapsForge Overlay to display device position
 MyLocationOverlay overlay = null;
@@ -77,7 +77,7 @@ private static final int MESSAGE_SNAP_ACTIVATED = R.string.location_snap_activat
 
 private static final int MESSAGE_SNAP_DEACTIVATED = R.string.location_snap_deactivated_message;
 
-private static final int MESSAGE_PROMPT_GPS_ACTIVATION = R.string.location_promt_gps_activation;
+private static final int MESSAGE_PROMPT_POSITION_ACCESS = R.string.location_promt_position_permission;
 
 private static final int MESSAGE_NETWORK_LOCATION_AVAILABLE = R.string.location_network_available_message;
 
@@ -91,6 +91,8 @@ private static final String SNAP = "SNAP";
  * Location provider status 
  */
 private int locationProviderStatus = LocationProvider.OUT_OF_SERVICE;
+
+public Location lastLocation;
 
 /**
  * Animation for the fixing gps icon
@@ -109,22 +111,28 @@ public LocationControl(AdvancedMapView view) {
     animation.setOneShot(false);
 }
 
+/**
+ * Called when control status changes
+ */
 @Override
 public void setEnabled(boolean enabled) {
     super.setEnabled(enabled);
 
-    Log.v("Location", "Setting from "+isEnabled()+" to "+enabled);
+    Log.v("Location", "Setting to "+enabled);
     if (enabled) {
         // check if GPS is activated
         initMyLocationOverlay();
-        addOverlay();
+        //addOverlay();
         locationProviderStatus=LocationProvider.TEMPORARILY_UNAVAILABLE;
+        checkLocationEnabled(true);
+        if(lastLocation != null){
+        	overlay.onLocationChanged(lastLocation);
+        }
         refreshIcon();
-        checkGpsEnabled(true);
     } else {
         if(overlay != null){
             overlay.disableMyLocation();
-            // removeOverlay();
+            //removeOverlay();
             setSnap(false);
             int currentStatus = MESSAGE_DEACTIVATED;
             sendMessageIfNeeded(currentStatus);
@@ -133,7 +141,7 @@ public void setEnabled(boolean enabled) {
         }
         
     }
-
+    activationButton.setSelected(false);
 }
 
 /**
@@ -167,6 +175,7 @@ private void initMyLocationOverlay() {
             public void onLocationChanged(Location location) {
                 try{
                     super.onLocationChanged(location);
+                    lastLocation = location;
                     Log.v("LOCATION","Location changed, setting AVAILABLE");
                     locationProviderStatus = LocationProvider.AVAILABLE;
                     refreshIcon();
@@ -235,7 +244,8 @@ private void initMyLocationOverlay() {
 
             }
         };
-
+        // If overlay is correctly created, add to the map
+        addOverlay();
     }
 
 }
@@ -261,6 +271,7 @@ public void draw(Canvas canvas) {
 @Override
 public void setActivationButton(ImageButton imageButton) {
     super.setActivationButton(imageButton);
+    super.setMapListener(this);
     imageButton.setLongClickable(true);
     imageButton.setOnLongClickListener(this);
 }
@@ -272,14 +283,18 @@ public void setActivationButton(ImageButton imageButton) {
 @Override
 public boolean onLongClick(View view) {
     // if the control is not enable, enable it and set snapToLocation
+	
+	// TODO: higlight button as pressed
     if (isEnabled() && overlay.isMyLocationEnabled()) {
         toggleSnap();
         int currentStatus = overlay.isSnapToLocationEnabled() ? MESSAGE_SNAP_ACTIVATED
                 : MESSAGE_SNAP_DEACTIVATED;
         sendMessageIfNeeded(currentStatus);
+        activationButton.setSelected(true);
         refreshIcon();
         return true;
     }
+    activationButton.setSelected(false);
     return false;
 }
 
@@ -334,12 +349,7 @@ private int refreshIcon() {
 			break;
 		case LocationProvider.AVAILABLE:
 			animation.stop();
-	    	if (overlay.isSnapToLocationEnabled()) {
-	        	// TODO: change icon with a different one
-	        	activationButton.setImageResource(R.drawable.ic_device_access_location_found);
-	        } else {
-	            activationButton.setImageResource(R.drawable.ic_device_access_location_found);
-	        }
+			activationButton.setImageResource(R.drawable.ic_device_access_location_found);
 	    	break;
 		default:
 			animation.stop();
@@ -362,6 +372,7 @@ private int refreshIcon() {
         activationButton.setSelected(false);
     }
     */
+	activationButton.setSelected(overlay.isSnapToLocationEnabled());
     return currentStatus;
 
 }
@@ -404,22 +415,23 @@ private static Paint getPaint(Style style, int color, int alpha) {
  * about the activation
  * @param b 
  */
-private void checkGpsEnabled(boolean enable) {
-    LocationManager locationManager = (LocationManager) view.getContext()
-            .getSystemService(Activity.LOCATION_SERVICE);
+private void checkLocationEnabled(boolean enable) {
+    LocationManager locationManager = (LocationManager) view.getContext().getSystemService(Activity.LOCATION_SERVICE);
 
-    if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-        buildAlertMessageNoGps(enable);
+    if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) &&
+    	!locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+    	
+        buildAlertMessageNoLocation(enable);
 
     } else {
-        // is present gps so just activate
+        // if a location provider is enabled, activate the location overlay
         if(enable){
             overlay.enableMyLocation(centerAtFirst);
         }
         if (overlay.isMyLocationEnabled()) {
-
-            int currentStatus = overlay.isSnapToLocationEnabled() ? MESSAGE_SNAP_ACTIVATED
-                    : MESSAGE_ACTIVATED;
+        	// default snap on click
+        	setSnap(true);
+            int currentStatus = overlay.isSnapToLocationEnabled() ? MESSAGE_SNAP_ACTIVATED : MESSAGE_ACTIVATED;
             sendMessageIfNeeded(currentStatus);
         }
     }
@@ -428,21 +440,19 @@ private void checkGpsEnabled(boolean enable) {
 }
 
 /**
- * Create a dialog to ask the user if he wants to activate GPS. If the user
- * choose to activate the GPS, the control is disabled and the location source
- * setting window of the system is opened If the user don't want, the button
- * will be enabled try to enable the control. If no provider is available, the
- * tool will be disabled
+ * Create a dialog to ask the user if he wants to activate a location provider. 
+ * If the user agree, the control is disabled and the location source
+ * setting window of the system is opened 
+ * If no provider is available, the tool will be disabled
  * @param enable 
  */
-private void buildAlertMessageNoGps(final boolean enable) {
+private void buildAlertMessageNoLocation(final boolean enable) {
     if(restoring){
         overlay.enableMyLocation(enable);
         return;
     }
-    final AlertDialog.Builder builder = new AlertDialog.Builder(
-            view.getContext());
-    builder.setMessage(MESSAGE_PROMPT_GPS_ACTIVATION)
+    final AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+    builder.setMessage(MESSAGE_PROMPT_POSITION_ACCESS)
             .setCancelable(false)
             // the positive button event
             .setPositiveButton(android.R.string.yes,
@@ -470,6 +480,7 @@ private void buildAlertMessageNoGps(final boolean enable) {
                             if(enable){
                                 overlay.enableMyLocation(true);
                             }
+                            // TODO: This part is not needed
                             // TODO: better management of this short lived object
                             LocationManager locationManager = (LocationManager) view.getContext().getSystemService(Activity.LOCATION_SERVICE);
                             if (!locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
@@ -559,6 +570,7 @@ public void restoreState(Bundle savedInstanceState) {
 
 }
 
+
 @Override
 public void refreshControl(int requestCode, int resultCode, Intent data) {
     Log.d("LOCATION", "Resfreshing control");
@@ -576,4 +588,20 @@ public void refreshControl(int requestCode, int resultCode, Intent data) {
         refreshStatus();
     }
 }
+
+
+@Override
+public boolean onTouch(View v, MotionEvent event) {
+	// Disable the button on map move
+	if(event.getAction() == MotionEvent.ACTION_MOVE){
+		if(overlay.isSnapToLocationEnabled()){
+			// reset Toast message 
+			previousStatus = 0;
+			setSnap(false);
+			refreshStatus();
+		}
+	}
+	return false;
+}
+
 }
