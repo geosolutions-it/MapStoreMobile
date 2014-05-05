@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android" >
     <color name="drawer_item_selected">#A06EADFF</color> 
+	<!-- Geopaparazzi Libraary values -->
+	
+	<color name="main_background">#FFFFFF</color>
+	<color name="main_text_color_neutral">#000000</color>
+	
 </resources>

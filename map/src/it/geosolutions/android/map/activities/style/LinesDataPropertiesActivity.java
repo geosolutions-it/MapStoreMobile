@@ -54,7 +54,7 @@ public class LinesDataPropertiesActivity extends BaseStyleActivity {
     public void onCreate( Bundle icicle ) {
         super.onCreate(icicle);
 
-        setContentView(R.layout.data_line_properties);
+        setContentView(R.layout.map_data_line_properties);
         final AdvancedStyle style = getStyle();
         setBaseStyleProperties(style);
 		colorSelStroke = Color.parseColor(style.strokecolor); //Set default color by the strokecolor attribute of style.

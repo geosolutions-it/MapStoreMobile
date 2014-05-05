@@ -139,14 +139,14 @@ public class SpatialiteLayerListActivity extends SherlockListActivity {
             e.printStackTrace();
         }
 
-        ArrayAdapter<SpatialVectorTable> arrayAdapter = new ArrayAdapter<SpatialVectorTable>(this, R.layout.data_row, spatialTables){
+        ArrayAdapter<SpatialVectorTable> arrayAdapter = new ArrayAdapter<SpatialVectorTable>(this, R.layout.map_data_row, spatialTables){
             @Override
             public View getView( final int position, View cView, ViewGroup parent ) {
                 View rowView = cView;
                 ViewHolder holder; // to reference the child views for later actions
                 if (rowView == null){
                     LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    rowView = inflater.inflate(R.layout.data_row, null);
+                    rowView = inflater.inflate(R.layout.map_data_row, null);
                     holder = new ViewHolder();
                     holder.legend = (ImageView)rowView.findViewById(R.id.legend);
                     holder.nameView = (TextView) rowView.findViewById(R.id.name);

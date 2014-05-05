@@ -105,7 +105,7 @@ public class MapStoreLayerListActivity extends SherlockListActivity {
         //replace the current 
         mapStoreConfig.map.layers = valid;
         
-    	ArrayAdapter<MapStoreLayer> arrayAdapter = new ArrayAdapter<MapStoreLayer>(this, R.layout.data_row,mapStoreConfig.map.layers){
+    	ArrayAdapter<MapStoreLayer> arrayAdapter = new ArrayAdapter<MapStoreLayer>(this, R.layout.map_data_row,mapStoreConfig.map.layers){
             @Override
             public View getView( final int position, View cView, ViewGroup parent ) {
                 View rowView = cView;

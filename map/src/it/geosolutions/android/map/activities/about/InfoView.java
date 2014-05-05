@@ -18,7 +18,7 @@ public class InfoView extends SherlockActivity {
 		@Override
         protected void onCreate(Bundle savedInstanceState) {
                 super.onCreate(savedInstanceState);
-                setContentView(R.layout.about);
+                setContentView(R.layout.map_about);
                 setTitle(R.string.about_mapstore);
                 mWebView = (WebView) findViewById(R.id.webview);
                 mWebView.getSettings().setJavaScriptEnabled(true);

@@ -56,7 +56,7 @@ public class PolygonsDataPropertiesActivity extends BaseStyleActivity {
 
     public void onCreate( Bundle icicle ) {
         super.onCreate(icicle);
-        setContentView(R.layout.data_polygon_properties);
+        setContentView(R.layout.map_data_polygon_properties);
         final AdvancedStyle style = getStyle();
         setBaseStyleProperties(style);
       

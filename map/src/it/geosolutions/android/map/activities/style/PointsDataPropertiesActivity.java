@@ -60,7 +60,7 @@ public class PointsDataPropertiesActivity extends BaseStyleActivity /*implements
     public void onCreate( Bundle icicle ) {
         super.onCreate(icicle);
 
-        setContentView(R.layout.data_point_properties);
+        setContentView(R.layout.map_data_point_properties);
         style = getStyle();
         setBaseStyleProperties(style);
         
