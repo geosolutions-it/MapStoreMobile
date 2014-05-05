@@ -17,6 +17,6 @@
 	<string name="location_activated_message">Location control activated. Long press on the button to make the map to follow your location.</string>
 	<string name="location_snap_activated_message">now the map will follow your position</string>
 	<string name="location_snap_deactivated_message">follow mode deactivated</string>
-	<string name="location_promt_gps_activation">GPS is not active. Do you want to activate it?</string>
+	<string name="location_promt_position_permission">Access to position is disabled. Do you want to enable it?</string>
 	<string name="location_network_available_message">Location control activated with network. Long press on the button to make the map to follow your location.</string>
 </resources>

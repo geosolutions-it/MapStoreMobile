@@ -17,6 +17,6 @@
 	<string name="location_activated_message">Localizzazione sulla mappa attivata.\nPremi a lungo il pulsante per agganciare la mappa alla tua posizione.</string>
 	<string name="location_snap_activated_message">Adesso la mappa seguirà la tua posizione</string>
 	<string name="location_snap_deactivated_message">Modalità di inseguimento della posizione disattivate</string>
-	<string name="location_promt_gps_activation">Il Ricevitore GPS è disattivato. Vuoi attivarlo?</string>
+	<string name="location_promt_position_permission">L\'accesso alla posizione è disattivato. Vuoi attivarla?</string>
 	<string name="location_network_available_message">Localizzazione tramite network attivata.\nPremi a lungo il pulsante per agganciare la mappa alla tua posizione.</string>
 </resources>
