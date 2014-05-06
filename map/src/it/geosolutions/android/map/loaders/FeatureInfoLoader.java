@@ -138,7 +138,7 @@ public void deliverResult(List<FeatureInfoQueryResult> data) {
 }
 
 // ********************************************************/
-// ** Implement the Loader’s state-dependent behavior **/
+// ** Implement the Loader's state-dependent behavior **/
 // ********************************************************/
 @Override
 protected void onStartLoading() {
