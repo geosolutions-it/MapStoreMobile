@@ -30,3 +30,6 @@ proguard/
 
 # Windows
 Thumbs.db
+#Maven targed dir 
+**/target/*
+**/target/**
