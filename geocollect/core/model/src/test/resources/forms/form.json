@@ -1,0 +1,16 @@
+{
+	"id": 1,
+	"name": "SampleForm",
+	"pages":[{
+			"title": "Scheda",
+			"iconCls":"not_supported_yet",
+			fields:[{
+				"fieldId": "DATA_SCHEDA",
+				"type":"text",
+				"xtype":"datePicker",
+				"label":"Data Scheda"
+			}]
+				
+	}],
+	"submitURL": "http://sample.com"
+}
