@@ -196,7 +196,7 @@ public class MarkerControl extends MapControl implements OnTouchListener, OnGest
 	 * wrap selecting one marker at time
 	 * @param dm
 	 */
-	private void selectMarker(DescribedMarker dm) {
+	public void selectMarker(DescribedMarker dm) {
 		if(selectedMarker !=null){
 			selectedMarker.highlightOff();
 		}
@@ -327,7 +327,8 @@ public class MarkerControl extends MapControl implements OnTouchListener, OnGest
 		// TODO Auto-generated method stub
 		super.setEnabled(enabled);
 		if(enabled){
-			Toast.makeText(view.getContext(), R.string.map_marker_enable_suggestion, Toast.LENGTH_LONG).show();
+			//this message is on creation, it should not be shown when create, but when display the map
+			//Toast.makeText(view.getContext(), R.string.map_marker_enable_suggestion, Toast.LENGTH_LONG).show();
 		}else{
 			if(view.getMarkerOverlay()!=null){
 			    view.getMarkerOverlay().resetHighlight();

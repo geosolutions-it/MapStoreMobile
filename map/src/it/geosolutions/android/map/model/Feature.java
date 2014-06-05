@@ -67,4 +67,7 @@ public class Feature extends ArrayList<Attribute> implements Serializable{
 		this.geometry = geometry;
 		
 	}
+	public String getDefaultGeometryProperty(){
+		return "the_geom";
+	}
 }

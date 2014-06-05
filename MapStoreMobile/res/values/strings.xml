@@ -2,4 +2,5 @@
 <resources>
     <string  translatable="false" name="app_name">MapStore</string>
     <string  translatable="false" name="title_activity_startup">StartupActivity</string>
+    <string  translatable="false" name="start_pack_url"></string>
 </resources>

@@ -50,11 +50,11 @@ public class ZipFileManager {
 	 * @param activity
 	 * @param dir_path
 	 */
-	public ZipFileManager(final Activity activity, final String dir_path){
+	public ZipFileManager(final Activity activity, final String dir_path,String dest_dir,String url){
 		this.activity = activity;
 		
 		//Check if folder of data already exists, otherwise it will be downloaded and unzipped.
-		File f = new File(dir_path+"/mapstore");
+		File f = new File(dir_path+dest_dir);
 		if(!f.isDirectory()){
 			AlertDialog.Builder download_dialog_builder;
 			download_dialog_builder = new AlertDialog.Builder(activity);

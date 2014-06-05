@@ -17,12 +17,15 @@
  */
 package it.geosolutions.android.mapstoremobile;
 
+import it.geosolutions.android.map.MapsActivity;
 import it.geosolutions.android.map.utils.ZipFileManager;
 
 import java.io.File;
+
 import android.os.Bundle;
 import android.os.Environment;
 import android.app.Activity;
+import android.content.Intent;
 
 /**
  * Startup activity loaded when launch mapstore mobile, download a data sample
@@ -42,7 +45,26 @@ public class StartupActivity extends Activity {
 		setContentView(R.layout.activity_startup);	
 		
 		dir_path = Environment.getExternalStorageDirectory().getPath();
-		ZipFileManager zfm = new ZipFileManager(this,dir_path);
+		ZipFileManager zfm = new ZipFileManager(this,dir_path,"/mapstore",getResources().getString(R.string.start_pack_url)){
+			@Override
+			public void launchMainActivity(){
+				Intent launch = new Intent(activity,MapsActivity.class);
+				launch.setAction(Intent.ACTION_VIEW);
+				launch.putExtra(MapsActivity.PARAMETERS.LAT, 43.68411);
+				launch.putExtra(MapsActivity.PARAMETERS.LON, 10.84899);
+				launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL, (byte)13);
+				//For the future, passing a marker
+				/*ArrayList<MarkerDTO> markers = new ArrayList(1);
+				MarkerDTO markerDTO1 = new MarkerDTO(43.7242359188,10.9463005959, MarkerDTO.MARKER_RED); 
+				markerDTO1.setId("AB123456789");
+				markerDTO1.setDescription("Segnalazione 1");
+				boolean add = markers.add(markerDTO1);
+				launch.putParcelableArrayListExtra(MapsActivity.PARAMETERS.MARKERS, markers);*/
+				
+				activity.startActivity(launch);
+				activity.finish();
+			}
+		};
 	}
 	
 	/**

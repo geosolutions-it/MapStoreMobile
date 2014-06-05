@@ -31,7 +31,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import eu.geopaparazzi.library.R;
 import eu.geopaparazzi.library.forms.FragmentDetail;
-import eu.geopaparazzi.library.nfc.NfcIdReaderActivity;
 import eu.geopaparazzi.library.util.LibraryConstants;
 
 /**
@@ -101,16 +100,7 @@ public class GNfcUidView extends View implements GView {
         uidText.setKeyListener(null);
         textLayout.addView(uidText);
 
-        button.setOnClickListener(new View.OnClickListener(){
-            public void onClick( View v ) {
-                Intent nfcIntent = new Intent(activity, NfcIdReaderActivity.class);
-                if (fragmentDetail != null) {
-                    fragmentDetail.startActivityForResult(nfcIntent, requestCode);
-                } else {
-                    activity.startActivityForResult(nfcIntent, requestCode);
-                }
-            }
-        });
+        
     }
 
     public String getValue() {
