@@ -7,7 +7,7 @@
   <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>MapStoreMobile main pom</name>
+  <name>MapStoreMobile Container</name>
 
   <modules>
     <module>AmbilWarna</module>
@@ -15,6 +15,7 @@
     <module>geopaparazzi/geopaparazzispatialitelibrary</module>
     <module>mapsforge</module>
     <module>map</module>
+	<module>geocollect</module>
     <module>MapStoreMobile</module>
   </modules>
 
@@ -23,12 +24,12 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <android.version>4.0.3_r3</android.version>
         <android.platform>19</android.platform>
-        <maven.android.plugin.version>3.9.0-SNAPSHOT</maven.android.plugin.version>
+        <maven.android.plugin.version>3.9.0-rc.2</maven.android.plugin.version>
   </properties>
 
   <dependencies>
 	<dependency>
-		<groupId>com.google.android</groupId>
+		<groupId>android</groupId>
 		<artifactId>android</artifactId>
 		<version>${android.version}</version>
 		<scope>provided</scope>

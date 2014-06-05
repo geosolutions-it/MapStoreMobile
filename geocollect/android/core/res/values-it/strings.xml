@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">GeoCollect</string>
+    <string name="action_settings">Impostazioni</string>
+    <string name="title_pendingmission_list">Missioni in sospeso</string>
+    <string name="title_pendingmission_detail">Dettaglio missione</string>
+	<string name="reporting">Segnalazioni</string>
+	<string name="map">Mappa</string>
+	<string name="accept_mission">Accetta</string>
+</resources>
