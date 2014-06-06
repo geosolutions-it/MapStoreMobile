@@ -17,7 +17,11 @@
  */
 package it.geosolutions.geocollect.android.core.mission;
 
+import org.mapsforge.android.maps.MapActivity;
+import org.mapsforge.android.maps.MapView;
+
 import it.geosolutions.android.map.MapsActivity;
+import it.geosolutions.android.map.view.MapViewManager;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.mission.utils.NavUtils;
@@ -27,10 +31,12 @@ import it.geosolutions.geocollect.android.core.navigation.NavDrawerAdapter;
 import it.geosolutions.geocollect.android.core.navigation.NavDrawerItem;
 import it.geosolutions.geocollect.android.core.preferences.GeoCollectPreferences;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 
@@ -51,7 +57,7 @@ import android.widget.ListView;
  * selections.
  */
 public class PendingMissionListActivity extends AbstractNavDrawerActivity implements
-		PendingMissionListFragment.Callbacks {
+		PendingMissionListFragment.Callbacks , MapActivity{
 
 	/**
 	 * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -59,6 +65,10 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 	 */
 	private boolean mTwoPane;
 	
+	/**
+	 * Manage mapviews (two pane mode
+	 */
+	MapViewManager mapViewManager = new MapViewManager();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +100,8 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 	@Override
 	public void onItemSelected(Object obj) {
 		if (mTwoPane) {
+			//DELETE PREVIOUS MAP VIEWS
+			mapViewManager.destroyMapViews();
 			// In two-pane mode, show the detail view in this activity by
 			// adding or replacing the detail fragment using a
 			// fragment transaction.
@@ -192,6 +204,38 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 	     .show();
     }
     
-    
+    // **********************************************
+    // *********MAP VIEWS MANAGEMENT      ***********
+    // **********************************************
+    /**
+	 * @return a unique MapView ID on each call.
+	 */
+	public final int getMapViewId() {
+		if(this.mapViewManager==null){
+			//registration auto creates mapViewManager
+			this.mapViewManager =new MapViewManager();
+		}
+		int i = this.mapViewManager.getMapViewId();
+		Log.v("MAPVIEW","created mapview with id:"+i);
+		return i;
+	}
+
+	/**
+	 * This method is called once by each MapView during its setup process.
+	 * 
+	 * @param mapView
+	 *            the calling MapView.
+	 */
+	public final void registerMapView(MapView mapView) {
+		if(this.mapViewManager==null){
+			//registration auto creates mapViewManager
+			this.mapViewManager =new MapViewManager();
+		}
+		this.mapViewManager.registerMapView(mapView);
+	}
+	
+	public Context getActivityContext(){
+		return this;
+	}
 	
 }
