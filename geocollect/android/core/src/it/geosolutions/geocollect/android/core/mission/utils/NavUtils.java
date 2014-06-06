@@ -30,12 +30,12 @@ import android.app.Activity;
 public class NavUtils {
 	public static NavDrawerItem[] getNavMenu(Activity app){
 		return new NavDrawerItem[] {
-                NavMenuSection.create( 100, "Missions"),//TODO translate
+                NavMenuSection.create( 100, app.getString(R.string.action_mission)),//TODO translate
                 NavMenuItem.create(101,app.getString(R.string.reporting), "ic_collections_view_as_list", false, app),
                 NavMenuItem.create(102, app.getString(R.string.map), "ic_location_map", true, app), 
-                NavMenuSection.create(200, "General"),
-                NavMenuItem.create(203, "Preferences", "ic_action_settings", false, app), 
-                NavMenuItem.create(204, "Quit", "navdrawer_quit", false, app)};
+                NavMenuSection.create(200,app.getString(R.string.general)),
+                NavMenuItem.create(203, app.getString(R.string.action_settings), "ic_action_settings", false, app), 
+                NavMenuItem.create(204, app.getString(R.string.action_quit), "ic_navigation_quit_light", false, app)};
 		
 	}
 }

@@ -55,7 +55,8 @@ public class MissionUtils {
 	 */
 	public static Loader<List<Feature>> createMissionLoader(
 			MissionTemplate missionTemplate,SherlockFragmentActivity a, int page, int pagesize) {
-		return new WFSGeoJsonFeatureLoader(a,missionTemplate.source.URL,null, missionTemplate.source.typeName,page,pagesize);
+		
+		return new WFSGeoJsonFeatureLoader(a,missionTemplate.source.URL,missionTemplate.source.baseParams, missionTemplate.source.typeName,page*pagesize+1,pagesize);
 	}
 	
 	/**

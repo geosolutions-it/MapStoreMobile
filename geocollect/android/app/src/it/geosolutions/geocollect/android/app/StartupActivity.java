@@ -21,6 +21,7 @@ package it.geosolutions.geocollect.android.app;
 import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.android.map.utils.ZipFileManager;
 import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
+import it.geosolutions.geocollect.android.core.mission.PendingMissionListFragment;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -49,6 +50,8 @@ public class StartupActivity extends Activity {
  			@Override
  			public void launchMainActivity(){
  				Intent launch = new Intent(activity, PendingMissionListActivity.class);
+ 				//TODO remove it when using a WFS or a database
+ 				launch.putExtra(PendingMissionListFragment.INFINITE_SCROLL,false);
  				activity.startActivity(launch);
  				activity.finish();
  			}

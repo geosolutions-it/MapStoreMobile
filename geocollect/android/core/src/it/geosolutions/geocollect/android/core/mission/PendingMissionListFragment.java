@@ -19,12 +19,14 @@ package it.geosolutions.geocollect.android.core.mission;
 
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.R;
+import it.geosolutions.geocollect.android.core.form.FormEditActivity;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 
 import java.util.List;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -40,6 +42,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockListFragment;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 
 
 /**
@@ -62,6 +67,10 @@ public class PendingMissionListFragment
 	private static final String STATE_ACTIVATED_POSITION = "activated_position";
 
 	private static final int LOADER_INDEX = 0;
+
+	private static final String TAG = "MISSION_LIST";
+
+	public static final String INFINITE_SCROLL = "INFINITE_SCROLL";
 
 	/**
 	 * The fragment's current callback object, which is notified of list item
@@ -106,7 +115,9 @@ public class PendingMissionListFragment
 	/**
 	 * page size for remote queries
 	 */
-	private int pagesize=150;
+	private int pagesize=100;
+
+	private View footer;
 	/**
 	 * A callback interface that all activities containing this fragment must
 	 * implement. This mechanism allows activities to be notified of item
@@ -145,15 +156,18 @@ public class PendingMissionListFragment
 	    adapter = new FeatureAdapter(getSherlockActivity(),
 	            R.layout.mission_resource_row,missionTemplate);
 	    setListAdapter(adapter);
+	    //option menu
+	    setHasOptionsMenu(true);
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	        Bundle savedInstanceState) {
-
+		footer = View.inflate(getActivity(), R.layout.loading_footer, null);
 	    startDataLoading(missionTemplate, LOADER_INDEX);
 	    return inflater.inflate(R.layout.mission_resource_list, container, false); 
 	}
+
 	
 	/**
 	 * hide loading bar and set loading task
@@ -164,7 +178,8 @@ public class PendingMissionListFragment
 	                        .setSupportProgressBarIndeterminateVisibility(false);
 	        getSherlockActivity()
 	                        .setSupportProgressBarVisibility(false);
-	        Log.v("GEOSTORE_LOADER", "task terminated");
+	        //getListView().removeFooterView(footer);
+	        Log.v(TAG, "task terminated");
 	        
 	    }
 	    adapter.notifyDataSetChanged();
@@ -176,15 +191,16 @@ public class PendingMissionListFragment
 	 */
 	private void setNoData() {
 	    ((TextView) getView().findViewById(R.id.empty_text))
-	            .setText(R.string.geostore_extracting_no_result);
+	            .setText(R.string.no_reporting_found);
 	    getView().findViewById(R.id.progress_bar).setVisibility(TextView.GONE);
 	}
 	
 	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
-
-		// Restore the previously serialized activated item position.
+		if(getActivity().getIntent().getBooleanExtra(INFINITE_SCROLL, true)){
+			getListView().setOnScrollListener(this);
+		}// Restore the previously serialized activated item position.
 		if (savedInstanceState != null
 				&& savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
 			setActivatedPosition(savedInstanceState
@@ -254,10 +270,31 @@ public class PendingMissionListFragment
 		mActivatedPosition = position;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.actionbarsherlock.view.ActionMode.Callback#onCreateActionMode(com.actionbarsherlock.view.ActionMode, com.actionbarsherlock.view.Menu)
-	 */
+	@Override
+	public void onCreateOptionsMenu(
+	      Menu menu, MenuInflater inflater) {
+	   inflater.inflate(R.menu.refreshable, menu);
+	}
 	
+	/* (non-Javadoc)
+	 * @see com.actionbarsherlock.app.SherlockFragment#onOptionsItemSelected(com.actionbarsherlock.view.MenuItem)
+	 */
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		
+		int id = item.getItemId();
+		if(id==R.id.refresh){
+			getLoaderManager().getLoader(LOADER_INDEX);
+			if(loader !=null){
+				adapter.clear();
+				loader.forceLoad();
+			}
+			return true;
+		}
+		
+		
+		return super.onOptionsItemSelected(item);
+	}
 
 	/* (non-Javadoc)
 	 * @see android.widget.AbsListView.OnScrollListener#onScrollStateChanged(android.widget.AbsListView, int)
@@ -289,7 +326,8 @@ public class PendingMissionListFragment
 	    int l = visibleItemCount + firstVisibleItem;
 	    if (l >= totalItemCount && !isLoading ) {
 	        // It is time to add new data. We call the listener
-	        //this.addFooterView(footer);
+	        //getListView().addFooterView(footer);
+	    	
 	        isLoading = true;
 	        loadMore();
 	    }
@@ -315,6 +353,7 @@ public class PendingMissionListFragment
 			   Toast.makeText(getSherlockActivity(), R.string.error_connectivity_problem, Toast.LENGTH_SHORT).show();
 			   setNoData();
 		   }else{
+			   
 			   //add loaded resources to the listView
 				for(Feature a : results ){
 					adapter.add(a);

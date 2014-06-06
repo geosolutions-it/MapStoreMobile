@@ -2,9 +2,18 @@
 <resources>
     <string name="app_name">GeoCollect</string>
     <string name="action_settings">Settings</string>
+    <string name="action_mission">Mission</string>
     <string name="title_pendingmission_list">Pending Missions</string>
     <string name="title_pendingmission_detail">Pending Mission Detail</string>
+    <string name="general">General</string>
 	<string name="reporting">Reportings</string>
+	<string name="no_reporting_found">no reports found</string>
 	<string name="map">Map</string>
 	<string name="accept_mission">Accept</string>
+	<string name="action_quit">Quit</string>
+	<string name="loading_footer">Loading...</string>
+	 <plurals name="reporting">
+        <item quantity="one">One reporting</item>
+        <item quantity="other">%d reportings.</item>
+    </plurals>
 </resources>
