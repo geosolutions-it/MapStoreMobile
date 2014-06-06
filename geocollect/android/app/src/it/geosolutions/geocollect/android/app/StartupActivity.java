@@ -18,10 +18,13 @@
 package it.geosolutions.geocollect.android.app;
 
 
+import it.geosolutions.android.map.utils.MapFilesProvider;
+import it.geosolutions.android.map.utils.ZipFileManager;
 import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 
 /**
  * Startup activity loaded when launch.
@@ -39,12 +42,18 @@ public class StartupActivity extends Activity {
 		//id really needed the set content vie for a starter
 		//setContentView(R.layout.activity_startup);	
 		//TODO place from a click on the item
-		 Intent intent = new Intent(this, PendingMissionListActivity.class);
-         startActivity(intent);
-         this.finish();
-		
-		
-		
+		 
+		 MapFilesProvider.setBaseDir("/geocollect");
+		 String dir_path = Environment.getExternalStorageDirectory().getPath();
+         ZipFileManager zfm = new ZipFileManager(this,dir_path,"/geocollect",getResources().getString(R.string.url_data_test_archive)){
+ 			@Override
+ 			public void launchMainActivity(){
+ 				Intent launch = new Intent(activity, PendingMissionListActivity.class);
+ 				activity.startActivity(launch);
+ 				activity.finish();
+ 			}
+ 		};
+
 	}
 	
 	/**

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string  translatable="false" name="url_data_test_archive">http://demo.geo-solutions.it/share/mapstoremobile/MapStoreMobile_demo_data.zip</string>
     <string  translatable="false" name="app_name">MapStore</string>
     <string  translatable="false" name="title_activity_startup">StartupActivity</string>
-    <string  translatable="false" name="start_pack_url"></string>
 </resources>

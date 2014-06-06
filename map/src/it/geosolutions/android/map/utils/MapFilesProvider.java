@@ -19,6 +19,7 @@ package it.geosolutions.android.map.utils;
 
 import java.io.File;
 import java.io.FilenameFilter;
+
 import android.os.Environment;
 import android.util.Log;
 
@@ -28,9 +29,11 @@ import android.util.Log;
  */
 public class MapFilesProvider {
 	private static String baseDir ="/mapstore";
-	private static String baseStyle = "/mapstore/styles/";
-	private static String backgroundFilePath = "/mapstore/bg.map";
-	
+	private static String baseStyle = baseDir + "/styles/";
+	private static String backgroundFileName =  "bg.map";
+	public static void setBaseDir(String baseDir){
+		MapFilesProvider.baseDir = baseDir;
+	}
 	public static File getBaseDirectoryFile(){
 		File f = new File(Environment
 				.getExternalStorageDirectory().getPath(),baseDir);
@@ -62,15 +65,27 @@ public class MapFilesProvider {
 		}
 		return false;
 	}
+	
+	/**
+	 * Provides background map file configured in this object
+	 * @return the .map file configured
+	 */
 	public static File getBackgroundMapFile(){
 		File f =new File(Environment
-				.getExternalStorageDirectory().getPath(),backgroundFilePath );
+				.getExternalStorageDirectory().getPath(),getBackgroundFilePath() );
 		if(f.exists()){
 			return f;
 		}
 		
 		Log.w("FILES","background file not found");
 		return null;
+	}
+	/**
+	 * Returns the path to the background .map file
+	 * @return
+	 */
+	private static String getBackgroundFilePath() {
+		return baseDir + "/" + backgroundFileName;
 	}
 	/**
 	 * @return

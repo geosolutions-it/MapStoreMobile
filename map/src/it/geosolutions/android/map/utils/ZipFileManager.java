@@ -44,17 +44,19 @@ import android.os.AsyncTask;
 public class ZipFileManager {
 	private AlertDialog download_dialog;
 	public Activity activity; //Necessary for the dialog
+
 	private final static String file_name = "data_test_archive.zip"; //Archive that must be to download
 	/**
 	 * Constructor for class ZipFileManager 
 	 * @param activity
 	 * @param dir_path
 	 */
-	public ZipFileManager(final Activity activity, final String dir_path,String dest_dir,String url){
+	public ZipFileManager(final Activity activity, final String dir_path,String dest_dir,final String url){
 		this.activity = activity;
 		
+		
 		//Check if folder of data already exists, otherwise it will be downloaded and unzipped.
-		File f = new File(dir_path+dest_dir);
+		File f = new File(dir_path + dest_dir);
 		if(!f.isDirectory()){
 			AlertDialog.Builder download_dialog_builder;
 			download_dialog_builder = new AlertDialog.Builder(activity);
@@ -65,7 +67,7 @@ public class ZipFileManager {
 				
 				@Override
 				public void onClick(DialogInterface dialog, int which) {	
-					String url = activity.getResources().getString(R.string.url_data_test_archive); //Url data test archive
+					
 					new DownloadFileAsyncTask().execute(url,dir_path);
 					download_dialog.dismiss();
 				}

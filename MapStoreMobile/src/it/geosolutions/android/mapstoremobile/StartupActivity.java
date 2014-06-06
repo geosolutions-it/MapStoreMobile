@@ -43,9 +43,8 @@ public class StartupActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_startup);	
-		
 		dir_path = Environment.getExternalStorageDirectory().getPath();
-		ZipFileManager zfm = new ZipFileManager(this,dir_path,"/mapstore",getResources().getString(R.string.start_pack_url)){
+		ZipFileManager zfm = new ZipFileManager(this,dir_path,"/mapstore",getResources().getString(R.string.url_data_test_archive)){
 			@Override
 			public void launchMainActivity(){
 				Intent launch = new Intent(activity,MapsActivity.class);
