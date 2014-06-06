@@ -254,7 +254,12 @@
 			},{
 				"title": "Invio",
 				"iconCls":"not_supported_yet",
-				"fields":[]
+				"fields":[{
+					
+					"type":"text",
+					"xtype":"separator",
+					"label":"TO BE IMPLEMENTED"
+				}]
 			}],
 			
 		"submitURL": "http://sample.com"
