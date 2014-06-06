@@ -126,6 +126,7 @@ public class MapsActivity extends MapActivityBase {
 		public static final String ZOOM_LEVEL = "ZOOM_LEVEL";
 		public static final String RESOURCE = "RESOURCE";
 		public static final String GEOSTORE_URL = "GEOSTORE_URL";
+		public static final String CONFIRM_ON_EXIT = "CONFIRM_ON_EXIT";
 	}
 
 	
@@ -498,23 +499,35 @@ public class MapsActivity extends MapActivityBase {
     @Override
     public void onBackPressed() {
     	
-		new AlertDialog.Builder(this)
-	    .setTitle(R.string.button_confirm_exit_title)
-	    .setMessage(R.string.button_confirm_exit)
-	    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-	        public void onClick(DialogInterface dialog, int which) { 
-	        	 MapsActivity.super.onBackPressed();
-	        	 return;
-	        }
-	     })
-	    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-	        public void onClick(DialogInterface dialog, int which) { 
-	            // do nothing
-	        }
-	     })
-	     .show();
+		confirmExit();
 
     }
+/**
+ * Show a confirm message to exit
+ */
+	public void confirmExit() {
+			boolean confirmOnExit = getIntent().getExtras().getBoolean(MapsActivity.PARAMETERS.CONFIRM_ON_EXIT ,true);
+			if(confirmOnExit){
+			new AlertDialog.Builder(this)
+		    .setTitle(R.string.button_confirm_exit_title)
+		    .setMessage(R.string.button_confirm_exit)
+		    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+		        public void onClick(DialogInterface dialog, int which) { 
+		        	finish();
+		        	 return;
+		        }
+		     })
+		    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+		        public void onClick(DialogInterface dialog, int which) { 
+		            // do nothing
+		        }
+		     })
+		     .show();
+	
+			}else{
+				finish();
+			}
+	}
 	
 	@Override
 	public void onRestoreInstanceState(Bundle savedInstanceState) {
@@ -582,22 +595,7 @@ public class MapsActivity extends MapActivityBase {
 			Intent info = new Intent(this,InfoView.class);
 			 startActivity(info);
 		}else if(item.getItemId() == R.id.exitview){
-			
-			new AlertDialog.Builder(this)
-		    .setTitle(R.string.button_confirm_exit_title)
-		    .setMessage(R.string.button_confirm_exit)
-		    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-		        public void onClick(DialogInterface dialog, int which) { 
-		        	 finish();
-		        	 return;
-		        }
-		     })
-		    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-		        public void onClick(DialogInterface dialog, int which) { 
-		            // do nothing
-		        }
-		     })
-		     .show();
+			confirmExit();
 		}
         return super.onOptionsItemSelected(item);
 		 

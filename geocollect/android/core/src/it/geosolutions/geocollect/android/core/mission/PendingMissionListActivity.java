@@ -149,10 +149,11 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
     		launch.putExtra(MapsActivity.PARAMETERS.LAT, 44.40565);
     		launch.putExtra(MapsActivity.PARAMETERS.LON, 8.946256);
     		launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL, (byte)11);
+    		launch.putExtra(MapsActivity.PARAMETERS.CONFIRM_ON_EXIT, false);
     		startActivity(launch);
     		
             break;
-        //Settings
+        //Settings	
         case 203:
         	Intent intent = new Intent(this,
         			GeoCollectPreferences.class);
