@@ -30,6 +30,6 @@ public class GeoCollectPreferences extends SherlockPreferenceActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 	   super.onCreate(savedInstanceState);
 	   
-	   addPreferencesFromResource(R.xml.preferences);
+	   addPreferencesFromResource(R.xml.preferences_geocollect);
 	}
 }

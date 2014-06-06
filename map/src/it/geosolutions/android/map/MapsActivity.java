@@ -783,7 +783,7 @@ public class MapsActivity extends MapActivityBase {
         	 byte zoom_level = intent.getByteExtra(PARAMETERS.ZOOM_LEVEL, (byte) 13);
         	 /*ArrayList<MarkerDTO> list_marker = intent.getParcelableArrayListExtra(PARAMETERS.MARKERS);
         	 MarkerDTO mark = list_marker.get(0);*/
-        	 new MapPosition(new GeoPoint(lat,lon),zoom_level);
+        	 mp = new MapPosition(new GeoPoint(lat,lon),zoom_level);
         	 mapView.getMapViewPosition().setMapPosition(mp);
    	 	}
    	 	else{

@@ -146,9 +146,9 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         	//TODO parametrize it 
         	Intent launch = new Intent(this,MapsActivity.class);
     		launch.setAction(Intent.ACTION_VIEW);
-    		launch.putExtra(MapsActivity.PARAMETERS.LAT, 43.68411);
-    		launch.putExtra(MapsActivity.PARAMETERS.LON, 10.84899);
-    		launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL, (byte)13);
+    		launch.putExtra(MapsActivity.PARAMETERS.LAT, 44.40565);
+    		launch.putExtra(MapsActivity.PARAMETERS.LON, 8.946256);
+    		launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL, (byte)11);
     		startActivity(launch);
     		
             break;
