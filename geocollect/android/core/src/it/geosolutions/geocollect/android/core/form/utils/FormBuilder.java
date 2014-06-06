@@ -391,6 +391,7 @@ public class FormBuilder {
 		// setting an unique id is important in order to save the state
 		// (content) of this view across screen configuration changes
 		editView.setId(id());
+		editView.setTag(field.fieldId);
 		editView.setInputType(type);
 		mFormView.addView(tvLabel);
 		mFormView.addView(editView);
@@ -460,6 +461,7 @@ public class FormBuilder {
 		// setting an unique id is important in order to save the state
 		// (content) of this view across screen configuration changes
 		editView.setId(id());
+		editView.setTag(field.fieldId);
 		editView.setInputType(type);
 		mFormView.addView(tvLabel);
 		mFormView.addView(editView);

@@ -22,12 +22,14 @@ import it.geosolutions.android.map.view.MapViewManager;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
+import it.geosolutions.geocollect.android.core.mission.utils.SpatialiteUtils;
 import it.geosolutions.geocollect.android.core.widgets.EnableSwipeViewPager;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.viewmodel.Field;
 import it.geosolutions.geocollect.model.viewmodel.Page;
 import it.geosolutions.geocollect.model.viewmodel.type.XType;
 
+import java.io.File;
 import java.util.List;
 
 import org.mapsforge.android.maps.MapActivity;
@@ -48,6 +50,8 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 
+import eu.geopaparazzi.library.util.ResourcesManager;
+
 public class FormEditActivity extends SherlockFragmentActivity  implements MapActivity  {
 
     /**
@@ -67,6 +71,11 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
 	 * the MapViewManager
 	 */
 	private MapViewManager mapViewManager =new MapViewManager();
+
+	/**
+	 * Spatialite Database for persistence
+	 */
+	jsqlite.Database spatialiteDatabase;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -144,6 +153,34 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
 				
 			}
 		});
+
+        // Initialize database
+		if(spatialiteDatabase == null){
+	        try {
+	            
+	            File sdcardDir = ResourcesManager.getInstance(this).getSdcardDir();
+	            File spatialDbFile = new File(sdcardDir, "geocollect/genova.sqlite");
+	
+	            if (!spatialDbFile.getParentFile().exists()) {
+	                throw new RuntimeException();
+	            }
+	            spatialiteDatabase = new jsqlite.Database();
+	            spatialiteDatabase.open(spatialDbFile.getAbsolutePath(), jsqlite.Constants.SQLITE_OPEN_READWRITE
+	                    | jsqlite.Constants.SQLITE_OPEN_CREATE);
+	            
+	            Log.v("FORM_EDIT", SpatialiteUtils.queryVersions(spatialiteDatabase));
+	            
+	            //TODO: remove hardcoded tableName
+	            if(SpatialiteUtils.checkOrCreateTable(spatialiteDatabase, "punti_accumulo_data")){
+		            Log.v("FORM_EDIT", "Table Found");
+	            }else{
+		            Log.w("FORM_EDIT", "Table could not be created, edits will not be saved");
+	            }
+	            
+	        } catch (Exception e) {
+	            Log.v("FORM_EDIT", Log.getStackTraceString(e));
+	        }
+		}
     }
 
    
@@ -261,6 +298,14 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
              super.onDestroy();
              if(this.mapViewManager!=null){
             	 this.mapViewManager.destroyMapViews();
+             }
+             if(this.spatialiteDatabase!=null){
+            	 try {
+					this.spatialiteDatabase.close();
+ 		            Log.v("FORM_EDIT", "Spatialite Database Closed");
+				} catch (jsqlite.Exception e) {
+		            Log.e("FORM_EDIT", Log.getStackTraceString(e));
+				}
              }
      }
     

@@ -3,7 +3,7 @@
 	"source":{
 		"type":"WFS",
 		"URL":"http://demo.geo-solutions.it/share/comunege/geocollect/punti_abbandono.geojson",
-		"typeName":"geosolutions:cities"
+		"typeName":"geosolutions:punti_abbandono"
 	},
 	"preview":{
 		"title":"Punto Abbandono",
@@ -79,12 +79,12 @@
 					"fieldId": "NOME_RILEVATORE",
 					"type":"person",
 					"xtype":"textfield",
-					"label":"Nome Rileavatore"
+					"label":"Nome Rilevatore"
 				},{
 					"fieldId": "COGNOME_RILEVATORE",
 					"type":"person",
 					"xtype":"textfield",
-					"label":"Cognome Rileavatore"
+					"label":"Cognome Rilevatore"
 				},{
 					"fieldId": "ENTE_RILEVATORE",
 					"type":"person",
@@ -233,6 +233,7 @@
 				},
 				"iconCls":"not_supported_yet",
 				"fields":[{
+					"fieldId": "GEOMETRY",
 					"type":"geoPoint",
 					"value":"${origin.the_geom}",
 					"xtype":"mapViewPoint",

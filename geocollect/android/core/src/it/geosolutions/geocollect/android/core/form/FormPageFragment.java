@@ -17,12 +17,16 @@
  */
 package it.geosolutions.geocollect.android.core.form;
 
+import jsqlite.Exception;
+import jsqlite.Stmt;
 import it.geosolutions.android.map.fragment.MapFragment;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.utils.FormBuilder;
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
+import it.geosolutions.geocollect.android.core.widgets.DatePicker;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
+import it.geosolutions.geocollect.model.viewmodel.Field;
 import it.geosolutions.geocollect.model.viewmodel.Page;
 import android.app.Activity;
 import android.os.Bundle;
@@ -37,6 +41,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
+import android.widget.TextView;
 
 /**
  * This Fragment contains form field for a page of the <Form>.
@@ -61,12 +66,21 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 	private ProgressBar mProgressView;
 	private boolean mDone;
 	private Mission mission;
-	
+	/**
+	 * Reference to the Activity Database
+	 */
+	jsqlite.Database db;
 	
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		Log.d(TAG, "onAttach(): activity = " + activity);
+		if(activity instanceof FormEditActivity){
+			Log.d(TAG, "Connecting to Activity database");
+			db = ((FormEditActivity)activity).spatialiteDatabase;
+		}else{
+			Log.w(TAG, "Could not connect to Activity database");
+		}
 	}
 
 	@Override
@@ -109,23 +123,192 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 		return mScrollView;
 	}
     
-    
+    /**
+     * Creates the page content cycling the page fields
+     */
     private void buildForm() {
 		// if the view hierarchy was already build, skip this
 		if (mDone)
 			return;
 
-		FormBuilder.buildForm(getActivity(), this.mFormView,page.fields, mission);//TODO page is not enougth, some data should be accessible like constants and data
+		FormBuilder.buildForm(getActivity(), this.mFormView, page.fields, mission);//TODO page is not enough, some data should be accessible like constants and data
 
+		// It is safe to initialize field here because buildForm is a callback of the onActivityCreated();
+		// TODO: move this block on database utils?
+		if(db != null){
+			String s;
+			Stmt st = null;
+			for(Field f : page.fields){
+				if(f == null )continue;
+				try {
+					// TODO: load all the fields in one query
+					s = "SELECT "+ f.fieldId +" FROM 'punti_accumulo_data' WHERE ORIGIN_ID = '"+mission.getOrigin().id+"';";
+					if(jsqlite.Database.complete(s)){
+						st = db.prepare(s);
+						if(st.step()){
+							View v = this.mFormView.findViewWithTag(f.fieldId);
+//////////////////////////
+							if (f.xtype == null) {
+								//textfield as default
+								((TextView)v).setText(st.column_string(0));
+							} else {
+								// switch witch widget create
+								switch (f.xtype) {
+								case textfield:
+									((TextView)v).setText(st.column_string(0));
+									break;
+								case textarea:
+									((TextView)v).setText(st.column_string(0));
+									break;
+								case datefield:
+									if(st.column_string(0) != null){
+										((DatePicker)v).setDate(st.column_string(0));
+									}
+									break;
+								case checkbox:
+									// TODO
+									break;
+								case spinner:
+									// TODO
+									break;
+								case label:
+									// skip
+									break;
+								case separator:
+									// skip
+									break;
+								case mapViewPoint:
+									// TODO
+									//addMapViewPoint(f,mFormView,context,mission);
+									break;
+								default:
+									//textfield as default
+									((TextView)v).setText(st.column_string(0));
+								}
+							}							
+////////////////////////
+						}else{
+							// no record found, creating..
+							Log.v(TAG, "No record found, creating..");
+							s = "INSERT INTO 'punti_accumulo_data' ( ORIGIN_ID ) VALUES ( '"+mission.getOrigin().id+"');";
+							st = db.prepare(s);
+							if(st.step()){
+								// nothing will be returned anyway
+							}
+							Log.v(TAG, "Record created");
+
+						}
+						st.close();
+					}
+				} catch (Exception e) {
+					Log.e(TAG, Log.getStackTraceString(e));
+				}
+			}
+			if(st!=null){
+				try {
+					st.close();
+				} catch (Exception e) {
+					//Log.e(TAG, Log.getStackTraceString(e));
+					// ignore
+				}
+			}
+		} // if db
+		
+		
 		// the view hierarchy is now complete
 		mDone = true;
 	}
+    
+    
     @Override 
     public void onSaveInstanceState(Bundle outState) {
     	outState.putSerializable(ARG_MISSION, mission);
     	
+		// TODO: move this block on database utils?
+		if(db != null){
+			String s;
+			String value;
+			Stmt st = null;
+			for(Field f : page.fields){
+				if(f == null )continue;
+
+				View v = this.mFormView.findViewWithTag(f.fieldId);
+
+				if(v == null){
+					Log.w(TAG, "Tag not found : "+f.fieldId);
+					continue;
+				}
+				
+				if (f.xtype == null) {
+					// TODO: load all the fields in one query
+					value = ((TextView)v).getText().toString();
+				} else {
+					// switch witch widget create
+					switch (f.xtype) {
+					case textfield:
+						value = ((TextView)v).getText().toString();
+						break;
+					case textarea:
+						value = ((TextView)v).getText().toString();
+						break;
+					case datefield:
+						value = ((DatePicker)v).getText().toString();
+						continue;
+						//break;
+					case checkbox:
+						// TODO
+						continue;
+						//break;
+					case spinner:
+						// TODO
+						continue;
+						//break;
+					case label:
+						// skip
+						continue;
+						//break;
+					case separator:
+						// skip
+						continue;
+						//break;
+					case mapViewPoint:
+						// TODO
+						continue;
+						//addMapViewPoint(f,mFormView,context,mission);
+						//break;
+					default:
+						//textfield as default
+						value = ((TextView)v).getText().toString();
+					}
+				}
+				try {	
+					
+					s = "UPDATE 'punti_accumulo_data' SET "+ f.fieldId +" = '"+ value +"' WHERE ORIGIN_ID = '"+mission.getOrigin().id+"';";
+					Log.v(TAG, "Query :\n"+s);
+					
+					st = db.prepare(s);
+					if(st.step()){
+						Log.v(TAG, "Updated");
+					}else{
+						Log.v(TAG, "Update failed");
+					}
+					
+				} catch (Exception e) {
+					Log.e(TAG, Log.getStackTraceString(e));
+				}
+			}
+			if(st!=null){
+				try {
+					st.close();
+				} catch (Exception e) {
+					//Log.e(TAG, Log.getStackTraceString(e));
+					// ignore
+				}
+			}
+		} // if db
     	
     }
+    
     @Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);

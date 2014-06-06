@@ -1,6 +1,8 @@
 package it.geosolutions.geocollect.android.core.widgets;
 
+import java.text.ParseException;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 import android.R;
@@ -101,6 +103,34 @@ public class DatePicker extends EditText implements DatePickerDialog.OnDateSetLi
 		
 		updateText();
 	}
+	
+	
+	/**
+	 * Set the date from a formatted String
+	 * @param s
+	 */
+	public void setDate(String s) {
+		
+		if (s==null)
+			return;
+		
+		Log.v("DatePitcker", "Got :"+s);
+		
+		try {
+			Calendar c = Calendar.getInstance();
+			c.setTime(this.dateFormat.parse(s));
+			this.year = c.get(Calendar.YEAR);
+			this.month = c.get(Calendar.MONTH);
+			this.day = c.get(Calendar.DAY_OF_MONTH);
+			
+			updateText();	
+			
+		} catch (ParseException e) {
+			Log.e("DatePitcker", Log.getStackTraceString(e));
+		}
+
+	}
+	
 	
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {

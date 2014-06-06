@@ -19,7 +19,6 @@ package it.geosolutions.geocollect.android.core.mission;
 
 import it.geosolutions.android.map.view.MapViewManager;
 import it.geosolutions.geocollect.android.core.R;
-
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
 
@@ -43,7 +42,6 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 public class PendingMissionDetailActivity extends SherlockFragmentActivity implements MapActivity {
 
 	private MapViewManager mapViewManager;
-	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +77,8 @@ public class PendingMissionDetailActivity extends SherlockFragmentActivity imple
 					.add(R.id.pendingmission_detail_container, fragment)
 					.commit();
 		}
+		
+
 	}
 
 	/* (non-Javadoc)
@@ -143,6 +143,7 @@ public class PendingMissionDetailActivity extends SherlockFragmentActivity imple
             	 this.mapViewManager.resumeMapViews();
              }
      }
+	 
 	 @Override
      protected void onDestroy() {
              super.onDestroy();
