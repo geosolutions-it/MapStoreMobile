@@ -41,7 +41,6 @@ import java.util.Locale;
 
 import org.mapsforge.core.model.GeoPoint;
 
-import android.R;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.text.InputType;
@@ -50,7 +49,6 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.SimpleAdapter;
@@ -318,7 +316,7 @@ public class FormBuilder {
 		// setting an unique id is important in order to save the state
 		// (content) of this view across screen configuration changes
 		spinner.setId(id());
-		
+		spinner.setTag(field.fieldId);
 		mFormView.addView(tvLabel);
 		mFormView.addView(spinner);
 		spinner.setAdapter(adapter);
@@ -504,6 +502,7 @@ public class FormBuilder {
 	    cb.setText(field.label);
 	    cb.setLayoutParams(getTextDefaultParams(field, false));
 	    cb.setId(id());
+	    cb.setTag(field.fieldId);
 		mFormView.addView(cb);
 	}
 	

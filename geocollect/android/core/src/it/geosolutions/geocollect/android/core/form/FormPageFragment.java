@@ -17,16 +17,13 @@
  */
 package it.geosolutions.geocollect.android.core.form;
 
-import jsqlite.Exception;
-import jsqlite.Stmt;
 import it.geosolutions.android.map.fragment.MapFragment;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.utils.FormBuilder;
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
-import it.geosolutions.geocollect.android.core.widgets.DatePicker;
+import it.geosolutions.geocollect.android.core.mission.utils.PersistanceUtils;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
-import it.geosolutions.geocollect.model.viewmodel.Field;
 import it.geosolutions.geocollect.model.viewmodel.Page;
 import android.app.Activity;
 import android.os.Bundle;
@@ -41,7 +38,6 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
-import android.widget.TextView;
 
 /**
  * This Fragment contains form field for a page of the <Form>.
@@ -132,9 +128,12 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 			return;
 
 		FormBuilder.buildForm(getActivity(), this.mFormView, page.fields, mission);//TODO page is not enough, some data should be accessible like constants and data
-
+		
 		// It is safe to initialize field here because buildForm is a callback of the onActivityCreated();
+		PersistanceUtils.loadPageData(page, mFormView, mission, db);
+		
 		// TODO: move this block on database utils?
+/*
 		if(db != null){
 			String s;
 			Stmt st = null;
@@ -152,7 +151,6 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 								//textfield as default
 								((TextView)v).setText(st.column_string(0));
 							} else {
-								// switch witch widget create
 								switch (f.xtype) {
 								case textfield:
 									((TextView)v).setText(st.column_string(0));
@@ -162,14 +160,28 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 									break;
 								case datefield:
 									if(st.column_string(0) != null){
+										Log.v(TAG, "Setting date :"+st.column_string(0));
 										((DatePicker)v).setDate(st.column_string(0));
 									}
 									break;
 								case checkbox:
-									// TODO
+									if(st.column_string(0) != null){
+										Log.v(TAG, "Setting checkbox value :"+st.column_string(0));
+										((CheckBox)v).setChecked(st.column_string(0).equals("1"));
+									}
 									break;
 								case spinner:
-									// TODO
+									if(st.column_string(0) != null){
+										Log.v(TAG, "Setting spinner value :"+st.column_string(0));
+										String fieldValue = st.column_string(0);
+										List<HashMap<String, String>> l = FormBuilder.getFieldAllowedData(f);
+										int i = 0;
+										for( i = 0; i<l.size(); i++){
+											if(l.get(i).get("f1") != null && l.get(i).get("f1").equals(fieldValue)){
+												((Spinner)v).setSelection(i);
+											}
+										}
+									}
 									break;
 								case label:
 									// skip
@@ -213,7 +225,7 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 				}
 			}
 		} // if db
-		
+		*/
 		
 		// the view hierarchy is now complete
 		mDone = true;
@@ -224,7 +236,9 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
     public void onSaveInstanceState(Bundle outState) {
     	outState.putSerializable(ARG_MISSION, mission);
     	
-		// TODO: move this block on database utils?
+    	PersistanceUtils.storePageData(page, mFormView, mission, db);
+    	
+		/* moved this block on PersistanceUtils
 		if(db != null){
 			String s;
 			String value;
@@ -306,6 +320,7 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 				}
 			}
 		} // if db
+		*/
     	
     }
     

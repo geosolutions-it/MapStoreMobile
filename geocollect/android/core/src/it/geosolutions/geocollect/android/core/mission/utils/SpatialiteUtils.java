@@ -116,7 +116,7 @@ public class SpatialiteUtils {
                 			"'INDIRIZZO' TEXT, " +
                 			"'CIVICO' TEXT, " +
                 			"'PRESA_IN_CARICO' TEXT, " +
-                			"'EMAIL' TEXT, " +
+                			"'EMAIL' INTEGER, " +
                 			"'RIMOZIONE' TEXT, " +
                 			"'SEQUESTRO' TEXT, " +
                 			"'RESPONSABILE_ABBANDONO' TEXT, " +
