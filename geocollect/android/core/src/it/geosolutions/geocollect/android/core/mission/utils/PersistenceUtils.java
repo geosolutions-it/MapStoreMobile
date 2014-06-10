@@ -6,14 +6,22 @@ package it.geosolutions.geocollect.android.core.mission.utils;
 import java.util.HashMap;
 import java.util.List;
 
+import org.mapsforge.core.model.GeoPoint;
+
+import it.geosolutions.android.map.dto.MarkerDTO;
+import it.geosolutions.android.map.overlay.MarkerOverlay;
+import it.geosolutions.android.map.overlay.items.DescribedMarker;
+import it.geosolutions.android.map.view.AdvancedMapView;
 import it.geosolutions.geocollect.android.core.form.utils.FormBuilder;
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.widgets.DatePicker;
 import it.geosolutions.geocollect.model.viewmodel.Field;
 import it.geosolutions.geocollect.model.viewmodel.Page;
+import it.geosolutions.geocollect.model.viewmodel.type.XType;
 import jsqlite.Database;
 import jsqlite.Exception;
 import jsqlite.Stmt;
+import android.content.Context;
 import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
@@ -26,7 +34,7 @@ import android.widget.TextView;
  * @author Lorenzo Pini lorenzo.pini@geo-solutions.it
  *
  */
-public class PersistanceUtils {
+public class PersistenceUtils {
 
 	/**
 	 * Tag for logging
@@ -37,22 +45,28 @@ public class PersistanceUtils {
 	 * Default method for storePageData
 	 * Stores the view data on given database based on given Page information
 	 */
-	public static boolean storePageData(Page page, LinearLayout layout, Mission mission, Database db){
-		return storePageData(page, layout, mission, db, "punti_accumulo_data");
+	public static boolean storePageData(Page page, LinearLayout layout, Mission mission){
+		return storePageData(page, layout, mission, "punti_accumulo_data");
 	}
 	
 	/**
 	 * Stores the view data on given database based on given Page information
 	 * @return
 	 */
-	public static boolean storePageData(Page page, LinearLayout layout, Mission mission, Database db, String tableName){
+	public static boolean storePageData(Page page, LinearLayout layout, Mission mission, String tableName){
 		
 		if(tableName == null || tableName.equalsIgnoreCase("")){
 			Log.w(TAG, "Empty tableName, aborting...");
 			return false;
 		}
 		
-		if(db != null){
+		if(mission.db != null){
+			// the database exists but is closed
+			if(mission.db.dbversion().equals("unknown")){
+				Log.w(TAG, "Database is already closed, aborting...");
+				return false;
+			}
+			
 			String s;
 			String value;
 			Stmt st = null;
@@ -106,21 +120,54 @@ public class PersistanceUtils {
 						continue;
 						//break;
 					case mapViewPoint:
-						// TODO
-						continue;
-						//addMapViewPoint(f,mFormView,context,mission);
-						//break;
+						// TODO Investigate performance of this check
+						AdvancedMapView amv = ((AdvancedMapView)v);
+						if( amv.getMarkerOverlay()==null){
+							Log.v(TAG, "Missing MarkerOverlay for "+f.fieldId);
+							continue;
+						}
+						if(amv.getMarkerOverlay().getMarkers() == null){
+							Log.v(TAG, "Missing Markers for "+f.fieldId);
+							continue;
+						}
+						if(	amv.getMarkerOverlay().getMarkers().size()<=0){
+							Log.v(TAG, "Empty Markers for "+f.fieldId);
+							continue;
+						}
+						if(amv.getMarkerOverlay().getMarkers().get(0) == null) {
+							Log.v(TAG, "First Marker is NULL for "+f.fieldId);
+							continue;
+						}
+						if(amv.getMarkerOverlay().getMarkers().get(0).getGeoPoint() != null){
+							GeoPoint g = amv.getMarkerOverlay().getMarkers().get(0).getGeoPoint();
+							if(g != null){
+								value = "MakePoint("+g.latitude+","+g.longitude+", 4326)";
+							}else{
+								Log.v(TAG, "Missing Geopoint for "+f.fieldId);
+								continue;
+							}
+						}else{
+							Log.w(TAG, "Cannot list features for "+f.fieldId);
+							continue;
+						}
+						break;
 					default:
 						//textfield as default
 						value = ((TextView)v).getText().toString();
 					}
 				}
 				try {	
-					value = value.replace("'", "''");
-					s = "UPDATE 'punti_accumulo_data' SET "+ f.fieldId +" = '"+ value +"' WHERE ORIGIN_ID = '"+mission.getOrigin().id+"';";
+					if(f.xtype == XType.mapViewPoint){
+						// a geometry must be built
+						s = "UPDATE 'punti_accumulo_data' SET "+ f.fieldId +" = "+ value +" WHERE ORIGIN_ID = '"+mission.getOrigin().id+"';";
+					}else{
+						// Standard values
+						value = value.replace("'", "''");
+						s = "UPDATE 'punti_accumulo_data' SET "+ f.fieldId +" = '"+ value +"' WHERE ORIGIN_ID = '"+mission.getOrigin().id+"';";
+					}
 					Log.v(TAG, "Query :\n"+s);
 					if(Database.complete(s)){
-						st = db.prepare(s);
+						st = mission.db.prepare(s);
 						if(st.step()){
 							//Log.v(TAG, "Updated");
 						}else{
@@ -155,8 +202,8 @@ public class PersistanceUtils {
 	/**
 	 * Default method for loadPageData
 	 */
-	public static boolean loadPageData(Page page, LinearLayout layout, Mission mission, Database db){
-		return loadPageData(page, layout, mission, db, "punti_accumulo_data");
+	public static boolean loadPageData(Page page, LinearLayout layout, Mission mission, Context context){
+		return loadPageData(page, layout, mission, context, "punti_accumulo_data");
 	}
 	
 	
@@ -164,18 +211,31 @@ public class PersistanceUtils {
 	 * Load the page data from the give database
 	 * @return
 	 */
-	public static boolean loadPageData(Page page, LinearLayout layout, Mission mission, Database db, String tableName){
+	public static boolean loadPageData(Page page, LinearLayout layout, Mission mission, Context context, String tableName){
 		
-		if(db != null){
+		
+		if(mission.db != null){
+			
+			// the database exists but is closed
+			if(mission.db.dbversion().equals("unknown")){
+				Log.w(TAG, "Database is already closed, aborting...");
+				return false;
+			}
+			
 			String s;
 			Stmt st = null;
 			for(Field f : page.fields){
 				if(f == null )continue;
 				try {
 					// TODO: load all the fields in one query
-					s = "SELECT "+ f.fieldId +" FROM '"+tableName+"' WHERE ORIGIN_ID = '"+mission.getOrigin().id+"';";
+					if(f.xtype == XType.mapViewPoint){
+						// a point must be retreived
+						s = "SELECT X("+ f.fieldId +"), Y("+ f.fieldId +") FROM '"+tableName+"' WHERE ORIGIN_ID = '"+mission.getOrigin().id+"';";
+					}else{
+						s = "SELECT "+ f.fieldId +" FROM '"+tableName+"' WHERE ORIGIN_ID = '"+mission.getOrigin().id+"';";
+					}
 					if(jsqlite.Database.complete(s)){
-						st = db.prepare(s);
+						st = mission.db.prepare(s);
 						if(st.step()){
 							View v = layout.findViewWithTag(f.fieldId);
 
@@ -222,8 +282,47 @@ public class PersistanceUtils {
 									// skip
 									break;
 								case mapViewPoint:
-									// TODO
-									//addMapViewPoint(f,mFormView,context,mission);
+									if(v != null){
+										Log.v(TAG, "Setting Point value :"+st.column_double(0)+" , "+st.column_double(1));
+										if(st.column_double(0)+st.column_double(1)==0){
+											Log.v(TAG, "Skipping zero coordinates on "+f.fieldId);
+											break;
+										}
+										
+										boolean displayOriginalValue = false;
+										if(f.getAttribute("displayOriginalValue")!=null){
+											try{
+												displayOriginalValue = (Boolean)f.getAttribute("displayOriginalValue");
+											}catch(ClassCastException cce){
+												Log.w(TAG, "Cannot cast displayOriginalValue to Boolean");
+											}
+										}
+										
+										GeoPoint geoPoint = new GeoPoint(st.column_double(0), st.column_double(1));
+										if(geoPoint!=null){
+
+											AdvancedMapView amv = ((AdvancedMapView)v);
+											MarkerOverlay mo = amv.getMarkerOverlay();
+											if(!displayOriginalValue){
+												// Remove existing markers
+												mo.getOverlayItems().removeAll(mo.getOverlayItems());
+												mo.getMarkers().removeAll(mo.getMarkers());
+											}
+											// TODO : If displayOriginalValue is true, the map should be read-only to prevent mismatch saving marker position on database
+											
+											// Add new marker based on geopoint
+											DescribedMarker marker = new MarkerDTO(geoPoint.latitude, geoPoint.longitude,MarkerDTO.MARKER_BLUE).createMarker(context);
+											mo.getOverlayItems().add(marker);
+											//mc.selectMarker(marker);
+											// center map on marker
+											if(((AdvancedMapView)v).getMapViewPosition() != null){
+												((AdvancedMapView)v).getMapViewPosition().setCenter(geoPoint);
+											}
+										}
+									}else{
+										Log.v(TAG, "Cannot find MapView "+f.fieldId);
+									}
+									
 									break;
 								default:
 									//textfield as default
@@ -234,7 +333,7 @@ public class PersistanceUtils {
 							// no record found, creating..
 							Log.v(TAG, "No record found, creating..");
 							s = "INSERT INTO '"+tableName+"' ( ORIGIN_ID ) VALUES ( '"+mission.getOrigin().id+"');";
-							st = db.prepare(s);
+							st = mission.db.prepare(s);
 							if(st.step()){
 								// nothing will be returned anyway
 							}

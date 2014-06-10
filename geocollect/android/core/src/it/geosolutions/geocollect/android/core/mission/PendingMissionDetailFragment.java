@@ -23,7 +23,9 @@ import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.FormEditActivity;
 import it.geosolutions.geocollect.android.core.form.utils.FormBuilder;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
+import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -52,6 +54,7 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 	 * Tag for logging
 	 */
 	public static final String TAG = "MissionDetail";
+	public static final int EDIT_ACTIVITY_CODE = 0;
 	/**
 	 * The fragment argument representing the item ID that this fragment
 	 * represents.
@@ -110,12 +113,13 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 
 
 	}
+	
 	@Override
 	public void onCreateOptionsMenu(
 	      Menu menu, MenuInflater inflater) {
 	   inflater.inflate(R.menu.editable, menu);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see com.actionbarsherlock.app.SherlockFragment#onOptionsItemSelected(com.actionbarsherlock.view.MenuItem)
 	 */
@@ -126,20 +130,39 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 		if(id==R.id.accept){
 			Intent i = new Intent(getSherlockActivity(),FormEditActivity.class);
 			i.putExtra("MISSION", mission);
-			startActivity(i);
+			startActivityForResult(i, EDIT_ACTIVITY_CODE);
 			return true;
 		}
 		
 		
 		return super.onOptionsItemSelected(item);
 	}
+	
+	/**
+	 * Handle the results
+	 */
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		Log.d(TAG, "onActivityResult()");
+	    super.onActivityResult(requestCode, resultCode, data);
+	    if(requestCode == EDIT_ACTIVITY_CODE){
+			MissionTemplate t = MissionUtils.getDefaultTemplate(getSherlockActivity());
+			PersistenceUtils.loadPageData(t.preview, mFormView, mission, getSherlockActivity());
+
+	    }
+	}
+	
+	/**
+	 * Fills the Page layout with widgets based on page template
+	 */
 	private void buildForm() {
 		// if the view hierarchy was already build, skip this
 		if (mDone)
 			return;
 		MissionTemplate t = MissionUtils.getDefaultTemplate(getSherlockActivity());
-		FormBuilder.buildForm(getActivity(), this.mFormView,t.preview.fields,mission);//TODO page is not enougth, some data should be accessible like constants and data
+		FormBuilder.buildForm(getActivity(), this.mFormView,t.preview.fields,mission);//TODO page is not enough, some data should be accessible like constants and data
 
+		PersistenceUtils.loadPageData(t.preview, mFormView, mission, getSherlockActivity());
 		// the view hierarchy is now complete
 		mDone = true;
 	}
@@ -153,13 +176,19 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 				+ savedInstanceState);
 		if(savedInstanceState == null){
 			toggleLoading(true);
-			getLoaderManager().initLoader(0, null, this);
+			getLoaderManager().restartLoader(0, null, this);
 		}else{
 			toggleLoading(true);
 			Feature origin  = (Feature)savedInstanceState.getSerializable(ARG_ITEM_FEATURE);
 			Mission m = new Mission();
 			m.setTemplate(MissionUtils.getDefaultTemplate(getSherlockActivity()));
 			m.setOrigin(origin);
+			if(getSherlockActivity() instanceof PendingMissionDetailActivity){
+				Log.d(TAG, "Loader: Connecting to Activity database");
+				m.db = ((PendingMissionDetailActivity)getSherlockActivity()).spatialiteDatabase;
+			}else{
+				Log.w(TAG, "Loader: Could not connect to Activity database");
+			}
 			mission =m;
 			toggleLoading(false);
 			buildForm();
@@ -173,10 +202,19 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 
 			@Override
 			public Void loadInBackground() {
+				Activity activity = getSherlockActivity();
 				Feature myFeature = (Feature) getArguments().getSerializable(ARG_ITEM_FEATURE);
 				Mission m = new Mission();
-				m.setTemplate(MissionUtils.getDefaultTemplate(getSherlockActivity()));
+				m.setTemplate(MissionUtils.getDefaultTemplate(activity));
 				m.setOrigin(myFeature);
+				
+				if(activity instanceof PendingMissionDetailActivity){
+					Log.d(TAG, "Loader: Connecting to Activity database");
+					m.db = ((PendingMissionDetailActivity)activity).spatialiteDatabase;
+				}else{
+					Log.w(TAG, "Loader: Could not connect to Activity database");
+				}
+				
 				mission =m;
 				return null;
 			}

@@ -85,7 +85,36 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
          * mapViewManager to delete the mapViews when destroy items
          * */
         
-        formPagerAdapter = new FormCollectionPagerAdapter(getSupportFragmentManager(),this){
+        // Initialize database
+		if(spatialiteDatabase == null){
+	        try {
+	            
+	            File sdcardDir = ResourcesManager.getInstance(this).getSdcardDir();
+	            File spatialDbFile = new File(sdcardDir, "geocollect/genova.sqlite");
+	
+	            if (!spatialDbFile.getParentFile().exists()) {
+	                throw new RuntimeException();
+	            }
+	            spatialiteDatabase = new jsqlite.Database();
+	            spatialiteDatabase.open(spatialDbFile.getAbsolutePath(), jsqlite.Constants.SQLITE_OPEN_READWRITE
+	                    | jsqlite.Constants.SQLITE_OPEN_CREATE);
+	            
+	            Log.v("FORM_EDIT", SpatialiteUtils.queryVersions(spatialiteDatabase));
+	            Log.v("FORM_EDIT", spatialiteDatabase.dbversion());
+	            
+	            //TODO: remove hardcoded tableName
+	            if(SpatialiteUtils.checkOrCreateTable(spatialiteDatabase, "punti_accumulo_data")){
+		            Log.v("FORM_EDIT", "Table Found");
+	            }else{
+		            Log.w("FORM_EDIT", "Table could not be created, edits will not be saved");
+	            }
+	            
+	        } catch (Exception e) {
+	            Log.v("FORM_EDIT", Log.getStackTraceString(e));
+	        }
+		}
+		
+		formPagerAdapter = new FormCollectionPagerAdapter(getSupportFragmentManager(),this){
         	MapViewManager mapManager = mapViewManager;
         	@Override 
             public Object instantiateItem(ViewGroup viewGroup, int position) {
@@ -154,33 +183,7 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
 			}
 		});
 
-        // Initialize database
-		if(spatialiteDatabase == null){
-	        try {
-	            
-	            File sdcardDir = ResourcesManager.getInstance(this).getSdcardDir();
-	            File spatialDbFile = new File(sdcardDir, "geocollect/genova.sqlite");
-	
-	            if (!spatialDbFile.getParentFile().exists()) {
-	                throw new RuntimeException();
-	            }
-	            spatialiteDatabase = new jsqlite.Database();
-	            spatialiteDatabase.open(spatialDbFile.getAbsolutePath(), jsqlite.Constants.SQLITE_OPEN_READWRITE
-	                    | jsqlite.Constants.SQLITE_OPEN_CREATE);
-	            
-	            Log.v("FORM_EDIT", SpatialiteUtils.queryVersions(spatialiteDatabase));
-	            
-	            //TODO: remove hardcoded tableName
-	            if(SpatialiteUtils.checkOrCreateTable(spatialiteDatabase, "punti_accumulo_data")){
-		            Log.v("FORM_EDIT", "Table Found");
-	            }else{
-		            Log.w("FORM_EDIT", "Table could not be created, edits will not be saved");
-	            }
-	            
-	        } catch (Exception e) {
-	            Log.v("FORM_EDIT", Log.getStackTraceString(e));
-	        }
-		}
+
     }
 
    

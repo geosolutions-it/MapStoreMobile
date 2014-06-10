@@ -126,6 +126,7 @@ public class FormBuilder {
 				}
 			}
 		}
+		//mFormView.getParent().requestLayout();
 
 	}
 
@@ -153,6 +154,7 @@ public class FormBuilder {
 			//mFormView.addView(infoButton);
 			mapView.setMinimumHeight(100);//it doesn't work, try a different method
 			mapView.setMinimumWidth(100);
+			mapView.setTag(field.fieldId);
 			mFormView.addView(mapView);
 		}
 		

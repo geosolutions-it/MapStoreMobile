@@ -46,9 +46,12 @@
 					"type":"geoPoint",
 					"value":"${origin.the_geom}",
 					"xtype":"mapViewPoint",
+					"fieldId": "GEOMETRY",
 					"attributes":{
 						"editable":false,
-						"description":"${origin.RIFIUTI_NO}"
+						"description":"${origin.RIFIUTI_NO}",
+						"height":640,
+						"displayOriginalValue":true
 					}
 				}]
 	},
