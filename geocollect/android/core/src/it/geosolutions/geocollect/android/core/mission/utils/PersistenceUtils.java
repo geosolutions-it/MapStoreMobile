@@ -8,6 +8,8 @@ import java.util.List;
 
 import org.mapsforge.core.model.GeoPoint;
 
+import com.vividsolutions.jts.geom.Point;
+
 import it.geosolutions.android.map.dto.MarkerDTO;
 import it.geosolutions.android.map.overlay.MarkerOverlay;
 import it.geosolutions.android.map.overlay.items.DescribedMarker;
@@ -289,6 +291,7 @@ public class PersistenceUtils {
 											break;
 										}
 										
+										// do we need to show the origin point?
 										boolean displayOriginalValue = false;
 										if(f.getAttribute("displayOriginalValue")!=null){
 											try{
@@ -303,10 +306,31 @@ public class PersistenceUtils {
 
 											AdvancedMapView amv = ((AdvancedMapView)v);
 											MarkerOverlay mo = amv.getMarkerOverlay();
-											if(!displayOriginalValue){
-												// Remove existing markers
-												mo.getOverlayItems().removeAll(mo.getOverlayItems());
-												mo.getMarkers().removeAll(mo.getMarkers());
+											
+											// Remove existing markers
+											mo.getOverlayItems().removeAll(mo.getOverlayItems());
+											mo.getMarkers().removeAll(mo.getMarkers());
+
+											if(displayOriginalValue){
+												// only from tag is supported
+												List<String> tags = MissionUtils.getTags(f.value);
+												GeoPoint origin_geoPoint = null;
+												if(tags!=null && tags.size() ==1){
+													//Get geometry now geoPoint only supported)
+													//TODO support for different formats
+													Point geom = (Point) mission.getValueByTag(tags.get(0));
+													if(geom !=null){
+														if(!geom.isEmpty()){
+															double lat = geom.getY();
+															double lon = geom.getX();
+															origin_geoPoint = new GeoPoint(lat, lon);
+														}
+													}
+												}
+
+												// Add new marker based on geopoint
+												DescribedMarker origin_marker = new MarkerDTO(origin_geoPoint.latitude, origin_geoPoint.longitude,MarkerDTO.MARKER_BLUE).createMarker(context);
+												mo.getOverlayItems().add(origin_marker);
 											}
 											// TODO : If displayOriginalValue is true, the map should be read-only to prevent mismatch saving marker position on database
 											
@@ -354,12 +378,13 @@ public class PersistenceUtils {
 					// ignore
 				}
 			}
+			
+			return true;
+			
 		}else{
 			Log.w(TAG, "Database not found, aborting...");
 			return false;
 		} // if db
-		
-		return false;
 		
 	}
 	

@@ -188,6 +188,8 @@ public class FormBuilder {
 		
 		//check editable
 		Boolean editable = (Boolean)getAttributeWithDefault(field,"editable",true);
+		//check disablePan
+		Boolean disablePan = (Boolean)getAttributeWithDefault(field,"disablePan",false);
 		//add marker control
 		MarkerControl mc  =new MarkerControl(mapView,editable);
 		//mc.setInfoButton(infoButton);
@@ -205,7 +207,7 @@ public class FormBuilder {
 			mapView.setMapFile(mapFile);
 		}
 		//pannable
-		mapView.setClickable(true);
+		mapView.setClickable(!disablePan);
 		mapView.setBuiltInZoomControls(true);
 		//set center and zoom level limits
 		Integer b = (Integer)getAttributeWithDefault(field,"zoom",18);
