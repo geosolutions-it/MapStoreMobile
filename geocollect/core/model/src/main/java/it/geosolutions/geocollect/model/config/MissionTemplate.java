@@ -34,6 +34,10 @@ public class MissionTemplate implements Serializable{
 	 */
 	private static final long serialVersionUID = 1L;
 	/**
+	 * Identifier of this template
+	 */
+	public String id;
+	/**
 	 * name to display for this Template
 	 */
 	public String title;

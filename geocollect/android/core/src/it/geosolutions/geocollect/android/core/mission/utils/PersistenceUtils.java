@@ -17,6 +17,8 @@ import it.geosolutions.android.map.view.AdvancedMapView;
 import it.geosolutions.geocollect.android.core.form.utils.FormBuilder;
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.widgets.DatePicker;
+import it.geosolutions.geocollect.model.config.MissionTemplate;
+import it.geosolutions.geocollect.model.source.XDataType;
 import it.geosolutions.geocollect.model.viewmodel.Field;
 import it.geosolutions.geocollect.model.viewmodel.Page;
 import it.geosolutions.geocollect.model.viewmodel.type.XType;
@@ -48,7 +50,12 @@ public class PersistenceUtils {
 	 * Stores the view data on given database based on given Page information
 	 */
 	public static boolean storePageData(Page page, LinearLayout layout, Mission mission){
-		return storePageData(page, layout, mission, "punti_accumulo_data");
+		if(mission == null || mission.getTemplate() == null){
+			Log.w(TAG, "Mission or MissionTemplate could not be found, abort saving..");
+			return false;
+		}
+		// TODO parameterize "_data" suffix
+		return storePageData(page, layout, mission, mission.getTemplate().id+"_data");
 	}
 	
 	/**
@@ -122,7 +129,6 @@ public class PersistenceUtils {
 						continue;
 						//break;
 					case mapViewPoint:
-						// TODO Investigate performance of this check
 						AdvancedMapView amv = ((AdvancedMapView)v);
 						if( amv.getMarkerOverlay()==null){
 							Log.v(TAG, "Missing MarkerOverlay for "+f.fieldId);
@@ -161,11 +167,11 @@ public class PersistenceUtils {
 				try {	
 					if(f.xtype == XType.mapViewPoint){
 						// a geometry must be built
-						s = "UPDATE 'punti_accumulo_data' SET "+ f.fieldId +" = "+ value +" WHERE ORIGIN_ID = '"+mission.getOrigin().id+"';";
+						s = "UPDATE '"+tableName+"' SET "+ f.fieldId +" = "+ value +" WHERE ORIGIN_ID = '"+mission.getOrigin().id+"';";
 					}else{
 						// Standard values
 						value = value.replace("'", "''");
-						s = "UPDATE 'punti_accumulo_data' SET "+ f.fieldId +" = '"+ value +"' WHERE ORIGIN_ID = '"+mission.getOrigin().id+"';";
+						s = "UPDATE '"+tableName+"' SET "+ f.fieldId +" = '"+ value +"' WHERE ORIGIN_ID = '"+mission.getOrigin().id+"';";
 					}
 					Log.v(TAG, "Query :\n"+s);
 					if(Database.complete(s)){
@@ -205,7 +211,12 @@ public class PersistenceUtils {
 	 * Default method for loadPageData
 	 */
 	public static boolean loadPageData(Page page, LinearLayout layout, Mission mission, Context context){
-		return loadPageData(page, layout, mission, context, "punti_accumulo_data");
+		if(mission == null || mission.getTemplate() == null){
+			Log.w(TAG, "Mission or MissionTemplate could not be found, abort loading..");
+			return false;
+		}
+		// TODO parameterize "_data" suffix
+		return loadPageData(page, layout, mission, context, mission.getTemplate().id+"_data");
 	}
 	
 	
@@ -385,6 +396,13 @@ public class PersistenceUtils {
 			Log.w(TAG, "Database not found, aborting...");
 			return false;
 		} // if db
+		
+	}
+	
+	public static HashMap<String,XDataType> getTemplateFieldsList(MissionTemplate mt){
+		// TODO implement
+		
+		return null;
 		
 	}
 	

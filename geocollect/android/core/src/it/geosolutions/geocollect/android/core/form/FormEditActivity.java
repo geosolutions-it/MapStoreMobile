@@ -102,11 +102,15 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
 	            Log.v("FORM_EDIT", SpatialiteUtils.queryVersions(spatialiteDatabase));
 	            Log.v("FORM_EDIT", spatialiteDatabase.dbversion());
 	            
-	            //TODO: remove hardcoded tableName
-	            if(SpatialiteUtils.checkOrCreateTable(spatialiteDatabase, "punti_accumulo_data")){
-		            Log.v("FORM_EDIT", "Table Found");
+	            MissionTemplate t = MissionUtils.getDefaultTemplate(this);
+	            if(t != null && t.id != null){
+		            if(SpatialiteUtils.checkOrCreateTable(spatialiteDatabase, t.id+"_data")){
+			            Log.v("FORM_EDIT", "Table Found");
+		            }else{
+			            Log.w("FORM_EDIT", "Table could not be created, edits will not be saved");
+		            }
 	            }else{
-		            Log.w("FORM_EDIT", "Table could not be created, edits will not be saved");
+	            	Log.w("FORM_EDIT", "MissionTemplate could not be found, edits will not be saved");
 	            }
 	            
 	        } catch (Exception e) {

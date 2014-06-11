@@ -97,6 +97,7 @@ public class SpatialiteUtils {
 				// Table not found creating
                 Log.v("SPATIALITE_UTILS", "Table "+tableName+" not found, creating..");
 				
+                // TODO: refactor this
                 if(tableName.equalsIgnoreCase("punti_accumulo_data")){
 
                 	String create_stmt = "CREATE TABLE 'punti_accumulo_data' (" +

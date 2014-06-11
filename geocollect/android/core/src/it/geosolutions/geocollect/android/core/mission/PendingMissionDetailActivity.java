@@ -21,7 +21,9 @@ import java.io.File;
 
 import it.geosolutions.android.map.view.MapViewManager;
 import it.geosolutions.geocollect.android.core.R;
+import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.SpatialiteUtils;
+import it.geosolutions.geocollect.model.config.MissionTemplate;
 
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
@@ -81,11 +83,15 @@ public class PendingMissionDetailActivity extends SherlockFragmentActivity imple
 	            Log.v("MISSION_DETAIL", SpatialiteUtils.queryVersions(spatialiteDatabase));
 	            Log.v("MISSION_DETAIL", spatialiteDatabase.dbversion());
 	            
-	            //TODO: remove hardcoded tableName
-	            if(SpatialiteUtils.checkOrCreateTable(spatialiteDatabase, "punti_accumulo_data")){
-		            Log.v("MISSION_DETAIL", "Table Found");
+	            MissionTemplate t = MissionUtils.getDefaultTemplate(this);
+	            if(t != null && t.id != null){
+		            if(SpatialiteUtils.checkOrCreateTable(spatialiteDatabase, t.id+"_data")){
+			            Log.v("MISSION_DETAIL", "Table Found");
+		            }else{
+			            Log.w("MISSION_DETAIL", "Table could not be created, edits will not be saved");
+		            }
 	            }else{
-		            Log.w("MISSION_DETAIL", "Table could not be created, edits will not be saved");
+	            	Log.w("MISSION_DETAIL", "MissionTemplate could not be found, edits will not be saved");
 	            }
 	            
 	        } catch (Exception e) {
