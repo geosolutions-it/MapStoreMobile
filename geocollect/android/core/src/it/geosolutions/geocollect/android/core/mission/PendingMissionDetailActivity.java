@@ -17,7 +17,6 @@
  */
 package it.geosolutions.geocollect.android.core.mission;
 
-import java.io.File;
 import java.util.HashMap;
 
 import it.geosolutions.android.map.view.MapViewManager;
@@ -38,8 +37,6 @@ import android.support.v4.app.NavUtils;
 import android.util.Log;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
-
-import eu.geopaparazzi.library.util.ResourcesManager;
 
 /**
  * An activity representing a single Pending Mission detail screen. This
@@ -80,7 +77,15 @@ public class PendingMissionDetailActivity extends SherlockFragmentActivity imple
 	            	
 	            	HashMap<String, XDataType> hm = PersistenceUtils.getTemplateFieldsList(t);
 	            	
-		            if(PersistenceUtils.createTableFromTemplate(spatialiteDatabase, t.id+"_data", hm)){
+	            	// default value
+	            	String tableName = t.id+"_data";
+	            	if(t.source != null 
+	            			&& t.source.storeLocally != null
+	            			&& !t.source.storeLocally.isEmpty()){
+	            		tableName = t.source.storeLocally;
+	            	}
+	            	
+		            if(PersistenceUtils.createTableFromTemplate(spatialiteDatabase, tableName, hm)){
 		            		//SpatialiteUtils.checkOrCreateTable(spatialiteDatabase, t.id+"_data")){
 			            Log.v("MISSION_DETAIL", "Table Found");
 		            }else{

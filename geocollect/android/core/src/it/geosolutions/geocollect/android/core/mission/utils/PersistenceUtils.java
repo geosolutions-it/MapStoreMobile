@@ -57,7 +57,14 @@ public class PersistenceUtils {
 			return false;
 		}
 		// TODO parameterize "_data" suffix
-		return storePageData(page, layout, mission, mission.getTemplate().id+"_data");
+    	// default value
+    	String tableName = mission.getTemplate().id+"_data";
+    	if(mission.getTemplate().source != null 
+    			&& mission.getTemplate().source.storeLocally != null
+    			&& !mission.getTemplate().source.storeLocally.isEmpty()){
+    		tableName = mission.getTemplate().source.storeLocally;
+    	}
+		return storePageData(page, layout, mission, tableName);
 	}
 	
 	/**
@@ -131,7 +138,10 @@ public class PersistenceUtils {
 						continue;
 						//break;
 					case mapViewPoint:
-						// TODO: DO NOT SAVE IF EDITABLE IS TRUE
+						if(!(Boolean)FormBuilder.getAttributeWithDefault(f,"editable",true)){
+							// Field is not editable, do not save
+							continue;
+						}
 						AdvancedMapView amv = ((AdvancedMapView)v);
 						if( amv.getMarkerOverlay()==null){
 							Log.v(TAG, "Missing MarkerOverlay for "+f.fieldId);
@@ -219,7 +229,14 @@ public class PersistenceUtils {
 			return false;
 		}
 		// TODO parameterize "_data" suffix
-		return loadPageData(page, layout, mission, context, mission.getTemplate().id+"_data");
+    	// default value
+    	String tableName = mission.getTemplate().id+"_data";
+    	if(mission.getTemplate().source != null 
+    			&& mission.getTemplate().source.storeLocally != null
+    			&& !mission.getTemplate().source.storeLocally.isEmpty()){
+    		tableName = mission.getTemplate().source.storeLocally;
+    	}
+		return loadPageData(page, layout, mission, context, tableName);
 	}
 	
 	

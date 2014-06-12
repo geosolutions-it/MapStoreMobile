@@ -52,5 +52,10 @@ public class WFSSource implements Serializable{
 	 * Map with "propertyName":"propertyType". Can be used to keep in the database or save later
 	 */
 	public HashMap<String,XDataType> dataTypes = new HashMap<String,XDataType>();
+	/**
+	 * Defines the local database table name where the form data should be saved
+	 */
+	public String storeLocally;
+
 	
 }

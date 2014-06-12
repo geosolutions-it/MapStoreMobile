@@ -31,7 +31,6 @@ import it.geosolutions.geocollect.model.viewmodel.Field;
 import it.geosolutions.geocollect.model.viewmodel.Page;
 import it.geosolutions.geocollect.model.viewmodel.type.XType;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 
@@ -52,8 +51,6 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
-
-import eu.geopaparazzi.library.util.ResourcesManager;
 
 public class FormEditActivity extends SherlockFragmentActivity  implements MapActivity  {
 
@@ -99,7 +96,14 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
 	            MissionTemplate t = MissionUtils.getDefaultTemplate(this);
 	            if(t != null && t.id != null){
 	            	HashMap<String, XDataType> hm = PersistenceUtils.getTemplateFieldsList(t);
-		            if(PersistenceUtils.createTableFromTemplate(spatialiteDatabase, t.id+"_data", hm)){
+	            	// default value
+	            	String tableName = t.id+"_data";
+	            	if(t.source != null 
+	            			&& t.source.storeLocally != null
+	            			&& !t.source.storeLocally.isEmpty()){
+	            		tableName = t.source.storeLocally;
+	            	}
+		            if(PersistenceUtils.createTableFromTemplate(spatialiteDatabase, tableName, hm)){
 //		            if(SpatialiteUtils.checkOrCreateTable(spatialiteDatabase, t.id+"_data")){
 			            Log.v("FORM_EDIT", "Table Found");
 		            }else{

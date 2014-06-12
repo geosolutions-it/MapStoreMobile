@@ -147,6 +147,7 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 	    super.onActivityResult(requestCode, resultCode, data);
 	    if(requestCode == EDIT_ACTIVITY_CODE){
 			MissionTemplate t = MissionUtils.getDefaultTemplate(getSherlockActivity());
+
 			PersistenceUtils.loadPageData(t.preview, mFormView, mission, getSherlockActivity());
 
 	    }

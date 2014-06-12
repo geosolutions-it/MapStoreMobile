@@ -35,10 +35,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.widget.FrameLayout;
-import android.widget.ListView;
 
 /**
  * An activity representing a list of Pending Missions. This activity has
