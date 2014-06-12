@@ -12,7 +12,10 @@
 	<string name="accept_mission">Accetta</string>
 	<string name="action_quit">Esci</string>
 	<string name="loading_footer">Loading...</string>
-	 <plurals name="reporting">
+	<string name="sending_data">Invio dati</string>
+	<string name="sending_media">Invo contenuti multimediali</string>
+	
+	<plurals name="reporting">
         <item quantity="one">Una Segnalazione.</item>
         <item quantity="other">%d Segnalazioni.</item>
     </plurals>

@@ -250,6 +250,13 @@
 					"type":"text",
 					"xtype":"separator",
 					"label":"TO BE IMPLEMENTED"
+				}],
+				"actions":[{
+					"id":1,
+					"text":"Scatta Foto",
+					"name":"photos",
+					"type":"photo",
+					iconCls:"ic_camera"
 				}]
 			},{
 				"title": "Invio",
@@ -259,6 +266,28 @@
 					"type":"text",
 					"xtype":"separator",
 					"label":"TO BE IMPLEMENTED"
+				},{
+					"fieldId": "DATA_AGG",
+					"type":"text",
+					"xtype":"label",
+					"label":"Data aggiornamento scheda"
+				},{
+					"fieldId": "TIPOLOGIA_RIFIUTO",
+					"type":"text",
+					"xtype":"label",
+					"label":"Tipologia Rifiuto"
+				},{
+					"fieldId": "QUANTITA_PRESUNTA",
+					"type":"decimal",
+					"xtype":"label",
+					"label":"Quantità Presunta"
+				}],
+				"actions":[{
+					"id":2,
+					"text":"Invia",
+					"type":"send",
+					"name":"send",
+					"iconCls":"ic_send"
 				}]
 			}],
 			

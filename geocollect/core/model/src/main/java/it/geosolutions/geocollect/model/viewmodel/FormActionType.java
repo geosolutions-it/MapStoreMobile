@@ -17,44 +17,13 @@
  */
 package it.geosolutions.geocollect.model.viewmodel;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-
 /**
- * Base class for a Page in the viewmodel
  * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
  *
  */
-public class Page implements Serializable{
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	/**
-	 * the title of the page
-	 */
-	public String title; 
-	/**
-	 * iconCls: the icon associated to this form
-	 */
-	public String iconCls;
-	/**
-	 * The fields in the page
-	 */
-	public ArrayList<Field> fields;
-	/**
-	 * swipe 
-	 */
-	public boolean swipe = true;
-	/**
-	 * page attributes
-	 */
-	public HashMap<String,Object> attributes;
-	
-	/**
-	 * actions
-	 */
-	public ArrayList<FormAction> actions;
+public enum FormActionType {
+	photo,
+	video,
+	send,
+	confirm
 }

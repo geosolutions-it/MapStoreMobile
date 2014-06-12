@@ -346,11 +346,22 @@ public class MarkerControl extends MapControl implements OnTouchListener, OnGest
 	public ImageButton getInfoButton() {
 		return infoButton;
 	}
-
-	public void setInfoButton(ImageButton infoButton) {
+	/**
+	 * Set the info button with the default listener
+	 * @param infoButton
+	 */
+	public void setInfoButton(ImageButton infoButton){
+		setInfoButton(infoButton, null);
+	}
+	/**
+	 * Set the info button with a custom listener
+	 * @param infoButton
+	 * @param infoListener
+	 */
+	public void setInfoButton(ImageButton infoButton, OnClickListener infoListener) {
 		this.infoButton = infoButton;
 		if(infoButton!=null){
-			infoButton.setOnClickListener(this);
+			infoButton.setOnClickListener(infoListener == null ? this : infoListener);
 		}
 	}
 

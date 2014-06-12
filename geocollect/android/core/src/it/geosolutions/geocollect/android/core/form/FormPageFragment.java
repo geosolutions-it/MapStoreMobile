@@ -17,15 +17,22 @@
  */
 package it.geosolutions.geocollect.android.core.form;
 
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+
 import jsqlite.Exception;
 import jsqlite.Stmt;
 import it.geosolutions.android.map.fragment.MapFragment;
 import it.geosolutions.geocollect.android.core.R;
+import it.geosolutions.geocollect.android.core.form.action.AndroidAction;
 import it.geosolutions.geocollect.android.core.form.utils.FormBuilder;
+import it.geosolutions.geocollect.android.core.form.utils.FormUtils;
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.widgets.DatePicker;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
+import it.geosolutions.geocollect.model.viewmodel.FormAction;
 import it.geosolutions.geocollect.model.viewmodel.Field;
 import it.geosolutions.geocollect.model.viewmodel.Page;
 import android.app.Activity;
@@ -86,6 +93,8 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Mission m =  (Mission) getActivity().getIntent().getExtras().getSerializable(ARG_MISSION);
+		mission = m;
 		Log.d(TAG, "onCreate(): savedInstanceState = " + savedInstanceState);
 		Integer pageNumber = (Integer) getArguments().get(ARG_OBJECT);
 		if(pageNumber!=null){
@@ -95,12 +104,60 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 			
 		}
 		if(savedInstanceState !=null){
+			
 			mission = (Mission)savedInstanceState.getSerializable(ARG_MISSION);
 		}
+		setHasOptionsMenu(true);
 		
 	}
 	
+	@Override
+	public void onCreateOptionsMenu(
+	      Menu menu, MenuInflater inflater) {
+		// add actions from the page configuration
+		if(this.page.actions == null) return;
+	   //add actions associated to the page
+	   for(int i = 0;i< this.page.actions.size();i++){
+		   FormAction a =this.page.actions.get(i);
+		   
+		   MenuItem item = menu.add(Menu.NONE, a.id , Menu.NONE, a.text);
+		   item.setIcon(FormUtils.getDrawable(a.iconCls));
+		   item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+		   Log.v("ACTION","added action"+ a.name);
+	   }
+	   super.onCreateOptionsMenu(menu,inflater);
+	}
+	/* (non-Javadoc)
+	 * @see com.actionbarsherlock.app.SherlockFragment#onOptionsItemSelected(com.actionbarsherlock.view.MenuItem)
+	 */
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		int id = item.getItemId();
+		//search for the action using the id (the index should not be supported
+		if(this.page.actions !=null){
+			for(FormAction a : this.page.actions){
+				if(id == a.id){
+					performAction(a);
+				}
+			}
+		}
+		return super.onOptionsItemSelected(item);
+	}
 	
+	/**
+	 * Performs and <Action> in the current page.
+	 * This function is call when the user tap an action
+	 * @param a
+	 */
+	private void performAction(FormAction a) {
+		Log.v("ACTION","performing action"+a);
+		AndroidAction aa = FormUtils.getAndroidAction(a);
+		if(aa!=null){
+			aa.performAction(this, a, mission, page);
+		}
+		
+	}
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
