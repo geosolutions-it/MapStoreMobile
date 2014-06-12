@@ -257,29 +257,32 @@ public class PersistenceUtils {
 
 							if (f.xtype == null) {
 								//textfield as default
-								((TextView)v).setText(st.column_string(0));
+								if(st.column_string(0) != null && v != null)
+									((TextView)v).setText(st.column_string(0));
 							} else {
 								switch (f.xtype) {
 								case textfield:
-									((TextView)v).setText(st.column_string(0));
+									if(st.column_string(0) != null && v != null)
+										((TextView)v).setText(st.column_string(0));
 									break;
 								case textarea:
-									((TextView)v).setText(st.column_string(0));
+									if(st.column_string(0) != null && v != null)
+										((TextView)v).setText(st.column_string(0));
 									break;
 								case datefield:
-									if(st.column_string(0) != null){
+									if(st.column_string(0) != null && v != null){
 										Log.v(TAG, "Setting date :"+st.column_string(0));
 										((DatePicker)v).setDate(st.column_string(0));
 									}
 									break;
 								case checkbox:
-									if(st.column_string(0) != null){
+									if(st.column_string(0) != null && v != null){
 										Log.v(TAG, "Setting checkbox value :"+st.column_string(0));
 										((CheckBox)v).setChecked(st.column_string(0).equals("1"));
 									}
 									break;
 								case spinner:
-									if(st.column_string(0) != null){
+									if(st.column_string(0) != null && v != null){
 										Log.v(TAG, "Setting spinner value :"+st.column_string(0));
 										String fieldValue = st.column_string(0);
 										List<HashMap<String, String>> l = FormBuilder.getFieldAllowedData(f);
@@ -292,7 +295,9 @@ public class PersistenceUtils {
 									}
 									break;
 								case label:
-									// skip
+									if(st.column_string(0) != null && v != null){
+										((TextView)v).setText(st.column_string(0));
+									}
 									break;
 								case separator:
 									// skip
@@ -364,7 +369,8 @@ public class PersistenceUtils {
 									break;
 								default:
 									//textfield as default
-									((TextView)v).setText(st.column_string(0));
+									if(st.column_string(0) != null && v != null)
+										((TextView)v).setText(st.column_string(0));
 								}
 							}							
 						}else{

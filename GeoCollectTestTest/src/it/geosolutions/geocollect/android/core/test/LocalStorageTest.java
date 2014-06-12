@@ -25,7 +25,7 @@ import android.widget.LinearLayout;
 /**
  * Test Class for PersistenceUtils Class
  * 
- * @author Lorenzo
+ * @author Lorenzo Pini
  *
  */
 public class LocalStorageTest extends android.test.AndroidTestCase {

@@ -273,6 +273,7 @@ public class FormBuilder {
 		// (content) of this view across screen configuration changes
 		//int type = getInputType(field);
 		text.setId(id());
+		text.setTag(field.fieldId);
 		//text.setInputType(type);
 		text.setText( mission.getValueAsString(field));//TODO make it parameterizable
 		mFormView.addView(tvLabel);
