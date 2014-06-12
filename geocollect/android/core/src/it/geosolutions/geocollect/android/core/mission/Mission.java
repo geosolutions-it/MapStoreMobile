@@ -18,10 +18,9 @@
 package it.geosolutions.geocollect.android.core.mission;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import jsqlite.Database;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
@@ -46,6 +45,10 @@ public class Mission implements Serializable{
 	
 	private MissionTemplate template;
 	private Feature origin;
+	/**
+	 * Reference of the SQLite/Spatialite Database
+	 */
+	transient public Database db;
 	
 	/**
 	 * provides a <String> value for the <Field>. The <Field> class's value attribute

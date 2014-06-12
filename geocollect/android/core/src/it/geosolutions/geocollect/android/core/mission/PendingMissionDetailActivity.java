@@ -17,8 +17,14 @@
  */
 package it.geosolutions.geocollect.android.core.mission;
 
+import java.io.File;
+
 import it.geosolutions.android.map.view.MapViewManager;
 import it.geosolutions.geocollect.android.core.R;
+import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
+import it.geosolutions.geocollect.android.core.mission.utils.SpatialiteUtils;
+import it.geosolutions.geocollect.model.config.MissionTemplate;
+
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
 
@@ -29,6 +35,8 @@ import android.support.v4.app.NavUtils;
 import android.util.Log;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+
+import eu.geopaparazzi.library.util.ResourcesManager;
 
 /**
  * An activity representing a single Pending Mission detail screen. This
@@ -43,6 +51,11 @@ public class PendingMissionDetailActivity extends SherlockFragmentActivity imple
 
 	private MapViewManager mapViewManager;
 
+	/**
+	 * Spatialite Database for persistence
+	 */
+	jsqlite.Database spatialiteDatabase;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -52,7 +65,40 @@ public class PendingMissionDetailActivity extends SherlockFragmentActivity imple
 		}
 		// Show the Up button in the action bar.
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+		
+		// Initialize database
+		if(spatialiteDatabase == null){
+	        try {
+	            
+	            File sdcardDir = ResourcesManager.getInstance(this).getSdcardDir();
+	            File spatialDbFile = new File(sdcardDir, "geocollect/genova.sqlite");
+	
+	            if (!spatialDbFile.getParentFile().exists()) {
+	                throw new RuntimeException();
+	            }
+	            spatialiteDatabase = new jsqlite.Database();
+	            spatialiteDatabase.open(spatialDbFile.getAbsolutePath(), jsqlite.Constants.SQLITE_OPEN_READWRITE
+	                    | jsqlite.Constants.SQLITE_OPEN_CREATE);
+	            
+	            Log.v("MISSION_DETAIL", SpatialiteUtils.queryVersions(spatialiteDatabase));
+	            Log.v("MISSION_DETAIL", spatialiteDatabase.dbversion());
+	            
+	            MissionTemplate t = MissionUtils.getDefaultTemplate(this);
+	            if(t != null && t.id != null){
+		            if(SpatialiteUtils.checkOrCreateTable(spatialiteDatabase, t.id+"_data")){
+			            Log.v("MISSION_DETAIL", "Table Found");
+		            }else{
+			            Log.w("MISSION_DETAIL", "Table could not be created, edits will not be saved");
+		            }
+	            }else{
+	            	Log.w("MISSION_DETAIL", "MissionTemplate could not be found, edits will not be saved");
+	            }
+	            
+	        } catch (Exception e) {
+	            Log.v("MISSION_DETAIL", Log.getStackTraceString(e));
+	        }
+		}
+		
 		// savedInstanceState is non-null when there is fragment state
 		// saved from previous configurations of this activity
 		// (e.g. when rotating the screen from portrait to landscape).
@@ -149,6 +195,14 @@ public class PendingMissionDetailActivity extends SherlockFragmentActivity imple
              super.onDestroy();
              if(this.mapViewManager!=null){
             	 this.mapViewManager.destroyMapViews();
+             }
+             if(this.spatialiteDatabase!=null){
+            	 try {
+					this.spatialiteDatabase.close();
+ 		            Log.v("MISSION_DETAIL", "Spatialite Database Closed");
+				} catch (jsqlite.Exception e) {
+		            Log.e("MISSION_DETAIL", Log.getStackTraceString(e));
+				}
              }
      }
 }
