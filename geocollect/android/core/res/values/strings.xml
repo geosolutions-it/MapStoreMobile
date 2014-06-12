@@ -12,6 +12,8 @@
 	<string name="accept_mission">Accept</string>
 	<string name="action_quit">Quit</string>
 	<string name="loading_footer">Loading...</string>
+	<string name="sending_data">Sending data</string>
+	<string name="sending_media">Sending media content</string>
 	 <plurals name="reporting">
         <item quantity="one">One reporting</item>
         <item quantity="other">%d reportings.</item>

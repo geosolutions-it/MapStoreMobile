@@ -18,43 +18,52 @@
 package it.geosolutions.geocollect.model.viewmodel;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * Base class for a Page in the viewmodel
+ * Configuration for an action in the ActionBar 
  * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
  *
  */
-public class Page implements Serializable{
-
+public class FormAction implements Serializable{
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	/**
-	 * the title of the page
+	 * identifier. This is mandatory, to make the action unique on the system
 	 */
-	public String title; 
+	public int id;
 	/**
-	 * iconCls: the icon associated to this form
+	 * icon to use for action
 	 */
 	public String iconCls;
 	/**
-	 * The fields in the page
+	 * Caption for the action
 	 */
-	public ArrayList<Field> fields;
+	public String text;
 	/**
-	 * swipe 
+	 * A name to associate to the action
 	 */
-	public boolean swipe = true;
+	public String name;
 	/**
-	 * page attributes
+	 * Type of the action. The default value is confirm
+	 */
+	public FormActionType type=FormActionType.confirm;
+
+	/**
+	 * Attributes for this action
 	 */
 	public HashMap<String,Object> attributes;
-	
 	/**
-	 * actions
+	 * The data model to populate  and give to the service(can be different for each service)
 	 */
-	public ArrayList<FormAction> actions;
+	public Object dataModel;
+	@Override
+	public String toString() {
+		return "Action [id=" + id + ", text=" + text + ", name=" + name
+				+ ", type=" + type + "]";
+	}
+	
+	
 }

@@ -32,7 +32,7 @@ public class NavUtils {
 		return new NavDrawerItem[] {
                 NavMenuSection.create( 100, app.getString(R.string.action_mission)),//TODO translate
                 NavMenuItem.create(101,app.getString(R.string.reporting), "ic_collections_view_as_list", false, app),
-                NavMenuItem.create(102, app.getString(R.string.map), "ic_location_map", true, app), 
+                NavMenuItem.create(102, app.getString(R.string.map), "ic_location_map", false, app), 
                 NavMenuSection.create(200,app.getString(R.string.general)),
                 NavMenuItem.create(203, app.getString(R.string.action_settings), "ic_action_settings", false, app), 
                 NavMenuItem.create(204, app.getString(R.string.action_quit), "ic_navigation_quit_light", false, app)};

@@ -15,46 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.geosolutions.geocollect.model.viewmodel;
+package it.geosolutions.geocollect.android.core.form.action;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
+import android.content.Context;
+import android.os.Bundle;
 
 /**
- * Base class for a Page in the viewmodel
+ * Listener that perform actions after success or failure for and android action
+ * The methods provide the current context of the application to call the current
+ * activity methods
  * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
  *
  */
-public class Page implements Serializable{
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	/**
-	 * the title of the page
-	 */
-	public String title; 
-	/**
-	 * iconCls: the icon associated to this form
-	 */
-	public String iconCls;
-	/**
-	 * The fields in the page
-	 */
-	public ArrayList<Field> fields;
-	/**
-	 * swipe 
-	 */
-	public boolean swipe = true;
-	/**
-	 * page attributes
-	 */
-	public HashMap<String,Object> attributes;
-	
-	/**
-	 * actions
-	 */
-	public ArrayList<FormAction> actions;
+public interface ActionResultListener {
+	public abstract void onActionSuccess(Context ctx, Bundle successData);
+	public abstract void onActionFailure(Context ctx, Bundle errorData);
 }
