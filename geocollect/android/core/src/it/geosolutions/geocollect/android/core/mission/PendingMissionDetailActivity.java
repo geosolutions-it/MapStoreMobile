@@ -18,12 +18,15 @@
 package it.geosolutions.geocollect.android.core.mission;
 
 import java.io.File;
+import java.util.HashMap;
 
 import it.geosolutions.android.map.view.MapViewManager;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
+import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.SpatialiteUtils;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
+import it.geosolutions.geocollect.model.source.XDataType;
 
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
@@ -68,24 +71,17 @@ public class PendingMissionDetailActivity extends SherlockFragmentActivity imple
 		
 		// Initialize database
 		if(spatialiteDatabase == null){
-	        try {
-	            
-	            File sdcardDir = ResourcesManager.getInstance(this).getSdcardDir();
-	            File spatialDbFile = new File(sdcardDir, "geocollect/genova.sqlite");
-	
-	            if (!spatialDbFile.getParentFile().exists()) {
-	                throw new RuntimeException();
-	            }
-	            spatialiteDatabase = new jsqlite.Database();
-	            spatialiteDatabase.open(spatialDbFile.getAbsolutePath(), jsqlite.Constants.SQLITE_OPEN_READWRITE
-	                    | jsqlite.Constants.SQLITE_OPEN_CREATE);
-	            
-	            Log.v("MISSION_DETAIL", SpatialiteUtils.queryVersions(spatialiteDatabase));
-	            Log.v("MISSION_DETAIL", spatialiteDatabase.dbversion());
-	            
+	        
+			spatialiteDatabase = SpatialiteUtils.openSpatialiteDB(this, "geocollect/genova.sqlite");
+			
+			if(spatialiteDatabase != null && !spatialiteDatabase.dbversion().equals("unknown")){
 	            MissionTemplate t = MissionUtils.getDefaultTemplate(this);
 	            if(t != null && t.id != null){
-		            if(SpatialiteUtils.checkOrCreateTable(spatialiteDatabase, t.id+"_data")){
+	            	
+	            	HashMap<String, XDataType> hm = PersistenceUtils.getTemplateFieldsList(t);
+	            	
+		            if(PersistenceUtils.createTableFromTemplate(spatialiteDatabase, t.id+"_data", hm)){
+		            		//SpatialiteUtils.checkOrCreateTable(spatialiteDatabase, t.id+"_data")){
 			            Log.v("MISSION_DETAIL", "Table Found");
 		            }else{
 			            Log.w("MISSION_DETAIL", "Table could not be created, edits will not be saved");
@@ -93,10 +89,8 @@ public class PendingMissionDetailActivity extends SherlockFragmentActivity imple
 	            }else{
 	            	Log.w("MISSION_DETAIL", "MissionTemplate could not be found, edits will not be saved");
 	            }
-	            
-	        } catch (Exception e) {
-	            Log.v("MISSION_DETAIL", Log.getStackTraceString(e));
-	        }
+			}
+
 		}
 		
 		// savedInstanceState is non-null when there is fragment state

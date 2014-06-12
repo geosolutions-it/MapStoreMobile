@@ -88,12 +88,6 @@ public class PersTest extends android.test.AndroidTestCase {
             Log.v("MISSION_DETAIL", SpatialiteUtils.queryVersions(spatialiteDatabase));
             Log.v("MISSION_DETAIL", spatialiteDatabase.dbversion());
             
-            if(SpatialiteUtils.checkOrCreateTable(spatialiteDatabase, "punti_accumulo_data")){
-	            Log.v("MISSION_DETAIL", "Table Found");
-            }else{
-	            Log.w("MISSION_DETAIL", "Table could not be created, edits will not be saved");
-            }
-            
             m.db = spatialiteDatabase;
 
         } catch (Exception e) {

@@ -5,6 +5,8 @@ package it.geosolutions.geocollect.android.core.mission.utils;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.mapsforge.core.model.GeoPoint;
 
@@ -129,6 +131,7 @@ public class PersistenceUtils {
 						continue;
 						//break;
 					case mapViewPoint:
+						// TODO: DO NOT SAVE IF EDITABLE IS TRUE
 						AdvancedMapView amv = ((AdvancedMapView)v);
 						if( amv.getMarkerOverlay()==null){
 							Log.v(TAG, "Missing MarkerOverlay for "+f.fieldId);
@@ -399,11 +402,165 @@ public class PersistenceUtils {
 		
 	}
 	
+	/**
+	 * Lists all the fields with the associated field type contained in the give MissionTemplate
+	 * or null if no MissionTemplate, no Form or can be found
+	 * @param mt
+	 * @return
+	 */
 	public static HashMap<String,XDataType> getTemplateFieldsList(MissionTemplate mt){
 		// TODO implement
+		// what if the same field name is found, but with different type?
 		
-		return null;
+		if(mt == null){
+			Log.v(TAG, "MissionTemplate not found");
+			return null;
+		}
 		
+		if(mt.form == null){
+			Log.v(TAG, "Form not found");
+			return null;
+		}
+		
+		HashMap<String,XDataType> fieldsList = new HashMap<String, XDataType>();
+		
+		if(mt.form.pages != null && mt.form.pages.size()>0 ){
+			
+			for(Page p : mt.form.pages){
+				if (p.fields != null & p.fields.size()>0){
+					
+					for(Field f : p.fields){
+						
+						// Add only valid couples "fieldId":"type"
+						if(f.fieldId != null 
+								&& !f.fieldId.isEmpty()
+								&& f.type != null
+								&& !fieldsList.containsKey(f.fieldId)){
+							
+							fieldsList.put(f.fieldId, f.type);
+							
+						}
+						
+					}
+					
+				}
+			}
+			
+		}
+		
+		return fieldsList;
+		
+	}
+
+	/**
+	 * Creates a table with the given tableName and data types in the given db
+	 * @param db
+	 * @param string
+	 * @param templateDataTypes
+	 */
+	public static boolean createTableFromTemplate(Database db, String tableName,
+			HashMap<String, XDataType> templateDataTypes) {
+		
+		if(tableName == null || tableName.isEmpty()){
+			Log.v(TAG, "No tableName, cannot create table");
+			return false;
+		}
+		
+		if (db != null){
+			
+	        String query = "SELECT name FROM sqlite_master WHERE type='table' AND name='"+tableName+"'";
+
+	        boolean found = false;
+	        try {
+	            Stmt stmt = db.prepare(query);
+	            if( stmt.step() ) {
+	                String nomeStr = stmt.column_string(0);
+	                found = true;
+	                Log.v(TAG, "Found table: "+nomeStr);
+	            }
+	            stmt.close();
+	        } catch (Exception e) {
+	            Log.e(TAG, Log.getStackTraceString(e));
+	            return false;
+	        }
+
+			if(found){
+				return true;
+			}else{
+				// Table not found creating
+                Log.v(TAG, "Table "+tableName+" not found, creating..");
+				
+            	String create_stmt = "CREATE TABLE '"+tableName+"' (" +
+            			"'ORIGIN_ID' TEXT" ;
+            	
+            	if(templateDataTypes != null && !templateDataTypes.isEmpty()){
+    				Log.v(TAG, "templateDataTypes size: "+templateDataTypes.size());
+            		for(Entry<String, XDataType> e : templateDataTypes.entrySet()){
+            			if(e.getKey()!=null && e.getValue()!= null)
+            				create_stmt = create_stmt + ", '"+e.getKey()+"' "+SpatialiteUtils.getSQLiteTypeFromString(e.getValue().toString());
+            			
+            		}
+
+            	}
+            	
+            			//
+            	create_stmt =create_stmt + ");";
+
+                Log.v(TAG, "Create statement: "+create_stmt);
+            	if(!Database.complete(create_stmt)){
+    				Log.w(TAG, "Create statement is not complete:\n"+create_stmt);
+    				return false;
+    			}
+            	
+            	// TODO: manage different geometry types and srid
+            	String add_geom_stmt = "SELECT AddGeometryColumn('"+tableName+"', 'GEOMETRY', 4326, 'POINT', 'XY');";
+            	if(!Database.complete(add_geom_stmt)){
+    				Log.w(TAG, "AddGeometryColumn statement is not complete:\n"+add_geom_stmt);
+    				return false;
+    			}
+            	
+            	String create_idx_stmt = "SELECT CreateSpatialIndex('"+tableName+"', 'GEOMETRY');";
+            	if(!Database.complete(create_idx_stmt)){
+    				Log.w(TAG, "CreateSpatialIndex statement is not complete:\n"+create_idx_stmt);
+    				return false;
+    			}
+                
+            	try {                	
+            		Stmt stmt01 = db.prepare(create_stmt);
+
+            		// Create statements returns empty result set, the step() call return value will always be FALSE
+					stmt01.step();
+					
+					if(!db.prepare("PRAGMA table_info('"+tableName+"');").step()){
+	    				Log.w(TAG, "Table could not be created");
+	    				return false;
+					}
+					
+					stmt01 = db.prepare(add_geom_stmt);
+					if (stmt01.step()) {
+					    Log.v(TAG, "Geometry Column Added "+stmt01.column_string(0));
+					}
+					
+					stmt01 = db.prepare(create_idx_stmt);
+					if (stmt01.step()) {
+					    Log.v(TAG, "Index Created");
+					}
+					
+					stmt01.close();
+					
+				} catch (jsqlite.Exception e) {
+					Log.e(TAG, Log.getStackTraceString(e));
+					return false;
+				}
+            	return true;
+            	
+			}
+			
+		}else{
+			Log.w(TAG, "No valid database received, aborting..");
+		}
+		
+		return false;
 	}
 	
 }

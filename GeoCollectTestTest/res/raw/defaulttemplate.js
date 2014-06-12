@@ -1,5 +1,5 @@
 ﻿{
-	"id":"punti_abbandono",
+	"id":"punti_accumulo",
 	"title": "Punti Abbandono",
 	"source":{
 		"type":"WFS",

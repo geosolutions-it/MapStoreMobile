@@ -28,6 +28,8 @@ public enum XDataType {
 	integer,
 	decimal,
 	phone,
-	person
+	person,
+	real,
+	text
 }
 
