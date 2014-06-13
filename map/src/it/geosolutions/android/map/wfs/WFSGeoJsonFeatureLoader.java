@@ -23,7 +23,7 @@ import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import java.util.HashMap;
 import java.util.List;
 
-import android.app.Activity;
+import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 /**
  * AsyncTaskLoader to load Features from WFS Service in GeoJson format.
@@ -45,7 +45,7 @@ public class WFSGeoJsonFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 	HashMap<String,String> parameters;
 	public Integer totalCount;//This hack allow infinite scrolling without total count limits.
 
-	public WFSGeoJsonFeatureLoader(Activity context,
+	public WFSGeoJsonFeatureLoader(Context context,
 			String url,HashMap<String,String> parameters,String typeName,int start,int limit) {
 		super(context);
 		wfs_url = url;
