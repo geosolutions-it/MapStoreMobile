@@ -18,4 +18,5 @@
         <item quantity="one">One reporting</item>
         <item quantity="other">%d reportings.</item>
     </plurals>
+    <string name="reload">Reload</string>
 </resources>

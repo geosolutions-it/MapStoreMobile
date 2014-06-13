@@ -19,4 +19,5 @@
         <item quantity="one">Una Segnalazione.</item>
         <item quantity="other">%d Segnalazioni.</item>
     </plurals>
+    <string name="reload">Ricarica</string>
 </resources>

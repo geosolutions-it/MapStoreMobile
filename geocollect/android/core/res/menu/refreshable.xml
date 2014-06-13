@@ -6,7 +6,7 @@
     <item android:id="@+id/refresh"
           android:icon="@drawable/ic_navigation_refresh"
           android:showAsAction="always"
-          android:title="@string/accept_mission"
+          android:title="@string/reload"
            /> 
 
 </menu>
