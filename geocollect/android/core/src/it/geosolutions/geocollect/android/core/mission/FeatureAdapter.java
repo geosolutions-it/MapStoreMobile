@@ -103,6 +103,8 @@ public View getView(int position, View convertView, ViewGroup parent) {
 	        	Object prop =result.properties.get(this.template.nameField);
 	        	if(prop!=null){
 	        		name.setText(prop.toString());//TODO: format options
+	        	}else{
+	        		name.setText("");
 	        	}
 	            
 	        }
@@ -113,6 +115,8 @@ public View getView(int position, View convertView, ViewGroup parent) {
 	        	Object prop =result.properties.get(this.template.descriptionField);
 	        	if(prop!=null){
 	        		desc.setText(prop.toString());//TODO: format options
+	        	}else{
+	        		desc.setText("");
 	        	}
 	            
 	        }
