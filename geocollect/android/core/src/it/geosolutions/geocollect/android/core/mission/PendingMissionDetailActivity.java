@@ -87,7 +87,12 @@ public class PendingMissionDetailActivity extends SherlockFragmentActivity imple
 	            	
 		            if(PersistenceUtils.createTableFromTemplate(spatialiteDatabase, tableName, hm)){
 		            		//SpatialiteUtils.checkOrCreateTable(spatialiteDatabase, t.id+"_data")){
-			            Log.v("MISSION_DETAIL", "Table Found");
+		            	Log.v("MISSION_DETAIL", "Table Found, checking for schema updates");
+			            if(PersistenceUtils.updateTableFromTemplate(spatialiteDatabase, tableName, hm)){
+			            	Log.v("MISSION_DETAIL", "All good");
+			            }else{
+			            	Log.w("MISSION_DETAIL", "Something went wrong during the update, the data can be inconsistent");
+			            }
 		            }else{
 			            Log.w("MISSION_DETAIL", "Table could not be created, edits will not be saved");
 		            }

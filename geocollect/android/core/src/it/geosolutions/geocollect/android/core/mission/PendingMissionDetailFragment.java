@@ -82,7 +82,9 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 		super.onCreate(savedInstanceState);
 
 		if (getArguments().containsKey(ARG_ITEM_ID)) {
-			//TODO get the Feature from db
+			// TODO: get the Feature from db
+			Log.d(TAG, "onCreate() ARG_ITEM_ID: " + getArguments().getString(ARG_ITEM_ID));
+			
 		}
 		setHasOptionsMenu(true);
 	}
@@ -197,6 +199,9 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 		
 	}
     
+    /**
+     * Load the mission and template data either from the database or from the intent
+     */
     public Loader<Void> onCreateLoader(int id, Bundle args) {
 		Log.d(TAG, "onCreateLoader(): id=" + id);
 		Loader<Void> loader = new AsyncTaskLoader<Void>(getActivity()) {

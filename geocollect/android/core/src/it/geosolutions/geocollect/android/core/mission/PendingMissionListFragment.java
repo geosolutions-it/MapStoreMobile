@@ -19,14 +19,12 @@ package it.geosolutions.geocollect.android.core.mission;
 
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.R;
-import it.geosolutions.geocollect.android.core.form.FormEditActivity;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 
 import java.util.List;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -344,6 +342,9 @@ public class PendingMissionListFragment
 	     return loader; 
 	}
 
+	/**
+	 * 
+	 */
 	/* (non-Javadoc)
 	 * @see android.support.v4.app.LoaderManager.LoaderCallbacks#onLoadFinished(android.support.v4.content.Loader, java.lang.Object)
 	 */
@@ -377,6 +378,7 @@ public class PendingMissionListFragment
 		adapter.clear();
 		
 	}
+	
 	/**
 	 * Loads more data from the Loader
 	 */
@@ -390,6 +392,7 @@ public class PendingMissionListFragment
 			
 		}
 	}
+	
 	/**
 	 * Create the data loader and bind the loader to the
 	 * parent callbacks

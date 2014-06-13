@@ -3,9 +3,9 @@
  */
 package it.geosolutions.geocollect.android.core.mission.utils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import org.mapsforge.core.model.GeoPoint;
@@ -162,7 +162,7 @@ public class PersistenceUtils {
 						if(amv.getMarkerOverlay().getMarkers().get(0).getGeoPoint() != null){
 							GeoPoint g = amv.getMarkerOverlay().getMarkers().get(0).getGeoPoint();
 							if(g != null){
-								value = "MakePoint("+g.latitude+","+g.longitude+", 4326)";
+								value = "MakePoint("+g.longitude+","+g.latitude+", 4326)";
 							}else{
 								Log.v(TAG, "Missing Geopoint for "+f.fieldId);
 								continue;
@@ -263,7 +263,7 @@ public class PersistenceUtils {
 					// TODO: load all the fields in one query
 					if(f.xtype == XType.mapViewPoint){
 						// a point must be retreived
-						s = "SELECT X("+ f.fieldId +"), Y("+ f.fieldId +") FROM '"+tableName+"' WHERE ORIGIN_ID = '"+mission.getOrigin().id+"';";
+						s = "SELECT Y("+ f.fieldId +"), X("+ f.fieldId +") FROM '"+tableName+"' WHERE ORIGIN_ID = '"+mission.getOrigin().id+"';";
 					}else{
 						s = "SELECT "+ f.fieldId +" FROM '"+tableName+"' WHERE ORIGIN_ID = '"+mission.getOrigin().id+"';";
 					}
@@ -474,15 +474,28 @@ public class PersistenceUtils {
 		return fieldsList;
 		
 	}
-
 	/**
 	 * Creates a table with the given tableName and data types in the given db
+	 * Does not convert the table if already exists
 	 * @param db
 	 * @param string
 	 * @param templateDataTypes
 	 */
 	public static boolean createTableFromTemplate(Database db, String tableName,
 			HashMap<String, XDataType> templateDataTypes) {
+		return createTableFromTemplate(db, tableName, templateDataTypes, false);
+	}
+	
+	/**
+	 * Creates a table with the given tableName and data types in the given db
+	 * If the table already exists and convertIfNeeded is true, tries to edit the table to match the given template
+	 * @param db
+	 * @param string
+	 * @param templateDataTypes
+	 * @param convertIfNeeded
+	 */
+	public static boolean createTableFromTemplate(Database db, String tableName,
+			HashMap<String, XDataType> templateDataTypes, boolean convertIfNeeded) {
 		
 		if(tableName == null || tableName.isEmpty()){
 			Log.v(TAG, "No tableName, cannot create table");
@@ -508,6 +521,65 @@ public class PersistenceUtils {
 	        }
 
 			if(found){
+				if(convertIfNeeded){
+					// TODO should call updateTableFromTemplate
+					// table_info lists the columns of the given table
+			        String table_info_query = "PRAGMA table_info('"+tableName+"');";
+			        int nameColumn = -1;
+			        int typeColumn = -1;
+			        String columnName, typeName;
+			        boolean origin_id_found = false;
+			        boolean pk_uid_found = false;
+			        try {
+			            Stmt stmt = db.prepare(table_info_query);
+			            while( stmt.step() ) {
+			                found = true;
+			                if(nameColumn<0 || typeColumn<0){
+			                	// I have to retrieve the position of the metadata fields
+			                	for(int i = 0; i<stmt.column_count(); i++){
+			                		Log.v(TAG, stmt.column_name(i));
+			                		if(stmt.column_name(i).equalsIgnoreCase("name")){
+			                			nameColumn = i;
+			                		}
+			                		if(stmt.column_name(i).equalsIgnoreCase("type")){
+			                			typeColumn = i;
+			                		}
+			                	}
+			                }
+			                
+			                columnName = stmt.column_string(nameColumn);
+			                if(columnName != null){
+			                	origin_id_found = origin_id_found || columnName.equalsIgnoreCase("ORIGIN_ID");
+			                	pk_uid_found = pk_uid_found || columnName.equalsIgnoreCase("PK_UID");			                	
+			                }else{
+			                	// This should never happen
+			                	Log.v(TAG, "Found a NULL column name, this is strange.");
+			                }
+			            }
+			            stmt.close();
+			            
+			            if(!origin_id_found){
+			            	
+			            	stmt = db.prepare("ALTER TABLE '"+tableName+"' ADD COLUMN 'ORIGIN_ID' TEXT;");
+			            	stmt.step();
+			            	stmt.close();
+			            	
+			            	if(pk_uid_found){
+				            	stmt = db.prepare("UPDATE '"+tableName+"' SET ORIGIN_ID = PK_UID;");
+				            	stmt.step();
+				            	stmt.close();
+			            	}
+			            }
+			            
+			            // TODO: PersistenceUtils.updateTableFromTemplate()			            
+			            
+			        } catch (Exception e) {
+			            Log.e(TAG, Log.getStackTraceString(e));
+			            return false;
+			        }
+
+					
+				}
 				return true;
 			}else{
 				// Table not found creating
@@ -577,6 +649,143 @@ public class PersistenceUtils {
 				}
             	return true;
             	
+			}
+			
+		}else{
+			Log.w(TAG, "No valid database received, aborting..");
+		}
+		
+		return false;
+	}
+
+	/**
+	 * Compare a table schema with the one provided and changes it accordingly
+	 * Create columns based on the given templateDataTypes
+	 * @param db
+	 * @param tableName
+	 * @param templateDataTypes2
+	 * @return
+	 */
+	// TODO: Add EnableDropColumn parameter
+	public static boolean updateTableFromTemplate(Database db, String tableName,
+			HashMap<String, XDataType> templateDataTypes2) {
+
+
+		if(tableName == null || tableName.isEmpty()){
+			Log.v(TAG, "No tableName, cannot create table");
+			return false;
+		}
+		
+		if(templateDataTypes2 == null){
+			Log.v(TAG, "No templateDataTypes given, aborting");
+			return false;
+		}
+		
+
+		if (db != null){
+			
+			HashMap<String, XDataType> newschema = new HashMap<String, XDataType>( templateDataTypes2);
+			
+			// table_info lists the columns of the given table
+	        String query = "PRAGMA table_info('"+tableName+"');";
+	        int nameColumn = -1;
+	        int typeColumn = -1;
+	        String columnName, typeName;
+
+	        boolean found = false;
+	        ArrayList<String> queriesToBeRun = new ArrayList<String>();
+	        ArrayList<String> old = new ArrayList<String>();
+	        try {
+	            Stmt stmt = db.prepare(query);
+	            while( stmt.step() ) {
+	                found = true;
+	                if(nameColumn<0 || typeColumn<0){
+	                	// I have to retrieve the position of the metadata fields
+	                	for(int i = 0; i<stmt.column_count(); i++){
+	                		Log.v(TAG, stmt.column_name(i));
+	                		if(stmt.column_name(i).equalsIgnoreCase("name")){
+	                			nameColumn = i;
+	                		}
+	                		if(stmt.column_name(i).equalsIgnoreCase("type")){
+	                			typeColumn = i;
+	                		}
+	                	}
+	                }
+	                
+	                columnName = stmt.column_string(nameColumn);
+	                if(columnName != null){
+	                	old.add(columnName);
+	                }else{
+	                	// Well, this is strange
+	                	Log.v(TAG, "Found a NULL column name, this is strange.");
+	                }
+	            }
+	            stmt.close();
+	        } catch (Exception e) {
+	            Log.e(TAG, Log.getStackTraceString(e));
+	            return false;
+	        }
+
+			if(found){
+				//compute diff
+				/*
+				// Check fields to be removed
+				for(String oldFieldName : old){
+					if(templateDataTypes2.containsKey(oldFieldName)){
+						queryListToBeRun.add("")
+					}
+				}
+				*/
+				
+				//List fields to be added
+				
+				Log.v(TAG, "templateDataTypes size: "+newschema.size());
+				for(String oldFieldName : old){
+					XDataType got = newschema.remove(oldFieldName);
+					if(got == null){
+						// this column should be dropped
+					}else{
+						// Check type?
+					}
+				}
+				
+				Log.v(TAG, "Found "+newschema.size()+" fields to be added");
+        		for(Entry<String, XDataType> e : newschema.entrySet()){
+        			if(e.getKey()!=null && e.getValue()!= null)
+        				queriesToBeRun.add("ALTER TABLE '"+tableName+"' ADD COLUMN '"+e.getKey()+"' "+SpatialiteUtils.getSQLiteTypeFromString(e.getValue().toString())+";");
+        		}
+
+        		// Log out
+        		for(String s : queriesToBeRun){
+        			Log.v(TAG, "Query : "+s);
+        			if(!Database.complete(s)){
+        				Log.w(TAG, "The query is not complete: "+s);
+        				return false;
+        			}
+        		}
+        		Stmt stmt;
+        		// Execute queries
+        		try {
+        			
+        			// TODO: Investigate transaction for concurrency
+        			
+        			for(String s : queriesToBeRun){
+	                    stmt = db.prepare(s);
+	                    stmt.step(); // step on an ALTER query always returns false
+	                    stmt.close();
+        			}
+        			
+                } catch (Exception e) {
+                    Log.e(TAG,  Log.getStackTraceString(e));
+                    return false;
+                }
+        		
+        		
+				return true;
+			}else{
+				// Table not found
+                Log.v(TAG, "Table "+tableName+" not found.");
+				return false;
 			}
 			
 		}else{

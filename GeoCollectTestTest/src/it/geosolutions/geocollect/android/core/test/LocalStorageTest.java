@@ -186,10 +186,205 @@ public class LocalStorageTest extends android.test.AndroidTestCase {
 	 */
 	public void testAlignFieldsOnDatabase(){
 		
+		db = SpatialiteUtils.openSpatialiteDB(getContext(), "geocollect/test.sqlite");
+		
+		assertNotNull(db);
+		Gson gson = new Gson();
+		String template1 = "{	" +
+				"	\"id\":\"punti_accumulo\"," +
+				"	\"title\": \"Punti Abbandono\"," +
+				"	\"source\":{" +
+				"		\"type\":\"WFS\"," +
+				"		\"URL\":\"http://demo.geo-solutions.it/share/comunege/geocollect/punti_abbandono.geojson\"," +
+				"		\"typeName\":\"geosolutions:punti_abbandono\"," +
+				"		\"dataTypes\":{" +
+				"			\"CODICE\":\"string\"," +
+				"			\"DATA_RILEV\":\"string\"," +
+				"			\"USO_AGRICO\":\"integer\"," +
+				"			\"USO_PARCHE\":\"integer\"," +
+				"			\"USO_COMMER\":\"integer\"," +
+				"			\"AREA_PRIVA\":\"string\"," +
+				"			\"AREA_PUBBL\":\"string\"," +
+				"			\"ALTRE_CARA\":\"integer\"," +
+				"			\"DISTANZA_U\":\"integer\"," +
+				"			\"DIMENSIONI\":\"string\"," +
+				"			\"RIFIUTI_NO\":\"string\"," +
+				"			\"RIFIUTI_PE\":\"string\"," +
+				"			\"QUANTITA_R\":\"integer\"," +
+				"			\"STATO_FISI\":\"string\"," +
+				"			\"ODORE\":\"string\"," +
+				"			\"MODALITA_S\":\"string\"," +
+				"			\"PERCOLATO\":\"string\"," +
+				"			\"VEGETAZION\":\"string\"," +
+				"			\"STABILITA\":\"integer\"," +
+				"			\"INSEDIAMEN\":\"string\"," +
+				"			\"AGRICOLO\":\"integer\"," +
+				"			\"AGRICOLO_A\":\"string\"," +
+				"			\"ID\":\"integer\"," +
+				"			\"ID1\":\"integer\"," +
+				"			\"VALORE_SOC\":\"integer\"," +
+				"			\"GMROTATION\":\"real\"" +
+				"		}" +
+				"	}" +
+				"}";
+		
+		String template2 = "{	" +
+				"	\"id\":\"punti_accumulo\"," +
+				"	\"title\": \"Punti Abbandono\"," +
+				"	\"source\":{" +
+				"		\"type\":\"WFS\"," +
+				"		\"URL\":\"http://demo.geo-solutions.it/share/comunege/geocollect/punti_abbandono.geojson\"," +
+				"		\"typeName\":\"geosolutions:punti_abbandono\"," +
+				"		\"dataTypes\":{" +
+				"			\"CODICE\":\"string\"," +
+				"			\"DATA_RILEV\":\"string\"," +
+				"			\"USO_AGRICO\":\"integer\"," +
+				"			\"USO_PARCHE\":\"integer\"," +
+				"			\"USO_COMMER\":\"integer\"," +
+				"			\"AREA_PRIVA\":\"string\"," +
+				"			\"AREA_PUBBL\":\"string\"," +
+				"			\"ALTRE_CARA\":\"integer\"," +
+				"			\"DISTANZA_U\":\"integer\"," +
+				"			\"DIMENSIONI\":\"string\"," +
+				"			\"RIFIUTI_NO\":\"string\"," +
+				"			\"RIFIUTI_PE\":\"string\"," +
+							// removed QUANTITA_R
+				"			\"STATO_FISI\":\"string\"," +
+				"			\"ODORE\":\"string\"," +
+				"			\"MODALITA_S\":\"string\"," +
+				"			\"PERCOLATO\":\"string\"," +
+				"			\"VEGETAZ\":\"string\"," +   // Renamed, must be dropped and recreated
+				"			\"STABILITA\":\"integer\"," +
+				"			\"INSEDIAMEN\":\"string\"," +
+				"			\"AGRICOLO\":\"integer\"," +
+				"			\"AGRICOLO_A\":\"string\"," +
+				"			\"ID\":\"integer\"," +
+				"			\"ID1\":\"integer\"," +
+				"			\"VALORE_SOC\":\"text\"," + // Changed type, must be ignored and keep integer
+				"			\"GMROTATION\":\"real\"" +
+				"		}" +
+				"	}" +
+				"}";
+		
+		MissionTemplate mt1 = gson.fromJson( template1 , MissionTemplate.class);
+		MissionTemplate mt2 = gson.fromJson( template2 , MissionTemplate.class);
+		
+		HashMap<String,XDataType> templateDataTypes1 = mt1.source.dataTypes;
+		HashMap<String,XDataType> templateDataTypes2 = mt2.source.dataTypes;
+
+		
+		assertNotNull(templateDataTypes1);
+		assertNotNull(templateDataTypes2);
+		assertTrue(templateDataTypes1.size()>0);
+		assertTrue(templateDataTypes2.size()>0);
+		
+		// TODO: write validator for these templateDataTypes
+		// fieldNames must not clash with PK_UID, ORIGIN_ID, GEOMETRY
+		try {
+			db.prepare("DROP TABLE IF EXISTS test_table;").step();
+		} catch (jsqlite.Exception e) {
+			fail(e.getLocalizedMessage());
+		}
+		// Create the table as usual
+		assertTrue(PersistenceUtils.createTableFromTemplate(db, "test_table", templateDataTypes1));
+		
+		// Method to test (EnableColumnDrop is FALSE)
+		assertTrue(PersistenceUtils.updateTableFromTemplate(db, "test_table", templateDataTypes2));
 		
 		
-		fail("Not implemented yet");
-		
+		// Check results
+        String query = "SELECT name FROM sqlite_master WHERE type='table' AND name='test_table'";
+
+        try {
+            Stmt stmt = db.prepare(query);
+            if( stmt.step() ) {
+                String nomeStr = stmt.column_string(0);
+                assertTrue("Retrieved table name is incorrect", nomeStr.equalsIgnoreCase("test_table"));
+            }else{
+            	fail("Table not found");
+            }
+            stmt.close();
+        } catch (Exception e) {
+            fail( Log.getStackTraceString(e));
+        }
+
+        // check results
+        query = "PRAGMA table_info('test_table');";
+        int nameColumn = -1;
+        int typeColumn = -1;
+        String columnName, typeName;
+
+        int count_columns = 0;
+        int count_VEGETAZION = 0;
+        try {
+            Stmt stmt = db.prepare(query);
+            while( stmt.step() ) {
+                if(nameColumn<0 || typeColumn<0){
+                	// I have to retrieve the position of the metadata fields
+                	for(int i = 0; i<stmt.column_count(); i++){
+                		Log.v(TAG, stmt.column_name(i));
+                		if(stmt.column_name(i).equalsIgnoreCase("name")){
+                			nameColumn = i;
+                		}
+                		if(stmt.column_name(i).equalsIgnoreCase("type")){
+                			typeColumn = i;
+                		}
+                	}
+                	
+                }
+            	assertTrue(nameColumn>=0);
+            	assertTrue(typeColumn>=0);
+            	
+            	columnName = stmt.column_string(nameColumn);
+            	typeName = stmt.column_string(typeColumn);
+            	
+            	// output values
+            	Log.v(TAG, count_columns+" : "+columnName+" : "+typeName);
+        		
+            	if(!columnName.equals("ORIGIN_ID") && !columnName.equals("GEOMETRY")){
+            		
+            		
+            		// If EnableColumnDrop, this fields should have been removed
+            		// EnableColumnDrop is disabled in this test
+            		//assertFalse(columnName.equalsIgnoreCase("QUANTITA_R"));
+            		//assertFalse(columnName.equalsIgnoreCase("VEGETAZION"));
+            		
+            		// This field should be added (only once)
+            		if(columnName.equals("VEGETAZ")){
+            			count_VEGETAZION++;
+            		}
+            		
+            		if(columnName.equals("VALORE_SOC")){
+            			// this field should not be changed
+            			assertTrue(typeName.equalsIgnoreCase(SpatialiteUtils.getSQLiteTypeFromString("integer")));
+            		}else{
+            			// If EnableDropColumn is TRUE , we must assertNotNull templateDataTypes2.get(columnName)
+            			// In this test EnableDropColumn is false (by default)
+            			if(templateDataTypes2.get(columnName)!=null){
+            				assertTrue(typeName.equalsIgnoreCase(SpatialiteUtils.getSQLiteTypeFromString(templateDataTypes2.get(columnName).toString())));
+            			}
+            		}
+            	}
+            	count_columns++;
+            }
+            stmt.close();
+        } catch (Exception e) {
+            fail( Log.getStackTraceString(e));
+        }
+        
+        // Check if the additional column was created
+        assertEquals(1, count_VEGETAZION);
+        
+        // output values
+        int j = 0;
+        for(Entry<String, XDataType> e : templateDataTypes2.entrySet()){
+        	Log.v(TAG, j++ +" : "+e.getKey()+" : "+e.getValue());
+        }
+        
+        // Add 2 because the default CREATE statement creates "ORIGIN_ID" and "GEOMETRY" columns
+        // all the other columns comes from the templateDataTypes
+        // Add 2 again, because in this test there are 2 old columns that are not removed on purpose
+        assertEquals(count_columns, templateDataTypes2.size()+2+2);
 	}
 	
 	/**

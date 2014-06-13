@@ -72,6 +72,10 @@ public class SpatialiteUtils {
 	 */
 	public static String getSQLiteTypeFromString(String inputTypeString){
 		
+		if(inputTypeString == null){
+			return null;
+		}
+		
 		String toCheck = inputTypeString.toLowerCase(Locale.US);
 		if(	toCheck.equals("string")
 			||	toCheck.equals("text")

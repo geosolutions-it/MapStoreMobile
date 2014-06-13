@@ -56,6 +56,9 @@ public class MissionUtils {
 	public static Loader<List<Feature>> createMissionLoader(
 			MissionTemplate missionTemplate,SherlockFragmentActivity a, int page, int pagesize) {
 		
+		// TODO: keep database and WFS in sync
+		new WFSGeoJsonFeatureLoader(a,missionTemplate.source.URL,missionTemplate.source.baseParams, missionTemplate.source.typeName,page*pagesize+1,pagesize);
+		
 		return new WFSGeoJsonFeatureLoader(a,missionTemplate.source.URL,missionTemplate.source.baseParams, missionTemplate.source.typeName,page*pagesize+1,pagesize);
 	}
 	
@@ -75,6 +78,7 @@ public class MissionUtils {
         
         return null;
 	}
+	
 	/**
 	 * Parse the string to get the tags between {} (brackets) 
 	 * @param toParse the string to parse

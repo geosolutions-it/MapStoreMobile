@@ -105,7 +105,13 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
 	            	}
 		            if(PersistenceUtils.createTableFromTemplate(spatialiteDatabase, tableName, hm)){
 //		            if(SpatialiteUtils.checkOrCreateTable(spatialiteDatabase, t.id+"_data")){
-			            Log.v("FORM_EDIT", "Table Found");
+			            Log.v("FORM_EDIT", "Table Found, checking for schema updates");
+			            if(PersistenceUtils.updateTableFromTemplate(spatialiteDatabase, tableName, hm)){
+			            	Log.v("FORM_EDIT", "All good");
+			            }else{
+			            	Log.w("FORM_EDIT", "Something went wrong during the update, the data can be inconsistent");
+			            }
+			            
 		            }else{
 			            Log.w("FORM_EDIT", "Table could not be created, edits will not be saved");
 		            }
