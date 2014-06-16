@@ -17,6 +17,8 @@
  */
 package it.geosolutions.geocollect.android.core.mission;
 
+import java.util.HashMap;
+
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
 
@@ -24,12 +26,17 @@ import it.geosolutions.android.map.MapsActivity;
 import it.geosolutions.android.map.view.MapViewManager;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.R;
+import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.NavUtils;
+import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
+import it.geosolutions.geocollect.android.core.mission.utils.SpatialiteUtils;
 import it.geosolutions.geocollect.android.core.navigation.AbstractNavDrawerActivity;
 import it.geosolutions.geocollect.android.core.navigation.NavDrawerActivityConfiguration;
 import it.geosolutions.geocollect.android.core.navigation.NavDrawerAdapter;
 import it.geosolutions.geocollect.android.core.navigation.NavDrawerItem;
 import it.geosolutions.geocollect.android.core.preferences.GeoCollectPreferences;
+import it.geosolutions.geocollect.model.config.MissionTemplate;
+import it.geosolutions.geocollect.model.source.XDataType;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -68,6 +75,11 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 	 */
 	MapViewManager mapViewManager = new MapViewManager();
 
+	/**
+	 * Spatialite Database for persistence
+	 */
+	jsqlite.Database spatialiteDatabase;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -88,6 +100,43 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 					.setActivateOnItemClick(true);
 		}
 
+		// Initialize database
+		if(spatialiteDatabase == null){
+	        
+			spatialiteDatabase = SpatialiteUtils.openSpatialiteDB(this, "geocollect/genova.sqlite");
+			
+			if(spatialiteDatabase != null && !spatialiteDatabase.dbversion().equals("unknown")){
+	            MissionTemplate t = MissionUtils.getDefaultTemplate(this);
+	            if(t != null && t.id != null){
+	            	
+	            	// Save Source Missions on database
+	            	HashMap<String, XDataType> hm = t.source.dataTypes;
+	            	
+	            	if(t.source != null 
+	            			&& t.source.localSourceStore != null
+	            			&& !t.source.localSourceStore.isEmpty()){
+			            if(PersistenceUtils.createTableFromTemplate(spatialiteDatabase, t.source.localSourceStore, hm)){
+		            		//SpatialiteUtils.checkOrCreateTable(spatialiteDatabase, t.id+"_data")){
+			            	Log.v("MISSION_LIST", "Table Found, checking for schema updates");
+				            if(PersistenceUtils.updateTableFromTemplate(spatialiteDatabase, t.source.localSourceStore, hm)){
+				            	Log.v("MISSION_LIST", "All good");
+				            }else{
+				            	Log.w("MISSION_LIST", "Something went wrong during the update, the data can be inconsistent");
+				            }
+			            }else{
+				            Log.w("MISSION_LIST", "Table could not be created, edits will not be saved");
+			            }
+
+	            	}
+	            	
+	            }else{
+	            	Log.w("MISSION_LIST", "MissionTemplate could not be found, edits will not be saved");
+	            }
+			}
+
+		}
+		
+		
 		// TODO: If exposing deep links into your app, handle intents here.
 	}
 
@@ -236,4 +285,20 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 		return this;
 	}
 	
+	@Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // TODO: check utility of this block (it wasn't present)
+        if(this.mapViewManager!=null){
+       	 this.mapViewManager.destroyMapViews();
+        }
+        if(this.spatialiteDatabase!=null){
+		    try {
+		    	this.spatialiteDatabase.close();
+		    	Log.v("MISSION_LIST", "Spatialite Database Closed");
+			} catch (jsqlite.Exception e) {
+				Log.e("MISSION_LIST", Log.getStackTraceString(e));
+			}
+        }
+    }
 }

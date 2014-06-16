@@ -18,12 +18,14 @@
 package it.geosolutions.geocollect.android.core.mission.utils;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Locale;
 
 import eu.geopaparazzi.library.util.ResourcesManager;
 import android.content.Context;
 import android.util.Log;
 import jsqlite.Database;
+import jsqlite.Exception;
 import jsqlite.Stmt;
 
 /**
@@ -115,7 +117,13 @@ public class SpatialiteUtils {
 				){
 			return "numeric";
 		}
-		
+
+		// Spatialite custom types
+		if(	toCheck.equals("point")
+				){
+			return "point";
+		}
+
 		// unrecognized type
 		return null;
 	}
@@ -154,7 +162,10 @@ public class SpatialiteUtils {
             
         } catch (Exception e) {
             Log.v(TAG, Log.getStackTraceString(e));
-        }
+        } catch (java.lang.Exception e) {
+        	// Cannot find Android ResourceManager
+            Log.e(TAG, Log.getStackTraceString(e));
+		}
 		
 		return spatialiteDatabase;
 	}
@@ -312,5 +323,82 @@ public class SpatialiteUtils {
 	}
 	 */
 	
+	/**
+	 * Return an Hashmap of Strings, containing the list of the columns of the given table name in the given database.
+	 * Returns null if wrong parameters are given or database is closed.
+	 * @param db
+	 * @param tableName
+	 * @return HashMap<String, String>
+	 */
+	public static HashMap<String, String> getPropertiesFields (Database db, String tableName){
+		
+		if(db == null || tableName == null){
+			Log.w(TAG, "Wrong parameters for getPropertiesFields()");
+			return null;
+		}
+		
+		if(db.dbversion().equals("unknown")){
+			Log.w(TAG, "Database is closed, cannot access to it.");
+			return null;
+		}
+		
+		// get table columns
+		// If table does not exists, an empty result set is returned.
+        String table_info_query = "PRAGMA table_info('"+tableName+"');";
+        int nameColumn = -1;
+        int typeColumn = -1;
+        String columnName, typeName;
+        HashMap<String, String> dbFieldValues = new HashMap<String, String>();
+        
+        try {
+            Stmt stmt = db.prepare(table_info_query);
+            while( stmt.step() ) {
+
+                if(nameColumn<0 || typeColumn<0){
+                	// I have to retrieve the position of the metadata fields
+                	for(int i = 0; i<stmt.column_count(); i++){
+                		Log.v(TAG, stmt.column_name(i));
+                		if(stmt.column_name(i).equalsIgnoreCase("name")){
+                			nameColumn = i;
+                		}
+                		if(stmt.column_name(i).equalsIgnoreCase("type")){
+                			typeColumn = i;
+                		}
+                	}
+                }
+                
+                columnName = stmt.column_string(nameColumn);
+                typeName = stmt.column_string(typeColumn);
+                if(columnName != null){
+                	
+                	// This is a debug check
+                	if(typeName == null){
+                		Log.d(TAG, "Column name '"+columnName+"' has a NULL typeName");
+                	}
+                	
+                	dbFieldValues.put(columnName, typeName);
+                	
+                }else{
+                	// This should never happen
+                	Log.d(TAG, "Found a NULL column name, this is strange.");
+                }
+            }
+            stmt.close();
+            			            
+        } catch (Exception e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+        }
+		return dbFieldValues;
+	}
 	
+	/**
+	 * Escape a string for database input
+	 */
+	public static String escape(String s){
+		if(s==null)
+			return s;
+		
+		s = s.replaceAll("'", "''");
+		return s;
+	}
 }

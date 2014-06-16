@@ -19,11 +19,16 @@ package it.geosolutions.geocollect.android.core.test;
 
 import java.io.File;
 import java.util.List;
+
+import com.google.gson.Gson;
+
 import jsqlite.Database;
 import jsqlite.Stmt;
 import it.geosolutions.android.map.wfs.WFSGeoJsonFeatureLoader;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
+import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.SQLiteCascadeFeatureLoader;
+import it.geosolutions.geocollect.model.config.MissionTemplate;
 import android.os.Environment;
 import android.util.Log;
 
@@ -74,6 +79,18 @@ public class SQLiteCascadeFeatureLoaderTest extends android.test.LoaderTestCase 
 				+ "/geocollect/testdb.sqlite",
 				jsqlite.Constants.SQLITE_OPEN_READWRITE
                 | jsqlite.Constants.SQLITE_OPEN_CREATE);
+		
+		// Initialize spatial metadata
+		try {
+			Stmt stmt = db.prepare("SELECT InitSpatialMetaData();");
+			stmt.step();
+			stmt.close();
+		} catch (jsqlite.Exception e) {
+			Log.e(TAG, Log.getStackTraceString(e));
+			fail(e.getLocalizedMessage());
+		}
+		
+
 	}
 
 	/**
@@ -96,8 +113,53 @@ public class SQLiteCascadeFeatureLoaderTest extends android.test.LoaderTestCase 
 	public void testSQLiteLoaderWithWFSPreLoader(){
 		
 		// Create test table
-		String tableName = "testTable";
 		
+		Gson gson = new Gson();
+		String template1 = "{	" +
+				"	\"id\":\"punti_accumulo\"," +
+				"	\"title\": \"Punti Abbandono\"," +
+				"	\"source\":{" +
+				"		\"type\":\"WFS\"," +
+				"		\"URL\":\"http://demo.geo-solutions.it/share/comunege/geocollect/punti_abbandono.geojson\"," +
+				"		\"typeName\":\"geosolutions:punti_abbandono\"," +
+				"		\"storeLocally\":\"testTable\","+
+				"		\"dataTypes\":{" +
+				"			\"CODICE\":\"string\"," +
+				"			\"DATA_RILEV\":\"string\"," +
+				"			\"USO_AGRICO\":\"integer\"," +
+				"			\"USO_PARCHE\":\"integer\"," +
+				"			\"USO_COMMER\":\"integer\"," +
+				"			\"AREA_PRIVA\":\"string\"," +
+				"			\"AREA_PUBBL\":\"string\"," +
+				"			\"ALTRE_CARA\":\"integer\"," +
+				"			\"DISTANZA_U\":\"integer\"," +
+				"			\"DIMENSIONI\":\"string\"," +
+				"			\"RIFIUTI_NO\":\"string\"," +
+				"			\"RIFIUTI_PE\":\"string\"," +
+				"			\"QUANTITA_R\":\"integer\"," +
+				"			\"STATO_FISI\":\"string\"," +
+				"			\"ODORE\":\"string\"," +
+				"			\"MODALITA_S\":\"string\"," +
+				"			\"PERCOLATO\":\"string\"," +
+				"			\"VEGETAZION\":\"string\"," +
+				"			\"STABILITA\":\"integer\"," +
+				"			\"INSEDIAMEN\":\"string\"," +
+				"			\"AGRICOLO\":\"integer\"," +
+				"			\"AGRICOLO_A\":\"string\"," +
+				"			\"ID\":\"integer\"," +
+				"			\"ID1\":\"integer\"," +
+				"			\"VALORE_SOC\":\"integer\"," +
+				"			\"GMROTATION\":\"real\"" +
+				"		}" +
+				"	}" +
+				"}";	
+		MissionTemplate mt1 = gson.fromJson( template1 , MissionTemplate.class);
+		
+		String tableName = mt1.source.localFormStore; //"testTable"
+
+		PersistenceUtils.createTableFromTemplate(db, tableName, mt1.source.dataTypes);
+		
+		/*
 		try {
 			Stmt stmt = db.prepare("CREATE TABLE '"+tableName+"' ('ORIGIN_ID' TEXT);");
 			stmt.step();
@@ -110,7 +172,7 @@ public class SQLiteCascadeFeatureLoaderTest extends android.test.LoaderTestCase 
 			Log.e(TAG, Log.getStackTraceString(e));
 			fail(e.getLocalizedMessage());
 		}
-		
+		*/
 		
 		// Setup the preloader
 		int page = 0;

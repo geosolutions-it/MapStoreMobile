@@ -19,9 +19,18 @@ package it.geosolutions.geocollect.android.core.mission.utils;
 
 
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
+import it.geosolutions.geocollect.model.source.XDataType;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+
+import com.vividsolutions.jts.JTSVersion;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKBReader;
 
 import jsqlite.Database;
 import jsqlite.Exception;
@@ -57,7 +66,9 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 		
 		super(context);
 		this.pre_loader = pre_loader;
-
+		this.db = db;
+		this.tableName = tableName;
+		
 	}
 	
 	/*
@@ -99,7 +110,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 		}
 		
 		if(this.pre_loader!= null){
-			
+
 			List<Feature> fromPreLoader = this.pre_loader.loadInBackground();
 			if(fromPreLoader!= null){
 				
@@ -107,7 +118,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 				
 				// TODO: truncate only paginated rows
 				try {
-					Stmt stmt = db.prepare("DELETE FROM '"+tableName+";");
+					Stmt stmt = db.prepare("DELETE FROM '"+tableName+"';");
 					stmt.step();
 					stmt.close();
 				} catch (jsqlite.Exception e) {
@@ -117,101 +128,172 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 				
 				if(!fromPreLoader.isEmpty()){
 					
-					// get table columns
-					// TODO: extract in a separate Utility Class
-			        String table_info_query = "PRAGMA table_info('"+tableName+"');";
-			        int nameColumn = -1;
-			        int typeColumn = -1;
-			        String columnName, typeName;
-			        HashMap<String, String> dbFieldValues = new HashMap<String, String>();
-			        
-			        try {
-			            Stmt stmt = db.prepare(table_info_query);
-			            while( stmt.step() ) {
+					// Get the list of the fields
+					HashMap<String, String> dbFieldValues = SpatialiteUtils.getPropertiesFields(db, tableName);
+					if(dbFieldValues != null){
 
-			                if(nameColumn<0 || typeColumn<0){
-			                	// I have to retrieve the position of the metadata fields
-			                	for(int i = 0; i<stmt.column_count(); i++){
-			                		Log.v(TAG, stmt.column_name(i));
-			                		if(stmt.column_name(i).equalsIgnoreCase("name")){
-			                			nameColumn = i;
-			                		}
-			                		if(stmt.column_name(i).equalsIgnoreCase("type")){
-			                			typeColumn = i;
-			                		}
-			                	}
-			                }
-			                
-			                columnName = stmt.column_string(nameColumn);
-			                typeName = stmt.column_string(typeColumn);
-			                if(columnName != null){
-			                	
-			                	dbFieldValues.put(columnName, typeName);
-			                	
-			                }else{
-			                	// This should never happen
-			                	Log.v(TAG, "Found a NULL column name, this is strange.");
-			                }
-			            }
-			            stmt.close();
-			            			            
-			        } catch (Exception e) {
-			            Log.e(TAG, Log.getStackTraceString(e));
-			        }
-					
-					////////////////////////////////////////
-					Stmt stmt;
-					String converted ;
-					for(Feature f : fromPreLoader){
-						
-						String columnNames = " (  ";
-						String columnValues = " ( ";
-						columnNames = columnNames + "ORIGIN_ID";
-						columnValues = columnValues + f.id;
-						
-						for(Entry<String, String> e : dbFieldValues.entrySet()){
-							Log.v(TAG, "Got -> "+e.getKey()+" : "+e.getValue());
+						Stmt stmt;
+						String converted ;
+						for(Feature f : fromPreLoader){
 							
-							converted = SpatialiteUtils.getSQLiteTypeFromString(e.getValue());
+							String columnNames = " ( ";
+							String columnValues = " ( ";
+							columnNames = columnNames + "ORIGIN_ID";
+							columnValues = columnValues + f.id;
 							
-							if(f.properties.containsKey(e.getKey()) && converted != null){
+							for(Entry<String, String> e : dbFieldValues.entrySet()){
+								Log.v(TAG, "Got -> "+e.getKey()+" : "+e.getValue());
 								
-								columnNames = columnNames + ", " + e.getKey() ;
+								converted = SpatialiteUtils.getSQLiteTypeFromString(e.getValue());
+								if (converted.equals("point") && f.geometry != null){
 								
-								// TODO: escape values
-								if(converted.equals("text")||converted.equals("blob")){
-									columnValues = columnValues + ", '" + e.getValue()+"' " ;
-								}else{
-									columnValues = columnValues + ", " + e.getValue() ;
+									columnNames = columnNames + ", GEOMETRY";
+									// In JTS Point getX = longitude, getY = latitude
+									columnValues = columnValues + ", MakePoint("+((Point)f.geometry).getX()+","+((Point)f.geometry).getY()+", 4326)";
+									
+								}else if(f.properties.containsKey(e.getKey()) && converted != null){
+									
+									columnNames = columnNames + ", " + e.getKey() ;
+									
+									if(converted.equals("text")||converted.equals("blob")){
+										columnValues = columnValues + ", '" + SpatialiteUtils.escape((String) f.properties.get(e.getKey())) +"' " ;
+									}else{
+										columnValues = columnValues + ", " + f.properties.get(e.getKey()) ;
+									}
+									
 								}
 								
 							}
 							
-						}
-						
-						columnNames = columnNames + ")";
-						columnValues = columnValues + ")";
-						
-						String insertQuery = "INSERT INTO '"+tableName+"' "+columnNames+" VALUES "+columnValues+";";
-						try {
-							stmt = db.prepare(insertQuery);
-							stmt.step();
-							stmt.close();
-						} catch (Exception e1) {
-							Log.e(TAG, Log.getStackTraceString(e1));
+							// add the geometry
+							
+							columnNames = columnNames + " )";
+							columnValues = columnValues + " )";
+							
+							// TODO: group all the insert queries into a transaction for insertion speedup
+							String insertQuery = "INSERT INTO '"+tableName+"' "+columnNames+" VALUES "+columnValues+";";
+							try {
+								stmt = db.prepare(insertQuery);
+								stmt.step();
+								stmt.close();
+							} catch (Exception e1) {
+								Log.e(TAG, Log.getStackTraceString(e1));
+							}
+							
+							
 						}
 					}
-				
 				}
 
-				mData = fromPreLoader;
+				//mData = fromPreLoader;
 			}else{
 				// error in the loader (no connectivity)
 			}
 		}
 		
 		// TODO: Load data into mData
+		// Get the list of the fields
+		// TODO: Can this call be done before the pre_loader block? 
+		// Are there any concurrent events that can modify the table schema before we read the data?
+		HashMap<String, String> dbFieldValues = SpatialiteUtils.getPropertiesFields(db, tableName);
 		
+		mData = new ArrayList<Feature>();
+		
+		// Reade for the Geometry field
+        WKBReader wkbReader = new WKBReader();
+        
+		if(dbFieldValues!=null){
+			
+			Stmt stmt;
+			String converted ;
+			
+			String columnNames = "SELECT ROWID "; // This is an SQLite standard column
+			//String columnValues = " ( ";
+
+			for(Entry<String, String> e : dbFieldValues.entrySet()){
+				Log.v(TAG, "Got -> "+e.getKey()+" : "+e.getValue());
+				
+				converted = SpatialiteUtils.getSQLiteTypeFromString(e.getValue());
+				
+				if(converted != null ){
+					
+					if(converted.equals("point")){
+						// Only Points are supported
+						columnNames = columnNames + ", ST_AsBinary(CastToXY("+e.getKey()+")) AS 'GEOMETRY'";
+					}else{
+						columnNames = columnNames + ", " + e.getKey() ;
+					}
+					
+					/* TODO: escape values, is it necessary? they are columnames
+					if(converted.equals("text")||converted.equals("blob")){
+						columnValues = columnValues + ", '" + e.getValue()+"' " ;
+					}else{
+						columnValues = columnValues + ", " + e.getValue() ;
+					}
+					*/
+				}
+				
+			}
+			
+			columnNames = columnNames + " FROM '"+tableName+"';";
+
+			Log.v(TAG, columnNames);
+			if(Database.complete(columnNames)){
+				
+		        try {
+		        	stmt = db.prepare(columnNames);
+		            String columnName;
+		            Feature f;
+		            while( stmt.step() ) {
+		                f = new Feature();
+		            	int colcount = stmt.column_count();
+		            	for(int colpos = 0; colpos < colcount; colpos++){
+	            			
+		            		columnName = stmt.column_name(colpos);
+			            	if(columnName != null){
+			            		
+			            		if(columnName.equalsIgnoreCase("PK_UID")||columnName.equalsIgnoreCase("ORIGIN_ID")){
+			            			f.id = stmt.column_string(colpos);
+			            		}else if(columnName.equalsIgnoreCase("GEOMETRY")){
+			            			// At the moment, only Point is supported
+			            			// Here, the "GEOMETRY" column contains the result of 
+			            			//	ST_AsBinary(CastToXY("GEOMETRY"))
+			            			byte[] geomBytes = stmt.column_bytes(colpos);
+				   					try {
+				   						f.geometry = wkbReader.read(geomBytes);
+				   					} catch (ParseException e) {
+				   						Log.e(TAG,"Error reading geometry");
+				   						//throw new Exception(e.getMessage());
+				   					}
+
+			            		}else{
+			            			if(f.properties == null){
+			            				f.properties = new HashMap<String, Object>();
+			            			}
+			            			f.properties.put(columnName, stmt.column_string(colpos));
+			            		}
+			            		
+			                	
+			                }else{
+			                	// This should never happen
+			                	Log.d(TAG, "Found a NULL column name, this is strange.");
+			                }
+		            	
+		            	}
+		                mData.add(f);
+		            }
+		            stmt.close();
+		            			            
+		        } catch (Exception e) {
+		            Log.e(TAG, Log.getStackTraceString(e));
+		        }
+				
+			}else{
+				Log.w(TAG, "Query is not complete:\n"+columnNames);
+			}
+			
+		}
+
 		return mData;
 	}
 

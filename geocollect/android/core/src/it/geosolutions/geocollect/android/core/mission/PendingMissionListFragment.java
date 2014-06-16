@@ -24,6 +24,8 @@ import it.geosolutions.geocollect.model.config.MissionTemplate;
 
 import java.util.List;
 
+import jsqlite.Database;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
@@ -338,8 +340,18 @@ public class PendingMissionListFragment
 	public Loader<List<Feature>> onCreateLoader(int arg0, Bundle arg1) {
 		getSherlockActivity().setSupportProgressBarIndeterminateVisibility(true);
 		getSherlockActivity().getSupportActionBar();
-		 loader = MissionUtils.createMissionLoader(missionTemplate,getSherlockActivity(),page,pagesize);
-	     return loader; 
+		
+		Database db = null;
+		// Check for a database
+		if(	getSherlockActivity() instanceof PendingMissionListActivity){
+			Log.d(TAG, "Loader: Connecting to Activity database");
+			db = ((PendingMissionListActivity)getSherlockActivity()).spatialiteDatabase;
+		}else{
+			Log.w(TAG, "Loader: Could not connect to Activity database");
+		}
+		
+		loader = MissionUtils.createMissionLoader(missionTemplate,getSherlockActivity(),page,pagesize,db);
+	    return loader; 
 	}
 
 	/**

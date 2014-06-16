@@ -60,9 +60,9 @@ public class PersistenceUtils {
     	// default value
     	String tableName = mission.getTemplate().id+"_data";
     	if(mission.getTemplate().source != null 
-    			&& mission.getTemplate().source.storeLocally != null
-    			&& !mission.getTemplate().source.storeLocally.isEmpty()){
-    		tableName = mission.getTemplate().source.storeLocally;
+    			&& mission.getTemplate().source.localFormStore != null
+    			&& !mission.getTemplate().source.localFormStore.isEmpty()){
+    		tableName = mission.getTemplate().source.localFormStore;
     	}
 		return storePageData(page, layout, mission, tableName);
 	}
@@ -232,9 +232,9 @@ public class PersistenceUtils {
     	// default value
     	String tableName = mission.getTemplate().id+"_data";
     	if(mission.getTemplate().source != null 
-    			&& mission.getTemplate().source.storeLocally != null
-    			&& !mission.getTemplate().source.storeLocally.isEmpty()){
-    		tableName = mission.getTemplate().source.storeLocally;
+    			&& mission.getTemplate().source.localFormStore != null
+    			&& !mission.getTemplate().source.localFormStore.isEmpty()){
+    		tableName = mission.getTemplate().source.localFormStore;
     	}
 		return loadPageData(page, layout, mission, context, tableName);
 	}

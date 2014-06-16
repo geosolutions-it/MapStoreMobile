@@ -80,9 +80,9 @@ public class PendingMissionDetailActivity extends SherlockFragmentActivity imple
 	            	// default value
 	            	String tableName = t.id+"_data";
 	            	if(t.source != null 
-	            			&& t.source.storeLocally != null
-	            			&& !t.source.storeLocally.isEmpty()){
-	            		tableName = t.source.storeLocally;
+	            			&& t.source.localFormStore != null
+	            			&& !t.source.localFormStore.isEmpty()){
+	            		tableName = t.source.localFormStore;
 	            	}
 	            	
 		            if(PersistenceUtils.createTableFromTemplate(spatialiteDatabase, tableName, hm)){

@@ -53,9 +53,13 @@ public class WFSSource implements Serializable{
 	 */
 	public HashMap<String,XDataType> dataTypes = new HashMap<String,XDataType>();
 	/**
+	 * Defines the local database table name where the original mission data should be saved
+	 */
+	public String localSourceStore;
+	/**
 	 * Defines the local database table name where the form data should be saved
 	 */
-	public String storeLocally;
+	public String localFormStore;
 
 	
 }

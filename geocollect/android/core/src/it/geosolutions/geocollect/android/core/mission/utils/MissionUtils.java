@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import jsqlite.Database;
+
 import android.content.Context;
 import android.support.v4.content.Loader;
 
@@ -54,12 +56,16 @@ public class MissionUtils {
 	 * @return
 	 */
 	public static Loader<List<Feature>> createMissionLoader(
-			MissionTemplate missionTemplate,SherlockFragmentActivity a, int page, int pagesize) {
+			MissionTemplate missionTemplate,SherlockFragmentActivity a, int page, int pagesize, Database db) {
 		
-		// TODO: keep database and WFS in sync
-		new WFSGeoJsonFeatureLoader(a,missionTemplate.source.URL,missionTemplate.source.baseParams, missionTemplate.source.typeName,page*pagesize+1,pagesize);
+		WFSGeoJsonFeatureLoader wfsl = new WFSGeoJsonFeatureLoader(a,missionTemplate.source.URL,missionTemplate.source.baseParams, missionTemplate.source.typeName,page*pagesize+1,pagesize);
 		
-		return new WFSGeoJsonFeatureLoader(a,missionTemplate.source.URL,missionTemplate.source.baseParams, missionTemplate.source.typeName,page*pagesize+1,pagesize);
+		if(db == null){
+			// No database provided, load only online data
+			return wfsl;
+		}
+		
+		return new SQLiteCascadeFeatureLoader(a, wfsl, db, missionTemplate.source.localFormStore);
 	}
 	
 	/**
