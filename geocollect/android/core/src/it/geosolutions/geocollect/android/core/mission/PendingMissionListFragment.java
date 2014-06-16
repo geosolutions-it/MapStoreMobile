@@ -118,6 +118,11 @@ public class PendingMissionListFragment
 	private int pagesize=100;
 
 	private View footer;
+	
+	/**
+	 * Main Activity's jsqlite Database instance reference
+	 */
+	private Database db;
 	/**
 	 * A callback interface that all activities containing this fragment must
 	 * implement. This mechanism allows activities to be notified of item
@@ -150,7 +155,9 @@ public class PendingMissionListFragment
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		 setRetainInstance(true);
+		Log.v("MISSION_LIST_FRAGMENT", "onCreate()");
+
+		setRetainInstance(true);
 		// setup the listView
 		missionTemplate =  MissionUtils.getDefaultTemplate(getSherlockActivity());
 	    adapter = new FeatureAdapter(getSherlockActivity(),
@@ -212,12 +219,21 @@ public class PendingMissionListFragment
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 
+		Log.v("MISSION_LIST_FRAGMENT", "onAttach()");
 		// Activities containing this fragment must implement its callbacks.
 		if (!(activity instanceof Callbacks)) {
 			throw new IllegalStateException(
 					"Activity must implement fragment's callbacks.");
 		}
 
+		// Check for a database
+		if(	getSherlockActivity() instanceof PendingMissionListActivity){
+			Log.d(TAG, "Loader: Connecting to Activity database");
+			db = ((PendingMissionListActivity)getSherlockActivity()).spatialiteDatabase;
+		}else{
+			Log.w(TAG, "Loader: Could not connect to Activity database");
+		}
+		
 		listSelectionCallbacks = (Callbacks) activity;
 	}
 
@@ -340,15 +356,8 @@ public class PendingMissionListFragment
 	public Loader<List<Feature>> onCreateLoader(int arg0, Bundle arg1) {
 		getSherlockActivity().setSupportProgressBarIndeterminateVisibility(true);
 		getSherlockActivity().getSupportActionBar();
-		
-		Database db = null;
-		// Check for a database
-		if(	getSherlockActivity() instanceof PendingMissionListActivity){
-			Log.d(TAG, "Loader: Connecting to Activity database");
-			db = ((PendingMissionListActivity)getSherlockActivity()).spatialiteDatabase;
-		}else{
-			Log.w(TAG, "Loader: Could not connect to Activity database");
-		}
+
+		Log.v("MISSION_LIST", "onCreateLoader()");
 		
 		loader = MissionUtils.createMissionLoader(missionTemplate,getSherlockActivity(),page,pagesize,db);
 	    return loader; 

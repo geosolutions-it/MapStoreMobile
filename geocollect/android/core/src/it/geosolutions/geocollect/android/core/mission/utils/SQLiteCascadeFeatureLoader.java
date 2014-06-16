@@ -151,7 +151,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 									// In JTS Point getX = longitude, getY = latitude
 									columnValues = columnValues + ", MakePoint("+((Point)f.geometry).getX()+","+((Point)f.geometry).getY()+", 4326)";
 									
-								}else if(f.properties.containsKey(e.getKey()) && converted != null){
+								}else if(f.properties.containsKey(e.getKey()) && converted != null && f.properties.get(e.getKey())!= null ){
 									
 									columnNames = columnNames + ", " + e.getKey() ;
 									

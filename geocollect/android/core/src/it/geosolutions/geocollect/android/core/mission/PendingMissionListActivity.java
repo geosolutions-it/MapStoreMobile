@@ -83,24 +83,9 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		//Set the layout
-		getLayoutInflater().inflate(R.layout.activity_pendingmission_list, (FrameLayout)findViewById( R.id.content_frame));
-		if (findViewById(R.id.pendingmission_detail_container) != null) {
-			// The detail container view will be present only in the
-			// large-screen layouts (res/values-large and
-			// res/values-sw600dp). If this view is present, then the
-			// activity should be in two-pane mode.
-			mTwoPane = true;
-
-			// In two-pane mode, list items should be given the
-			// 'activated' state when touched.
-			((PendingMissionListFragment) getSupportFragmentManager()
-					.findFragmentById(R.id.pendingmission_list))
-					.setActivateOnItemClick(true);
-		}
-
+		Log.v("MISSION_LIST", "onCreate()");
 		// Initialize database
+		// This should be the first thing the Activity does
 		if(spatialiteDatabase == null){
 	        
 			spatialiteDatabase = SpatialiteUtils.openSpatialiteDB(this, "geocollect/genova.sqlite");
@@ -136,6 +121,24 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 
 		}
 		
+		
+		//Set the layout
+		getLayoutInflater().inflate(R.layout.activity_pendingmission_list, (FrameLayout)findViewById( R.id.content_frame));
+		if (findViewById(R.id.pendingmission_detail_container) != null) {
+			// The detail container view will be present only in the
+			// large-screen layouts (res/values-large and
+			// res/values-sw600dp). If this view is present, then the
+			// activity should be in two-pane mode.
+			mTwoPane = true;
+
+			// In two-pane mode, list items should be given the
+			// 'activated' state when touched.
+			((PendingMissionListFragment) getSupportFragmentManager()
+					.findFragmentById(R.id.pendingmission_list))
+					.setActivateOnItemClick(true);
+		}
+
+
 		
 		// TODO: If exposing deep links into your app, handle intents here.
 	}
