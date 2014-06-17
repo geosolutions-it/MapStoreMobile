@@ -226,10 +226,23 @@ public class PendingMissionListFragment
 					"Activity must implement fragment's callbacks.");
 		}
 
+		// If a previous instance of the database was attached, the loader must be restarted
+		boolean needReload = false;
+		if(db != null && db.dbversion().equals("unknown")){
+			needReload = true;
+		}
+		
 		// Check for a database
 		if(	getSherlockActivity() instanceof PendingMissionListActivity){
-			Log.d(TAG, "Loader: Connecting to Activity database");
+			Log.v(TAG, "Loader: Connecting to Activity database");
 			db = ((PendingMissionListActivity)getSherlockActivity()).spatialiteDatabase;
+			// restart the loader if needed
+			if(needReload){
+				LoaderManager lm = getSherlockActivity().getSupportLoaderManager();
+				if(lm.getLoader(LOADER_INDEX) != null){
+				    lm.restartLoader(LOADER_INDEX, null, this); 
+				}
+			}
 		}else{
 			Log.w(TAG, "Loader: Could not connect to Activity database");
 		}

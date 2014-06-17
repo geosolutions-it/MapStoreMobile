@@ -142,7 +142,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 							columnValues = columnValues + f.id;
 							
 							for(Entry<String, String> e : dbFieldValues.entrySet()){
-								Log.v(TAG, "Got -> "+e.getKey()+" : "+e.getValue());
+								//Log.v(TAG, "Got -> "+e.getKey()+" : "+e.getValue());
 								
 								converted = SpatialiteUtils.getSQLiteTypeFromString(e.getValue());
 								if (converted.equals("point") && f.geometry != null){
@@ -211,7 +211,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 			//String columnValues = " ( ";
 
 			for(Entry<String, String> e : dbFieldValues.entrySet()){
-				Log.v(TAG, "Got -> "+e.getKey()+" : "+e.getValue());
+				//Log.v(TAG, "Got -> "+e.getKey()+" : "+e.getValue());
 				
 				converted = SpatialiteUtils.getSQLiteTypeFromString(e.getValue());
 				
