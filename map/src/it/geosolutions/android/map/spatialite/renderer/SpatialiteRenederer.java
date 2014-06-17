@@ -110,43 +110,47 @@ public class SpatialiteRenederer implements OverlayRenderer<SpatialiteLayer> {
 				if (!StyleUtils.isInVisibilityRange(style4Table, drawZoomLevel)){
 					continue;
 				}
+
 				//retrieve the handler 
 				SpatialVectorTable spatialTable = sdManager.getVectorTableByName(l.getTableName());
-				ISpatialDatabaseHandler spatialDatabaseHandler = sdManager.getVectorHandler(spatialTable);
-
-				GeometryIterator geometryIterator = null;
-				try {
-					geometryIterator = spatialDatabaseHandler
-							.getGeometryIteratorInBounds("4326", spatialTable,
-									n, s, e, w);
-
-					Paint fill = null;
-					Paint stroke = null;
-					if (style4Table.fillcolor != null
-							&& style4Table.fillcolor.trim().length() > 0)
-						fill = StyleManager.getFillPaint4Style(style4Table);
-					if (style4Table.strokecolor != null	&& style4Table.strokecolor.trim().length() > 0)
-						stroke = StyleManager.getStrokePaint4Style(style4Table);
-
-					PointTransformation pointTransformer = new MapsforgePointTransformation(
-							projection, drawX, drawY, drawZoomLevel);
-					Shapes shapes = new Shapes(pointTransformer, canvas,
-							style4Table, geometryIterator);
-					if (spatialTable.isPolygon()) {
-						shapes.drawPolygon(fill, stroke);
+				ISpatialDatabaseHandler spatialDatabaseHandler = l.getSpatialDatabaseHandler();
+				if(spatialDatabaseHandler != null){
+					//ISpatialDatabaseHandler spatialDatabaseHandler = sdManager.getVectorHandler(spatialTable);
+	
+					GeometryIterator geometryIterator = null;
+					try {
+						geometryIterator = spatialDatabaseHandler
+								.getGeometryIteratorInBounds("4326", spatialTable,
+										n, s, e, w);
+	
+						Paint fill = null;
+						Paint stroke = null;
+						if (style4Table.fillcolor != null
+								&& style4Table.fillcolor.trim().length() > 0)
+							fill = StyleManager.getFillPaint4Style(style4Table);
+						if (style4Table.strokecolor != null	&& style4Table.strokecolor.trim().length() > 0)
+							stroke = StyleManager.getStrokePaint4Style(style4Table);
+	
+						PointTransformation pointTransformer = new MapsforgePointTransformation(
+								projection, drawX, drawY, drawZoomLevel);
+						Shapes shapes = new Shapes(pointTransformer, canvas,
+								style4Table, geometryIterator);
+						if (spatialTable.isPolygon()) {
+							shapes.drawPolygon(fill, stroke);
+							
+						} else if (spatialTable.isLine()) {
+							shapes.drawLine(stroke);
+							
+						} else if (spatialTable.isPoint()) {
+							shapes.drawPoint(fill, stroke);
+							
+						}
 						
-					} else if (spatialTable.isLine()) {
-						shapes.drawLine(stroke);
 						
-					} else if (spatialTable.isPoint()) {
-						shapes.drawPoint(fill, stroke);
-						
+					} finally {
+						if (geometryIterator != null)
+							geometryIterator.close();
 					}
-					
-					
-				} finally {
-					if (geometryIterator != null)
-						geometryIterator.close();
 				}
 			}
 		} catch (Exception e1) {

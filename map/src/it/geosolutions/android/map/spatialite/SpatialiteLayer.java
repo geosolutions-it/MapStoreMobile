@@ -17,6 +17,8 @@
  */
 package it.geosolutions.android.map.spatialite;
 
+import android.util.Log;
+import jsqlite.Exception;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
 import it.geosolutions.android.map.model.Layer;
 import it.geosolutions.android.map.style.AdvancedStyle;
@@ -32,7 +34,7 @@ public class SpatialiteLayer implements Layer<SpatialiteSource> {
 	public SpatialiteLayer(SpatialVectorTable t) {
 		this.title = t.getName();
 		this.tableName = t.getName();
-		ISpatialDatabaseHandler h= SpatialDataSourceManager.getInstance().getSpatialDataSourceHandler(t);
+		SpatialDataSourceManager.getInstance().getSpatialDataSourceHandler(t);
 	}
 
 
@@ -102,6 +104,25 @@ public class SpatialiteLayer implements Layer<SpatialiteSource> {
 	@Override
 	public int getStatus() {
 		return status;
+	}
+	
+	/**
+	 * Returns the renderer associated to this layer
+	 * @return
+	 */
+	public ISpatialDatabaseHandler getSpatialDatabaseHandler(){
+		SpatialDataSourceManager sdsm = SpatialDataSourceManager.getInstance();
+		if(sdsm != null){
+			try {
+				if(sdsm.getVectorTableByName(tableName)!=null){
+					return sdsm.getVectorHandler(sdsm.getVectorTableByName(tableName));
+				}
+			} catch (Exception e) {
+				Log.e("SpatialiteLayer","Exception while getting SpatialDatabaseHandler");
+				Log.e("SpatialiteLayer",Log.getStackTraceString(e));
+			}
+		}
+		return null;
 	}
 
 }
