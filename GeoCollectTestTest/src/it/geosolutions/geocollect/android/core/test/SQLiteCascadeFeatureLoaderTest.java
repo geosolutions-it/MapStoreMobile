@@ -122,7 +122,7 @@ public class SQLiteCascadeFeatureLoaderTest extends android.test.LoaderTestCase 
 				"		\"type\":\"WFS\"," +
 				"		\"URL\":\"http://demo.geo-solutions.it/share/comunege/geocollect/punti_abbandono.geojson\"," +
 				"		\"typeName\":\"geosolutions:punti_abbandono\"," +
-				"		\"storeLocally\":\"testTable\","+
+				"		\"localSourceStore\":\"testTable\","+
 				"		\"dataTypes\":{" +
 				"			\"CODICE\":\"string\"," +
 				"			\"DATA_RILEV\":\"string\"," +
@@ -155,7 +155,7 @@ public class SQLiteCascadeFeatureLoaderTest extends android.test.LoaderTestCase 
 				"}";	
 		MissionTemplate mt1 = gson.fromJson( template1 , MissionTemplate.class);
 		
-		String tableName = mt1.source.localFormStore; //"testTable"
+		String tableName = mt1.source.localSourceStore; //"testTable"
 
 		PersistenceUtils.createTableFromTemplate(db, tableName, mt1.source.dataTypes);
 		
