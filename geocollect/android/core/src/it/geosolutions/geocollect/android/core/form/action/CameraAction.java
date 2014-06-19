@@ -17,15 +17,17 @@
  */
 package it.geosolutions.geocollect.android.core.form.action;
 
+import java.io.File;
 import com.actionbarsherlock.app.SherlockFragment;
 
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.model.viewmodel.FormAction;
 import it.geosolutions.geocollect.model.viewmodel.Page;
-import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.v4.app.Fragment;
+import android.util.Log;
 
 /**
  * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
@@ -54,11 +56,18 @@ public class CameraAction extends AndroidAction {
 	/**
 	 * Provides the image file URI
 	 * @param mediaTypeImage
+	 * @param feature_id 
 	 * @return
 	 */
-	private static String getOutputMediaFileUri(int mediaTypeImage) {
-		//TODO implement this
-		return "myFileUri";
+	private static Uri getOutputMediaFileUri(int mediaTypeImage, String feature_id) {
+		File baseDir = new File(Environment.getExternalStorageDirectory().getPath()+"/geocollect/media/"+feature_id);
+		
+		baseDir.mkdirs();
+		
+		File f = new File (baseDir, String.valueOf(System.currentTimeMillis()) + ".jpg");
+		
+		return Uri.fromFile(f);
+
 	}
 
 
@@ -68,13 +77,23 @@ public class CameraAction extends AndroidAction {
 	@Override
 	public void performAction(SherlockFragment fragment, FormAction action, Mission m,
 			Page p) {
+		
+		if(m == null || m.getOrigin() == null || m.getOrigin().id.isEmpty()){
+			
+	    	Log.w("CameraAction", "Could not start intent, feature id not found");
+			return;
+		}
+		
 		// create Intent to take a picture and return control to the calling application
 	    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-	    String fileUri = "sampleImage";
-	    fileUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE); // create a file to save the image
-	    intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri); // set the image file name
-	    // start the image capture Intent
-	    fragment.startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+	    Uri fileUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE, m.getOrigin().id); // create a file to save the image
+	    if(fileUri != null){
+		    intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri); // set the image file name
+		    // start the image capture Intent
+		    fragment.startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+	    }else{
+	    	Log.w("CameraAction", "Could not start intent, bad Uri");
+	    }
 	}
 	
 }

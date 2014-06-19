@@ -25,15 +25,12 @@
 			  <type>apklib</type>
 		</dependency>
 		
-		
-		<!--dependency>
-			<groupId>it.geosolutions.android.map</groupId>
-			<artifactId>MapActivity</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-            <type>jar</type>
-            <scope>provided</scope>
+		<dependency>
+			<groupId>com.nostra13.universalimageloader</groupId>
+			<artifactId>universal-image-loader</artifactId>
+			<version>1.9.2</version>
 		</dependency>
-		-->
+		
 	</dependencies>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
@@ -81,5 +78,31 @@
 		</plugins>
 	</build>
 				
+	<profiles>
+		<profile>
+				<id>emma</id>
+				<build>
+					<plugins>
+						<plugin>
+							<groupId>com.jayway.maven.plugins.android.generation2</groupId>
+						<artifactId>android-maven-plugin</artifactId>
+						<configuration>
+						  <!-- emma start -->
+							<emma>
+								 <enable>true</enable>
+								 <classFolders>${project.basedir}/target/classes/</classFolders>
+							<outputMetaFile>${project.basedir}/target/emma/coverage.em</outputMetaFile>
+							</emma>
+							<!-- emma stop -->
+							<dex>
+								 <noLocals>true</noLocals> <!--  must be set for emma -->
+							</dex>
+						</configuration>
+						<extensions>true</extensions>
+					   </plugin>
+					 </plugins>
+				  </build>
+		</profile>
+	</profiles>
 
 </project>

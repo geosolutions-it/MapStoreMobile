@@ -39,18 +39,30 @@ import org.mapsforge.android.maps.MapView;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListener;
+import com.nostra13.universalimageloader.core.listener.PauseOnScrollListener;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
 public class FormEditActivity extends SherlockFragmentActivity  implements MapActivity  {
 
@@ -76,6 +88,27 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
 	 * Spatialite Database for persistence
 	 */
 	jsqlite.Database spatialiteDatabase;
+
+	/**
+	 * ListView for Photo Gallery
+	 */
+	AbsListView listView;
+	
+	/**
+	 * Singleton of the ImageLoader, used by the Photo Gallery
+	 */
+	ImageLoader imageLoader = ImageLoader.getInstance();
+
+
+	/**
+	 * Stores the image urls to be shown
+	 */
+	String[] imageUrls;
+
+	/**
+	 * Options of the Photo Gallery
+	 */
+	DisplayImageOptions options;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -303,6 +336,13 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
              if(this.mapViewManager !=null){
             	 this.mapViewManager.resumeMapViews();
              }
+             /*
+             if(listView != null){
+            	 // TODO: add pauseOnScroll and pauseOnFling to the optionsMenu
+            	 listView.setOnScrollListener(new PauseOnScrollListener(imageLoader, false, true));
+             }
+             */
+
      }
 	 @Override
      protected void onDestroy() {
@@ -319,5 +359,86 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
 				}
              }
      }
-    
+	 
+	/**
+	 * 
+	 * @author Lorenzo Pini
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent resultIntent) {
+		super.onActivityResult(requestCode, resultCode, resultIntent);
+		
+		
+		
+	}
+	 */	 
+	 
+	 /*
+	  * UniversalImage Loader 
+	  */
+		static class ViewHolder {
+			ImageView imageView;
+			ProgressBar progressBar;
+		}
+
+		public class ImageAdapter extends BaseAdapter {
+			@Override
+			public int getCount() {
+				return imageUrls.length;
+			}
+
+			@Override
+			public Object getItem(int position) {
+				return null;
+			}
+
+			@Override
+			public long getItemId(int position) {
+				return position;
+			}
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				final ViewHolder holder;
+				View view = convertView;
+				if (view == null) {
+					view = getLayoutInflater().inflate(R.layout.uil_item_grid_image, parent, false);
+					holder = new ViewHolder();
+					assert view != null;
+					holder.imageView = (ImageView) view.findViewById(R.id.image);
+					holder.progressBar = (ProgressBar) view.findViewById(R.id.progress);
+					view.setTag(holder);
+				} else {
+					holder = (ViewHolder) view.getTag();
+				}
+
+				imageLoader.displayImage(imageUrls[position], holder.imageView, options, new SimpleImageLoadingListener() {
+											 @Override
+											 public void onLoadingStarted(String imageUri, View view) {
+												 holder.progressBar.setProgress(0);
+												 holder.progressBar.setVisibility(View.VISIBLE);
+											 }
+
+											 @Override
+											 public void onLoadingFailed(String imageUri, View view,
+													 FailReason failReason) {
+												 holder.progressBar.setVisibility(View.GONE);
+											 }
+
+											 @Override
+											 public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+												 holder.progressBar.setVisibility(View.GONE);
+											 }
+										 }, new ImageLoadingProgressListener() {
+											 @Override
+											 public void onProgressUpdate(String imageUri, View view, int current,
+													 int total) {
+												 holder.progressBar.setProgress(Math.round(100.0f * current / total));
+											 }
+										 }
+				);
+
+				return view;
+			}
+		}
 }

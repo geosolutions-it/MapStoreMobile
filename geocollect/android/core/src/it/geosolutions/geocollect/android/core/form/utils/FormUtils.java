@@ -17,6 +17,9 @@
  */
 package it.geosolutions.geocollect.android.core.form.utils;
 
+import java.io.File;
+import java.util.ArrayList;
+
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.action.AndroidAction;
 import it.geosolutions.geocollect.android.core.form.action.CameraAction;
@@ -26,7 +29,10 @@ import it.geosolutions.geocollect.model.viewmodel.FormAction;
 import it.geosolutions.geocollect.model.viewmodel.Page;
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 
 
 /**
@@ -80,5 +86,35 @@ public class FormUtils {
 		
 	}
 	
+	/**
+	 * Return a list of Strings representing Uris for the media
+	 * TODO: Filter media based on feature.id
+	 * @return
+	 */
+	public static String[] getPhotoUriStrings(String feature_id){
+		
+		if(feature_id == null || feature_id.isEmpty()){
+			Log.w("FormUtils", "getPhotoUriStrings: Could not get feature_id");
+			return new String[0];
+		}
+			
+		File folder = new File(Environment.getExternalStorageDirectory().getPath()+"/geocollect/media/"+feature_id);
+		folder.mkdirs();
+		File[] listOfFiles = folder.listFiles();
+
+		if(listOfFiles == null){
+			// Zero-length array as "not found"
+			return new String[0];
+		}
+		
+		ArrayList<String> newFileListUri = new ArrayList<String>();
+	    for (int i = 0; i < listOfFiles.length; i++) {
+			if (listOfFiles[i].isFile()) {
+				newFileListUri.add(Uri.fromFile(listOfFiles[i]).toString());
+			} 
+	    }
+		
+	    return newFileListUri.toArray(new String[newFileListUri.size()]);
+	}
 
 }

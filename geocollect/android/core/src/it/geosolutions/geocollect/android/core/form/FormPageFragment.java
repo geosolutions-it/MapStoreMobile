@@ -18,19 +18,29 @@
 package it.geosolutions.geocollect.android.core.form;
 
 
+import java.io.File;
+import java.util.ArrayList;
+
 import it.geosolutions.android.map.fragment.MapFragment;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.action.AndroidAction;
+import it.geosolutions.geocollect.android.core.form.action.CameraAction;
 import it.geosolutions.geocollect.android.core.form.utils.FormBuilder;
 import it.geosolutions.geocollect.android.core.form.utils.FormUtils;
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
+import it.geosolutions.geocollect.android.core.widgets.UILImageAdapter;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
+import it.geosolutions.geocollect.model.viewmodel.Field;
 import it.geosolutions.geocollect.model.viewmodel.FormAction;
 import it.geosolutions.geocollect.model.viewmodel.Page;
+import it.geosolutions.geocollect.model.viewmodel.type.XType;
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
@@ -39,6 +49,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
@@ -46,6 +57,7 @@ import android.widget.ScrollView;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 /**
  * This Fragment contains form field for a page of the <Form>.
@@ -70,6 +82,12 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 	private ProgressBar mProgressView;
 	private boolean mDone;
 	private Mission mission;
+	
+	/**
+	 * Reference to the ImageLoader instance
+	 * Has value only if this page contains a Photo gallery
+	 */
+	ImageLoader imageLoader;
 	
 	@Override
 	public void onAttach(Activity activity) {
@@ -233,6 +251,44 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 		return loader;
 	}
 
+    
+	/**
+	 * Handle the results of the CameraAction
+	 */
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		Log.d(TAG, "onActivityResult(): "+requestCode);
+	    super.onActivityResult(requestCode, resultCode, data);
+	    
+	    if(requestCode == CameraAction.CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE && resultCode == Activity.RESULT_OK){
+	    	if( this.page.fields != null &&
+	    			this.mission != null &&
+	    			this.mission.getOrigin() != null &&
+	    			this.mission.getOrigin().id != null &&
+	    			!this.mission.getOrigin().id.isEmpty()){
+	    		
+	    		
+				for(Field f : page.fields){
+					if(f == null || f.xtype != XType.photo)
+						continue;
+					
+					// TODO: use a non-string tag
+					GridView grid = (GridView) this.mFormView.findViewWithTag("__photo__");
+					
+			    	if( grid != null && ImageLoader.getInstance().isInited()){
+			    		
+		    		    ((UILImageAdapter)grid.getAdapter()).setImageUrls(FormUtils.getPhotoUriStrings(this.mission.getOrigin().id));
+		    		    ((UILImageAdapter)grid.getAdapter()).notifyDataSetChanged();
+			    	}
+			    	break;
+		    	}
+	    		
+	    	}
+	    }
+	    
+	}
+	
+	
     /**
      * 
      */
@@ -240,6 +296,13 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 		Log.d(TAG, "onLoadFinished(): id=" + id);
 		toggleLoading(false);
 		buildForm();
+		
+		for(Field f : page.fields){
+			if(f == null || f.xtype != XType.photo)
+				continue;
+			imageLoader = ImageLoader.getInstance();
+	    	break;
+    	}
 	}
 
 	public void onLoaderReset(Loader<Void> loader) {
@@ -256,12 +319,20 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 		super.onStop();
 		Log.d(TAG, "onStop()");
 		//PersistenceUtils.storePageData(page, mFormView, mission);
+		if(imageLoader != null){
+			imageLoader.stop();
+		}
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
 		Log.d(TAG, "onPause()");
+
+		if(imageLoader != null && imageLoader.isInited()){
+			imageLoader.pause();
+		}
+
 		PersistenceUtils.storePageData(page, mFormView, mission);
 	}
 
@@ -269,6 +340,9 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 	public void onDestroyView() {
 		super.onDestroyView();
 		Log.d(TAG, "onDestroyView()");
+		if(imageLoader != null){
+			imageLoader.destroy();
+		}
 	}
 
 	@Override
@@ -283,5 +357,12 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 		Log.d(TAG, "onDetach()");
 	}
 
+	@Override
+	public void onResume() {
+		super.onResume();
+		if(imageLoader != null && imageLoader.isInited()){
+			imageLoader.resume();
+		}
+	}
 	
 }

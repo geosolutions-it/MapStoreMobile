@@ -137,6 +137,10 @@ public class PersistenceUtils {
 						// skip
 						continue;
 						//break;
+					case photo:
+						// skip
+						continue;
+						//break;
 					case mapViewPoint:
 						if(!(Boolean)FormBuilder.getAttributeWithDefault(f,"editable",true)){
 							// Field is not editable, do not save
@@ -317,6 +321,9 @@ public class PersistenceUtils {
 									}
 									break;
 								case separator:
+									// skip
+									break;
+								case photo:
 									// skip
 									break;
 								case mapViewPoint:

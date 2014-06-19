@@ -301,28 +301,15 @@
 					"label":"Quantità Presunta"
 				}]
 			},{
-				"title": "Posizione",
-				"attributes":{
-					"message":"Premi a lungo sul marker per muoverlo."
-				},
-				"iconCls":"not_supported_yet",
-				"fields":[{
-					"fieldId": "GEOMETRY",
-					"type":"geoPoint",
-					"value":"${origin.the_geom}",
-					"xtype":"mapViewPoint",
-					"attributes":{
-						"editable":true,
-						"description":"${origin.PROVNAME}"
-					}
-				}]
-			},{
 				"title": "Rilievi Fotografici",
 				"iconCls":"not_supported_yet",
 				"fields":[{
 					
 					"type":"text",
 					"xtype":"separator",
+					"label":"TO BE IMPLEMENTED"
+				},{
+					"xtype":"photo",
 					"label":"TO BE IMPLEMENTED"
 				}],
 				"actions":[{

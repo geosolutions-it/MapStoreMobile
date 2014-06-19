@@ -19,4 +19,6 @@
         <item quantity="other">%d reportings.</item>
     </plurals>
     <string name="reload">Reload</string>
+    <string name="uil_descr_image">Image</string>
+    
 </resources>
