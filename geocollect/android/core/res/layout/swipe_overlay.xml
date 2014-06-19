@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.actionbarsherlock.internal.widget.IcsLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/abs__item_background_holo_dark"
+    android:gravity="center"
+    android:measureWithLargestChild="true"
+    android:orientation="horizontal" >
+
+    <TextView
+        android:id="@+id/txtSwipeLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+		android:text="@string/swipe_left_to_continue"/>
+
+</com.actionbarsherlock.internal.widget.IcsLinearLayout>

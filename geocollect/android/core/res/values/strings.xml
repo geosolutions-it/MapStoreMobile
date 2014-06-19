@@ -20,5 +20,5 @@
     </plurals>
     <string name="reload">Reload</string>
     <string name="uil_descr_image">Image</string>
-    
+    <string name="swipe_left_to_continue">Swipe left to continue</string>
 </resources>

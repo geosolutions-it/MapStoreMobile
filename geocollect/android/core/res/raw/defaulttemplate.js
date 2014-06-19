@@ -135,6 +135,9 @@
 			{
 				"title": "Scheda",
 				"iconCls":"not_supported_yet",
+				"attributes":{
+					"tutorial":true
+				},
 				"fields":[{
 					"fieldId": "DATA_SCHEDA",
 					"type":"text",
