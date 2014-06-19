@@ -24,6 +24,8 @@ import it.geosolutions.android.map.overlay.items.DescribedMarker;
 import it.geosolutions.android.map.overlay.managers.MultiSourceOverlayManager;
 import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.android.map.view.AdvancedMapView;
+import it.geosolutions.geocollect.android.core.form.FormEditActivity;
+import it.geosolutions.geocollect.android.core.form.ViewPagerAwareMarkerControl;
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.widgets.DatePicker;
@@ -191,7 +193,12 @@ public class FormBuilder {
 		//check disablePan
 		Boolean disablePan = (Boolean)getAttributeWithDefault(field,"disablePan",false);
 		//add marker control
-		MarkerControl mc  =new MarkerControl(mapView,editable);
+		MarkerControl mc;
+		if(context instanceof FormEditActivity)
+			mc = new ViewPagerAwareMarkerControl(mapView,editable, ((FormEditActivity)context).mViewPager);
+		else
+			mc = new MarkerControl(mapView,editable);
+
 		//mc.setInfoButton(infoButton);
 		mapView.addControl(mc);
 		

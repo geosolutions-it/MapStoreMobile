@@ -411,6 +411,12 @@ public class MarkerControl extends MapControl implements OnTouchListener, OnGest
 		
 	}
 	
-
+	/**
+	 * Return true if the control is in DRAG state
+	 * @return
+	 */
+	public boolean isDragging() {
+		return isDragging;
+	}
 
 }

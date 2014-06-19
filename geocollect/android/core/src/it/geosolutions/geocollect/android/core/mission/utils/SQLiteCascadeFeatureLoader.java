@@ -19,15 +19,11 @@ package it.geosolutions.geocollect.android.core.mission.utils;
 
 
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
-import it.geosolutions.geocollect.model.source.XDataType;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import com.vividsolutions.jts.JTSVersion;
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;

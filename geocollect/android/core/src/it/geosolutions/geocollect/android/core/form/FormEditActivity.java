@@ -66,7 +66,7 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
     /**
      * The {@link android.support.v4.view.ViewPager} that will display the object collection.
      */
-	EnableSwipeViewPager mViewPager;
+	public EnableSwipeViewPager mViewPager;
 	/**
 	 * the MapViewManager
 	 */
