@@ -19,4 +19,5 @@
         <item quantity="other">%d reportings.</item>
     </plurals>
     <string name="reload">Reload</string>
+    <string name="swipe_left_to_continue">Swipe left to continue</string>
 </resources>

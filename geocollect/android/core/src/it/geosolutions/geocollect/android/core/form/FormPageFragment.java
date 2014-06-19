@@ -34,11 +34,13 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.view.ViewPager.LayoutParams;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
@@ -182,6 +184,34 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 		// It is safe to initialize field here because buildForm is a callback of the onActivityCreated();
 		PersistenceUtils.loadPageData(page, mFormView, mission, getActivity());
 
+		
+		if(page.attributes != null && page.attributes.containsKey("tutorial")){
+			if ( page.attributes.get("tutorial") != null &&
+				 page.attributes.get("tutorial") instanceof Boolean &&
+				 (Boolean) page.attributes.get("tutorial")){
+				
+				Log.v(TAG, "Showing tutorial");
+				
+				// create new Layout
+				FrameLayout overlayFramelayout = new FrameLayout(getSherlockActivity());
+				
+				View view = getSherlockActivity().getLayoutInflater().inflate(
+						R.layout.swipe_overlay,
+						overlayFramelayout,
+						false
+						);
+				
+				
+				overlayFramelayout.addView(view);
+
+				// Viewpager layoutparams
+				LayoutParams layoutParams = new LayoutParams();
+				layoutParams.gravity = Gravity.BOTTOM;
+				//getSherlockActivity().addContentView(overlayFramelayout, layoutParams);
+				this.mFormView.addView(overlayFramelayout, layoutParams);
+				
+			}
+		}
 		// the view hierarchy is now complete
 		mDone = true;
 	}
