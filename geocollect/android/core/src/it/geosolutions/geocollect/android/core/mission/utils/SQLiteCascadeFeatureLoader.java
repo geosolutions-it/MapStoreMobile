@@ -48,7 +48,8 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 	public String TAG = "SQLiteCascadeFeatureLoader";
 	private AsyncTaskLoader<List<Feature>> pre_loader;
 	private Database db;
-	private String tableName;
+	private String sourceTableName;
+	private String formTableName;
 	private List<Feature> mData;
 	public int start;
 	public int limit;
@@ -58,15 +59,36 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 	public SQLiteCascadeFeatureLoader(Context context,
 			AsyncTaskLoader<List<Feature>> pre_loader,
 			Database db,
-			String tableName) {
+			String localSourceStore,
+			String localFormStore) {
 		
 		super(context);
 		this.pre_loader = pre_loader;
 		this.db = db;
-		this.tableName = tableName;
+		this.sourceTableName = localSourceStore;
+		this.formTableName = localFormStore;
 		
 	}
 	
+	/**
+	 * Constructor without form data checking
+	 * Features will not be checked for existence in the form data table
+	 * @param context
+	 * @param pre_loader
+	 * @param db
+	 * @param localSourceStore
+	 */
+	public SQLiteCascadeFeatureLoader(Context context,
+			AsyncTaskLoader<List<Feature>> pre_loader, 
+			Database db, 
+			String localSourceStore) {
+		super(context);
+		this.pre_loader = pre_loader;
+		this.db = db;
+		this.sourceTableName = localSourceStore;
+		this.formTableName = null;
+	}
+
 	/*
 	 * When is this called?
 	 */
@@ -100,7 +122,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 			return null;
 		}
 		
-		if(this.tableName == null || this.tableName.isEmpty()){
+		if(this.sourceTableName == null || this.sourceTableName.isEmpty()){
 			Log.w(TAG, "Table Name is empty");
 			return null;
 		}
@@ -114,7 +136,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 				
 				// TODO: truncate only paginated rows
 				try {
-					Stmt stmt = db.prepare("DELETE FROM '"+tableName+"';");
+					Stmt stmt = db.prepare("DELETE FROM '"+sourceTableName+"';");
 					stmt.step();
 					stmt.close();
 				} catch (jsqlite.Exception e) {
@@ -125,7 +147,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 				if(!fromPreLoader.isEmpty()){
 					
 					// Get the list of the fields
-					HashMap<String, String> dbFieldValues = SpatialiteUtils.getPropertiesFields(db, tableName);
+					HashMap<String, String> dbFieldValues = SpatialiteUtils.getPropertiesFields(db, sourceTableName);
 					if(dbFieldValues != null){
 
 						Stmt stmt;
@@ -167,7 +189,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 							columnValues = columnValues + " )";
 							
 							// TODO: group all the insert queries into a transaction for insertion speedup
-							String insertQuery = "INSERT INTO '"+tableName+"' "+columnNames+" VALUES "+columnValues+";";
+							String insertQuery = "INSERT INTO '"+sourceTableName+"' "+columnNames+" VALUES "+columnValues+";";
 							try {
 								stmt = db.prepare(insertQuery);
 								stmt.step();
@@ -191,7 +213,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 		// Get the list of the fields
 		// TODO: Can this call be done before the pre_loader block? 
 		// Are there any concurrent events that can modify the table schema before we read the data?
-		HashMap<String, String> dbFieldValues = SpatialiteUtils.getPropertiesFields(db, tableName);
+		HashMap<String, String> dbFieldValues = SpatialiteUtils.getPropertiesFields(db, sourceTableName);
 		
 		mData = new ArrayList<Feature>();
 		
@@ -231,7 +253,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 				
 			}
 			
-			columnNames = columnNames + " FROM '"+tableName+"';";
+			columnNames = columnNames + " FROM '"+sourceTableName+"';";
 
 			Log.v(TAG, columnNames);
 			if(Database.complete(columnNames)){
@@ -283,11 +305,33 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 		        } catch (Exception e) {
 		            Log.e(TAG, Log.getStackTraceString(e));
 		        }
-				
+		        
 			}else{
 				Log.w(TAG, "Query is not complete:\n"+columnNames);
 			}
 			
+		}
+
+		
+		if(formTableName != null && !formTableName.isEmpty()){
+			ArrayList<String> editingIds = new ArrayList<String>();
+			try {
+				Stmt stmt = db.prepare("SELECT ORIGIN_ID FROM '"+formTableName+"';");
+				while( stmt.step() ) {
+					editingIds.add(stmt.column_string(0));
+				}
+				stmt.close();
+			} catch (jsqlite.Exception e) {
+				Log.e(TAG, Log.getStackTraceString(e));
+			}
+			
+			if(!editingIds.isEmpty()){
+				for(Feature f : mData){
+					if(editingIds.contains(f.id)){
+						f.editing = true;
+					}
+				}
+			}
 		}
 
 		return mData;

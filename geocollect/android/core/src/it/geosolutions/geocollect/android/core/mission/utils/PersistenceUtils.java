@@ -73,7 +73,7 @@ public class PersistenceUtils {
 	 */
 	public static boolean storePageData(Page page, LinearLayout layout, Mission mission, String tableName){
 		
-		if(tableName == null || tableName.equalsIgnoreCase("")){
+		if(tableName == null || tableName.isEmpty()){
 			Log.w(TAG, "Empty tableName, aborting...");
 			return false;
 		}

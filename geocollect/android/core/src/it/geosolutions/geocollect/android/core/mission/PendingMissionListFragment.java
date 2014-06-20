@@ -205,7 +205,7 @@ public class PendingMissionListFragment
 	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
-		if(getActivity().getIntent().getBooleanExtra(INFINITE_SCROLL, true)){
+		if(getActivity().getIntent().getBooleanExtra(INFINITE_SCROLL, false)){
 			getListView().setOnScrollListener(this);
 		}// Restore the previously serialized activated item position.
 		if (savedInstanceState != null
@@ -313,14 +313,14 @@ public class PendingMissionListFragment
 		
 		int id = item.getItemId();
 		if(id==R.id.refresh){
-			getLoaderManager().getLoader(LOADER_INDEX);
+
+			//getLoaderManager().getLoader(LOADER_INDEX);
 			if(loader !=null){
 				adapter.clear();
 				loader.forceLoad();
 			}
 			return true;
 		}
-		
 		
 		return super.onOptionsItemSelected(item);
 	}
@@ -442,5 +442,24 @@ public class PendingMissionListFragment
 	    adapter.clear();
 	    page=0;
 	    lm.initLoader(loaderIndex, null, this); 
+	}
+	
+	/**
+	 * Shows the "editing" icon upon resuming from launched detail activity
+	 */
+	@Override
+	public void onResume() {
+		super.onResume();
+		if(getListView()!= null){
+			int pos = getListView().getCheckedItemPosition();
+			int max = getListView().getCount();
+			if( pos != AbsListView.INVALID_POSITION && pos < max){
+				Feature f = (Feature) getListView().getItemAtPosition(pos);
+				if(f != null){
+					f.editing = true;
+					getListView().invalidateViews();
+				}
+			}
+		}
 	}
 }
