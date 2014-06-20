@@ -117,9 +117,27 @@ public class Mission implements Serializable{
 				}
 			}
 			else if(LOCAL_PROVIDER_TAG.equals(provider)){
-				getDataValue(path[1]);
+				return getLocalValue(path[1]);
 			}
 			
+		}
+		return null;
+	}
+
+	/**
+	 * Provides a value from local device configuration (TBD)
+	 * (Username, local time)
+	 * @param string
+	 * @return
+	 */
+	private Object getLocalValue(String string) {
+		// TODO This is only a Mock implementation
+		if(string.equals("user_name")){
+			return "Mario";
+		}else if(string.equals("user_surname")){
+			return "Rossi";
+		}else if(string.equals("user_organization")){
+			return "Comune di Genova";
 		}
 		return null;
 	}
