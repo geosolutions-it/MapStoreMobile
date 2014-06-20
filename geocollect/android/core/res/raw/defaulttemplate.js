@@ -156,16 +156,19 @@
 					"fieldId": "NOME_RILEVATORE",
 					"type":"person",
 					"xtype":"textfield",
+					"value":"${local.user_name}",
 					"label":"Nome Rilevatore"
 				},{
 					"fieldId": "COGNOME_RILEVATORE",
 					"type":"person",
 					"xtype":"textfield",
+					"value":"${local.user_surname}",
 					"label":"Cognome Rilevatore"
 				},{
 					"fieldId": "ENTE_RILEVATORE",
 					"type":"person",
 					"xtype":"textfield",
+					"value":"${local.user_organization}",
 					"label":"Ente di appartenenza Rilevatore"
 				}]
 			},{
@@ -360,7 +363,7 @@
 					"fieldId": "QUANTITA_PRESUNTA",
 					"type":"decimal",
 					"xtype":"label",
-					"label":"Quantità Presunta"
+					"label":"Quantità Presunta (mc)"
 				}],
 				"actions":[{
 					"id":2,

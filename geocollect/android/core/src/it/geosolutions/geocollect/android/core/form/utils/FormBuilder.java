@@ -485,6 +485,9 @@ public class FormBuilder {
 		editView.setId(id());
 		editView.setTag(field.fieldId);
 		editView.setInputType(type);
+		
+		editView.setText( mission.getValueAsString(field));//TODO make it parameterizable
+		
 		mFormView.addView(tvLabel);
 		mFormView.addView(editView);
 	}
@@ -606,7 +609,8 @@ public class FormBuilder {
 		} else {
 			switch (field.type) {
 			case person:
-				return InputType.TYPE_TEXT_VARIATION_PERSON_NAME;
+				//return InputType.TYPE_TEXT_VARIATION_PERSON_NAME; // TYPE_TEXT_VARIATION_PERSON_NAME seems to not be used by the framework
+				return InputType.TYPE_TEXT_FLAG_CAP_WORDS;
 			case phone:
 				return InputType.TYPE_CLASS_PHONE;
 			case decimal:
