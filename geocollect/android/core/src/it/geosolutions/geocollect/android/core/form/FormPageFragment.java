@@ -44,6 +44,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -184,7 +185,7 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 		// It is safe to initialize field here because buildForm is a callback of the onActivityCreated();
 		PersistenceUtils.loadPageData(page, mFormView, mission, getActivity());
 
-		
+		// TODO: add a timer and start an animation for the tutorial
 		if(page.attributes != null && page.attributes.containsKey("tutorial")){
 			if ( page.attributes.get("tutorial") != null &&
 				 page.attributes.get("tutorial") instanceof Boolean &&
@@ -214,6 +215,12 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 		}
 		// the view hierarchy is now complete
 		mDone = true;
+	
+		// TODO: merge this code block with the previous "tutorial"
+		if(page.attributes != null && page.attributes.containsKey("message")){
+			Toast.makeText(getSherlockActivity(), (String) page.attributes.get("message"), Toast.LENGTH_LONG).show();
+		}
+
 	}
     
     

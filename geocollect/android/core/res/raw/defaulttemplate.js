@@ -136,7 +136,7 @@
 				"title": "Scheda",
 				"iconCls":"not_supported_yet",
 				"attributes":{
-					"tutorial":true
+					"message":"Scorri a sinistra per continuare"
 				},
 				"fields":[{
 					"fieldId": "DATA_SCHEDA",
