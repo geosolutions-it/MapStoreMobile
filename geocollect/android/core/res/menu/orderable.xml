@@ -3,10 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="it.geosolutions.geocollect.android.core.MainActivity" >
     
-    <item android:id="@+id/refresh"
-          android:icon="@drawable/ic_navigation_refresh"
+    <item android:id="@+id/order"
+          android:icon="@drawable/ic_action_sort_by_size"
           android:showAsAction="always"
-          android:title="@string/reload"
+          android:title="@string/order_by_date"
            /> 
 
 </menu>

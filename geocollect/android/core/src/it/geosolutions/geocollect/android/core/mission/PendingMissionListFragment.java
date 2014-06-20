@@ -302,7 +302,8 @@ public class PendingMissionListFragment
 	@Override
 	public void onCreateOptionsMenu(
 	      Menu menu, MenuInflater inflater) {
-	   inflater.inflate(R.menu.refreshable, menu);
+		   inflater.inflate(R.menu.orderable, menu);
+		   inflater.inflate(R.menu.refreshable, menu);
 	}
 	
 	/* (non-Javadoc)
@@ -320,7 +321,17 @@ public class PendingMissionListFragment
 				loader.forceLoad();
 			}
 			return true;
+		} else if (id==R.id.order){
+
+			// TODO: Define a contract on the ordering field/fields
+			// 		Get it from the mission template
+			if(loader !=null){
+				adapter.clear();
+				loader.forceLoad();
+			}
+			return true;
 		}
+
 		
 		return super.onOptionsItemSelected(item);
 	}
