@@ -575,9 +575,9 @@ public class FormBuilder {
         
 		.cacheInMemory(false)
 		.cacheOnDisk(false)
-		.considerExifParams(false)
+		.considerExifParams(true)
 		.bitmapConfig(Bitmap.Config.RGB_565)
-		.imageScaleType(ImageScaleType.IN_SAMPLE_INT)
+		.imageScaleType(ImageScaleType.EXACTLY)
 		.build();
 		
 		//***************************
