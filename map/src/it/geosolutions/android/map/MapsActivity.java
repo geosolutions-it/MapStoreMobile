@@ -280,7 +280,17 @@ public class MapsActivity extends MapActivityBase {
 			String geoStoreUrl = data.getString(PARAMETERS.GEOSTORE_URL);
 			loadGeoStoreResource(resource, geoStoreUrl);
 		}
-		
+
+		if(data.containsKey(MSM_MAP)){
+	        layerManager.loadMap((MSMMap)data.getSerializable(MSM_MAP));
+
+		}
+		/*
+		ArrayList<Layer> layersToAdd = (ArrayList<Layer>) data.getSerializable(LAYERS_TO_ADD);
+		if(layersToAdd != null){
+			addLayers(layersToAdd);
+		}
+		*/
 	}
 
 	/**
