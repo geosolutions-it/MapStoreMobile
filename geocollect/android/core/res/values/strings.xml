@@ -18,6 +18,7 @@
         <item quantity="one">One reporting</item>
         <item quantity="other">%d reportings.</item>
     </plurals>
+    <string name="order_by_date">Order By Date</string>
     <string name="reload">Reload</string>
     <string name="uil_descr_image">Image</string>
     <string name="swipe_left_to_continue">Swipe left to continue</string>

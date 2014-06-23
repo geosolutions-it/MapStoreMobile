@@ -65,7 +65,7 @@ public class MissionUtils {
 			return wfsl;
 		}
 		
-		return new SQLiteCascadeFeatureLoader(a, wfsl, db, missionTemplate.source.localSourceStore);
+		return new SQLiteCascadeFeatureLoader(a, wfsl, db, missionTemplate.source.localSourceStore, missionTemplate.source.localFormStore);
 	}
 	
 	/**

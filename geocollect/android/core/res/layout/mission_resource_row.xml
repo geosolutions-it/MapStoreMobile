@@ -28,13 +28,15 @@
 		    android:maxLines="1"
 		    android:layout_centerHorizontal="true"
 		    android:ellipsize="end"/> 
-    <!-- Arrow not needed -->
-	<!--  <ImageView 
-   	    android:contentDescription="@string/next"
-	    android:src="@drawable/ic_navigation_next_item_gray"
+    <!-- Pencil visible when record is beeing edited -->
+	<ImageView 
+	    android:id="@+id/mission_resource_edit_icon"
+   	    android:contentDescription="@string/edit"
+	    android:src="@drawable/ic_action_edit"
 		android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
     	android:layout_alignParentRight="true"
-    	android:layout_centerVertical="true" />  -->
+    	android:layout_centerVertical="true"
+    	android:visibility="gone"/> 
  
 </RelativeLayout>
