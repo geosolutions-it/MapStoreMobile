@@ -155,6 +155,9 @@ public class SpatialiteSource implements Source {
 	 * @return
 	 */
 	private boolean checkisVisible(SpatialVectorTable table, byte zoomLevel) {
+		if(table == null){
+			return false;
+		}
 		AdvancedStyle s = StyleManager.getInstance().getStyle(table.getName());
 		//Log.v("Spatialite_Source","zoom level:"+zoomLevel);
 	     if ( !StyleUtils.isInVisibilityRange(s, zoomLevel) ) {
