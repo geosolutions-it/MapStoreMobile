@@ -18,14 +18,17 @@
 package it.geosolutions.geocollect.android.app;
 
 
+import it.geosolutions.android.map.MapsActivity;
 import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.android.map.utils.ZipFileManager;
 import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
 import it.geosolutions.geocollect.android.core.mission.PendingMissionListFragment;
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.app.TaskStackBuilder;
 
 /**
  * Startup activity loaded when launch.
@@ -49,10 +52,26 @@ public class StartupActivity extends Activity {
          ZipFileManager zfm = new ZipFileManager(this,dir_path,"/geocollect",getResources().getString(R.string.url_data_test_archive)){
  			@Override
  			public void launchMainActivity(){
+ 				
  				Intent launch = new Intent(activity, PendingMissionListActivity.class);
  				//TODO remove it when using a WFS or a database
  				launch.putExtra(PendingMissionListFragment.INFINITE_SCROLL,false);
- 				activity.startActivity(launch);
+ 				launch.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+ 				
+ 				TaskStackBuilder sBuilder = TaskStackBuilder.create( activity );
+ 				sBuilder.addNextIntent(launch);
+ 				
+ 				Intent launchMap = new Intent(activity,MapsActivity.class);
+ 				launchMap.setAction(Intent.ACTION_VIEW);
+ 				launchMap.putExtra(MapsActivity.PARAMETERS.LAT, 44.40565);
+ 				launchMap.putExtra(MapsActivity.PARAMETERS.LON, 8.946256);
+ 				launchMap.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL, (byte)11);
+ 				launchMap.putExtra(MapsActivity.PARAMETERS.CONFIRM_ON_EXIT, false);
+ 				// disable the animation
+ 				launchMap.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+ 				sBuilder.addNextIntent(launchMap);
+ 				sBuilder.startActivities();
+ 				//activity.startActivity(pIntent);
  				activity.finish();
  			}
  		};

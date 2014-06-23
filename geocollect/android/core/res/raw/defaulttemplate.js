@@ -5,8 +5,8 @@
 		"type":"WFS",
 		"URL":"http://demo.geo-solutions.it/share/comunege/geocollect/punti_abbandono.geojson",
 		"typeName":"geosolutions:punti_abbandono",
-		"localSourceStore":"punti_abbandono_origin",
-		"localFormStore":"localTable",
+		"localSourceStore":"punti_abbandono",
+		"localFormStore":"rilevamenti_effettuati",
 		"dataTypes":{
 			"CODICE":"string",
 			"DATA_RILEV":"string",
@@ -304,7 +304,7 @@
 					"fieldId": "QUANTITA_PRESUNTA",
 					"type":"decimal",
 					"xtype":"textfield",
-					"label":"Quantità Presunta"
+					"label":"Quantità Presunta (mc)"
 				}]
 			},{
 				"title": "Posizione",

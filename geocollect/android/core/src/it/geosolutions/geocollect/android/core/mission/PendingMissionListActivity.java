@@ -23,6 +23,8 @@ import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
 
 import it.geosolutions.android.map.MapsActivity;
+import it.geosolutions.android.map.model.MSMMap;
+import it.geosolutions.android.map.utils.SpatialDbUtils;
 import it.geosolutions.android.map.view.MapViewManager;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.R;
@@ -95,25 +97,45 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 	            if(t != null && t.id != null){
 	            	
 	            	// Save Source Missions on database
-	            	HashMap<String, XDataType> hm = t.source.dataTypes;
-	            	
-	            	if(t.source != null 
-	            			&& t.source.localSourceStore != null
-	            			&& !t.source.localSourceStore.isEmpty()){
-			            if(PersistenceUtils.createTableFromTemplate(spatialiteDatabase, t.source.localSourceStore, hm)){
-		            		//SpatialiteUtils.checkOrCreateTable(spatialiteDatabase, t.id+"_data")){
-			            	Log.v("MISSION_LIST", "Table Found, checking for schema updates");
-				            if(PersistenceUtils.updateTableFromTemplate(spatialiteDatabase, t.source.localSourceStore, hm)){
-				            	Log.v("MISSION_LIST", "All good");
+	            	HashMap<String, XDataType> sourceDataTypes = t.source.dataTypes;
+	            	HashMap<String, XDataType> formDataTypes = PersistenceUtils.getTemplateFieldsList(t);
+	            	// default value
+	            	String formTableName = t.id+"_data";
+	            	if(t.source != null ){
+	            		if( t.source.localFormStore != null
+	            			&& !t.source.localFormStore.isEmpty()){
+		            		formTableName = t.source.localFormStore;
+		            	}
+		            	if( t.source.localSourceStore != null
+		            		&& !t.source.localSourceStore.isEmpty()){
+				            if(PersistenceUtils.createTableFromTemplate(spatialiteDatabase, t.source.localSourceStore, sourceDataTypes, true)){
+			            		//SpatialiteUtils.checkOrCreateTable(spatialiteDatabase, t.id+"_data")){
+				            	Log.v("MISSION_LIST", "Table Found, checking for schema updates");
+					            if(PersistenceUtils.updateTableFromTemplate(spatialiteDatabase, t.source.localSourceStore, sourceDataTypes)){
+					            	Log.v("MISSION_LIST", "All good");
+					            }else{
+					            	Log.w("MISSION_LIST", "Something went wrong during the update, the data can be inconsistent");
+					            }
 				            }else{
-				            	Log.w("MISSION_LIST", "Something went wrong during the update, the data can be inconsistent");
+					            Log.w("MISSION_LIST", "Table could not be created, edits will not be saved");
 				            }
-			            }else{
-				            Log.w("MISSION_LIST", "Table could not be created, edits will not be saved");
-			            }
-
-	            	}
+	
+		            	}
+	            	}else{
+		            	Log.w("MISSION_LIST", "MissionTemplate source could not be found!");
+		            }
 	            	
+		            if(PersistenceUtils.createTableFromTemplate(spatialiteDatabase, formTableName, formDataTypes)){
+			            Log.v("MISSION_LIST", "Table Found, checking for schema updates");
+			            if(PersistenceUtils.updateTableFromTemplate(spatialiteDatabase, formTableName, formDataTypes)){
+			            	Log.v("MISSION_LIST", "All good");
+			            }else{
+			            	Log.w("MISSION_LIST", "Something went wrong during the update, the data can be inconsistent");
+			            }
+			            
+		            }else{
+			            Log.w("MISSION_LIST", "Table could not be created, edits will not be saved");
+		            }
 	            }else{
 	            	Log.w("MISSION_LIST", "MissionTemplate could not be found, edits will not be saved");
 	            }
@@ -212,6 +234,13 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
     		launch.putExtra(MapsActivity.PARAMETERS.LON, 8.946256);
     		launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL, (byte)11);
     		launch.putExtra(MapsActivity.PARAMETERS.CONFIRM_ON_EXIT, false);
+    		MSMMap m = SpatialDbUtils.mapFromDb();
+    		if(m.layers == null || m.layers.isEmpty()){
+    			// retry, SpatialDataSourceManager is buggy
+    			m = SpatialDbUtils.mapFromDb();
+    		}
+    		launch.putExtra(MapsActivity.MSM_MAP, m);
+    		//launch.putExtra(MapsActivity.LAYERS_TO_ADD, m.layers) ;
     		startActivity(launch);
     		
             break;

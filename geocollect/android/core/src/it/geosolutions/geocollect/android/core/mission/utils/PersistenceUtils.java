@@ -378,7 +378,7 @@ public class PersistenceUtils {
 											// TODO : If displayOriginalValue is true, the map should be read-only to prevent mismatch saving marker position on database
 											
 											// Add new marker based on geopoint
-											DescribedMarker marker = new MarkerDTO(geoPoint.latitude, geoPoint.longitude,MarkerDTO.MARKER_BLUE).createMarker(context);
+											DescribedMarker marker = new MarkerDTO(geoPoint.latitude, geoPoint.longitude,MarkerDTO.MARKER_RED).createMarker(context);
 											mo.getOverlayItems().add(marker);
 											//mc.selectMarker(marker);
 											// center map on marker

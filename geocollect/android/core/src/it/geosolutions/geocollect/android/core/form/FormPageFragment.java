@@ -85,6 +85,7 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 	private ProgressBar mProgressView;
 	private boolean mDone;
 	private Mission mission;
+	private boolean visibleToUser;
 	
 	/**
 	 * Reference to the ImageLoader instance
@@ -235,12 +236,23 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 		mDone = true;
 	
 		// TODO: merge this code block with the previous "tutorial"
-		if(page.attributes != null && page.attributes.containsKey("message")){
+		if(visibleToUser && page.attributes != null && page.attributes.containsKey("message")){
 			Toast.makeText(getSherlockActivity(), (String) page.attributes.get("message"), Toast.LENGTH_LONG).show();
 		}
 
 	}
     
+    @Override
+    public void setMenuVisibility(boolean menuVisible) {
+    	super.setMenuVisibility(menuVisible);
+    	visibleToUser = menuVisible;
+    	if(imageLoader != null && imageLoader.isInited()){
+			if(menuVisible)
+				imageLoader.resume();
+			else
+				imageLoader.pause();
+		}
+    }
     
     @Override 
     public void onSaveInstanceState(Bundle outState) {

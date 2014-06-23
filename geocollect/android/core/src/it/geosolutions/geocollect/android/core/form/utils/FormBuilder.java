@@ -244,7 +244,7 @@ public class FormBuilder {
 			marker.setDescription(mission.getValueAsString(field, (String)field.getAttribute("description")));
 			
 			m.getOverlayItems().add(marker);
-			mc.selectMarker(marker);
+			//mc.selectMarker(marker);
 			mapView.getMapViewPosition().setCenter(geoPoint);
 		}
 	}
@@ -568,7 +568,7 @@ public class FormBuilder {
 	    String[] stringUrls = FormUtils.getPhotoUriStrings(mission.getOrigin().id);
 
 		DisplayImageOptions options = new DisplayImageOptions.Builder()
-		.showImageOnLoading(it.geosolutions.geocollect.android.core.R.drawable.ic_stub)
+		.showImageOnLoading(it.geosolutions.geocollect.android.core.R.drawable.ic_launcher)
 		.showImageForEmptyUri(it.geosolutions.geocollect.android.core.R.drawable.ic_empty)
 		.showImageOnFail(it.geosolutions.geocollect.android.core.R.drawable.ic_error)
 		.resetViewBeforeLoading(false)
