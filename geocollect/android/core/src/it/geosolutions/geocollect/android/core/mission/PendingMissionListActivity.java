@@ -17,14 +17,18 @@
  */
 package it.geosolutions.geocollect.android.core.mission;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
 
 import it.geosolutions.android.map.MapsActivity;
+import it.geosolutions.android.map.model.Layer;
 import it.geosolutions.android.map.model.MSMMap;
+import it.geosolutions.android.map.utils.LocalPersistence;
 import it.geosolutions.android.map.utils.SpatialDbUtils;
+import it.geosolutions.android.map.utils.StorageUtils;
 import it.geosolutions.android.map.view.MapViewManager;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.R;
@@ -45,6 +49,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.FrameLayout;
 
 /**
@@ -230,16 +238,21 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         	//TODO parametrize it 
         	Intent launch = new Intent(this,MapsActivity.class);
     		launch.setAction(Intent.ACTION_VIEW);
-    		launch.putExtra(MapsActivity.PARAMETERS.LAT, 44.40565);
-    		launch.putExtra(MapsActivity.PARAMETERS.LON, 8.946256);
-    		launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL, (byte)11);
     		launch.putExtra(MapsActivity.PARAMETERS.CONFIRM_ON_EXIT, false);
-    		MSMMap m = SpatialDbUtils.mapFromDb();
-    		if(m.layers == null || m.layers.isEmpty()){
-    			// retry, SpatialDataSourceManager is buggy
-    			m = SpatialDbUtils.mapFromDb();
-    		}
-    		launch.putExtra(MapsActivity.MSM_MAP, m);
+        	
+    		ArrayList<Layer> layers =  (ArrayList<Layer>) LocalPersistence.readObjectFromFile(this, LocalPersistence.CURRENT_MAP);
+        	if(layers == null || layers.isEmpty()){
+				MSMMap m = SpatialDbUtils.mapFromDb();
+	    		if(m.layers == null || m.layers.isEmpty()){
+	    			// retry, SpatialDataSourceManager is buggy
+	    			m = SpatialDbUtils.mapFromDb();
+	    		}
+	    		launch.putExtra(MapsActivity.PARAMETERS.LAT, 44.40565);
+	    		launch.putExtra(MapsActivity.PARAMETERS.LON, 8.946256);
+	    		launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL, (byte)11);
+	    		launch.putExtra(MapsActivity.MSM_MAP, m);
+			}
+        	
     		//launch.putExtra(MapsActivity.LAYERS_TO_ADD, m.layers) ;
     		startActivity(launch);
     		
