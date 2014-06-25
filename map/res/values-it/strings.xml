@@ -24,7 +24,7 @@
     <string name="use_this_feature_description">Vuoi piazzare il marker su questa feature?</string>
     <string name="menu_preferences">Impostazioni Mappa</string>
     <string name="menu_geostore">MapStore</string>
-    <string name="dialog_title">Avviso</string>
+    <string name="dialog_title">Download</string>
 	<string name="dialog_message">Vuoi scaricare l\'archivio dei dati di prova?</string>
 	<string name="button_download">Si</string>
 	<string name="button_undownload">Non ora</string>

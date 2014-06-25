@@ -24,13 +24,13 @@
     <string name="use_this_feature_description">Do you want to place a marker on this feature?</string>
     <string name="menu_preferences">Map Preferences</string>
     <string name="menu_geostore">MapStore</string>
-   	<string name="dialog_title">Advertise</string>
+   	<string name="dialog_title">Test Data Download</string>
 	<string name="dialog_message">Do you want to download data files test archive?</string>
 	<string name="button_download">OK</string>
 	<string name="button_undownload">Not now</string>
 	<string name="progress_dialog_title">Wait please</string>
 	<string name="progress_dialog_message">Download data</string>
-	<string name="progress_dialog_unzipping">Unzipping ongoing</string>
+	<string name="progress_dialog_unzipping">Unzipping...</string>
 	<string name="next">Next</string>
 	<string name="previous">Previous</string>
 	<string name="other">Other</string>
