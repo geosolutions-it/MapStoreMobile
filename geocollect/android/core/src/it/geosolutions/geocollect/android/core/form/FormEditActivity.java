@@ -20,11 +20,13 @@ package it.geosolutions.geocollect.android.core.form;
 
 import it.geosolutions.android.map.view.MapViewManager;
 import it.geosolutions.geocollect.android.core.R;
+import it.geosolutions.geocollect.android.core.form.utils.FormUtils;
 import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.SpatialiteUtils;
 import it.geosolutions.geocollect.android.core.widgets.EnableSwipeViewPager;
+import it.geosolutions.geocollect.android.core.widgets.UILImageAdapter;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.source.XDataType;
 import it.geosolutions.geocollect.model.viewmodel.Field;
@@ -37,7 +39,9 @@ import java.util.List;
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -46,10 +50,16 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AbsListView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.BaseAdapter;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -61,12 +71,13 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListener;
-import com.nostra13.universalimageloader.core.listener.PauseOnScrollListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
 public class FormEditActivity extends SherlockFragmentActivity  implements MapActivity  {
 
-    /**
+	public static final int CONTEXT_IMAGE_ACTION_DELETE = 8001;
+
+	/**
      * The {@link android.support.v4.view.PagerAdapter} that will provide fragments representing
      * each object in a collection. We use a {@link android.support.v4.app.FragmentStatePagerAdapter}
      * derivative, which will destroy and re-create fragments as needed, saving and restoring their
@@ -103,7 +114,7 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
 	/**
 	 * Stores the image urls to be shown
 	 */
-	String[] imageUrls;
+	//String[] imageUrls;
 
 	/**
 	 * Options of the Photo Gallery
@@ -375,7 +386,7 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
 	 
 	 /*
 	  * UniversalImage Loader 
-	  */
+
 		static class ViewHolder {
 			ImageView imageView;
 			ProgressBar progressBar;
@@ -441,4 +452,96 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
 				return view;
 			}
 		}
+			  */
+		// Context menu for images
+
+		@Override
+		public boolean onContextItemSelected(MenuItem item) {
+			// super.onContextItemSelected(item);
+			if(item != null){
+				switch (item.getItemId()) {
+				case CONTEXT_IMAGE_ACTION_DELETE:
+					Log.v("FEA", "Need to delete the image");
+					if(	item.getMenuInfo() != null  &&  item.getMenuInfo() instanceof AdapterContextMenuInfo ){
+						final AdapterContextMenuInfo aminfo = (AdapterContextMenuInfo) item.getMenuInfo();
+						Log.v("FEA", "Target view type: "+aminfo.targetView.getClass().getName());
+						String imagepath = (String) aminfo.targetView.getTag(R.id.tag_image_path);
+						if(imagepath != null){
+							Log.v("FEA", "ImagePath: "+imagepath);
+							
+							final String imagePath = imagepath;
+					    	new AlertDialog.Builder(this)
+						    .setTitle(R.string.button_confirm_image_delete_title)
+						    .setMessage(R.string.button_confirm_image_delete)
+						    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+						        public void onClick(DialogInterface dialog, int which) { 
+						        	
+						        	FormUtils.deleteFile(imagePath);
+						        	((UILImageAdapter)((GridView)aminfo.targetView.getParent()).getAdapter()).notifyDataSetChanged();
+						        }
+						     })
+						    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+						        public void onClick(DialogInterface dialog, int which) { 
+						            // do nothing
+						        }
+						     })
+						     .show();
+							
+							//confirmImageDelete(imagepath);
+							
+							return true;
+						}
+					}
+					break;
+
+				default:
+					break;
+				}
+				
+				return false;
+			}
+			return false;
+		}
+		
+		
+		
+		@Override
+		public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+			Log.v("FEA", "CreatingMenu for "+v.getClass().getName());
+			super.onCreateContextMenu(menu, v, menuInfo);
+			
+			// a longPress on an Image is detected
+			// Currently supported Actions are:
+			// - Delete Image
+			if (v instanceof GridView) {
+				menu.setHeaderTitle(getString(R.string.gallery_context_menu_title));
+				// Delete Option
+				menu.add(Menu.NONE, CONTEXT_IMAGE_ACTION_DELETE, Menu.NONE, getString(R.string.gallery_context_menu_delete));
+			}
+
+		}
+		
+		/**
+		 * Prompt the user before deleting the selected image
+		 * @param imagePath
+		 */
+	    public void confirmImageDelete(final String imagePath){
+	    	new AlertDialog.Builder(this)
+		    .setTitle(R.string.button_confirm_image_delete_title)
+		    .setMessage(R.string.button_confirm_image_delete)
+		    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+		        public void onClick(DialogInterface dialog, int which) { 
+		        	
+		        	FormUtils.deleteFile(imagePath);
+		        	
+		        }
+		     })
+		    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+		        public void onClick(DialogInterface dialog, int which) { 
+		            // do nothing
+		        }
+		     })
+		     .show();
+	    }
+		
 }

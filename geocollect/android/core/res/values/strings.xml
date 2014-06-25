@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <item type="id" name="tag_image_path"></item>
     <string name="app_name">GeoCollect</string>
     <string name="action_settings">Settings</string>
     <string name="action_mission">Mission</string>
@@ -22,4 +23,10 @@
     <string name="reload">Reload</string>
     <string name="uil_descr_image">Image</string>
     <string name="swipe_left_to_continue">Swipe left to continue</string>
+    <string name="gallery_context_menu_title">Image Options</string>
+    <string name="gallery_context_menu_delete">Delete</string>
+    
+    <string name="button_confirm_image_delete">Do you really want to delete this image?</string>
+    <string name="button_confirm_image_delete_title">Delete Image</string>
+    
 </resources>

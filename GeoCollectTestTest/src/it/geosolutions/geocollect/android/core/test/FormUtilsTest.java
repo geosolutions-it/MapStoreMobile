@@ -3,9 +3,9 @@ package it.geosolutions.geocollect.android.core.test;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
-public class PersistenceTest extends AndroidTestCase {
+public class FormUtilsTest extends AndroidTestCase {
 
-	static String TAG = "PersistenceTEST"; 
+	static String TAG = "FormUtilsTEST"; 
 			
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -22,20 +22,21 @@ public class PersistenceTest extends AndroidTestCase {
 	}
 
 	
-	public void testStorePageDataPageLinearLayoutMission() {
+	public void testDeleteExistingFile() {
+		
 		fail("Not yet implemented");
 	}
 
-	public void testStorePageDataPageLinearLayoutMissionString() {
+	public void testDeleteNonExistingFile() {
+		
 		fail("Not yet implemented");
 	}
 
-	public void testLoadPageDataPageLinearLayoutMissionContext() {
+	public void testDeleteFileNullReference() {
+		
 		fail("Not yet implemented");
 	}
 
-	public void testLoadPageDataPageLinearLayoutMissionContextString() {
-		fail("Not yet implemented");
-	}
+
 
 }

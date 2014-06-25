@@ -18,20 +18,16 @@
 package it.geosolutions.geocollect.android.core.form.utils;
 
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.action.AndroidAction;
 import it.geosolutions.geocollect.android.core.form.action.CameraAction;
 import it.geosolutions.geocollect.android.core.form.action.SendAction;
-import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.model.viewmodel.FormAction;
-import it.geosolutions.geocollect.model.viewmodel.Page;
-import android.app.Activity;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.util.Log;
 
 
@@ -117,4 +113,23 @@ public class FormUtils {
 	    return newFileListUri.toArray(new String[newFileListUri.size()]);
 	}
 
+
+	/**
+	 * Given a string encoded file URI, delete that file
+	 * @param filePath
+	 * @return boolean whether the file was deleted or not
+	 */
+	public static boolean deleteFile(String filePath){
+		if(filePath == null)
+			return false;
+		
+		URI fileURI = URI.create(filePath);
+		
+		File f = new File(fileURI);
+		if(f == null || !f.exists() || !f.isFile()|| !f.canWrite() ){
+			return false;
+		}
+		return f.delete();
+		
+	}
 }

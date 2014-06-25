@@ -48,11 +48,12 @@ import org.mapsforge.core.model.GeoPoint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
-import android.net.Uri;
-import android.os.Environment;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.CheckBox;
@@ -550,22 +551,8 @@ public class FormBuilder {
 		//photoView.setTag(field.fieldId); // TODO: useless, the photoView must be used to fetch from a folder derived from the mission id
 		// TODO: use a non-string tag
 		photoView.setTag("__photo__");
-		
-		//***************************
-		// Test config
-		/*
-		String[] stringUrls = new String[] {
-				"http://cdn.urbanislandz.com/wp-content/uploads/2011/10/MMSposter-large.jpg", // Very large image
-				"http://4.bp.blogspot.com/-LEvwF87bbyU/Uicaskm-g6I/AAAAAAAAZ2c/V-WZZAvFg5I/s800/Pesto+Guacamole+500w+0268.jpg", // Image with "Mark has been invalidated" problem
-				"file:///sdcard/Universal Image Loader @#&=+-_.,!()~'%20.png", // Image from SD card with encoded symbols
-				"http://cdn.urbanislandz.com/wp-content/uploads/2011/10/MMSposter-large.jpg", // Very large image
-				"http://4.bp.blogspot.com/-LEvwF87bbyU/Uicaskm-g6I/AAAAAAAAZ2c/V-WZZAvFg5I/s800/Pesto+Guacamole+500w+0268.jpg", // Image with "Mark has been invalidated" problem
-				"file:///sdcard/Universal Image Loader @#&=+-_.,!()~'%20.png" // Image from SD card with encoded symbols
-				
-		};
-		*/
 
-	    String[] stringUrls = FormUtils.getPhotoUriStrings(mission.getOrigin().id);
+	    //String[] stringUrls = FormUtils.getPhotoUriStrings(mission.getOrigin().id);
 
 		DisplayImageOptions options = new DisplayImageOptions.Builder()
 		.showImageOnLoading(it.geosolutions.geocollect.android.core.R.drawable.ic_launcher)
@@ -582,16 +569,34 @@ public class FormBuilder {
 		
 		//***************************
 		
-		photoView.setAdapter(new UILImageAdapter(context, stringUrls, options));
-		// TODO: enable when the Activity exists
-		/*
+		photoView.setAdapter(new UILImageAdapter(context, mission.getOrigin().id, options));
+		
+		// enable ContexxtMenu on LongPress
+		((FormEditActivity) context).registerForContextMenu(photoView);
+
+		
 		photoView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				startImagePagerActivity(position);
+				//startImagePagerActivity(position);
+				Log.v("ItemListener", "Clicked position "+position+" , id "+id+ ", ViewID "+view.getId());
+				// TODO: start full image show activity
+				//view.showContextMenu();
 			}
-		});*/
+		});
 		
+		/*		
+		photoView.setOnItemLongClickListener(new OnItemLongClickListener() {
+
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				Log.v("ItemListener", "LONG Click on position "+position+" , id "+id+ ", ViewID "+view.getId());
+				// TODO: open contextual menu for deletion
+				return true;
+			}
+		});
+		*/
 		// TODO: enable label?
 		//mFormView.addView(tvLabel);
 		mFormView.addView(photoView);

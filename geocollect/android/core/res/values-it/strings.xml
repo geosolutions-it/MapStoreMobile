@@ -22,4 +22,11 @@
     <string name="order_by_date">Ordina Per Data</string>
 	<string name="reload">Ricarica</string>
     <string name="swipe_left_to_continue">Scorri a sinistra per continuare</string>
+
+    <string name="gallery_context_menu_title">Opzioni</string>
+    <string name="gallery_context_menu_delete">Elimina Immagine</string>
+
+    <string name="button_confirm_image_delete">L\'immagine verrà eliminata.\nContinuare?</string>
+    <string name="button_confirm_image_delete_title">Elimina Immagine</string>
+    
 </resources>

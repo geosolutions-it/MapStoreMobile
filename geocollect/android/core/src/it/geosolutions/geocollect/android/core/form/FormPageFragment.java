@@ -18,9 +18,6 @@
 package it.geosolutions.geocollect.android.core.form;
 
 
-import java.io.File;
-import java.util.ArrayList;
-
 import it.geosolutions.android.map.fragment.MapFragment;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.action.AndroidAction;
@@ -38,9 +35,7 @@ import it.geosolutions.geocollect.model.viewmodel.Page;
 import it.geosolutions.geocollect.model.viewmodel.type.XType;
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
@@ -326,7 +321,7 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 					
 			    	if( grid != null && ImageLoader.getInstance().isInited()){
 			    		
-		    		    ((UILImageAdapter)grid.getAdapter()).setImageUrls(FormUtils.getPhotoUriStrings(this.mission.getOrigin().id));
+		    		    //((UILImageAdapter)grid.getAdapter()).setImageUrls(FormUtils.getPhotoUriStrings(this.mission.getOrigin().id));
 		    		    ((UILImageAdapter)grid.getAdapter()).notifyDataSetChanged();
 			    	}
 			    	break;

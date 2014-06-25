@@ -1,6 +1,7 @@
 package it.geosolutions.geocollect.android.core.widgets;
 
 import it.geosolutions.geocollect.android.core.R;
+import it.geosolutions.geocollect.android.core.form.utils.FormUtils;
 
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -10,11 +11,8 @@ import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
-import com.nostra13.universalimageloader.core.process.BitmapProcessor;
-
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +27,7 @@ public class UILImageAdapter extends BaseAdapter {
 	private String[] imageUrls;
 	private ImageLoader imageLoader;
 	private DisplayImageOptions options;
+	private String missionID;
 	
 	static class ViewHolder {
 		ImageView imageView;
@@ -59,6 +58,17 @@ public class UILImageAdapter extends BaseAdapter {
 		this.options = options;
 	}
 	
+	/**
+	 * Constructor to create an Adapter by the mission ID
+	 * @param context
+	 * @param missionID
+	 * @param options
+	 */
+	public UILImageAdapter(Context context, String missionID, DisplayImageOptions options) {
+		this(context, FormUtils.getPhotoUriStrings(missionID), options);
+		this.missionID = missionID;
+	}
+
 	@Override
 	public int getCount() {
 		return getImageUrls().length;
@@ -90,6 +100,9 @@ public class UILImageAdapter extends BaseAdapter {
 			holder = (ViewHolder) view.getTag();
 		}
 
+		// Store the image Path in the View
+		view.setTag(R.id.tag_image_path, getImageUrls()[position]);
+		
 		imageLoader.displayImage(getImageUrls()[position], holder.imageView, options, new SimpleImageLoadingListener() {
 									 @Override
 									 public void onLoadingStarted(String imageUri, View view) {
@@ -121,6 +134,9 @@ public class UILImageAdapter extends BaseAdapter {
 
 	@Override
 	public void notifyDataSetChanged() {
+		if(missionID != null){
+			this.imageUrls = FormUtils.getPhotoUriStrings(missionID);
+		}
 		super.notifyDataSetChanged();
 	}
 
