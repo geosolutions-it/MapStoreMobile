@@ -20,6 +20,7 @@ package it.geosolutions.geocollect.android.core.mission.utils;
 
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +51,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 	public static String TAG = "SQLiteCascadeFeatureLoader";
 	public static String PREF_NAME = "SQLiteCascadeFeatureLoader";
 	public static String LAST_UPDATE_PREF = "LastUpdate";
+	public static String REVERSE_ORDER_PREF = "OrderByDesc";
 	// 1 Hour between automatic reloading
 	public long UPDATE_THRESHOLD = (3600)*1000;
 
@@ -57,6 +59,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 	private Database db;
 	private String sourceTableName;
 	private String formTableName;
+	private String orderingField;
 	private List<Feature> mData;
 	public int start;
 	public int limit;
@@ -70,7 +73,8 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 			AsyncTaskLoader<List<Feature>> pre_loader,
 			Database db,
 			String localSourceStore,
-			String localFormStore) {
+			String localFormStore,
+			String orderingField) {
 		
 		super(context);
 		this.mPrefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
@@ -78,6 +82,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 		this.db = db;
 		this.sourceTableName = localSourceStore;
 		this.formTableName = localFormStore;
+		this.orderingField = orderingField;
 		
 	}
 	
@@ -93,7 +98,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 			AsyncTaskLoader<List<Feature>> pre_loader, 
 			Database db, 
 			String localSourceStore) {
-		this(context, pre_loader, db, localSourceStore, null);
+		this(context, pre_loader, db, localSourceStore, null, null);
 	}
 
 	/*
@@ -283,9 +288,20 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 				}
 				
 			}
-			
-			columnNames = columnNames + " FROM '"+sourceTableName+"';";
 
+			
+
+			if(orderingField != null && !orderingField.isEmpty()){
+				boolean reverse = mPrefs.getBoolean(REVERSE_ORDER_PREF, false);
+				if(reverse){
+					columnNames = columnNames + " FROM '"+sourceTableName+"' ORDER BY "+orderingField+" DESC;";
+				}else{
+					columnNames = columnNames + " FROM '"+sourceTableName+"' ORDER BY "+orderingField+";";
+				}
+			}else{
+				columnNames = columnNames + " FROM '"+sourceTableName+"';";
+			}
+			
 			Log.v(TAG, columnNames);
 			if(Database.complete(columnNames)){
 				
@@ -346,16 +362,19 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 		
 		if(formTableName != null && !formTableName.isEmpty()){
 			ArrayList<String> editingIds = new ArrayList<String>();
-			try {
-				Stmt stmt = db.prepare("SELECT ORIGIN_ID FROM '"+formTableName+"';");
-				while( stmt.step() ) {
-					editingIds.add(stmt.column_string(0));
+			String query = "SELECT ORIGIN_ID FROM '"+formTableName+"';";
+						
+			if(Database.complete(query)){
+				try {
+					Stmt stmt = db.prepare(query);
+					while( stmt.step() ) {
+						editingIds.add(stmt.column_string(0));
+					}
+					stmt.close();
+				} catch (jsqlite.Exception e) {
+					Log.e(TAG, Log.getStackTraceString(e));
 				}
-				stmt.close();
-			} catch (jsqlite.Exception e) {
-				Log.e(TAG, Log.getStackTraceString(e));
 			}
-			
 			if(!editingIds.isEmpty()){
 				for(Feature f : mData){
 					if(editingIds.contains(f.id)){

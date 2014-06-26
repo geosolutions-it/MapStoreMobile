@@ -61,5 +61,9 @@ public class WFSSource implements Serializable{
 	 */
 	public String localFormStore;
 
-	
+	/**
+	 * Optional column name for ordering
+	 */
+	public String orderingField;
+
 }

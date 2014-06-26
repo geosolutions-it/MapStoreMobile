@@ -73,7 +73,8 @@
 			"SOCIO_PAES":"string",
 			"VALORE_SOC":"integer",
 			"GMROTATION":"real"
-		}
+		},
+		"orderingField":"CODICE"
 	},
 	"preview":{
 		"title":"Punto Abbandono",

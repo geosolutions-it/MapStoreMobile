@@ -56,16 +56,22 @@ public class MissionUtils {
 	 * @return
 	 */
 	public static Loader<List<Feature>> createMissionLoader(
-			MissionTemplate missionTemplate,SherlockFragmentActivity a, int page, int pagesize, Database db) {
+			MissionTemplate missionTemplate,SherlockFragmentActivity activity, int page, int pagesize, Database db) {
 		
-		WFSGeoJsonFeatureLoader wfsl = new WFSGeoJsonFeatureLoader(a,missionTemplate.source.URL,missionTemplate.source.baseParams, missionTemplate.source.typeName,page*pagesize+1,pagesize);
+		WFSGeoJsonFeatureLoader wfsl = new WFSGeoJsonFeatureLoader(activity,missionTemplate.source.URL,missionTemplate.source.baseParams, missionTemplate.source.typeName,page*pagesize+1,pagesize);
 		
 		if(db == null){
 			// No database provided, load only online data
 			return wfsl;
 		}
 		
-		return new SQLiteCascadeFeatureLoader(a, wfsl, db, missionTemplate.source.localSourceStore, missionTemplate.source.localFormStore);
+		return new SQLiteCascadeFeatureLoader(
+				activity, 
+				wfsl, 
+				db, 
+				missionTemplate.source.localSourceStore, 
+				missionTemplate.source.localFormStore, 
+				missionTemplate.source.orderingField);
 	}
 	
 	/**

@@ -336,6 +336,15 @@ public class PendingMissionListFragment
 			// TODO: Define a contract on the ordering field/fields
 			// 		Get it from the mission template
 			if(loader !=null){
+				
+				SharedPreferences sp = getSherlockActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME, Context.MODE_PRIVATE);
+				boolean reverse = sp.getBoolean(SQLiteCascadeFeatureLoader.REVERSE_ORDER_PREF, false);
+				SharedPreferences.Editor editor = sp.edit();
+				// Change the ordering
+				Log.v(TAG, "Changing to "+reverse);
+				editor.putBoolean(SQLiteCascadeFeatureLoader.REVERSE_ORDER_PREF, !reverse);
+				editor.commit();
+
 				adapter.clear();
 				loader.forceLoad();
 			}
