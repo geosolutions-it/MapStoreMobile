@@ -326,13 +326,8 @@
 				"title": "Rilievi Fotografici",
 				"iconCls":"not_supported_yet",
 				"fields":[{
-					
-					"type":"text",
-					"xtype":"separator",
-					"label":"TO BE IMPLEMENTED"
-				},{
 					"xtype":"photo",
-					"label":"TO BE IMPLEMENTED"
+					"label":"photo_has_no_label"
 				}],
 				"actions":[{
 					"id":1,
