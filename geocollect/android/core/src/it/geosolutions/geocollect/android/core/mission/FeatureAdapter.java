@@ -18,11 +18,14 @@
 package it.geosolutions.geocollect.android.core.mission;
 
 
-import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,7 +42,7 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
  * @author Lorenzo Natali (www.geo-solutions.it)
  */
 public class FeatureAdapter extends
-        ArrayAdapter<Feature> {
+        ArrayAdapter<MissionFeature> {
 
 int resourceId = R.layout.mission_resource_row;
 
@@ -88,7 +91,7 @@ public View getView(int position, View convertView, ViewGroup parent) {
      * in the list. (The ArrayAdapter iterates through the list we sent it)
      * Therefore, i refers to the current Item object.
      */
-    Feature result = getItem(position);
+    MissionFeature result = getItem(position);
 
     if (result != null) {
 
@@ -121,14 +124,33 @@ public View getView(int position, View convertView, ViewGroup parent) {
 	        }
     	}
     	
-		ImageView desc = (ImageView) v.findViewById(R.id.mission_resource_edit_icon);
-		if(desc != null){
+		ImageView editingIcon = (ImageView) v.findViewById(R.id.mission_resource_edit_icon);
+		if(editingIcon != null){
 			if(result.editing){
-				desc.setVisibility(View.VISIBLE);
+				editingIcon.setVisibility(View.VISIBLE);
 			}else{
-				desc.setVisibility(View.GONE);
+				editingIcon.setVisibility(View.GONE);
 			}
     	}
+		
+		ImageView priorityIcon = (ImageView) v.findViewById(R.id.mission_resource_priority_icon);
+		if ( priorityIcon != null && priorityIcon.getDrawable() != null ){
+			
+			// Get the icon and tweak the color
+			Drawable d = priorityIcon.getDrawable();
+			
+			if ( result.displayColor != null ){
+				try{
+					d.mutate().setColorFilter(Color.parseColor(result.displayColor), PorterDuff.Mode.SRC_ATOP);
+				}catch(IllegalArgumentException iae){
+					Log.e("FeatureAdapter", "A feature has an incorrect color value" );
+				}
+	    	}else{
+	    		d.mutate().clearColorFilter();
+	    	}
+
+    	}
+
     }
 
     // the view must be returned to our activity

@@ -43,7 +43,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -58,10 +57,7 @@ import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AbsListView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.BaseAdapter;
 import android.widget.GridView;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -69,9 +65,6 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.FailReason;
-import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListener;
-import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
 public class FormEditActivity extends SherlockFragmentActivity  implements MapActivity  {
 
@@ -384,164 +377,92 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
 	}
 	 */	 
 	 
-	 /*
-	  * UniversalImage Loader 
+	// Context menu for images
 
-		static class ViewHolder {
-			ImageView imageView;
-			ProgressBar progressBar;
-		}
-
-		public class ImageAdapter extends BaseAdapter {
-			@Override
-			public int getCount() {
-				return imageUrls.length;
-			}
-
-			@Override
-			public Object getItem(int position) {
-				return null;
-			}
-
-			@Override
-			public long getItemId(int position) {
-				return position;
-			}
-
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent) {
-				final ViewHolder holder;
-				View view = convertView;
-				if (view == null) {
-					view = getLayoutInflater().inflate(R.layout.uil_item_grid_image, parent, false);
-					holder = new ViewHolder();
-					assert view != null;
-					holder.imageView = (ImageView) view.findViewById(R.id.image);
-					holder.progressBar = (ProgressBar) view.findViewById(R.id.progress);
-					view.setTag(holder);
-				} else {
-					holder = (ViewHolder) view.getTag();
-				}
-
-				imageLoader.displayImage(imageUrls[position], holder.imageView, options, new SimpleImageLoadingListener() {
-											 @Override
-											 public void onLoadingStarted(String imageUri, View view) {
-												 holder.progressBar.setProgress(0);
-												 holder.progressBar.setVisibility(View.VISIBLE);
-											 }
-
-											 @Override
-											 public void onLoadingFailed(String imageUri, View view,
-													 FailReason failReason) {
-												 holder.progressBar.setVisibility(View.GONE);
-											 }
-
-											 @Override
-											 public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-												 holder.progressBar.setVisibility(View.GONE);
-											 }
-										 }, new ImageLoadingProgressListener() {
-											 @Override
-											 public void onProgressUpdate(String imageUri, View view, int current,
-													 int total) {
-												 holder.progressBar.setProgress(Math.round(100.0f * current / total));
-											 }
-										 }
-				);
-
-				return view;
-			}
-		}
-			  */
-		// Context menu for images
-
-		@Override
-		public boolean onContextItemSelected(MenuItem item) {
-			// super.onContextItemSelected(item);
-			if(item != null){
-				switch (item.getItemId()) {
-				case CONTEXT_IMAGE_ACTION_DELETE:
-					Log.v("FEA", "Need to delete the image");
-					if(	item.getMenuInfo() != null  &&  item.getMenuInfo() instanceof AdapterContextMenuInfo ){
-						final AdapterContextMenuInfo aminfo = (AdapterContextMenuInfo) item.getMenuInfo();
-						Log.v("FEA", "Target view type: "+aminfo.targetView.getClass().getName());
-						String imagepath = (String) aminfo.targetView.getTag(R.id.tag_image_path);
-						if(imagepath != null){
-							Log.v("FEA", "ImagePath: "+imagepath);
-							
-							final String imagePath = imagepath;
-					    	new AlertDialog.Builder(this)
-						    .setTitle(R.string.button_confirm_image_delete_title)
-						    .setMessage(R.string.button_confirm_image_delete)
-						    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-						        public void onClick(DialogInterface dialog, int which) { 
-						        	
-						        	FormUtils.deleteFile(imagePath);
-						        	((UILImageAdapter)((GridView)aminfo.targetView.getParent()).getAdapter()).notifyDataSetChanged();
-						        }
-						     })
-						    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-						        public void onClick(DialogInterface dialog, int which) { 
-						            // do nothing
-						        }
-						     })
-						     .show();
-							
-							//confirmImageDelete(imagepath);
-							
-							return true;
-						}
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		// super.onContextItemSelected(item);
+		if(item != null){
+			switch (item.getItemId()) {
+			case CONTEXT_IMAGE_ACTION_DELETE:
+				Log.v("FEA", "Need to delete the image");
+				if(	item.getMenuInfo() != null  &&  item.getMenuInfo() instanceof AdapterContextMenuInfo ){
+					final AdapterContextMenuInfo aminfo = (AdapterContextMenuInfo) item.getMenuInfo();
+					Log.v("FEA", "Target view type: "+aminfo.targetView.getClass().getName());
+					String imagepath = (String) aminfo.targetView.getTag(R.id.tag_image_path);
+					if(imagepath != null){
+						Log.v("FEA", "ImagePath: "+imagepath);
+						
+						final String imagePath = imagepath;
+				    	new AlertDialog.Builder(this)
+					    .setTitle(R.string.button_confirm_image_delete_title)
+					    .setMessage(R.string.button_confirm_image_delete)
+					    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+					        public void onClick(DialogInterface dialog, int which) { 
+					        	
+					        	FormUtils.deleteFile(imagePath);
+					        	((UILImageAdapter)((GridView)aminfo.targetView.getParent()).getAdapter()).notifyDataSetChanged();
+					        }
+					     })
+					    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+					        public void onClick(DialogInterface dialog, int which) { 
+					            // do nothing
+					        }
+					     })
+					     .show();
+						
+						
+						return true;
 					}
-					break;
-
-				default:
-					break;
 				}
-				
-				return false;
+				break;
+
+			default:
+				break;
 			}
+			
 			return false;
 		}
+		return false;
+	}
+	
+	
+	
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+		Log.v("FEA", "CreatingMenu for "+v.getClass().getName());
+		super.onCreateContextMenu(menu, v, menuInfo);
 		
-		
-		
-		@Override
-		public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-			Log.v("FEA", "CreatingMenu for "+v.getClass().getName());
-			super.onCreateContextMenu(menu, v, menuInfo);
-			
-			// a longPress on an Image is detected
-			// Currently supported Actions are:
-			// - Delete Image
-			if (v instanceof GridView) {
-				menu.setHeaderTitle(getString(R.string.gallery_context_menu_title));
-				// Delete Option
-				menu.add(Menu.NONE, CONTEXT_IMAGE_ACTION_DELETE, Menu.NONE, getString(R.string.gallery_context_menu_delete));
-			}
-
+		// a longPress on an Image is detected
+		// Currently supported Actions are:
+		// - Delete Image
+		if (v instanceof GridView) {
+			menu.setHeaderTitle(getString(R.string.gallery_context_menu_title));
+			// Delete Option
+			menu.add(Menu.NONE, CONTEXT_IMAGE_ACTION_DELETE, Menu.NONE, getString(R.string.gallery_context_menu_delete));
 		}
-		
-		/**
-		 * Prompt the user before deleting the selected image
-		 * @param imagePath
-		 */
-	    public void confirmImageDelete(final String imagePath){
-	    	new AlertDialog.Builder(this)
-		    .setTitle(R.string.button_confirm_image_delete_title)
-		    .setMessage(R.string.button_confirm_image_delete)
-		    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-		        public void onClick(DialogInterface dialog, int which) { 
-		        	
-		        	FormUtils.deleteFile(imagePath);
-		        	
-		        }
-		     })
-		    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-		        public void onClick(DialogInterface dialog, int which) { 
-		            // do nothing
-		        }
-		     })
-		     .show();
-	    }
-		
+
+	}
+	
+	/**
+	 * Prompt the user before deleting the selected image
+	 * @param imagePath
+
+    public void confirmImageDelete(final String imagePath){
+    	new AlertDialog.Builder(this)
+	    .setTitle(R.string.button_confirm_image_delete_title)
+	    .setMessage(R.string.button_confirm_image_delete)
+	    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+	        public void onClick(DialogInterface dialog, int which) { 
+	        	FormUtils.deleteFile(imagePath);
+	        }
+	     })
+	    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+	        public void onClick(DialogInterface dialog, int which) { 
+	            // do nothing
+	        }
+	     })
+	     .show();
+    }
+	 */		
 }

@@ -26,6 +26,7 @@ import jsqlite.Database;
 import jsqlite.Stmt;
 import it.geosolutions.android.map.wfs.WFSGeoJsonFeatureLoader;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
+import it.geosolutions.geocollect.android.core.mission.MissionFeature;
 import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.SQLiteCascadeFeatureLoader;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
@@ -190,7 +191,7 @@ public class SQLiteCascadeFeatureLoaderTest extends android.test.LoaderTestCase 
 		SQLiteCascadeFeatureLoader loaderToTest = new SQLiteCascadeFeatureLoader(getContext(), wfsl, db, tableName);
 		
 		// Start the test
-		List<Feature> results = loaderToTest.loadInBackground();
+		List<MissionFeature> results = loaderToTest.loadInBackground();
 		
 		// Check results
 		assertEquals(90, results.size() );

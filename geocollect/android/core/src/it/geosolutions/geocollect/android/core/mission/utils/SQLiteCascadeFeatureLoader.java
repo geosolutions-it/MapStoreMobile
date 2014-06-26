@@ -19,8 +19,9 @@ package it.geosolutions.geocollect.android.core.mission.utils;
 
 
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
+import it.geosolutions.geocollect.android.core.mission.MissionFeature;
+
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -41,12 +42,12 @@ import android.util.Log;
 /**
  * AsyncTaskLoader to load Features from SQLite database.
  * It queries another loader to fetch data (can be a WFSLoader or any other one) before loading it
- * Provide a List of Resources <Feature> object on Load finish
+ * Provide a List of Resources <MissionFeature> object on Load finish
  *  
  * @author Lorenzo Pini (www.geo-solutions.it)
  *
  */
-public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
+public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeature>> {
 
 	public static String TAG = "SQLiteCascadeFeatureLoader";
 	public static String PREF_NAME = "SQLiteCascadeFeatureLoader";
@@ -60,10 +61,15 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 	private String sourceTableName;
 	private String formTableName;
 	private String orderingField;
-	private List<Feature> mData;
+	private List<MissionFeature> mData;
 	public int start;
 	public int limit;
 	HashMap<String,String> parameters;
+
+	// Hold information about the priority to be shown
+	private String priorityField;
+	HashMap<String,String> priorityColours;
+
 	public Integer totalCount;//This hack allow infinite scrolling without total count limits.
 
 	// Place where to store the last load time
@@ -74,7 +80,9 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 			Database db,
 			String localSourceStore,
 			String localFormStore,
-			String orderingField) {
+			String orderingField, 
+			String priorityField,
+			HashMap<String, String> priorityValuesColors) {
 		
 		super(context);
 		this.mPrefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
@@ -83,6 +91,8 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 		this.sourceTableName = localSourceStore;
 		this.formTableName = localFormStore;
 		this.orderingField = orderingField;
+		this.priorityField = priorityField;
+		this.priorityColours = priorityValuesColors;
 		
 	}
 	
@@ -99,6 +109,24 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 			Database db, 
 			String localSourceStore) {
 		this(context, pre_loader, db, localSourceStore, null, null);
+	}
+
+	/**
+	 * Constructor without color field info
+	 * @param context
+	 * @param pre_loader
+	 * @param db
+	 * @param localSourceStore
+	 * @param localFormStore
+	 * @param orderingField
+	 */
+	public SQLiteCascadeFeatureLoader(Context context,
+			AsyncTaskLoader<List<Feature>> pre_loader,
+			Database db,
+			String localSourceStore,
+			String localFormStore,
+			String orderingField) {
+		this(context, pre_loader, db, localSourceStore, localFormStore, orderingField, null, null);
 	}
 
 	/*
@@ -127,7 +155,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 	}
 	
 	@Override
-	public List<Feature> loadInBackground() {
+	public List<MissionFeature> loadInBackground() {
 		
 		if(this.db == null || this.db.dbversion().equals("unknown")){
 			Log.w(TAG, "Cannot open DB");
@@ -251,7 +279,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 		// Are there any concurrent events that can modify the table schema before we read the data?
 		HashMap<String, String> dbFieldValues = SpatialiteUtils.getPropertiesFields(db, sourceTableName);
 		
-		mData = new ArrayList<Feature>();
+		mData = new ArrayList<MissionFeature>();
 		
 		// Reade for the Geometry field
         WKBReader wkbReader = new WKBReader();
@@ -308,9 +336,9 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 		        try {
 		        	stmt = db.prepare(columnNames);
 		            String columnName;
-		            Feature f;
+		            MissionFeature f;
 		            while( stmt.step() ) {
-		                f = new Feature();
+		                f = new MissionFeature();
 		            	int colcount = stmt.column_count();
 		            	for(int colpos = 0; colpos < colcount; colpos++){
 	            			
@@ -359,6 +387,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 			
 		}
 
+		// Set the "Editing flag"
 		
 		if(formTableName != null && !formTableName.isEmpty()){
 			ArrayList<String> editingIds = new ArrayList<String>();
@@ -376,14 +405,30 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 				}
 			}
 			if(!editingIds.isEmpty()){
-				for(Feature f : mData){
-					if(editingIds.contains(f.id)){
+				for(MissionFeature f : mData){
+					if ( editingIds.contains(f.id)){
 						f.editing = true;
 					}
 				}
 			}
 		}
-
+		
+		
+		// Icon Color
+		if ( priorityField != null
+    			&& !priorityField.isEmpty()
+    			&& priorityColours != null
+    			&& !priorityColours.isEmpty()
+				){
+			
+			for(MissionFeature f : mData){
+				if ( f.properties.containsKey(priorityField)){
+					f.displayColor = priorityColours.get(f.properties.get(priorityField));
+				}
+			}
+			
+		}
+		
 		return mData;
 	}
 
@@ -424,18 +469,20 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 	 * android.support.v4.content.AsyncTaskLoader#onCanceled(java.lang.Object)
 	 */
 	@Override
-	public void onCanceled(List<Feature> data) {
+	public void onCanceled(List<MissionFeature> data) {
 		super.onCanceled(data);
+		/*
 		if(this.pre_loader != null){
 			this.pre_loader.onCanceled(data);
 		}
+		*/
 		releaseResources(data);
 	}
 
 	/**
-	 * @param data
+	 * @param mData
 	 */
-	private void releaseResources(List<Feature> data) {
+	private void releaseResources(List<MissionFeature> mData) {
 		// release resource if needed
 
 	}

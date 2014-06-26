@@ -20,6 +20,7 @@ package it.geosolutions.geocollect.android.core.mission.utils;
 import it.geosolutions.android.map.wfs.WFSGeoJsonFeatureLoader;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.R;
+import it.geosolutions.geocollect.android.core.mission.MissionFeature;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 
 import java.io.BufferedReader;
@@ -55,15 +56,12 @@ public class MissionUtils {
 	 * @param pagesize
 	 * @return
 	 */
-	public static Loader<List<Feature>> createMissionLoader(
+	public static Loader<List<MissionFeature>> createMissionLoader(
 			MissionTemplate missionTemplate,SherlockFragmentActivity activity, int page, int pagesize, Database db) {
 		
 		WFSGeoJsonFeatureLoader wfsl = new WFSGeoJsonFeatureLoader(activity,missionTemplate.source.URL,missionTemplate.source.baseParams, missionTemplate.source.typeName,page*pagesize+1,pagesize);
 		
-		if(db == null){
-			// No database provided, load only online data
-			return wfsl;
-		}
+		
 		
 		return new SQLiteCascadeFeatureLoader(
 				activity, 
@@ -71,7 +69,9 @@ public class MissionUtils {
 				db, 
 				missionTemplate.source.localSourceStore, 
 				missionTemplate.source.localFormStore, 
-				missionTemplate.source.orderingField);
+				missionTemplate.source.orderingField,
+				missionTemplate.priorityField,
+				missionTemplate.priorityValuesColors);
 	}
 	
 	/**
@@ -85,6 +85,7 @@ public class MissionUtils {
             final Gson gson = new Gson();
             final BufferedReader reader =
                 new BufferedReader(new InputStreamReader(inputStream));
+            // TODO: Catch JsonSyntaxException when template is malformed
             return gson.fromJson(reader, MissionTemplate.class);
         }
         

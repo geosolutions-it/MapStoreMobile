@@ -61,7 +61,7 @@ import com.actionbarsherlock.view.MenuItem;
  */
 public class PendingMissionListFragment 
 	extends SherlockListFragment 
-	implements  LoaderCallbacks<List<Feature>>,	OnScrollListener{
+	implements  LoaderCallbacks<List<MissionFeature>>,	OnScrollListener{
 
 	/**
 	 * The serialization (saved instance state) Bundle key representing the
@@ -99,7 +99,7 @@ public class PendingMissionListFragment
 	/**
 	 * Callback for the Loader
 	 */
-	private LoaderCallbacks<List<Feature>> mCallbacks;
+	private LoaderCallbacks<List<MissionFeature>> mCallbacks;
 
 	
 	/**
@@ -333,8 +333,7 @@ public class PendingMissionListFragment
 			return true;
 		} else if (id==R.id.order){
 
-			// TODO: Define a contract on the ordering field/fields
-			// 		Get it from the mission template
+			// Get it from the mission template
 			if(loader !=null){
 				
 				SharedPreferences sp = getSherlockActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME, Context.MODE_PRIVATE);
@@ -396,7 +395,7 @@ public class PendingMissionListFragment
 	 * @see android.support.v4.app.LoaderManager.LoaderCallbacks#onCreateLoader(int, android.os.Bundle)
 	 */
 	@Override
-	public Loader<List<Feature>> onCreateLoader(int arg0, Bundle arg1) {
+	public Loader<List<MissionFeature>> onCreateLoader(int arg0, Bundle arg1) {
 		getSherlockActivity().setSupportProgressBarIndeterminateVisibility(true);
 		getSherlockActivity().getSupportActionBar();
 
@@ -413,14 +412,14 @@ public class PendingMissionListFragment
 	 * @see android.support.v4.app.LoaderManager.LoaderCallbacks#onLoadFinished(android.support.v4.content.Loader, java.lang.Object)
 	 */
 	@Override
-	public void onLoadFinished(Loader<List<Feature>> loader, List<Feature> results) {
+	public void onLoadFinished(Loader<List<MissionFeature>> loader, List<MissionFeature> results) {
 		if(results == null){
 			   Toast.makeText(getSherlockActivity(), R.string.error_connectivity_problem, Toast.LENGTH_SHORT).show();
 			   setNoData();
 		   }else{
 			   
 			   //add loaded resources to the listView
-				for(Feature a : results ){
+				for(MissionFeature a : results ){
 					adapter.add(a);
 				}
 				if (adapter.isEmpty()) {
@@ -438,7 +437,7 @@ public class PendingMissionListFragment
 	 * @see android.support.v4.app.LoaderManager.LoaderCallbacks#onLoaderReset(android.support.v4.content.Loader)
 	 */
 	@Override
-	public void onLoaderReset(Loader<List<Feature>> arg0) {
+	public void onLoaderReset(Loader<List<MissionFeature>> arg0) {
 		adapter.clear();
 		
 	}
@@ -484,7 +483,7 @@ public class PendingMissionListFragment
 			int pos = getListView().getCheckedItemPosition();
 			int max = getListView().getCount();
 			if( pos != AbsListView.INVALID_POSITION && pos < max){
-				Feature f = (Feature) getListView().getItemAtPosition(pos);
+				MissionFeature f = (MissionFeature) getListView().getItemAtPosition(pos);
 				if(f != null){
 					f.editing = true;
 					getListView().invalidateViews();

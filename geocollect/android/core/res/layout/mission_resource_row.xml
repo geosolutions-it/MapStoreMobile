@@ -8,20 +8,31 @@
 	android:paddingLeft="5dip"
     android:background="@drawable/multiselect_list" >
  
+	<ImageView 
+	    android:id="@+id/mission_resource_priority_icon"
+   	    android:contentDescription="@string/edit"
+	    android:src="@drawable/ic_action_view_as_list"
+		android:layout_width="wrap_content"
+    	android:layout_height="wrap_content"
+    	android:layout_alignParentLeft="true"
+    	android:layout_centerVertical="true"/> 
+    	
     <TextView 
 	 android:id="@+id/mission_resource_name" 
-		    android:layout_width="match_parent" 
+		    android:layout_width="wrap_content" 
 		    android:layout_height="wrap_content" 
+		    android:layout_toRightOf="@id/mission_resource_priority_icon"
 		    android:paddingBottom ="5dip"
 		    android:textSize="18sp"
 	        android:textStyle="bold"
 		    android:layout_centerVertical="true"/> 
+		    
     <TextView 
 	 android:id="@+id/mission_resource_description" 
-		    android:layout_width="match_parent" 
+		    android:layout_width="wrap_content" 
 		    android:layout_height="wrap_content" 
 		    android:layout_below="@id/mission_resource_name"
-		    android:layout_alignLeft="@id/mission_resource_name"
+		    android:layout_toRightOf="@id/mission_resource_priority_icon"
 		    android:paddingTop="5dip"
 		    android:paddingRight="15dip"
 		    android:textSize="15sp"

@@ -69,4 +69,15 @@ public class MissionTemplate implements Serializable{
 	 * 
 	 */
 	public HashMap<String,Object> config = new HashMap<String,Object>();
+	/**
+	 * priority Field 
+	 */
+	public String priorityField;
+	/**
+	 * Association between {priorityField} values and a color value String
+	 * to be shown on the main missions list
+	 * 
+	 */
+	public HashMap<String,String> priorityValuesColors = new HashMap<String,String>();
+
 }

@@ -374,5 +374,13 @@
 	},
 	"config":{
 		"myAllowedValues1":["value1","value2","value3"]
-	}
+	},
+	"priorityField":"GRAVITA",
+	"priorityValuesColors":{
+				"elevata":"#FF0000",
+				"media":"#FF9933",
+				"scarsa":"#FFFF00",
+				"area pulita":"#00FF00"
+			}
+	
 }

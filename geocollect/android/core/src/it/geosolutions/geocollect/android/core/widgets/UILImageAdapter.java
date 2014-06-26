@@ -89,6 +89,7 @@ public class UILImageAdapter extends BaseAdapter {
 		final ViewHolder holder;
 		View view = convertView;
 		if (view == null) {
+			
 			// TODO: Null checks on this line
 			view = ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.uil_item_grid_image, parent, false);
 			holder = new ViewHolder();
@@ -96,6 +97,7 @@ public class UILImageAdapter extends BaseAdapter {
 			holder.imageView = (ImageView) view.findViewById(R.id.image);
 			holder.progressBar = (ProgressBar) view.findViewById(R.id.progress);
 			view.setTag(holder);
+			
 		} else {
 			holder = (ViewHolder) view.getTag();
 		}
