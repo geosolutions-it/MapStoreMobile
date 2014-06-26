@@ -20,6 +20,7 @@ package it.geosolutions.geocollect.android.core.mission;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
+import it.geosolutions.geocollect.android.core.mission.utils.SQLiteCascadeFeatureLoader;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 
 import java.util.List;
@@ -27,6 +28,8 @@ import java.util.List;
 import jsqlite.Database;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -317,6 +320,13 @@ public class PendingMissionListFragment
 
 			//getLoaderManager().getLoader(LOADER_INDEX);
 			if(loader !=null){
+				
+				SharedPreferences sp = getSherlockActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME, Context.MODE_PRIVATE);
+				SharedPreferences.Editor editor = sp.edit();
+				// Reset the preference to force update
+				editor.putLong(SQLiteCascadeFeatureLoader.LAST_UPDATE_PREF, 0);
+				editor.commit();
+				
 				adapter.clear();
 				loader.forceLoad();
 			}

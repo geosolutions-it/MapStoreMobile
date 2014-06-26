@@ -20,6 +20,7 @@ package it.geosolutions.geocollect.android.core.mission.utils;
 
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -33,6 +34,7 @@ import jsqlite.Exception;
 import jsqlite.Stmt;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 /**
@@ -45,7 +47,12 @@ import android.util.Log;
  */
 public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 
-	public String TAG = "SQLiteCascadeFeatureLoader";
+	public static String TAG = "SQLiteCascadeFeatureLoader";
+	public static String PREF_NAME = "SQLiteCascadeFeatureLoader";
+	public static String LAST_UPDATE_PREF = "LastUpdate";
+	// 1 Hour between automatic reloading
+	public long UPDATE_THRESHOLD = (3600)*1000;
+
 	private AsyncTaskLoader<List<Feature>> pre_loader;
 	private Database db;
 	private String sourceTableName;
@@ -56,6 +63,9 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 	HashMap<String,String> parameters;
 	public Integer totalCount;//This hack allow infinite scrolling without total count limits.
 
+	// Place where to store the last load time
+	private final SharedPreferences mPrefs;
+
 	public SQLiteCascadeFeatureLoader(Context context,
 			AsyncTaskLoader<List<Feature>> pre_loader,
 			Database db,
@@ -63,6 +73,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 			String localFormStore) {
 		
 		super(context);
+		this.mPrefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
 		this.pre_loader = pre_loader;
 		this.db = db;
 		this.sourceTableName = localSourceStore;
@@ -82,11 +93,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 			AsyncTaskLoader<List<Feature>> pre_loader, 
 			Database db, 
 			String localSourceStore) {
-		super(context);
-		this.pre_loader = pre_loader;
-		this.db = db;
-		this.sourceTableName = localSourceStore;
-		this.formTableName = null;
+		this(context, pre_loader, db, localSourceStore, null);
 	}
 
 	/*
@@ -127,7 +134,23 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 			return null;
 		}
 		
-		if(this.pre_loader!= null){
+		// Default, reload anyway
+		boolean reload = true;
+
+		if (mPrefs != null){
+			long millis = mPrefs.getLong(LAST_UPDATE_PREF, 0L);
+			if(millis >0){
+				Date currentDate = new Date();
+				if( currentDate.getTime() - millis < UPDATE_THRESHOLD){
+					// Disable reload when too early
+					Log.v(TAG, "Data is already updated");
+					reload = false;
+				}
+			}
+		
+		}
+		
+		if(this.pre_loader!= null && reload){
 
 			List<Feature> fromPreLoader = this.pre_loader.loadInBackground();
 			if(fromPreLoader!= null){
@@ -194,6 +217,14 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 								stmt = db.prepare(insertQuery);
 								stmt.step();
 								stmt.close();
+								
+								if(mPrefs != null){
+									SharedPreferences.Editor editor = mPrefs.edit();
+									Date currentDate = new Date();
+									editor.putLong(LAST_UPDATE_PREF, currentDate.getTime());
+									editor.commit();
+								}
+								
 							} catch (Exception e1) {
 								Log.e(TAG, Log.getStackTraceString(e1));
 							}
