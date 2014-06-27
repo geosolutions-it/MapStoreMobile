@@ -1,0 +1,12 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="it.geosolutions.geocollect.android.core.MainActivity" >
+    
+    <item android:id="@+id/filter"
+          android:icon="@drawable/ic_action_undo"
+          android:showAsAction="always"
+          android:title="@string/undo_filter"
+           /> 
+
+</menu>

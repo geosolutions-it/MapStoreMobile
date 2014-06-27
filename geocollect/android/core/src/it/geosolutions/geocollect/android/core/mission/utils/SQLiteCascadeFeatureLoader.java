@@ -53,6 +53,16 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 	public static String PREF_NAME = "SQLiteCascadeFeatureLoader";
 	public static String LAST_UPDATE_PREF = "LastUpdate";
 	public static String REVERSE_ORDER_PREF = "OrderByDesc";
+	
+	/**
+	 * Preferences Strings for the Spatial Filter
+	 */
+	public static String FILTER_N = "FilterN";
+	public static String FILTER_S = "FilterS";
+	public static String FILTER_E = "FilterE";
+	public static String FILTER_W = "FilterW";
+	public static String FILTER_SRID = "FilterSRID";
+	
 	// 1 Hour between automatic reloading
 	public long UPDATE_THRESHOLD = (3600)*1000;
 
@@ -288,10 +298,12 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 			
 			Stmt stmt;
 			String converted ;
+			boolean hasGeometry = false;
 			
 			String columnNames = "SELECT ROWID "; // This is an SQLite standard column
-			//String columnValues = " ( ";
-
+			String filterString = "";
+			String orderString = "";
+			
 			for(Entry<String, String> e : dbFieldValues.entrySet()){
 				//Log.v(TAG, "Got -> "+e.getKey()+" : "+e.getValue());
 				
@@ -302,6 +314,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 					if(converted.equals("point")){
 						// Only Points are supported
 						columnNames = columnNames + ", ST_AsBinary(CastToXY("+e.getKey()+")) AS 'GEOMETRY'";
+						hasGeometry = true;
 					}else{
 						columnNames = columnNames + ", " + e.getKey() ;
 					}
@@ -318,23 +331,40 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 			}
 
 			
+			//Add Sspatial filtering
+			if(hasGeometry){
+				int filterSrid = mPrefs.getInt(FILTER_SRID, -1);
+				// If the SRID is not defined, skip the filter
+				if(filterSrid != -1){
+					double filterN = Double.longBitsToDouble( mPrefs.getLong(FILTER_N, Double.doubleToLongBits(0)));
+					double filterS = Double.longBitsToDouble( mPrefs.getLong(FILTER_S, Double.doubleToLongBits(0)));
+					double filterW = Double.longBitsToDouble( mPrefs.getLong(FILTER_W, Double.doubleToLongBits(0)));
+					double filterE = Double.longBitsToDouble( mPrefs.getLong(FILTER_E, Double.doubleToLongBits(0)));
+					
+					filterString = " WHERE MbrIntersects(GEOMETRY, BuildMbr("+filterW+", "+filterN+", "+filterE+", "+filterS+")) ";
+				}
+				//WHERE MbrIntersects(GEOMETRY, BuildMbr(8.75269101373853, 44.505790969141614, 9.039467060007173, 44.35415617743291))
+			}
+			
 
 			if(orderingField != null && !orderingField.isEmpty()){
 				boolean reverse = mPrefs.getBoolean(REVERSE_ORDER_PREF, false);
 				if(reverse){
-					columnNames = columnNames + " FROM '"+sourceTableName+"' ORDER BY "+orderingField+" DESC;";
+					orderString = "ORDER BY "+orderingField+" DESC";
+					//columnNames = columnNames + " FROM '"+sourceTableName+"' ORDER BY "+orderingField+" DESC;";
 				}else{
-					columnNames = columnNames + " FROM '"+sourceTableName+"' ORDER BY "+orderingField+";";
+					orderString = "ORDER BY "+orderingField;
+					//columnNames = columnNames + " FROM '"+sourceTableName+"' ORDER BY "+orderingField+";";
 				}
-			}else{
-				columnNames = columnNames + " FROM '"+sourceTableName+"';";
 			}
 			
-			Log.v(TAG, columnNames);
-			if(Database.complete(columnNames)){
+			String finalQuery = columnNames + " FROM '"+sourceTableName+"' "+filterString+" "+orderString+";";
+					
+			Log.v(TAG, finalQuery);
+			if(Database.complete(finalQuery)){
 				
 		        try {
-		        	stmt = db.prepare(columnNames);
+		        	stmt = db.prepare(finalQuery);
 		            String columnName;
 		            MissionFeature f;
 		            while( stmt.step() ) {
@@ -382,7 +412,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 		        }
 		        
 			}else{
-				Log.w(TAG, "Query is not complete:\n"+columnNames);
+				Log.w(TAG, "Query is not complete:\n"+finalQuery);
 			}
 			
 		}

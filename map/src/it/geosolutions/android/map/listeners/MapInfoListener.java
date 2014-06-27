@@ -40,292 +40,333 @@ import android.view.View.OnTouchListener;
 
 /**
  * Listener that implements OnTouch Event on map.
+ * 
  * @author Lorenzo Natali (www.geo-solutions.it)
  */
-public class MapInfoListener implements OnTouchListener{
+public class MapInfoListener implements OnTouchListener {
 
-// MODES
+	// MODES
 
+	private int mode = Constants.Modes.MODE_EDIT;
 
-private int mode = Constants.Modes.MODE_EDIT;
+	private boolean dragStarted;
 
-private boolean dragStarted;
+	private float startX;
 
-private float startX;
+	private float startY;
 
-private float startY;
+	private float endX;
 
-private float endX;
+	private float endY;
 
-private float endY;
+	protected AdvancedMapView view;
 
-protected AdvancedMapView view;
+	private boolean isPinching;
 
-private boolean isPinching;
+	private Activity activity;
 
-private Activity activity;
+	private SharedPreferences pref; // Used to check shape of selection desired
 
-private SharedPreferences pref; //Used to check shape of selection desired
+	/**
+	 * Constructor for class MapInfoListener
+	 * 
+	 * @param mapView
+	 * @param activity
+	 * @param Shape_Selection
+	 */
+	public MapInfoListener(AdvancedMapView mapView, Activity activity) {
+		view = mapView;
+		this.setActivity(activity);
+		pref = PreferenceManager.getDefaultSharedPreferences(activity
+				.getApplicationContext());
+	}
 
-/**
- * Constructor for class MapInfoListener
- * @param mapView
- * @param activity
- * @param Shape_Selection
- */
-public MapInfoListener(AdvancedMapView mapView, Activity activity) {
-    view = mapView;
-    this.activity = activity;
-    pref = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
-}
+	/**
+	 * Create a FeatureQuery for rectangular selection and pass it via intent.
+	 * 
+	 * @param n
+	 * @param w
+	 * @param s
+	 * @param e
+	 * @param zoomLevel
+	 */
+	protected void infoDialog(final double n, final double w, final double s,
+			final double e, byte zoomLevel) {
+		try {
+			ArrayList<Layer> layerNames = getLayers();
+			Intent i = new Intent(view.getContext(),
+					GetFeatureInfoLayerListActivity.class);
+			i.putExtra(Constants.ParamKeys.LAYERS, layerNames);
+			BBoxQuery query = new BBoxQuery();
+			query.setE(e);
+			query.setN(n);
+			query.setS(s);
+			query.setW(w);
+			query.setZoomLevel(zoomLevel);
+			query.setSrid("4326");
+			i.putExtra("query", query);
+			if (mode == Constants.Modes.MODE_EDIT) {
+				i.setAction(Intent.ACTION_PICK);
+			} else {
+				i.setAction(Intent.ACTION_VIEW);
+			}
+			getActivity().startActivityForResult(i,
+					GetFeatureInfoLayerListActivity.BBOX_REQUEST);
 
-/**
- * Create a FeatureQuery for rectangular selection and pass it via intent.
- * @param n
- * @param w
- * @param s
- * @param e
- * @param zoomLevel
- */
-private void infoDialog(final double n, final double w, final double s,
-        final double e, byte zoomLevel) {
-    try {
-        ArrayList<Layer> layerNames = getLayers();
-        Intent i = new Intent(view.getContext(),
-                GetFeatureInfoLayerListActivity.class);
-        i.putExtra(Constants.ParamKeys.LAYERS, layerNames);
-        BBoxQuery query = new BBoxQuery();
-        query.setE(e);
-        query.setN(n);
-        query.setS(s);
-        query.setW(w);
-        query.setZoomLevel(zoomLevel);
-        query.setSrid("4326");
-        i.putExtra("query", query);      
-        if (mode == Constants.Modes.MODE_EDIT) {
-            i.setAction(Intent.ACTION_PICK);
-        } else {
-            i.setAction(Intent.ACTION_VIEW);
-        }
-        activity.startActivityForResult(i,GetFeatureInfoLayerListActivity.BBOX_REQUEST);
-
-    } catch (Exception ex) {
-        ex.printStackTrace();
-    }
-}
-
-/**
- * Get layers from the mapView
- * @return an arrayList of layers
- */
-private ArrayList<Layer> getLayers() {
-	MultiSourceOverlayManager manager =  view.getLayerManager();
-	ArrayList<Layer> layers = manager.getLayers();
-	ArrayList<Layer> result =new ArrayList<Layer>();
-	for(Layer layer:layers){
-		if(layer.isVisibility()){
-			result.add(layer);
+		} catch (Exception ex) {
+			Log.e("MapInfoListener", Log.getStackTraceString(ex));
 		}
 	}
-	return result;
-}
 
-/**
- * Create a Feature Query for circular selection and pass it to an activity via intent.
- * @param x
- * @param y
- * @param radius
- * @param zoomLevel
- */
-private void infoDialogCircle(final double x, final double y, final double radius,
-		byte zoomLevel){
-       try{
-		ArrayList<Layer> layers = getLayers();
-        Intent i = new Intent(view.getContext(),
-                GetFeatureInfoLayerListActivity.class);
-        i.putExtra(Constants.ParamKeys.LAYERS, layers);
-        CircleQuery query = new CircleQuery();
-        query.setX(x);
-        query.setY(y);
-        query.setRadius(radius);
-        query.setSrid("4326");
-        query.setZoomLevel(zoomLevel);
-        i.putExtra("query", query);
-        if (mode == Constants.Modes.MODE_EDIT) {
-            i.setAction(Intent.ACTION_PICK);
-        } else {
-            i.setAction(Intent.ACTION_VIEW);
-        }
-        
-        activity.startActivityForResult(i,
-                GetFeatureInfoLayerListActivity.CIRCLE_REQUEST);
-        }catch(Exception ex){
-        	ex.printStackTrace();
-        }
-}
+	/**
+	 * Get layers from the mapView
+	 * 
+	 * @return an arrayList of layers
+	 */
+	protected ArrayList<Layer> getLayers() {
+		MultiSourceOverlayManager manager = view.getLayerManager();
+		ArrayList<Layer> layers = manager.getLayers();
+		ArrayList<Layer> result = new ArrayList<Layer>();
+		for (Layer layer : layers) {
+			if (layer.isVisibility()) {
+				result.add(layer);
+			}
+		}
+		return result;
+	}
 
-/**
- * Method to handle touch event on view.
- * @param v
- * @param event class that handle touch.
- */
-@Override
-public boolean onTouch(View v, MotionEvent event){
-    String[] array = activity.getResources().getStringArray(R.array.preferences_selection_shape);    
-    
-    int action = event.getAction();
-    int pointerCount = event.getPointerCount(); //Number of pointer of device
-    
-    // Try to skip pinch events
-    if (Log.isLoggable("MAPINFOTOOL", Log.DEBUG)) {// Log check to avoid string
-                                                   // creation
-        Log.d("MAPINFOTOOL", "performed action:" + action + " on Info Tool");
-    }
-        
-    if (action == MotionEvent.ACTION_DOWN) {
-    	if(dragStarted  && pointerCount > 1) {
-            setDragStarted(false);
-            Log.d("MAPINFOTOOL", "drag stopped");
-            isPinching = true;
-        }  	
-    }
-    if(action == MotionEvent.ACTION_MOVE) {
-        	if (pointerCount > 1 || isPinching) {
-                setDragStarted(false);
-                Log.d("MAPINFOTOOL", "drag stopped");
-                return false;
-            }
-            // START DRAGGING
-            if (!dragStarted) {
-                startX = event.getX();
-                startY = event.getY();
-            }
+	/**
+	 * Create a Feature Query for circular selection and pass it to an activity
+	 * via intent.
+	 * 
+	 * @param x
+	 * @param y
+	 * @param radius
+	 * @param zoomLevel
+	 */
+	private void infoDialogCircle(final double x, final double y,
+			final double radius, byte zoomLevel) {
+		try {
+			ArrayList<Layer> layers = getLayers();
+			Intent i = new Intent(view.getContext(),
+					GetFeatureInfoLayerListActivity.class);
+			i.putExtra(Constants.ParamKeys.LAYERS, layers);
+			CircleQuery query = new CircleQuery();
+			query.setX(x);
+			query.setY(y);
+			query.setRadius(radius);
+			query.setSrid("4326");
+			query.setZoomLevel(zoomLevel);
+			i.putExtra("query", query);
+			if (mode == Constants.Modes.MODE_EDIT) {
+				i.setAction(Intent.ACTION_PICK);
+			} else {
+				i.setAction(Intent.ACTION_VIEW);
+			}
 
-        	setDragStarted(true);
-            Log.d("MAPINFOTOOL", "dragging started");
-        	endX = event.getX();
-            endY = event.getY();
-        
-            // Force redraw   
-	        view.redraw(false);
-	        return true;
-    } else if (dragStarted && action == MotionEvent.ACTION_UP) {
-        	if (pointerCount > 1){
-                isPinching = true;
-                setDragStarted(false);
-                Log.d("MAPINFOTOOL", "drag stopped");
-                return false;
-            } else if (isPinching){
-                isPinching = false;
-                setDragStarted(false);
-                Log.d("MAPINFOTOOL", "drag stopped");
-                return false;
-            }
-        	 endX = event.getX();
-             endY = event.getY();
-             if (endX == startX || endY == startY) {
-                 setDragStarted(false);
-                 isPinching = false;
-                 return false;
-             }             
-        	// END DRAGGING EVENT		
-        	setDragStarted(false);
-            Log.d("MAPINFOTOOL", "drag stopped");
-            Log.d("MAPINFOTOOL", "start query layer");
+			getActivity().startActivityForResult(i,
+					GetFeatureInfoLayerListActivity.CIRCLE_REQUEST);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
 
-            //Use utility class to perform conversion from pixels to latitude/longitude.
-            if(pref.getString("selectionShape", activity.getResources().getString(R.string.preferences_selection_shape_default)).equals(array[0])){
-            	double n = ConversionUtilities.convertFromPixelsToLatitude(view, startY);
-            	double w = ConversionUtilities.convertFromPixelsToLongitude(view, startX);
-            	double s = ConversionUtilities.convertFromPixelsToLatitude(view, endY);
-            	double e = ConversionUtilities.convertFromPixelsToLongitude(view, endX);
-     
-                Log.v("MAPINFOTOOL", "bbox:" + w + "," + s + "," + e + "," + n);
-                infoDialog(n, w, s, e,view.getMapViewPosition().getZoomLevel());
-            }
-            else {  
-            	//Calculate radius and coordinates of circle
-            	double y = ConversionUtilities.convertFromPixelsToLatitude(view, startY);
-            	double x = ConversionUtilities.convertFromPixelsToLongitude(view, startX);
-            	double fin_y = ConversionUtilities.convertFromPixelsToLatitude(view, endY);
-            	double fin_x = ConversionUtilities.convertFromPixelsToLongitude(view, endX);
-                double rad_x = Math.abs(x-fin_x); 
-                double rad_y = Math.abs(y-fin_y);
-                double radius = Math.sqrt( (rad_x*rad_x) + (rad_y*rad_y));
-        	
-                Log.v("MAPINFOTOOL", "circle: center (" + x + "," + y + ") radius " + radius);
-            	infoDialogCircle(x,y,radius,view.getMapViewPosition().getZoomLevel());
-            	}
-        }	
-    
-    return false;
-}
+	/**
+	 * Method to handle touch event on view.
+	 * 
+	 * @param v
+	 * @param event
+	 *            class that handle touch.
+	 */
+	@Override
+	public boolean onTouch(View v, MotionEvent event) {
+		String[] array = getActivity().getResources().getStringArray(
+				R.array.preferences_selection_shape);
 
-private void setDragStarted(boolean b) {
-//	if(dragStarted ^ b){
-//		if (dragStarted= true){
-//			this.view.thawOverlays();
-//		}else{
-//			this.view.freezeOverlays();
-//		}
-//	}
-	dragStarted=b;
-}
+		int action = event.getAction();
+		int pointerCount = event.getPointerCount(); // Number of pointer of
+													// device
 
-/**
- * Check if user start dragging
- * @return
- */
-public boolean isDragStarted(){
-    return dragStarted;
-}
+		// Try to skip pinch events
+		if (Log.isLoggable("MAPINFOTOOL", Log.DEBUG)) {// Log check to avoid
+														// string
+														// creation
+			Log.d("MAPINFOTOOL", "performed action:" + action + " on Info Tool");
+		}
 
-/**
- * Return start x coordinate for selection
- * @return
- */
-public float getStartX() {
-    return startX;
-}
+		if (action == MotionEvent.ACTION_DOWN) {
+			if (dragStarted && pointerCount > 1) {
+				setDragStarted(false);
+				Log.d("MAPINFOTOOL", "drag stopped");
+				isPinching = true;
+			}
+		}
+		if (action == MotionEvent.ACTION_MOVE) {
+			if (pointerCount > 1 || isPinching) {
+				setDragStarted(false);
+				Log.d("MAPINFOTOOL", "drag stopped");
+				return false;
+			}
+			// START DRAGGING
+			if (!dragStarted) {
+				startX = event.getX();
+				startY = event.getY();
+			}
 
-/**
- * Return start y coordinate for selection
- * @return
- */
-public float getStartY() {
-    return startY;
-}
+			setDragStarted(true);
+			Log.d("MAPINFOTOOL", "dragging started");
+			endX = event.getX();
+			endY = event.getY();
 
-/**
- * Return final x coordinate for selection
- * @return
- */
-public float getEndX() {
-    return endX;
-}
+			// Force redraw
+			view.redraw(false);
+			return true;
+		} else if (dragStarted && action == MotionEvent.ACTION_UP) {
+			if (pointerCount > 1) {
+				isPinching = true;
+				setDragStarted(false);
+				Log.d("MAPINFOTOOL", "drag stopped");
+				return false;
+			} else if (isPinching) {
+				isPinching = false;
+				setDragStarted(false);
+				Log.d("MAPINFOTOOL", "drag stopped");
+				return false;
+			}
+			endX = event.getX();
+			endY = event.getY();
+			if (endX == startX || endY == startY) {
+				setDragStarted(false);
+				isPinching = false;
+				return false;
+			}
+			// END DRAGGING EVENT
+			setDragStarted(false);
+			Log.d("MAPINFOTOOL", "drag stopped");
+			Log.d("MAPINFOTOOL", "start query layer");
 
-/**
- * Return final y coordinate for selection
- * @return
- */
-public float getEndY() {
-    return endY;
-}
+			// Use utility class to perform conversion from pixels to
+			// latitude/longitude.
+			if (pref.getString(
+					"selectionShape",
+					getActivity().getResources().getString(
+							R.string.preferences_selection_shape_default))
+					.equals(array[0])) {
+				double n = ConversionUtilities.convertFromPixelsToLatitude(
+						view, startY);
+				double w = ConversionUtilities.convertFromPixelsToLongitude(
+						view, startX);
+				double s = ConversionUtilities.convertFromPixelsToLatitude(
+						view, endY);
+				double e = ConversionUtilities.convertFromPixelsToLongitude(
+						view, endX);
 
-/**
- * Return mode.
- * @return
- */
-public int getMode() {
-    return mode;
-}
+				Log.v("MAPINFOTOOL", "bbox:" + w + "," + s + "," + e + "," + n);
+				infoDialog(n, w, s, e, view.getMapViewPosition().getZoomLevel());
+			} else {
+				// Calculate radius and coordinates of circle
+				double y = ConversionUtilities.convertFromPixelsToLatitude(
+						view, startY);
+				double x = ConversionUtilities.convertFromPixelsToLongitude(
+						view, startX);
+				double fin_y = ConversionUtilities.convertFromPixelsToLatitude(
+						view, endY);
+				double fin_x = ConversionUtilities
+						.convertFromPixelsToLongitude(view, endX);
+				double rad_x = Math.abs(x - fin_x);
+				double rad_y = Math.abs(y - fin_y);
+				double radius = Math.sqrt((rad_x * rad_x) + (rad_y * rad_y));
 
-/**
- * Set mode.
- * @param mode
- */
-public void setMode(int mode) {
-    this.mode = mode;
-}
+				Log.v("MAPINFOTOOL", "circle: center (" + x + "," + y
+						+ ") radius " + radius);
+				infoDialogCircle(x, y, radius, view.getMapViewPosition()
+						.getZoomLevel());
+			}
+		}
+
+		return false;
+	}
+
+	private void setDragStarted(boolean b) {
+		// if(dragStarted ^ b){
+		// if (dragStarted= true){
+		// this.view.thawOverlays();
+		// }else{
+		// this.view.freezeOverlays();
+		// }
+		// }
+		dragStarted = b;
+	}
+
+	/**
+	 * Check if user start dragging
+	 * 
+	 * @return
+	 */
+	public boolean isDragStarted() {
+		return dragStarted;
+	}
+
+	/**
+	 * Return start x coordinate for selection
+	 * 
+	 * @return
+	 */
+	public float getStartX() {
+		return startX;
+	}
+
+	/**
+	 * Return start y coordinate for selection
+	 * 
+	 * @return
+	 */
+	public float getStartY() {
+		return startY;
+	}
+
+	/**
+	 * Return final x coordinate for selection
+	 * 
+	 * @return
+	 */
+	public float getEndX() {
+		return endX;
+	}
+
+	/**
+	 * Return final y coordinate for selection
+	 * 
+	 * @return
+	 */
+	public float getEndY() {
+		return endY;
+	}
+
+	/**
+	 * Return mode.
+	 * 
+	 * @return
+	 */
+	public int getMode() {
+		return mode;
+	}
+
+	/**
+	 * Set mode.
+	 * 
+	 * @param mode
+	 */
+	public void setMode(int mode) {
+		this.mode = mode;
+	}
+
+	public Activity getActivity() {
+		return activity;
+	}
+
+	public void setActivity(Activity activity) {
+		this.activity = activity;
+	}
 
 }

@@ -127,6 +127,7 @@ public class MapsActivity extends MapActivityBase {
 		public static final String RESOURCE = "RESOURCE";
 		public static final String GEOSTORE_URL = "GEOSTORE_URL";
 		public static final String CONFIRM_ON_EXIT = "CONFIRM_ON_EXIT";
+		public static final String CUSTOM_MAPINFO_CONTROL = "CustomMapInfoControlParcel";
 	}
 
 	
@@ -723,8 +724,17 @@ public class MapsActivity extends MapActivityBase {
 		 mapView.addControl(new CoordinateControl(mapView, true));
 		 List<MapControl> group = new ArrayList<MapControl>();
 		 
+		 
 		 // Info Control
-		 MapInfoControl ic= new MapInfoControl(mapView,this);
+		 MapInfoControl ic;
+		 if(getIntent().hasExtra(MapsActivity.PARAMETERS.CUSTOM_MAPINFO_CONTROL)){
+			 ic = getIntent().getParcelableExtra(MapsActivity.PARAMETERS.CUSTOM_MAPINFO_CONTROL) ;
+			 ic.activity = this;
+			 ic.mapView = mapView;
+			 ic.instantiateListener();
+		 }else{
+			 ic= new MapInfoControl(mapView,this);
+		 }
 		 ic.setActivationButton( (ImageButton)findViewById(R.id.ButtonInfo) );
 		 
 		 mapView.addControl(ic);

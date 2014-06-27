@@ -28,7 +28,6 @@ import it.geosolutions.android.map.model.Layer;
 import it.geosolutions.android.map.model.MSMMap;
 import it.geosolutions.android.map.utils.LocalPersistence;
 import it.geosolutions.android.map.utils.SpatialDbUtils;
-import it.geosolutions.android.map.utils.StorageUtils;
 import it.geosolutions.android.map.view.MapViewManager;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.R;
@@ -41,6 +40,7 @@ import it.geosolutions.geocollect.android.core.navigation.NavDrawerActivityConfi
 import it.geosolutions.geocollect.android.core.navigation.NavDrawerAdapter;
 import it.geosolutions.geocollect.android.core.navigation.NavDrawerItem;
 import it.geosolutions.geocollect.android.core.preferences.GeoCollectPreferences;
+import it.geosolutions.geocollect.android.map.ReturningMapInfoControl;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.source.XDataType;
 import android.app.AlertDialog;
@@ -48,11 +48,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.ContextMenu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.FrameLayout;
 
 /**
@@ -74,6 +71,8 @@ import android.widget.FrameLayout;
 public class PendingMissionListActivity extends AbstractNavDrawerActivity implements
 		PendingMissionListFragment.Callbacks , MapActivity{
 
+	public static int SPATIAL_QUERY = 7001;
+	
 	/**
 	 * Whether or not the activity is in two-pane mode, i.e. running on a tablet
 	 * device.
@@ -253,8 +252,10 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 	    		launch.putExtra(MapsActivity.MSM_MAP, m);
 			}
         	
+        	launch.putExtra(MapsActivity.PARAMETERS.CUSTOM_MAPINFO_CONTROL, new ReturningMapInfoControl());
+        	
     		//launch.putExtra(MapsActivity.LAYERS_TO_ADD, m.layers) ;
-    		startActivity(launch);
+    		startActivityForResult(launch, SPATIAL_QUERY);
     		
             break;
         //Settings	
@@ -346,4 +347,19 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 			}
         }
     }
+	
+	/**
+	 * Since the triggering intent is launched by the activity and not bay a Fragment
+	 * the child Fragments will not receive the result
+	 * We override the default onActivityResult() to propagate the result to the 
+	 * child Fragments
+	 */
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		// We need to explicitly call the child Fragments onActivityResult()
+		for (Fragment fragment : getSupportFragmentManager().getFragments()) {
+            fragment.onActivityResult(requestCode, resultCode, data);
+        }
+	}
 }

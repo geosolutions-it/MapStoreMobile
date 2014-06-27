@@ -67,12 +67,12 @@ public class MapInfoControl extends MapControl{
 	private static float STROKE_SPACES = 10f;
 	private static float STROKE_SHAPE_DIMENSION = 15f;
 	private static Paint.Join STROKE_ANGLES = Paint.Join.ROUND;
-	private static String defaultShapeSelection;
+	protected static String defaultShapeSelection;
 
-	private Activity activity; 	
-	private String[] array;
-	private SharedPreferences pref;
-	private AdvancedMapView mapView;
+	public Activity activity; 	
+	protected String[] array;
+	protected SharedPreferences pref;
+	public AdvancedMapView mapView;
 		
 	//Overrides the MapListener
 	@Override
@@ -110,10 +110,11 @@ public class MapInfoControl extends MapControl{
 		this.mapView = mapView;
 		this.activity=activity;	
 		
-		pref  = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
-		array = activity.getResources().getStringArray(R.array.preferences_selection_shape);
-		defaultShapeSelection = activity.getResources().getString(R.string.preferences_selection_shape_default); //default selection rectangular
-		
+		if(activity != null){
+			pref  = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
+			array = activity.getResources().getStringArray(R.array.preferences_selection_shape);
+			defaultShapeSelection = activity.getResources().getString(R.string.preferences_selection_shape_default); //default selection rectangular
+		}
 		instantiateListener();
 		setMode(mode);
 	}
@@ -270,7 +271,7 @@ public class MapInfoControl extends MapControl{
 	/**
 	 * Instantiate listener for selection choosed by user.
 	 */
-	private void instantiateListener(){
+	public void instantiateListener(){
 		String shapeSelection = pref.getString("selectionShape", defaultShapeSelection);
 		if(shapeSelection.equals(array[3]) && polygonTapListener == null){
 			this.polygonTapListener = new PolygonTapListener(mapView,activity);

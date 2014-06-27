@@ -17,7 +17,8 @@
  */
 package it.geosolutions.geocollect.android.core.mission;
 
-import it.geosolutions.android.map.wfs.geojson.feature.Feature;
+import it.geosolutions.android.map.model.query.BBoxQuery;
+import it.geosolutions.android.map.model.query.BaseFeatureInfoQuery;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.SQLiteCascadeFeatureLoader;
@@ -29,6 +30,7 @@ import jsqlite.Database;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
@@ -302,11 +304,19 @@ public class PendingMissionListFragment
 		mActivatedPosition = position;
 	}
 
+	/**
+	 * Creates the actionBar buttons
+	 */
 	@Override
 	public void onCreateOptionsMenu(
 	      Menu menu, MenuInflater inflater) {
-		   inflater.inflate(R.menu.orderable, menu);
-		   inflater.inflate(R.menu.refreshable, menu);
+		// If SRID is set, a filter exists
+		SharedPreferences sp = getSherlockActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME, Context.MODE_PRIVATE);
+		if(sp.contains(SQLiteCascadeFeatureLoader.FILTER_SRID)){
+			inflater.inflate(R.menu.filterable, menu);
+		}
+		inflater.inflate(R.menu.orderable, menu);
+		inflater.inflate(R.menu.refreshable, menu);
 	}
 	
 	/* (non-Javadoc)
@@ -346,6 +356,27 @@ public class PendingMissionListFragment
 
 				adapter.clear();
 				loader.forceLoad();
+			}
+			return true;
+			
+		} else if (id==R.id.filter){
+
+			// Clear the Spatial Filter
+			if(loader !=null){
+				
+				SharedPreferences sp = getSherlockActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME, Context.MODE_PRIVATE);
+				SharedPreferences.Editor editor = sp.edit();
+				// Change the ordering
+				editor.remove(SQLiteCascadeFeatureLoader.FILTER_N);
+				editor.remove(SQLiteCascadeFeatureLoader.FILTER_S);
+				editor.remove(SQLiteCascadeFeatureLoader.FILTER_W);
+				editor.remove(SQLiteCascadeFeatureLoader.FILTER_E);
+				editor.remove(SQLiteCascadeFeatureLoader.FILTER_SRID);
+				editor.commit();
+
+				adapter.clear();
+				loader.forceLoad();
+				item.setVisible(false);
 			}
 			return true;
 		}
@@ -490,5 +521,65 @@ public class PendingMissionListFragment
 				}
 			}
 		}
+	}
+	
+
+	/**
+	 * Handle the results
+	 */
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		Log.d(TAG, "onActivityResult()");
+	    super.onActivityResult(requestCode, resultCode, data);
+	    if(requestCode == PendingMissionListActivity.SPATIAL_QUERY){
+	    	
+	    	if(data!= null && data.hasExtra("query")){
+	    	    BaseFeatureInfoQuery query = data.getParcelableExtra("query");
+	    	    
+	    	    // Create task query
+	    	    if(query instanceof BBoxQuery){
+	    	    	BBoxQuery bbox = (BBoxQuery) query;
+	    	    	
+	    	    	// TODO: Refactor the Preferences Double Storage
+	    	    	// This is just a fast hack to store Doubles in Long but It should be handled by a more clean utility class
+	    	    	// Maybe extend the Preference Editor?
+	    	    	
+	    	    	Log.v(TAG, "Received:\nN: "+bbox.getN()+"\nN: "+bbox.getS()+"\nE: "+bbox.getE()+"\nW: "+bbox.getW()+"\nSRID: "+bbox.getSrid());
+					SharedPreferences sp = getSherlockActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME, Context.MODE_PRIVATE);
+					SharedPreferences.Editor editor = sp.edit();
+					editor.putLong(SQLiteCascadeFeatureLoader.FILTER_N, Double.doubleToRawLongBits( bbox.getN()));
+					editor.putLong(SQLiteCascadeFeatureLoader.FILTER_S, Double.doubleToRawLongBits( bbox.getS()));
+					editor.putLong(SQLiteCascadeFeatureLoader.FILTER_W, Double.doubleToRawLongBits( bbox.getW()));
+					editor.putLong(SQLiteCascadeFeatureLoader.FILTER_E, Double.doubleToRawLongBits( bbox.getE()));
+					editor.putInt(SQLiteCascadeFeatureLoader.FILTER_SRID, Integer.parseInt(bbox.getSrid()));
+					editor.commit();
+
+					adapter.clear();
+					loader.forceLoad();
+					// TODO: This call could need to move the onCreateMenu() code into a onPrepareOptionMenu()
+					getSherlockActivity().supportInvalidateOptionsMenu();
+	    	    }
+
+	    	    //else if(query instanceof CircleQuery){ }
+	    		
+	    	}else{
+	    		
+	    		// No result, clean the filter
+	    		SharedPreferences sp = getSherlockActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME, Context.MODE_PRIVATE);
+				SharedPreferences.Editor editor = sp.edit();
+				editor.remove(SQLiteCascadeFeatureLoader.FILTER_N);
+				editor.remove(SQLiteCascadeFeatureLoader.FILTER_S);
+				editor.remove(SQLiteCascadeFeatureLoader.FILTER_W);
+				editor.remove(SQLiteCascadeFeatureLoader.FILTER_E);
+				editor.remove(SQLiteCascadeFeatureLoader.FILTER_SRID);
+				editor.commit();
+
+				adapter.clear();
+				loader.forceLoad();
+				// TODO: This call could need to move the onCreateMenu() code into a onPrepareOptionMenu()
+				getSherlockActivity().supportInvalidateOptionsMenu();
+	    	}
+
+	    }
 	}
 }
