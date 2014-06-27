@@ -11,7 +11,7 @@
 	<ImageView 
 	    android:id="@+id/mission_resource_priority_icon"
    	    android:contentDescription="@string/edit"
-	    android:src="@drawable/ic_action_view_as_list"
+	    android:src="@drawable/ic_action_important_light"
 		android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
     	android:layout_alignParentLeft="true"
