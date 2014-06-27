@@ -17,7 +17,6 @@
  */
 package it.geosolutions.geocollect.android.core.mission;
 
-import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.SQLiteCascadeFeatureLoader;
@@ -34,6 +33,9 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
+import android.support.v4.view.ViewCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -61,7 +63,7 @@ import com.actionbarsherlock.view.MenuItem;
  */
 public class PendingMissionListFragment 
 	extends SherlockListFragment 
-	implements  LoaderCallbacks<List<MissionFeature>>,	OnScrollListener{
+	implements  LoaderCallbacks<List<MissionFeature>>,	OnScrollListener, OnRefreshListener{
 
 	/**
 	 * The serialization (saved instance state) Bundle key representing the
@@ -101,7 +103,11 @@ public class PendingMissionListFragment
 	 */
 	private LoaderCallbacks<List<MissionFeature>> mCallbacks;
 
-	
+	/**
+	 * SwipeRefreshLayout, use by the swipeDown gesture
+	 */
+	ListFragmentSwipeRefreshLayout mSwipeRefreshLayout;
+		
 	/**
 	 * Boolean value that allow to start loading only once at time
 	 */
@@ -174,8 +180,31 @@ public class PendingMissionListFragment
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	        Bundle savedInstanceState) {
 		footer = View.inflate(getActivity(), R.layout.loading_footer, null);
-	    startDataLoading(missionTemplate, LOADER_INDEX);
-	    return inflater.inflate(R.layout.mission_resource_list, container, false); 
+	    
+	    // Create the list fragment's content view by calling the super method
+        final View listFragmentView = inflater.inflate(R.layout.mission_resource_list, container, false);//super.onCreateView(inflater, container, savedInstanceState);
+ 
+        // Now create a SwipeRefreshLayout to wrap the fragment's content view
+        mSwipeRefreshLayout = new ListFragmentSwipeRefreshLayout(getSherlockActivity());
+ 
+        // Add the list fragment's content view to the SwipeRefreshLayout, making sure that it fills
+        // the SwipeRefreshLayout
+        mSwipeRefreshLayout.addView(listFragmentView,
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+ 
+        // Make sure that the SwipeRefreshLayout will fill the fragment
+        mSwipeRefreshLayout.setLayoutParams(
+                new ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT));
+       
+        mSwipeRefreshLayout.setColorScheme(R.color.blue, R.color.green, R.color.red, R.color.yellow);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
+        // Now return the SwipeRefreshLayout as this fragment's content view
+        return mSwipeRefreshLayout;
+	    
+	    
+	    //return inflater.inflate(R.layout.mission_resource_list, container, false); 
 	}
 
 	
@@ -194,6 +223,9 @@ public class PendingMissionListFragment
 	    }
 	    adapter.notifyDataSetChanged();
 	    isLoading=false;
+        if(mSwipeRefreshLayout != null)
+        	mSwipeRefreshLayout.setRefreshing(false);
+
 	}
 	
 	/**
@@ -205,17 +237,46 @@ public class PendingMissionListFragment
 	    getView().findViewById(R.id.progress_bar).setVisibility(TextView.GONE);
 	}
 	
+	
 	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 		if(getActivity().getIntent().getBooleanExtra(INFINITE_SCROLL, false)){
 			getListView().setOnScrollListener(this);
-		}// Restore the previously serialized activated item position.
+		}else{
+			getListView().setOnScrollListener(new OnScrollListener() {
+				
+				@Override
+				public void onScrollStateChanged(AbsListView view, int scrollState) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void onScroll(AbsListView view, int firstVisibleItem,
+						int visibleItemCount, int totalItemCount) {
+					Log.v("PMLF", "First: "+ firstVisibleItem + ", count: "+visibleItemCount+ ", total: "+totalItemCount);
+					if(firstVisibleItem == 0 || visibleItemCount == 0){
+						mSwipeRefreshLayout.setEnabled(true);
+					}else{
+						mSwipeRefreshLayout.setEnabled(false);
+					}
+
+					
+				}
+			});
+		}
+		
+		
+		// Restore the previously serialized activated item position.
 		if (savedInstanceState != null
 				&& savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
 			setActivatedPosition(savedInstanceState
 					.getInt(STATE_ACTIVATED_POSITION));
 		}
+
+		startDataLoading(missionTemplate, LOADER_INDEX);
+
 	}
 
 	@Override
@@ -320,15 +381,7 @@ public class PendingMissionListFragment
 
 			//getLoaderManager().getLoader(LOADER_INDEX);
 			if(loader !=null){
-				
-				SharedPreferences sp = getSherlockActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME, Context.MODE_PRIVATE);
-				SharedPreferences.Editor editor = sp.edit();
-				// Reset the preference to force update
-				editor.putLong(SQLiteCascadeFeatureLoader.LAST_UPDATE_PREF, 0);
-				editor.commit();
-				
-				adapter.clear();
-				loader.forceLoad();
+				this.onRefresh();
 			}
 			return true;
 		} else if (id==R.id.order){
@@ -368,6 +421,14 @@ public class PendingMissionListFragment
 	 */
 	@Override
 	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+		
+		Log.v("PMLF", "First: "+ firstVisibleItem + ", count: "+visibleItemCount+ ", total: "+totalItemCount);
+		if(firstVisibleItem == 0 || visibleItemCount == 0){
+			mSwipeRefreshLayout.setEnabled(true);
+		}else{
+			mSwipeRefreshLayout.setEnabled(false);
+		}
+		
 		//check if applicable
 		if (adapter == null){
 	        return ;
@@ -427,9 +488,7 @@ public class PendingMissionListFragment
 			    }else{
 			    }
 		   }
-		  
 		   stopLoadingGUI();
-		
 	}
 	
 
@@ -439,7 +498,9 @@ public class PendingMissionListFragment
 	@Override
 	public void onLoaderReset(Loader<List<MissionFeature>> arg0) {
 		adapter.clear();
-		
+        if(mSwipeRefreshLayout != null)
+        	mSwipeRefreshLayout.setRefreshing(false);
+
 	}
 	
 	/**
@@ -491,4 +552,78 @@ public class PendingMissionListFragment
 			}
 		}
 	}
+
+	/**
+	 * Callback for the {@link SwipeRefreshLayout}
+	 */
+	@Override
+	public void onRefresh() {
+		
+		SharedPreferences sp = getSherlockActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME, Context.MODE_PRIVATE);
+		SharedPreferences.Editor editor = sp.edit();
+		// Reset the preference to force update
+		editor.putLong(SQLiteCascadeFeatureLoader.LAST_UPDATE_PREF, 0);
+		editor.commit();
+		
+		adapter.clear();
+		loader.forceLoad();
+        if(mSwipeRefreshLayout != null)
+        	mSwipeRefreshLayout.setRefreshing(true);
+
+	}
+	
+    /**
+     * Utility method to check whether a {@link ListView} can scroll up from it's current position.
+     * Handles platform version differences, providing backwards compatible functionality where
+     * needed.
+     */
+    private static boolean canListViewScrollUp(ListView listView) {
+        if (android.os.Build.VERSION.SDK_INT >= 14) {
+            // For ICS and above we can call canScrollVertically() to determine this
+            return ViewCompat.canScrollVertically(listView, -1);
+        } else {
+            // Pre-ICS we need to manually check the first visible item and the child view's top
+            // value
+            return listView.getChildCount() > 0 &&
+                    (listView.getFirstVisiblePosition() > 0
+                            || listView.getChildAt(0).getTop() < listView.getPaddingTop());
+        }
+    }
+    
+    /**
+     * Sub-class of {@link android.support.v4.widget.SwipeRefreshLayout} for use in this
+     * {@link android.support.v4.app.ListFragment}. The reason that this is needed is because
+     * {@link android.support.v4.widget.SwipeRefreshLayout} only supports a single child, which it
+     * expects to be the one which triggers refreshes. In our case the layout's child is the content
+     * view returned from
+     * {@link android.support.v4.app.ListFragment#onCreateView(android.view.LayoutInflater, android.view.ViewGroup, android.os.Bundle)}
+     * which is a {@link android.view.ViewGroup}.
+     *
+     * <p>To enable 'swipe-to-refresh' support via the {@link android.widget.ListView} we need to
+     * override the default behavior and properly signal when a gesture is possible. This is done by
+     * overriding {@link #canChildScrollUp()}.
+     */
+    private class ListFragmentSwipeRefreshLayout extends SwipeRefreshLayout {
+ 
+        public ListFragmentSwipeRefreshLayout(Context context) {
+            super(context);
+        }
+ 
+        /**
+         * As mentioned above, we need to override this method to properly signal when a
+         * 'swipe-to-refresh' is possible.
+         *
+         * @return true if the {@link android.widget.ListView} is visible and can scroll up.
+         */
+        @Override
+        public boolean canChildScrollUp() {
+            final ListView listView = getListView();
+            if (listView.getVisibility() == View.VISIBLE) {
+                return canListViewScrollUp(listView);
+            } else {
+                return false;
+            }
+        }
+ 
+    }
 }
