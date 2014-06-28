@@ -181,8 +181,8 @@ public class PendingMissionListFragment
 	        Bundle savedInstanceState) {
 		footer = View.inflate(getActivity(), R.layout.loading_footer, null);
 	    
-	    // Create the list fragment's content view by calling the super method
-        final View listFragmentView = inflater.inflate(R.layout.mission_resource_list, container, false);//super.onCreateView(inflater, container, savedInstanceState);
+	    // Gest the list fragment's content view
+        final View listFragmentView = inflater.inflate(R.layout.mission_resource_list, container, false);
  
         // Now create a SwipeRefreshLayout to wrap the fragment's content view
         mSwipeRefreshLayout = new ListFragmentSwipeRefreshLayout(getSherlockActivity());
