@@ -728,7 +728,7 @@ public class MapsActivity extends MapActivityBase {
 		 // Info Control
 		 MapInfoControl ic;
 		 if(getIntent().hasExtra(MapsActivity.PARAMETERS.CUSTOM_MAPINFO_CONTROL)){
-			 ic = getIntent().getParcelableExtra(MapsActivity.PARAMETERS.CUSTOM_MAPINFO_CONTROL) ;
+			 ic = (MapInfoControl) getIntent().getParcelableExtra(MapsActivity.PARAMETERS.CUSTOM_MAPINFO_CONTROL) ;
 			 ic.activity = this;
 			 ic.mapView = mapView;
 			 ic.instantiateListener();
