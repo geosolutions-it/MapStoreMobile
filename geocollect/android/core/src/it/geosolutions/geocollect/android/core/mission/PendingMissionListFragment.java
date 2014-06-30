@@ -258,7 +258,7 @@ public class PendingMissionListFragment
 				@Override
 				public void onScroll(AbsListView view, int firstVisibleItem,
 						int visibleItemCount, int totalItemCount) {
-					Log.v("PMLF", "First: "+ firstVisibleItem + ", count: "+visibleItemCount+ ", total: "+totalItemCount);
+					//Log.v("PMLF", "First: "+ firstVisibleItem + ", count: "+visibleItemCount+ ", total: "+totalItemCount);
 					if(firstVisibleItem == 0 || visibleItemCount == 0){
 						mSwipeRefreshLayout.setEnabled(true);
 					}else{
