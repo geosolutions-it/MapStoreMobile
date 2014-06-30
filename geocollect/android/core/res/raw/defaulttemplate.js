@@ -379,7 +379,7 @@
 	"priorityValuesColors":{
 				"elevata":"#FF0000",
 				"media":"#FF9933",
-				"scarsa":"#FFFF00",
+				"scarsa":"#FDF600",
 				"area pulita":"#00FF00"
 			}
 	

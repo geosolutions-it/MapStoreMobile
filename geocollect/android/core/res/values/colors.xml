@@ -4,4 +4,9 @@
     <color name="red">#FF0000</color>
     <color name="green">#00FF00</color>
     <color name="yellow">#FFFF00</color>
+    <color name="geosol_1">#33dd55</color>
+    <color name="geosol_2">#11bbff</color>
+    <color name="geosol_3">#44bb88</color>
+    <color name="geosol_4">#ddddee</color>
+    
 </resources>

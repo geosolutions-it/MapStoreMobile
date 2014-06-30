@@ -201,7 +201,7 @@ public class PendingMissionListFragment
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT));
        
-        mSwipeRefreshLayout.setColorScheme(R.color.blue, R.color.green, R.color.red, R.color.yellow);
+        mSwipeRefreshLayout.setColorScheme(R.color.geosol_1, R.color.geosol_2, R.color.geosol_3, R.color.geosol_4);
         mSwipeRefreshLayout.setOnRefreshListener(this);
         // Now return the SwipeRefreshLayout as this fragment's content view
         return mSwipeRefreshLayout;
