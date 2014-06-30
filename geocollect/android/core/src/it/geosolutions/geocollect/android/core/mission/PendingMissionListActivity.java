@@ -24,9 +24,11 @@ import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
 
 import it.geosolutions.android.map.MapsActivity;
+import it.geosolutions.android.map.database.SpatialDataSourceManager;
 import it.geosolutions.android.map.model.Layer;
 import it.geosolutions.android.map.model.MSMMap;
 import it.geosolutions.android.map.utils.LocalPersistence;
+import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.android.map.utils.SpatialDbUtils;
 import it.geosolutions.android.map.view.MapViewManager;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
@@ -239,18 +241,30 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
     		launch.setAction(Intent.ACTION_VIEW);
     		launch.putExtra(MapsActivity.PARAMETERS.CONFIRM_ON_EXIT, false);
         	
-    		ArrayList<Layer> layers =  (ArrayList<Layer>) LocalPersistence.readObjectFromFile(this, LocalPersistence.CURRENT_MAP);
-        	if(layers == null || layers.isEmpty()){
+    		//ArrayList<Layer> layers =  (ArrayList<Layer>) LocalPersistence.readObjectFromFile(this, LocalPersistence.CURRENT_MAP);
+        	//if(layers == null || layers.isEmpty()){
+    			MapFilesProvider.setBaseDir("/geocollect");
+    			
 				MSMMap m = SpatialDbUtils.mapFromDb();
 	    		if(m.layers == null || m.layers.isEmpty()){
 	    			// retry, SpatialDataSourceManager is buggy
+	    			SpatialDataSourceManager dbManager = SpatialDataSourceManager.getInstance();
+
+	    			try {
+	    				//Only if not already loaded some tables
+	    				if (dbManager.getSpatialVectorTables(false).size() <= 0) {
+	    					dbManager.init(this, MapFilesProvider.getBaseDirectoryFile());
+	    				} 
+	    			} catch (Exception e) {
+	    				// ignore
+	    			}
 	    			m = SpatialDbUtils.mapFromDb();
 	    		}
 	    		launch.putExtra(MapsActivity.PARAMETERS.LAT, 44.40565);
 	    		launch.putExtra(MapsActivity.PARAMETERS.LON, 8.946256);
 	    		launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL, (byte)11);
 	    		launch.putExtra(MapsActivity.MSM_MAP, m);
-			}
+			//}
         	
         	launch.putExtra(MapsActivity.PARAMETERS.CUSTOM_MAPINFO_CONTROL, new ReturningMapInfoControl());
         	
