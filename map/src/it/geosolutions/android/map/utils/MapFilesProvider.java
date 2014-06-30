@@ -33,6 +33,7 @@ public class MapFilesProvider {
 	private static String backgroundFileName =  "bg.map";
 	public static void setBaseDir(String baseDir){
 		MapFilesProvider.baseDir = baseDir;
+		MapFilesProvider.baseStyle = baseDir + "/styles/";
 	}
 	public static File getBaseDirectoryFile(){
 		File f = new File(Environment
