@@ -287,5 +287,13 @@ public class UploadDialog extends RetainedDialogFragment {
 		}
 	}
 	
+	/**
+	 * Refresh the activity reference when changes
+	 */
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		this.activity = activity;
+	}
 	
 }

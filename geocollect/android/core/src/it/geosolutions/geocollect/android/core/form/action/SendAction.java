@@ -106,14 +106,15 @@ public class SendAction extends AndroidAction {
 				 */
 				@Override
 				public void onFinish(Activity activity, Result result) {
-					
-					Toast.makeText(activity, "SAVED", Toast.LENGTH_LONG).show();
-					NavUtils.navigateUpTo(activity, new Intent(activity,
-							PendingMissionListActivity.class));
+					if(activity != null){
+						Toast.makeText(activity, "SAVED", Toast.LENGTH_LONG).show();
+						NavUtils.navigateUpTo(activity, new Intent(activity,
+								PendingMissionListActivity.class));
+					}
 					super.onFinish(activity,result);
 				}
 			};
-			
+			((DialogFragment)mTaskFragment).setCancelable(false);
 		    ft.add(mTaskFragment, FRAGMENT_UPLOAD_DIALOG);
 			//ft.add(R.id.embedded, newFragment);
 			ft.commit();
