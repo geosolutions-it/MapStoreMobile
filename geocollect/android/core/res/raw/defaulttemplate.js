@@ -153,6 +153,9 @@
 			},{
 				"title": "Rilevatore",
 				"iconCls":"not_supported_yet",
+				"attributes":{
+					"message":"Scorri a sinistra per continuare"
+				},
 				"fields":[{
 					"fieldId": "NOME_RILEVATORE",
 					"type":"person",
@@ -174,6 +177,9 @@
 				}]
 			},{
 				"title": "Segnalazione",
+				"attributes":{
+					"message":"Scorri a sinistra per continuare"
+				},
 				"fields":[{
 					"fieldId": "TIPOLOGIA_SEGNALAZIONE",
 					"type":"text",
