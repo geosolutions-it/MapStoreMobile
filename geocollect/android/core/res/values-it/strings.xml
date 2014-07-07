@@ -29,5 +29,6 @@
     <string name="button_confirm_image_delete">L\'immagine verrà eliminata.\nContinuare?</string>
     <string name="button_confirm_image_delete_title">Elimina Immagine</string>
     <string name="undo_filter">Rimuovi Filtraggio</string>
+	<string name="data_send_success">Invio dati completato</string>
     
 </resources>

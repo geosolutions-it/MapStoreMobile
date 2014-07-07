@@ -29,5 +29,6 @@
     <string name="button_confirm_image_delete">Do you really want to delete this image?</string>
     <string name="button_confirm_image_delete_title">Delete Image</string>
     <string name="undo_filter">Undo Filtering</string>
+	<string name="data_send_success">Data successfully sent</string>
     
 </resources>

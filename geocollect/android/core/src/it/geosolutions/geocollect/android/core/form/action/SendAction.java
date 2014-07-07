@@ -19,6 +19,7 @@ package it.geosolutions.geocollect.android.core.form.action;
 
 import com.actionbarsherlock.app.SherlockFragment;
 
+import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
 import it.geosolutions.geocollect.android.core.widgets.dialog.TaskFragment;
@@ -107,7 +108,7 @@ public class SendAction extends AndroidAction {
 				@Override
 				public void onFinish(Activity activity, Result result) {
 					if(activity != null){
-						Toast.makeText(activity, "SAVED", Toast.LENGTH_LONG).show();
+						Toast.makeText(activity, getResources().getString(R.string.data_send_success), Toast.LENGTH_LONG).show();
 						NavUtils.navigateUpTo(activity, new Intent(activity,
 								PendingMissionListActivity.class));
 					}
