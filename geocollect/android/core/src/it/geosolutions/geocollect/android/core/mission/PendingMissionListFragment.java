@@ -377,7 +377,19 @@ public class PendingMissionListFragment
 		if(sp.contains(SQLiteCascadeFeatureLoader.FILTER_SRID)){
 			inflater.inflate(R.menu.filterable, menu);
 		}
-		inflater.inflate(R.menu.orderable, menu);
+		
+		if ( missionTemplate != null 
+				&& missionTemplate.source != null
+				&& missionTemplate.source.orderingField != null){
+			inflater.inflate(R.menu.orderable, menu);
+			MenuItem orderButton = menu.findItem(R.id.order);
+			if(orderButton != null){
+				String stringFormat = getResources().getString(R.string.order_by);
+				String formattedTitle = String.format(stringFormat, missionTemplate.source.orderingField);
+				orderButton.setTitle(formattedTitle);
+			}
+		}
+		
 		inflater.inflate(R.menu.refreshable, menu);
 	}
 	
