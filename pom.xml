@@ -53,16 +53,5 @@
       </plugins>
     </pluginManagement>
   </build>
-  
-				<pluginRepositories>
-					<pluginRepository>
-						<id>oss.sonatype.org-jayway-snapshots</id>
-						<name>Jayway OpenSource SNAPSHOTs on Sonatype.org</name>
-						<url>http://oss.sonatype.org/content/repositories/jayway-snapshots/</url>
-						<snapshots>
-							<enabled>true</enabled>
-						</snapshots>
-					</pluginRepository>
-				</pluginRepositories>
 
 </project>
