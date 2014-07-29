@@ -372,7 +372,11 @@
 					"text":"Invia",
 					"type":"send",
 					"name":"send",
-					"iconCls":"ic_send"
+					"iconCls":"ic_send",
+					"attributes":{
+						"confirmMessage":"Inviare?"
+					}
+					
 				}]
 			}],
 			

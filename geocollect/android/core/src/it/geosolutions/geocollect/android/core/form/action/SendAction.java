@@ -19,6 +19,7 @@ package it.geosolutions.geocollect.android.core.form.action;
 
 import com.actionbarsherlock.app.SherlockFragment;
 
+import it.geosolutions.geocollect.android.core.BuildConfig;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
@@ -27,13 +28,16 @@ import it.geosolutions.geocollect.android.core.widgets.dialog.UploadDialog;
 import it.geosolutions.geocollect.model.viewmodel.FormAction;
 import it.geosolutions.geocollect.model.viewmodel.Page;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NavUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,6 +49,11 @@ import android.widget.Toast;
  *
  */
 public class SendAction extends AndroidAction {
+	/**
+	 * Tag for Logging
+	 */
+	private static String TAG = "SendAction";
+	
 	/**
 	 * serialVersionUID
 	 */
@@ -71,14 +80,48 @@ public class SendAction extends AndroidAction {
 	 * @see it.geosolutions.geocollect.android.core.form.action.AndroidAction#performAction(android.support.v4.app.Fragment, it.geosolutions.geocollect.model.viewmodel.Action, it.geosolutions.geocollect.android.core.mission.Mission, it.geosolutions.geocollect.model.viewmodel.Page)
 	 */
 	@Override
-	public void performAction(SherlockFragment fragment, FormAction action, Mission m, Page p) {
-			String confirm =null;
+	public void performAction(final SherlockFragment fragment, final FormAction action, final Mission m, final Page p) {
+			
+		if(fragment == null){
+			if(BuildConfig.DEBUG){
+				Log.w(TAG, "Given fragment is NULL, cannot perform action");
+			}
+			return;
+		}
+		if(fragment.getActivity() == null){
+			if(BuildConfig.DEBUG){
+				Log.w(TAG, "Given fragment Activity is NULL, cannot perform action");
+			}
+			return;
+		}
+		
+		
+		String confirm =null;
 			if(attributes!=null){
 				confirm= (String) attributes.get(ATTRIBUTE_CONFIRM_MESSAGE);
 			}
 			
+			// TODO: add validation
+			
 			if(confirm !=null){
-				sendData( fragment,  action,  m,  p);
+				
+				new AlertDialog.Builder(fragment.getActivity())
+			    .setTitle(R.string.sending_data)
+			    .setMessage(confirm)
+			    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+			        public void onClick(DialogInterface dialog, int which) { 
+			        	sendData( fragment,  action,  m,  p);
+			        	
+			        }
+			     })
+			    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+			        public void onClick(DialogInterface dialog, int which) { 
+			            // do nothing
+			        }
+			     })
+			     .show();
+				
+				
 			}else{
 				//missing confirm message will send without any confirmation
 				sendData( fragment,  action,  m,  p);
