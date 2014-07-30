@@ -17,9 +17,14 @@
  */
 package it.geosolutions.geocollect.android.core.mission.utils;
 
+import it.geosolutions.geocollect.android.core.mission.MissionFeature;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.Locale;
+
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKBReader;
 
 import eu.geopaparazzi.library.util.ResourcesManager;
 import android.content.Context;
@@ -389,6 +394,52 @@ public class SpatialiteUtils {
             Log.e(TAG, Log.getStackTraceString(e));
         }
 		return dbFieldValues;
+	}
+	/**
+	 * Populate attributes and geometry fields of a feature from the stmt 
+	 * reading attributes and setting geometry 
+	 * @param wkbReader
+	 * @param stmt
+	 * @param f
+	 * @throws Exception
+	 */
+	public static void populateFeatureFromStmt(WKBReader wkbReader, Stmt stmt,
+			MissionFeature f) throws Exception {
+		String columnName;
+		int colcount = stmt.column_count();
+		for(int colpos = 0; colpos < colcount; colpos++){
+			
+			columnName = stmt.column_name(colpos);
+			if(columnName != null){
+				
+				if(columnName.equalsIgnoreCase("PK_UID")||columnName.equalsIgnoreCase("ORIGIN_ID")){
+					f.id = stmt.column_string(colpos);
+				}else if(columnName.equalsIgnoreCase("GEOMETRY")){
+					// At the moment, only Point is supported
+					// Here, the "GEOMETRY" column contains the result of 
+					//	ST_AsBinary(CastToXY("GEOMETRY"))
+					byte[] geomBytes = stmt.column_bytes(colpos);
+					try {
+						f.geometry = wkbReader.read(geomBytes);
+					} catch (ParseException e) {
+						Log.e(TAG,"Error reading geometry");
+						//throw new Exception(e.getMessage());
+					}
+
+				}else{
+					if(f.properties == null){
+						f.properties = new HashMap<String, Object>();
+					}
+					f.properties.put(columnName, stmt.column_string(colpos));
+				}
+				
+		    	
+		    }else{
+		    	// This should never happen
+		    	Log.d(TAG, "Found a NULL column name, this is strange.");
+		    }
+		
+		}
 	}
 	
 	/**

@@ -275,19 +275,26 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 			public Void loadInBackground() {
 				Activity activity = getSherlockActivity();
 				
-				Mission m =  (Mission) getActivity().getIntent().getExtras().getSerializable(ARG_MISSION);
-				m.setTemplate(MissionUtils.getDefaultTemplate(activity));
-				
-				if(activity instanceof FormEditActivity){
-					Log.d(TAG, "Loader: Connecting to Activity database");
-					m.db = ((FormEditActivity)activity).spatialiteDatabase;
-				}else{
-					Log.w(TAG, "Loader: Could not connect to Activity database");
-				}
+				Mission m =  (Mission) getActivity().getIntent().getExtras().getSerializable(ARG_MISSION);//TODO investigate sometimes m is null
+				if(m!=null){
+					m.setTemplate(MissionUtils.getDefaultTemplate(activity));
+					if(activity instanceof FormEditActivity){
+						Log.d(TAG, "Loader: Connecting to Activity database");
+						m.db = ((FormEditActivity)activity).spatialiteDatabase;
+					}else{
+						Log.w(TAG, "Loader: Could not connect to Activity database");
+					}
 
+					
+					mission =m;
+					return null;
+				}else{
+					//TODO notify error
+					Toast.makeText(getActivity(), R.string.error_getting_data_from_database, Toast.LENGTH_LONG).show();
+					getActivity().finish();
+					return null;
+				}
 				
-				mission =m;
-				return null;
 			}
 		};
 		//TODO create loader;

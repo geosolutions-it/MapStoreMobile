@@ -19,6 +19,7 @@ package it.geosolutions.geocollect.android.core.mission.utils;
 
 
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
+import static it.geosolutions.geocollect.android.core.mission.utils.SpatialiteUtils.populateFeatureFromStmt;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
 
 import java.util.ArrayList;
@@ -361,59 +362,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 			String finalQuery = columnNames + " FROM '"+sourceTableName+"' "+filterString+" "+orderString+";";
 					
 			Log.v(TAG, finalQuery);
-			if(Database.complete(finalQuery)){
-				
-		        try {
-		        	stmt = db.prepare(finalQuery);
-		            String columnName;
-		            MissionFeature f;
-		            while( stmt.step() ) {
-		                f = new MissionFeature();
-		            	int colcount = stmt.column_count();
-		            	for(int colpos = 0; colpos < colcount; colpos++){
-	            			
-		            		columnName = stmt.column_name(colpos);
-			            	if(columnName != null){
-			            		
-			            		if(columnName.equalsIgnoreCase("PK_UID")||columnName.equalsIgnoreCase("ORIGIN_ID")){
-			            			f.id = stmt.column_string(colpos);
-			            		}else if(columnName.equalsIgnoreCase("GEOMETRY")){
-			            			// At the moment, only Point is supported
-			            			// Here, the "GEOMETRY" column contains the result of 
-			            			//	ST_AsBinary(CastToXY("GEOMETRY"))
-			            			byte[] geomBytes = stmt.column_bytes(colpos);
-				   					try {
-				   						f.geometry = wkbReader.read(geomBytes);
-				   					} catch (ParseException e) {
-				   						Log.e(TAG,"Error reading geometry");
-				   						//throw new Exception(e.getMessage());
-				   					}
-
-			            		}else{
-			            			if(f.properties == null){
-			            				f.properties = new HashMap<String, Object>();
-			            			}
-			            			f.properties.put(columnName, stmt.column_string(colpos));
-			            		}
-			            		
-			                	
-			                }else{
-			                	// This should never happen
-			                	Log.d(TAG, "Found a NULL column name, this is strange.");
-			                }
-		            	
-		            	}
-		                mData.add(f);
-		            }
-		            stmt.close();
-		            			            
-		        } catch (Exception e) {
-		            Log.e(TAG, Log.getStackTraceString(e));
-		        }
-		        
-			}else{
-				Log.w(TAG, "Query is not complete:\n"+finalQuery);
-			}
+			loadMissionFeature(wkbReader, finalQuery);
 			
 		}
 
@@ -461,6 +410,31 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 		
 		return mData;
 	}
+
+	private void loadMissionFeature(WKBReader wkbReader, String query) {
+		Stmt stmt;
+		if(Database.complete(query)){
+			
+		    try {
+		    	stmt = db.prepare(query);
+		        String columnName;
+		        MissionFeature f;
+		        while( stmt.step() ) {
+		            f = new MissionFeature();
+		        	populateFeatureFromStmt(wkbReader, stmt, f);
+		            mData.add(f);
+		        }
+		        stmt.close();
+		        			            
+		    } catch (Exception e) {
+		        Log.e(TAG, Log.getStackTraceString(e));
+		    }
+		    
+		}else{
+			Log.w(TAG, "Query is not complete:\n"+query);
+		}
+	}
+
 
 	@Override
 	protected void onStopLoading() {

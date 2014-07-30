@@ -5,16 +5,17 @@
         <string name="action_mission">Missione</string>
     <string name="title_pendingmission_list">Missioni in sospeso</string>
     <string name="title_pendingmission_detail">Dettaglio missione</string>
+    <string name="general">Generale</string>
 	<string name="reporting">Segnalazioni</string>
 	<string name="no_reporting_found">Nessuna segnalazione trovata</string>
-	 <string name="general">Generale</string>
 	<string name="map">Mappa</string>
 	<string name="accept_mission">Accetta</string>
 	<string name="action_quit">Esci</string>
 	<string name="loading_footer">Loading...</string>
 	<string name="sending_data">Invio dati</string>
 	<string name="sending_media">Invo contenuti multimediali</string>
-	
+	<string name="error_sending_data">Errore durante l\'invio dei dati</string>
+	<string name="no_media_to_send">Nessun file da inviare</string>
 	<plurals name="reporting">
         <item quantity="one">Una Segnalazione.</item>
         <item quantity="other">%d Segnalazioni.</item>
