@@ -372,7 +372,11 @@
 					"text":"Invia",
 					"type":"send",
 					"name":"send",
-					"iconCls":"ic_send"
+					"iconCls":"ic_send",
+					"attributes":{
+						"url":"http://192.168.2.107:8080/opensdi2-web/mvc/geocollect/action/asd",
+						"mediaurl":"http://192.168.2.107:8080/opensdi2-web/mvc/geocollect/data"
+					}
 				}]
 			}],
 			
