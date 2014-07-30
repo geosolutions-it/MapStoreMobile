@@ -15,19 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.geosolutions.geocollect.model.viewmodel;
+package it.geosolutions.geocollect.model.http;
 
 /**
  * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
  *
  */
-public enum FormActionType {
-	photo,
-	video,
-	/**
-	 * send uses attributes: 
-	 * url
-	 */
-	send,
-	confirm
+public enum Status {
+	SUCCESS,ERROR
 }

@@ -15,19 +15,50 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.geosolutions.geocollect.model.viewmodel;
+package it.geosolutions.geocollect.model.http;
 
 /**
+ * Represents the return object of a commit
+ * 
  * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
  *
  */
-public enum FormActionType {
-	photo,
-	video,
+public class CommitResponse {
 	/**
-	 * send uses attributes: 
-	 * url
+	 * The esit of the response
 	 */
-	send,
-	confirm
+	private Status status;
+	/**
+	 * The path to the media service to send 
+	 */
+	private String message;
+	/**
+	 * identifier of the created object
+	 */
+	private String id;
+	
+	public boolean isSuccess(){
+		return Status.SUCCESS.equals(status);
+	}
+	//GETTERS AND SETTERS
+	public Status getStatus() {
+		return status;
+	}
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+	
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
+	public String getMessage() {
+		return message;
+	}
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
 }

@@ -18,8 +18,11 @@
 package it.geosolutions.geocollect.android.core.mission.utils;
 
 import it.geosolutions.android.map.wfs.WFSGeoJsonFeatureLoader;
+import it.geosolutions.android.map.wfs.geojson.GeoJson;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
+import it.geosolutions.android.map.wfs.geojson.feature.FeatureCollection;
 import it.geosolutions.geocollect.android.core.R;
+import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 
@@ -27,12 +30,13 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import jsqlite.Database;
-
 import android.content.Context;
 import android.support.v4.content.Loader;
 
@@ -116,6 +120,15 @@ public class MissionUtils {
 		return null;
 	}
 	
-	
+	/**
+	 * @param dataMapping
+	 * @return
+	 */
+	public static String generateJsonString(Map<String, String> dataMapping, Mission m) {
+		Feature f = PersistenceUtils.loadFeatureById(m);
+		GeoJson gson = new GeoJson();
+		String c = gson.toJson( f);
+		return c;
+	}
 	
 }

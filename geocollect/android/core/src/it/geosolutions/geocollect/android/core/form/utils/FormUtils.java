@@ -94,7 +94,7 @@ public class FormUtils {
 			return new String[0];
 		}
 			
-		File folder = new File(Environment.getExternalStorageDirectory().getPath()+"/geocollect/media/"+feature_id);
+		File folder = new File(Environment.getExternalStorageDirectory().getPath()+"/geocollect/media/"+feature_id);//TODO Parametrize this
 		folder.mkdirs();
 		File[] listOfFiles = folder.listFiles();
 

@@ -17,14 +17,19 @@
  */
 package it.geosolutions.geocollect.android.core.form.action;
 
+import java.util.Map;
+
 import com.actionbarsherlock.app.SherlockFragment;
 
 import it.geosolutions.geocollect.android.core.BuildConfig;
 import it.geosolutions.geocollect.android.core.R;
+import it.geosolutions.geocollect.android.core.form.utils.FormUtils;
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
+import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.widgets.dialog.TaskFragment;
 import it.geosolutions.geocollect.android.core.widgets.dialog.UploadDialog;
+import it.geosolutions.geocollect.model.http.CommitResponse;
 import it.geosolutions.geocollect.model.viewmodel.FormAction;
 import it.geosolutions.geocollect.model.viewmodel.Page;
 import android.app.Activity;
@@ -136,28 +141,50 @@ public class SendAction extends AndroidAction {
 	 * @param m
 	 * @param p
 	 */
-	private void sendData(SherlockFragment fragment, FormAction action, Mission m, Page p) {
+	private void sendData(SherlockFragment fragment, FormAction action, Mission m, Page pi) {
 		//createProgressAlert();
 		//uploadData();
 		android.support.v4.app.FragmentManager fm = fragment.getSherlockActivity().getSupportFragmentManager();
 		Fragment mTaskFragment = (Fragment)fm.findFragmentByTag(FRAGMENT_UPLOAD_DIALOG);
 		if(mTaskFragment==null){
 			FragmentTransaction ft = fm.beginTransaction();
-			
+			String url = (String) action.attributes.get("url");//TODO extenalize
+			String murl = (String) action.attributes.get("mediaurl");
+			FormUtils.getPhotoUriStrings(m.getOrigin().id);
 			mTaskFragment = new UploadDialog(){
 				/**
 				 * Navigate up to the list
 				 */
+				/* (non-Javadoc)
+				 * @see it.geosolutions.geocollect.android.core.widgets.dialog.UploadDialog#onFinish(android.app.Activity, it.geosolutions.geocollect.model.http.CommitResponse)
+				 */
 				@Override
-				public void onFinish(Activity activity, Result result) {
-					if(activity != null){
-						Toast.makeText(activity, getResources().getString(R.string.data_send_success), Toast.LENGTH_LONG).show();
-						NavUtils.navigateUpTo(activity, new Intent(activity,
-								PendingMissionListActivity.class));
+				public void onFinish(Activity ctx, CommitResponse result) {
+					if(result !=null && result.isSuccess()){
+						if(ctx != null){
+							Toast.makeText(ctx, getResources().getString(R.string.data_send_success), Toast.LENGTH_LONG).show();
+							NavUtils.navigateUpTo(ctx, new Intent(ctx,
+									PendingMissionListActivity.class));
+						}
+						super.onFinish(ctx,result);
+					}else{
+						Toast.makeText(ctx, R.string.error_sending_data, Toast.LENGTH_LONG).show();
+						super.onFinish(ctx,result);
 					}
-					super.onFinish(activity,result);
+					
 				}
 			};
+			
+			Bundle arguments = new Bundle();
+			arguments.putString(UploadDialog.PARAMS.DATAURL, url);
+			arguments.putString(UploadDialog.PARAMS.MEDIAURL, murl);
+			arguments.putString(UploadDialog.PARAMS.DATA, MissionUtils.generateJsonString(null,m));
+			arguments.putString(UploadDialog.PARAMS.ORIGIN_ID, m.getOrigin().id);
+			arguments.putString(UploadDialog.PARAMS.MISSION_ID, m.getTemplate().id);
+			arguments.putStringArray(UploadDialog.PARAMS.MEDIA, FormUtils.getPhotoUriStrings(m.getOrigin().id));
+			
+			mTaskFragment.setArguments(arguments);
+			
 			((DialogFragment)mTaskFragment).setCancelable(false);
 		    ft.add(mTaskFragment, FRAGMENT_UPLOAD_DIALOG);
 			//ft.add(R.id.embedded, newFragment);
@@ -167,6 +194,8 @@ public class SendAction extends AndroidAction {
 		
 		
 	}
+
+	
 	
 }
 

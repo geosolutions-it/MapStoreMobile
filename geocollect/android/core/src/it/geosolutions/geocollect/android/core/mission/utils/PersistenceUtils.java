@@ -3,6 +3,9 @@
  */
 package it.geosolutions.geocollect.android.core.mission.utils;
 
+import static it.geosolutions.geocollect.android.core.mission.utils.SpatialiteUtils.populateFeatureFromStmt;
+
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,13 +14,16 @@ import java.util.Map.Entry;
 import org.mapsforge.core.model.GeoPoint;
 
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.io.WKBReader;
 
 import it.geosolutions.android.map.dto.MarkerDTO;
 import it.geosolutions.android.map.overlay.MarkerOverlay;
 import it.geosolutions.android.map.overlay.items.DescribedMarker;
 import it.geosolutions.android.map.view.AdvancedMapView;
+import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.form.utils.FormBuilder;
 import it.geosolutions.geocollect.android.core.mission.Mission;
+import it.geosolutions.geocollect.android.core.mission.MissionFeature;
 import it.geosolutions.geocollect.android.core.widgets.DatePicker;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.source.XDataType;
@@ -28,6 +34,7 @@ import jsqlite.Database;
 import jsqlite.Exception;
 import jsqlite.Stmt;
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
@@ -223,7 +230,77 @@ public class PersistenceUtils {
 		} // if db
 		
 	}
-	
+	public static Feature loadFeatureById(Mission mission){
+		
+		if(mission == null || mission.getTemplate() == null){
+			Log.w(TAG, "Mission or MissionTemplate could not be found, abort loading..");
+			return null;
+		}
+		// TODO parameterize "_data" suffix
+    	// default value
+    	String tableName = mission.getTemplate().source.localFormStore;
+    	//geometry needs ST_AsBinary(CastToXY(GEOMETRY)) AS GEOMETRY
+    	HashMap<String, String> columns = SpatialiteUtils.getPropertiesFields(mission.db,tableName);
+
+    	List<String> selectFields = new ArrayList<String>();
+    	for(String columnName : columns.keySet()){
+    		//Spatialite custom field point
+    		if("point".equalsIgnoreCase(columns.get(columnName))){
+    			selectFields.add("ST_AsBinary(CastToXY(" + columnName + ")) AS GEOMETRY");
+    		}else{
+    			selectFields.add(columnName);
+    		}
+    	}
+    	String selectString = TextUtils.join(",",selectFields);
+    	StringWriter queryWriter = new StringWriter();
+    	queryWriter.append("SELECT ")
+    		.append(selectString)
+    		.append(" FROM ")
+    		.append(tableName)
+    		.append(" WHERE ORIGIN_ID = '")
+    		.append(mission.getOrigin().id)
+    		.append("';");
+    	
+    	
+    	String query = queryWriter.toString();
+    	List<Feature> fl = loadFormFeature(mission,query);
+    	if(fl!=null && fl.size() == 1){
+    		return fl.get(0);
+    	}
+    	return null;
+	}
+	/**
+	 * Create a Feature from the query
+	 * @param m mission
+	 * @param wkbReader
+	 * @param query
+	 */
+	private static List<Feature> loadFormFeature(Mission m, String query) {
+		Stmt stmt;
+		List<Feature> mData = new ArrayList<Feature>();
+		if(Database.complete(query)){
+			
+		    try {
+		    	stmt = m.db.prepare(query);
+		    	
+		    	WKBReader wkbReader = new WKBReader();
+		        MissionFeature f;
+		        while( stmt.step() ) {
+		            f = new MissionFeature();
+		        	populateFeatureFromStmt(wkbReader, stmt, f);
+		            mData.add(f);
+		        }
+		        stmt.close();
+		        			            
+		    } catch (Exception e) {
+		        Log.e(TAG, Log.getStackTraceString(e));
+		    }
+		    
+		}else{
+			Log.w(TAG, "Query is not complete:\n"+query);
+		}
+		return mData;
+	}
 	/**
 	 * Default method for loadPageData
 	 */
@@ -267,9 +344,9 @@ public class PersistenceUtils {
 					// TODO: load all the fields in one query
 					if(f.xtype == XType.mapViewPoint){
 						// a point must be retreived
-						s = "SELECT Y("+ f.fieldId +"), X("+ f.fieldId +") FROM '"+tableName+"' WHERE ORIGIN_ID = '"+mission.getOrigin().id+"';";
+						s = "SELECT Y(" + f.fieldId + "), X(" + f.fieldId + ") FROM '" + tableName + "' WHERE ORIGIN_ID = '" + mission.getOrigin().id+"';";
 					}else{
-						s = "SELECT "+ f.fieldId +" FROM '"+tableName+"' WHERE ORIGIN_ID = '"+mission.getOrigin().id+"';";
+						s = "SELECT " + f.fieldId +" FROM '" + tableName + "' WHERE ORIGIN_ID = '" + mission.getOrigin().id+"';";
 					}
 					if(jsqlite.Database.complete(s)){
 						st = mission.db.prepare(s);
