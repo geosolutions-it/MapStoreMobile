@@ -41,7 +41,25 @@
             <undeployBeforeDeploy>true</undeployBeforeDeploy>
           </configuration>
         </plugin>
+		 <plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-deploy-plugin</artifactId>
+			<version>${maven.deploy.plugin.version}</version>
+			<!-- 
+			    Exclude deploy by default : 
+				to allow the deploy of the single modules add this plugin to <build> tag of the module (<phase> tag has deploy as content) : 
+					<plugins>
+						<plugin>
+								<groupId>org.apache.maven.plugins</groupId>
+								<artifactId>maven-deploy-plugin</artifactId>
+								<executions><execution><id>default-deploy</id><phase>deploy</phase></execution></executions>
+						</plugin>
+					</plugins>
+			-->
+			<executions> <execution> <id>default-deploy</id> <phase>none</phase> </execution></executions>
+		  </plugin>
       </plugins>
+	 
     </pluginManagement>
   </build>
 
