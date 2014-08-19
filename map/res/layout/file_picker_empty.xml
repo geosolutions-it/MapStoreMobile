@@ -1,0 +1,7 @@
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/bordered_button"
+    android:gravity="center_vertical|center_horizontal"
+    android:text="no files found, please check your sd card"
+    android:textSize="28sp" />

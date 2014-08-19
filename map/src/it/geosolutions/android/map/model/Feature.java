@@ -1,6 +1,6 @@
 /*
  * GeoSolutions map - Digital field mapping on Android based devices
- * Copyright (C) 2013  GeoSolutions (www.geo-solutions.it)
+ * Copyright (C) 2013 - 2014  GeoSolutions (www.geo-solutions.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -119,5 +119,16 @@
         <item>triangle</item>
         <item>X</item>
     </string-array>
+    
+    <string-array name="mapsforge_background_types">
+        <item>Mapsforge</item>
+        <item>MBTiles</item>
+        <item>GeoPackage</item>
+    </string-array>
+    <string-array name="mapsforge_background_types_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
 
 </resources>

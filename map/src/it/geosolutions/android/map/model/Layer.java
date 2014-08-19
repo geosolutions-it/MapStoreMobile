@@ -67,4 +67,22 @@ public interface Layer <T extends Source> extends Serializable{
 	
 	public int getStatus();
 	
+	
+	/**
+	 * The {@link LayerGroup} of this layer, 
+	 * can be null if the layer isn't into a group
+	 * @param layerGroup
+	 */
+	public void setLayerGroup(LayerGroup layerGroup);
+	
+	public LayerGroup getLayerGroup();
+	
+	/**
+	 * The Opacity value of this layer
+	 */
+	public void setOpacity(double opacityValue);
+	
+	public double getOpacity();
+	
+	
 }

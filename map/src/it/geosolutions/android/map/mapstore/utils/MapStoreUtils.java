@@ -45,8 +45,13 @@ import com.google.gson.JsonSyntaxException;
  *
  */
 public class MapStoreUtils {
+	
 	public final static  String WMS_PTYPE ="gxp_wmssource";
 
+	public final static  String PTYPE_MBTILES ="mbtiles";
+	
+	public final static  String PTYPE_SPATIALITE ="geojson";
+	
 	/**
 	 * Creates an async task to get and read a mapstore configuration from the geostore url.
 	 * 

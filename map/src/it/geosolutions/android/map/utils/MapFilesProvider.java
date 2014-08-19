@@ -20,6 +20,7 @@ package it.geosolutions.android.map.utils;
 import java.io.File;
 import java.io.FilenameFilter;
 
+import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
@@ -28,27 +29,66 @@ import android.util.Log;
  *
  */
 public class MapFilesProvider {
+	
+	/**
+	 * Tag for logging
+	 */
+	private static String TAG = "MapFilesProvider";
+	
+	private static String environmentDir;
+	
 	private static String baseDir ="/mapstore";
 	private static String baseStyle = baseDir + "/styles/";
 	private static String backgroundFileName =  "bg.map";
+	
 	public static void setBaseDir(String baseDir){
 		MapFilesProvider.baseDir = baseDir;
 		MapFilesProvider.baseStyle = baseDir + "/styles/";
 	}
-	public static File getBaseDirectoryFile(){
-		File f = new File(Environment
-				.getExternalStorageDirectory().getPath(),baseDir);
-		if(f.exists()){
-			if(validFilesFound(f)){
-				Log.v("FILES","base directory found at:"+f.getAbsolutePath());
-				return f;
+	
+	/**
+	 * Utility method to retrieve a writable directory
+	 * @return
+	 */
+	public static String getEnvironmentDirPath(Context c) {
+		
+		if(environmentDir == null){
+			if(c == null){
+				environmentDir = Environment.getExternalStorageDirectory().getPath();
 			}else{
-				Log.v("FILES","no sqlite found at:"+f.getAbsolutePath());
+				if(isExternalStorageWritable()){
+					environmentDir = Environment.getExternalStorageDirectory().getPath();
+				}else{
+					environmentDir = c.getFilesDir().getPath();
+				}
 			}
 		}
 		
-		Log.w("FILES","base directory not found at: "+Environment
-				.getExternalStorageDirectory().getPath() );
+		return environmentDir;
+	}
+	
+	/**
+	 * Default, no context
+	 * @return
+	 */
+	private static String getEnvironmentDirPath(){
+		return getEnvironmentDirPath(null);
+	}
+	
+	
+	public static File getBaseDirectoryFile(){
+		
+		File f = new File(getEnvironmentDirPath(),baseDir);
+		if(f.exists()){
+			if(validFilesFound(f)){
+				Log.v(TAG,"base directory found at:"+f.getAbsolutePath());
+				return f;
+			}else{
+				Log.v(TAG,"no sqlite found at:"+f.getAbsolutePath());
+			}
+		}
+		
+		Log.w(TAG,"base directory not found at: "+getEnvironmentDirPath() );
 		return null;
 		
 	}
@@ -72,13 +112,12 @@ public class MapFilesProvider {
 	 * @return the .map file configured
 	 */
 	public static File getBackgroundMapFile(){
-		File f =new File(Environment
-				.getExternalStorageDirectory().getPath(),getBackgroundFilePath() );
+		File f =new File(getEnvironmentDirPath(),getBackgroundFilePath() );
 		if(f.exists()){
 			return f;
 		}
 		
-		Log.w("FILES","background file not found");
+		Log.w(TAG,"background file not found");
 		return null;
 	}
 	/**
@@ -92,14 +131,36 @@ public class MapFilesProvider {
 	 * @return
 	 */
 	public static String getStyleDirIn() {
-		String in = Environment.getExternalStorageDirectory().getPath() + baseStyle;
+		String in = getEnvironmentDirPath() + baseStyle;
 		return in;
 	}
 	/**
 	 * @return
 	 */
 	public static String getStyleDirOut() {
-		String in = Environment.getExternalStorageDirectory().getPath() + baseStyle;
+		String in = getEnvironmentDirPath() + baseStyle;
 		return in;
 	}
+	
+	
+	/* Checks if external storage is available for read and write */
+	public static boolean isExternalStorageWritable() {
+	    String state = Environment.getExternalStorageState();
+	    if (Environment.MEDIA_MOUNTED.equals(state)) {
+	        return true;
+	    }
+	    return false;
+	}
+
+	/* Checks if external storage is available to at least read */
+	public static boolean isExternalStorageReadable() {
+	    String state = Environment.getExternalStorageState();
+	    if (Environment.MEDIA_MOUNTED.equals(state) ||
+	        Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+	        return true;
+	    }
+	    return false;
+	}
+	
+	
 }

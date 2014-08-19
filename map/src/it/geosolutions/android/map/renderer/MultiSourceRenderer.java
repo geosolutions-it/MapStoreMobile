@@ -58,6 +58,10 @@ public class MultiSourceRenderer implements OverlayRenderer<Layer> {
 			//get all next layers with the same source
 			while(iterator.hasNext()){
 				l = iterator.next();
+				if(l.getSource() == null){
+					Log.e("MultiSourceRenderer", "Missing source for "+l.getTitle());
+					continue;
+				}
 				if(l.getSource().equals(s)){//TODO check if equals method have to be redefined
 					layerChunk.add(l);
 					if (!iterator.hasNext()){
@@ -137,7 +141,7 @@ public class MultiSourceRenderer implements OverlayRenderer<Layer> {
 	public void refreshLayer(Layer layer) {
 		synchronized (renderers) {
 			for(OverlayRenderer r:renderers){
-				if(r.getLayers().contains(layer)){
+				if(r.getLayers() != null && r.getLayers().contains(layer)){
 					r.refresh();
 					return;
 				}

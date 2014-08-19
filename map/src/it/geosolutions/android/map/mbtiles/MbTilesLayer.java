@@ -15,43 +15,44 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.geosolutions.android.map.spatialite;
+package it.geosolutions.android.map.mbtiles;
 
 import android.util.Log;
 import jsqlite.Exception;
+import it.geosolutions.android.map.BuildConfig;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
 import it.geosolutions.android.map.model.Layer;
 import it.geosolutions.android.map.model.LayerGroup;
 import it.geosolutions.android.map.style.AdvancedStyle;
 import it.geosolutions.android.map.style.StyleManager;
 import eu.geopaparazzi.spatialite.database.spatial.core.ISpatialDatabaseHandler;
-import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
+import eu.geopaparazzi.spatialite.database.spatial.core.SpatialRasterTable;
 
 /**
- * Abstraction of a Vector layer
- * The source is a Spatialite database
- * 
- * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
+ * Abstraction for an MBTiles Layer
  * @author Lorenzo Pini (lorenzo.pini@geo-solutions.it)
  */
-public class SpatialiteLayer implements Layer<SpatialiteSource> {
-	
-	private String title;
-	SpatialiteSource source;
-	private String tableName;
-	
-	private double opacity;
+public class MbTilesLayer implements Layer<MbTilesSource> {
 	
 	/**
-	 * LayerGroup of this Layer, can be null
+	 * Tag for logging
 	 */
+	protected static final String TAG = "MbTilesLayer";
+	
+	protected String title;
+	protected MbTilesSource source;
+	protected String tableName;
 	protected LayerGroup layerGroup;
-
-	public SpatialiteLayer(SpatialVectorTable t) {
+	protected int opacity;
+	
+	public static int MAX_OPACITY = 255;	
+	
+	public MbTilesLayer(SpatialRasterTable t) {
 		if(t != null){
-			this.title = t.getName();
-			this.tableName = t.getName();
+			this.title = t.getTableName();
+			this.tableName = t.getTableName();
 		}
+		this.opacity = MAX_OPACITY;
 	}
 
 
@@ -62,12 +63,12 @@ public class SpatialiteLayer implements Layer<SpatialiteSource> {
 	
 	boolean visibility =true;
 	private int status;
-	public SpatialiteSource getSource() {
+	public MbTilesSource getSource() {
 		return source;
 	}
 
 
-	public void setSource(SpatialiteSource source) {
+	public void setSource(MbTilesSource source) {
 		this.source = source;
 	}
 
@@ -131,17 +132,20 @@ public class SpatialiteLayer implements Layer<SpatialiteSource> {
 		SpatialDataSourceManager sdsm = SpatialDataSourceManager.getInstance();
 		if(sdsm != null){
 			try {
-				if(sdsm.getVectorTableByName(tableName)!=null){
-					return sdsm.getVectorHandler(sdsm.getVectorTableByName(tableName));
+				if(sdsm.getRasterTableByName(tableName)!=null){
+					return sdsm.getRasterHandler(sdsm.getRasterTableByName(tableName));
 				}
 			} catch (Exception e) {
-				Log.e("SpatialiteLayer","Exception while getting SpatialDatabaseHandler");
-				Log.e("SpatialiteLayer",Log.getStackTraceString(e));
+				if(BuildConfig.DEBUG){
+					Log.e("MbTilesLayer", "Exception while getting SpatialDatabaseHandler");
+					Log.e("MbTilesLayer", e.getLocalizedMessage(), e);
+				}
 			}
 		}
 		return null;
 	}
-	
+
+
 	/**
 	 * Set {@link LayerGroup}
 	 */
@@ -162,8 +166,25 @@ public class SpatialiteLayer implements Layer<SpatialiteSource> {
 
 	@Override
 	public void setOpacity(double opacityValue) {
-
-		this.opacity = opacityValue;
+		
+		if(opacityValue < 0 || opacityValue > 255){
+			
+			// Fully visible
+			this.opacity = MAX_OPACITY;
+			
+		}else{
+			
+			try{
+				this.opacity = (int) Math.floor(opacityValue);
+			}catch(ClassCastException cce){
+				if(BuildConfig.DEBUG){
+					Log.w(TAG, "Cannot cast opacity value to INT");
+				}
+				this.opacity = MAX_OPACITY;		
+			}
+			
+		}
+		
 	}
 
 

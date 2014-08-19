@@ -18,6 +18,7 @@
 package it.geosolutions.android.mapstoremobile;
 
 import it.geosolutions.android.map.MapsActivity;
+import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.android.map.utils.ZipFileManager;
 
 import java.io.File;
@@ -43,7 +44,7 @@ public class StartupActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_startup);	
-		dir_path = Environment.getExternalStorageDirectory().getPath();
+		dir_path = MapFilesProvider.getEnvironmentDirPath(this);
 		ZipFileManager zfm = new ZipFileManager(this,dir_path,"/mapstore",getResources().getString(R.string.url_data_test_archive)){
 			@Override
 			public void launchMainActivity(){
