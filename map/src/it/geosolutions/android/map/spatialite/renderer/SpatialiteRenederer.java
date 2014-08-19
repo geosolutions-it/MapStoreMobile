@@ -18,6 +18,7 @@
 package it.geosolutions.android.map.spatialite.renderer;
 
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
+import it.geosolutions.android.map.model.Layer;
 import it.geosolutions.android.map.overlay.MapsforgePointTransformation;
 import it.geosolutions.android.map.overlay.Shapes;
 import it.geosolutions.android.map.renderer.OverlayRenderer;
@@ -66,7 +67,14 @@ public class SpatialiteRenederer implements OverlayRenderer<SpatialiteLayer> {
 
 	@Override
 	public void setLayers(ArrayList<SpatialiteLayer> layers) {
-		this.layers = layers;
+		
+		layers = new ArrayList<SpatialiteLayer>();
+		
+		for(Layer l : layers){
+			if(l instanceof SpatialiteLayer){
+				this.layers.add((SpatialiteLayer) l);
+			}
+		}
 	}
 
 	public void refresh() {
@@ -81,6 +89,10 @@ public class SpatialiteRenederer implements OverlayRenderer<SpatialiteLayer> {
 	private void drawFromSpatialite(Canvas canvas, BoundingBox boundingBox,
 			byte drawZoomLevel) {
 
+		if( layers == null){
+			// nothing to draw
+			return;
+		}
 		double n = boundingBox.maxLatitude;
 		double w = boundingBox.minLongitude;
 		double s = boundingBox.minLatitude;

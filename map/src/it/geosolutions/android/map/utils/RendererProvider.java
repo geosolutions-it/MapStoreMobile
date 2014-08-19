@@ -6,6 +6,8 @@ import org.mapsforge.android.maps.Projection;
 import org.mapsforge.core.model.BoundingBox;
 
 import android.graphics.Canvas;
+import it.geosolutions.android.map.mbtiles.MbTilesRenderer;
+import it.geosolutions.android.map.mbtiles.MbTilesSource;
 import it.geosolutions.android.map.model.Source;
 import it.geosolutions.android.map.renderer.OverlayRenderer;
 import it.geosolutions.android.map.spatialite.SpatialiteSource;
@@ -20,6 +22,8 @@ public class RendererProvider {
 			return new WMSUntiledRenderer();
 		}else if (s instanceof SpatialiteSource){
 			return new SpatialiteRenederer();
+		}else if (s instanceof MbTilesSource){
+			return new MbTilesRenderer();
 		}
 		return null;
 	}

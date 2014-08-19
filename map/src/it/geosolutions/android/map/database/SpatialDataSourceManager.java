@@ -212,6 +212,14 @@ public class SpatialDataSourceManager {
     }
     
     /**
+     * Get the Handler for the Table
+     * @param table
+     * @return
+     */
+    public ISpatialDatabaseHandler getSpatialDataSourceHandler(SpatialRasterTable table){
+   	 	return rasterTablesMap.get(table);
+    }
+    /**
      * Query a polygon and returns an array of <Bundle> mapped as attributeName->attributeValue
      * *NOTE*: max 10 results for now
      * @param boundsSrid
