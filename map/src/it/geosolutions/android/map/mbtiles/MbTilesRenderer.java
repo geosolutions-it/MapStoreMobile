@@ -17,41 +17,38 @@
  */
 package it.geosolutions.android.map.mbtiles;
 
-import it.geosolutions.android.map.BuildConfig;
-import it.geosolutions.android.map.database.SpatialDataSourceManager;
 import it.geosolutions.android.map.renderer.OverlayRenderer;
 import it.geosolutions.android.map.style.AdvancedStyle;
-import it.geosolutions.android.map.utils.ProjectionUtils;
 import it.geosolutions.android.map.utils.StyleUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-
-import jsqlite.Exception;
-
 import org.mapsforge.android.maps.Projection;
 import org.mapsforge.core.model.BoundingBox;
 import org.mapsforge.core.model.GeoPoint;
 import org.mapsforge.core.model.Tile;
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.util.Log;
+import android.util.TimingLogger;
 
 import eu.geopaparazzi.spatialite.database.spatial.core.ISpatialDatabaseHandler;
-import eu.geopaparazzi.spatialite.database.spatial.core.SpatialRasterTable;
 
 /**
  * A Renderer for MBTiles Layers
  * 
- * @author Lorenzo Pini(lorenzo.pini@geo-solutions.it)
+ * @author Lorenzo Pini (lorenzo.pini@geo-solutions.it)
  * 
  */
 public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 
+	// -----------------------------------------------
+	// copied from
+	// - geopaparazzilibrary/src/eu/geopaparazzi/library/util/Utilities.java
+	// -----------------------------------------------
+	public static double originShift = 2 * Math.PI * 6378137 / 2.0;
+	
 	private ArrayList<MbTilesLayer> layers;
 	private Projection projection;
 
@@ -65,7 +62,15 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 	 * to the given {@link Canvas}
 	 */
 	public void render(Canvas c, BoundingBox boundingBox, byte zoomLevel) {
+		// Time execution
+		TimingLogger timings = new TimingLogger(TAG, "Rendering MBTiles");
+		
+		// actual rendering
 		drawFromMbTile(c, boundingBox, zoomLevel);
+		
+		// measure and log execution time
+		timings.addSplit("Render Done");
+		timings.dumpToLog();
 	}
 
 	@Override
@@ -82,6 +87,12 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 		return layers;
 	}
 
+	/**
+	 * Draws the tiles of the given {@link BoundingBox} in the given {@link Canvas}
+	 * @param canvas
+	 * @param boundingBox
+	 * @param drawZoomLevel
+	 */
 	private void drawFromMbTile (Canvas canvas, BoundingBox boundingBox, byte drawZoomLevel) {
 
 		double n = boundingBox.maxLatitude;
@@ -89,27 +100,65 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 		double s = boundingBox.minLatitude;
 		double e = boundingBox.maxLongitude;
 
+		if(projection == null){
+			// cannot continue
+			return;
+		}
+
 		// Get the point of the canvas where to start drawing
 		GeoPoint dp = new GeoPoint(n, w); // UpperLeftCorner
-		long[] pxDp = ProjectionUtils.getDrawPoint(dp, projection, drawZoomLevel);
-		long drawX = pxDp[0];
-		long drawY = pxDp[1];
+		//long[] pxDp = ProjectionUtils.getDrawPoint(dp, projection, drawZoomLevel);
+		//long drawX = pxDp[0];
+		//long drawY = pxDp[1];
+		android.graphics.Point bboxPixelPoint = projection.toPixels(dp, null);
 		
+		
+		// Get the row/col values of the tiles covering the area to draw
 		int[] tile_bounds =	LatLonBounds_to_TileBounds(
-								new double[]{w,s,e,n},
+								new double[]{w,n,e,s},
 								drawZoomLevel);
 		
-		Log.v(TAG, "Tilebounds "+Arrays.toString(tile_bounds));
-		
 		int i_min_x = tile_bounds[1]; 
-		int i_min_y_osm = tile_bounds[4]; 
+		int i_min_y_osm = tile_bounds[2]; 
 		int i_max_x = tile_bounds[3]; 
-		int i_max_y_osm = tile_bounds[2];
+		int i_max_y_osm = tile_bounds[4];
 		
+		// get tileLatLonBounds of the upper left tile
+		double[] tb = tileLatLonBounds(i_min_x, i_min_y_osm, drawZoomLevel, Tile.TILE_SIZE);
 
-		try {
+		GeoPoint mbtileUlc = new GeoPoint(tb[1], tb[0]); // UpperLeftCorner
+		//long[] pxMbtile = ProjectionUtils.getDrawPoint(mbtileUlc, projection, drawZoomLevel);
+		//long tileX = pxMbtile[0];
+		//long tileY = pxMbtile[1];
+
+		// get the screen pixel position
+		android.graphics.Point tilePixelPoint = projection.toPixels(mbtileUlc, null);
+		
+		/*
+		if(BuildConfig.DEBUG){
+			Log.v(TAG, "BBox Point [ "+bboxPixelPoint.x+" , "+bboxPixelPoint.y+" ]");
+			Log.v(TAG, "Tile Point [ "+tilePixelPoint.x+" , "+tilePixelPoint.y+" ]");
+		}
+		 */
+		
+		long offsetX = (long) bboxPixelPoint.x - tilePixelPoint.x; 
+		long offsetY = (long) bboxPixelPoint.y - tilePixelPoint.y; 
+		
+		/*
+		if(BuildConfig.DEBUG){
+			Log.v(TAG, "Calculated ULC  [ "+drawX+" , "+drawY+" ]");
+			Log.v(TAG, "Viewport Tilebounds "+Arrays.toString(tile_bounds));
+			Log.v(TAG, "ULC Tilebounds "+Arrays.toString(tb));
+			Log.v(TAG, "Calculated pxMbtile  [ "+tileX+" , "+tileY+" ]");
+			Log.v(TAG, "Offset first method  [ "+offsetX+" , "+offsetY+" ]");
+			Log.v(TAG, "Offset second method [ "+(drawX - tileX)+" , "+(drawY - tileY)+" ]");
+		}
+		*/
+		
+		//try {
+
 			// gets mbtiles layers from the spatialite database manager
-			SpatialDataSourceManager sdManager = SpatialDataSourceManager.getInstance();
+			//SpatialDataSourceManager sdManager = SpatialDataSourceManager.getInstance();
 			
 			StringBuilder sb = new StringBuilder();
 			
@@ -130,40 +179,42 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 				}
 
 				// retrieve the handler
-				SpatialRasterTable spatialRasterTable = sdManager.getRasterTableByName(l.getTableName());
+				//SpatialRasterTable spatialRasterTable = sdManager.getRasterTableByName(l.getTableName());
 				
 				ISpatialDatabaseHandler spatialDatabaseHandler = l.getSpatialDatabaseHandler();
 				
 				if (spatialDatabaseHandler != null) {
 										
 					////////
-					int tileSize = Tile.TILE_SIZE;
 					// Prepare the pixel matrix
 					int[] pixels = new int[Tile.TILE_SIZE * Tile.TILE_SIZE];
 					
 					Bitmap decodedBitmap = null;
 					Bitmap bitmap = null;		
 					
-					for(int tile_min_y = i_min_y_osm; tile_min_y<=i_max_y_osm; tile_min_y++ ){
-						for(int tile_min_x = i_min_x; tile_min_x<=i_max_x; tile_min_x++ ){
+
+					for(int tile_y = i_min_y_osm; tile_y<=i_max_y_osm; tile_y++ ){
+						
+						for(int tile_x = i_min_x; tile_x<=i_max_x; tile_x++ ){
 						
 							// clear all
 							sb.delete(0, sb.length());
 							
 							byte[] rasterBytes = null;
-							sb.append(drawZoomLevel).append(",").append(tile_min_x).append(",").append(tile_min_y);
+							sb.append(drawZoomLevel).append(",").append(tile_x).append(",").append(tile_y);
 							
 							String tileQuery = sb.toString();
-							if(BuildConfig.DEBUG){
-								Log.v(TAG, tileQuery);
-							}
+
 							// get the raster tile
 							rasterBytes = spatialDatabaseHandler.getRasterTile(tileQuery);
 							if( rasterBytes == null){
 								// got nothing
+								/*
+								 *  TODO: use a StringBuilder to log inside critical blocks
 								if(BuildConfig.DEBUG){
 									Log.v(TAG, "Could not find the correct tile");
 								}
+								*/
 								continue;
 							}
 							
@@ -172,7 +223,7 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 							// check if the input stream could be decoded into a bitmap
 							if (decodedBitmap != null) {
 								// copy all pixels from the decoded bitmap to the color array
-								decodedBitmap.getPixels(pixels, 0, tileSize, 0, 0, tileSize, tileSize);
+								decodedBitmap.getPixels(pixels, 0, Tile.TILE_SIZE, 0, 0, Tile.TILE_SIZE, Tile.TILE_SIZE);
 								decodedBitmap.recycle();
 							} else {
 								for (int i = 0; i < pixels.length; i++) {
@@ -182,17 +233,41 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 							
 							if(bitmap == null){
 								Bitmap.Config conf = Bitmap.Config.ARGB_8888;
-								bitmap = Bitmap.createBitmap(tileSize, tileSize, conf);
+								bitmap = Bitmap.createBitmap(Tile.TILE_SIZE, Tile.TILE_SIZE, conf);
 							}
 							
 							// copy all pixels from the color array to the tile bitmap
-							bitmap.setPixels(pixels, 0, tileSize, 0, 0, tileSize, tileSize);
+							bitmap.setPixels(pixels, 0, Tile.TILE_SIZE, 0, 0, Tile.TILE_SIZE, Tile.TILE_SIZE);
+							
+							// some logging
+							/*
+							sb.append("\n");
+							sb.append("tile_x      ").append(tile_x).append("\n");
+							sb.append("i_min_x     ").append(i_min_x).append("\n");
+							sb.append("offsetX     ").append(offsetX).append("\n");
+							sb.append("tile_y      ").append(tile_y).append("\n");
+							sb.append("i_min_y_osm ").append(i_min_y_osm).append("\n");
+							sb.append("offsetY     ").append(offsetY).append("\n");
+							*/
 							
 							// do the actual drawing on canvas
+							// TODO: make this Paint configurable
 							Paint paint = new Paint();    
-							paint.setAlpha(60); //you can set your transparent value here    
-							canvas.drawBitmap(bitmap, (tile_min_x-i_min_x)*tileSize, (tile_min_y-i_min_y_osm)*tileSize, paint);
+							paint.setAlpha(60); // set transparent value here  
+							/* 
+							 * TODO: investigate the why the tiles must be drawn with an additional Y offset of (-tileSize)
+							 * ((tile_y - i_min_y_osm -1 )*tileSize) -offsetY
+							 * instead of
+							 * ((tile_y - i_min_y_osm )*tileSize) -offsetY
+							 * 
+							 */
+							canvas.drawBitmap(bitmap, ((tile_x-i_min_x)*Tile.TILE_SIZE)-offsetX, ((tile_y - i_min_y_osm - 1)*Tile.TILE_SIZE)-offsetY, paint);
 		
+							/*
+							if(BuildConfig.DEBUG){
+								Log.v(TAG, sb.toString());
+							}
+							*/
 						}
 					}
 					
@@ -204,12 +279,14 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 
 				}
 			}
+		/*
 		} catch (Exception e1) {
 			if (BuildConfig.DEBUG) {
 				Log.e(TAG, "Exception while rendering spatialite data");
 				Log.e(TAG, e1.getLocalizedMessage(), e1);
 			}
 		}
+		*/
 	}
 
 	private boolean sizeHasChanged() {
@@ -264,13 +341,98 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 	 * @param i_zoom
 	 * @return [zoom,minx, miny, maxx, maxy of tile_bounds]
 	 */
-	public static int[] LatLonBounds_to_TileBounds(double[] latlong_bounds,
-			int i_zoom) {
+	public static int[] LatLonBounds_to_TileBounds(double[] latlong_bounds, int i_zoom) {
 		int[] min_tile_bounds = getTileNumber(latlong_bounds[1],
 				latlong_bounds[0], i_zoom);
 		int[] max_tile_bounds = getTileNumber(latlong_bounds[3],
 				latlong_bounds[2], i_zoom);
 		return new int[] { i_zoom, min_tile_bounds[1], min_tile_bounds[2],
 				max_tile_bounds[1], max_tile_bounds[2] };
+	}
+	
+	/**
+	 * Returns bounds of the given tile in EPSG:900913 coordinates
+	 * 
+	 * <p>
+	 * Code copied from: http://code.google.com/p/gmap-tile-generator/
+	 * </p>
+	 * 
+	 * @param tx
+	 * @param ty
+	 * @param zoom
+	 * @return [minx, miny, maxx, maxy]
+	 */
+	public static double[] tileBounds(int tx, int ty, int zoom, int tileSize) {
+		double[] min = pixelsToMeters(tx * tileSize, ty * tileSize, zoom, tileSize);
+		double minx = min[0], miny = min[1];
+		double[] max = pixelsToMeters((tx + 1) * tileSize, (ty + 1) * tileSize, zoom, tileSize);
+		double maxx = max[0], maxy = max[1];
+		return new double[] { minx, miny, maxx, maxy };
+	}
+	
+	/**
+	 * Converts pixel coordinates in given zoom level of pyramid to EPSG:900913
+	 * 
+	 * <p>
+	 * Code copied from: http://code.google.com/p/gmap-tile-generator/
+	 * </p>
+	 * 
+	 * @return
+	 */
+	public static double[] pixelsToMeters(double px, double py, int zoom, int tileSize) {
+		double res = getResolution(zoom, tileSize);
+		double mx = px * res - originShift;
+		double my = py * res - originShift;
+		return new double[] { mx, my };
+	}
+
+	/**
+	 * Resolution (meters/pixel) for given zoom level (measured at Equator)
+	 * 
+	 * <p>
+	 * Code copied from: http://code.google.com/p/gmap-tile-generator/
+	 * </p>
+	 * 
+	 * @return
+	 */
+	public static double getResolution(int zoom, int tileSize) {
+		// return (2 * Math.PI * 6378137) / (this.tileSize * 2**zoom)
+		double initialResolution = 2 * Math.PI * 6378137 / tileSize;
+		return initialResolution / Math.pow(2, zoom);
+	}
+	
+	/**
+	 * <p>
+	 * Code copied from: http://code.google.com/p/gmap-tile-generator/
+	 * </p>
+	 * 
+	 * @param tx
+	 * @param ty [osm notation]
+	 * @param zoom
+	 * @param tileSize
+	 * @return [minx, miny, maxx, maxy]
+	 */
+	public static double[] tileLatLonBounds(int tx, int ty, int zoom, int tileSize) {
+		double[] bounds = tileBounds(tx, ty, zoom, tileSize);
+		double[] mins = metersToLatLon(bounds[0], bounds[1]);
+		double[] maxs = metersToLatLon(bounds[2], bounds[3]);
+		return new double[] { mins[1], maxs[0], maxs[1], mins[0] };
+	}
+
+	/**
+	 * Converts XY point from Spherical Mercator EPSG:900913 to lat/lon in WGS84 Datum
+	 * 
+	 * <p>
+	 * Code copied from: http://code.google.com/p/gmap-tile-generator/
+	 * </p>
+	 * 
+	 * @return
+	 */
+	public static double[] metersToLatLon(double mx, double my) { 
+		// double originShift = 2 * Math.PI * 6378137 / 2.0;
+		double lon = (mx / originShift) * 180.0;
+		double lat = (my / originShift) * 180.0;
+		lat = 180 / Math.PI * (2 * Math.atan(Math.exp(lat * Math.PI / 180.0)) - Math.PI / 2.0);
+		return new double[] { -lat, lon };
 	}
 }
