@@ -58,7 +58,7 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 	private static String TAG = "MbTilesRenderer";
 	
 	/**
-	 * Draws the tiles of the requested bounding box at the requested zoomlevel
+	 * Draws the tiles of the requested bounding box at the requested zoom level
 	 * to the given {@link Canvas}
 	 */
 	public void render(Canvas c, BoundingBox boundingBox, byte zoomLevel) {
@@ -127,11 +127,11 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 		double[] tb = tileLatLonBounds(i_min_x, i_min_y_osm, drawZoomLevel, Tile.TILE_SIZE);
 
 		// Check Lon/Lat bounds
-		if( -180 > tb[0] || tb[0] > 180
-			|| -90 > tb[1] || tb[1] > 90){
-			// Computations gone wrong, skip
-			return;
-		}
+//		if( -180 > tb[0] || tb[0] > 180
+//			|| -90 > tb[1] || tb[1] > 90){
+//			// Computations gone wrong, skip
+//			return;
+//		}
 		
 		GeoPoint mbtileUlc = new GeoPoint(tb[1], tb[0]); // UpperLeftCorner
 		//long[] pxMbtile = ProjectionUtils.getDrawPoint(mbtileUlc, projection, drawZoomLevel);
@@ -151,22 +151,6 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 		long offsetX = (long) bboxPixelPoint.x - tilePixelPoint.x; 
 		long offsetY = (long) bboxPixelPoint.y - tilePixelPoint.y; 
 		
-		/*
-		if(BuildConfig.DEBUG){
-			Log.v(TAG, "Calculated ULC  [ "+drawX+" , "+drawY+" ]");
-			Log.v(TAG, "Viewport Tilebounds "+Arrays.toString(tile_bounds));
-			Log.v(TAG, "ULC Tilebounds "+Arrays.toString(tb));
-			Log.v(TAG, "Calculated pxMbtile  [ "+tileX+" , "+tileY+" ]");
-			Log.v(TAG, "Offset first method  [ "+offsetX+" , "+offsetY+" ]");
-			Log.v(TAG, "Offset second method [ "+(drawX - tileX)+" , "+(drawY - tileY)+" ]");
-		}
-		*/
-		
-		//try {
-
-			// gets mbtiles layers from the spatialite database manager
-			//SpatialDataSourceManager sdManager = SpatialDataSourceManager.getInstance();
-			
 			StringBuilder sb = new StringBuilder();
 			
 			for (MbTilesLayer l : layers) {
@@ -245,17 +229,6 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 							
 							// copy all pixels from the color array to the tile bitmap
 							bitmap.setPixels(pixels, 0, Tile.TILE_SIZE, 0, 0, Tile.TILE_SIZE, Tile.TILE_SIZE);
-							
-							// some logging
-							/*
-							sb.append("\n");
-							sb.append("tile_x      ").append(tile_x).append("\n");
-							sb.append("i_min_x     ").append(i_min_x).append("\n");
-							sb.append("offsetX     ").append(offsetX).append("\n");
-							sb.append("tile_y      ").append(tile_y).append("\n");
-							sb.append("i_min_y_osm ").append(i_min_y_osm).append("\n");
-							sb.append("offsetY     ").append(offsetY).append("\n");
-							*/
 							
 							// do the actual drawing on canvas
 							// TODO: make this Paint configurable
@@ -370,9 +343,10 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 	 * @return [minx, miny, maxx, maxy]
 	 */
 	public static double[] tileBounds(int tx, int ty, int zoom, int tileSize) {
-		double[] min = pixelsToMeters(tx * tileSize, ty * tileSize, zoom, tileSize);
+		//cast to long needed to go over the 24th zoom level (integer limit overflow)
+		double[] min = pixelsToMeters((long)tx * (long)tileSize, (long)ty * (long)tileSize, zoom, tileSize);
 		double minx = min[0], miny = min[1];
-		double[] max = pixelsToMeters((tx + 1) * tileSize, (ty + 1) * tileSize, zoom, tileSize);
+		double[] max = pixelsToMeters(((long)tx + (long)1) * (long)tileSize, ((long)ty + (long)1) * (long)tileSize, zoom, tileSize);
 		double maxx = max[0], maxy = max[1];
 		return new double[] { minx, miny, maxx, maxy };
 	}
