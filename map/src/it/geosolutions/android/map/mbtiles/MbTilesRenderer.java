@@ -126,6 +126,13 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 		// get tileLatLonBounds of the upper left tile
 		double[] tb = tileLatLonBounds(i_min_x, i_min_y_osm, drawZoomLevel, Tile.TILE_SIZE);
 
+		// Check Lon/Lat bounds
+		if( -180 > tb[0] || tb[0] > 180
+			|| -90 > tb[1] || tb[1] > 90){
+			// Computations gone wrong, skip
+			return;
+		}
+		
 		GeoPoint mbtileUlc = new GeoPoint(tb[1], tb[0]); // UpperLeftCorner
 		//long[] pxMbtile = ProjectionUtils.getDrawPoint(mbtileUlc, projection, drawZoomLevel);
 		//long tileX = pxMbtile[0];
