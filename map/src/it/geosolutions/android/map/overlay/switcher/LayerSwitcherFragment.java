@@ -226,6 +226,10 @@ public class LayerSwitcherFragment extends SherlockListFragment implements
 		// have the checkbox stacked as the layers
 		if (size > 0) {
 
+			// prevents notifyDataSetChanged()
+			// to be called on each add()
+			adapter.setNotifyOnChange(false);
+
 			for (int i = size - 1; i >= 0; i--) {
 				adapter.add(layers.get(i));
 		}
