@@ -21,16 +21,30 @@ import android.util.Log;
 import jsqlite.Exception;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
 import it.geosolutions.android.map.model.Layer;
+import it.geosolutions.android.map.model.LayerGroup;
 import it.geosolutions.android.map.style.AdvancedStyle;
 import it.geosolutions.android.map.style.StyleManager;
 import eu.geopaparazzi.spatialite.database.spatial.core.ISpatialDatabaseHandler;
 import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
 
+/**
+ * Abstraction of a Vector layer
+ * The source is a Spatialite database
+ * 
+ * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
+ * @author Lorenzo Pini (lorenzo.pini@geo-solutions.it)
+ */
 public class SpatialiteLayer implements Layer<SpatialiteSource> {
+	
 	private String title;
 	SpatialiteSource source;
 	private String tableName;
 	
+	/**
+	 * LayerGroup of this Layer, can be null
+	 */
+	protected LayerGroup layerGroup;
+
 	public SpatialiteLayer(SpatialVectorTable t) {
 		this.title = t.getName();
 		this.tableName = t.getName();
@@ -123,6 +137,23 @@ public class SpatialiteLayer implements Layer<SpatialiteSource> {
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Set {@link LayerGroup}
+	 */
+	@Override
+	public void setLayerGroup(LayerGroup layerGroup) {
+		this.layerGroup = layerGroup;
+	}
+
+
+	/**
+	 * Get {@link LayerGroup}
+	 */
+	@Override
+	public LayerGroup getLayerGroup() {
+		return this.layerGroup;
 	}
 
 }

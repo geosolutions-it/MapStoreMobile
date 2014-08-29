@@ -22,15 +22,22 @@ import jsqlite.Exception;
 import it.geosolutions.android.map.BuildConfig;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
 import it.geosolutions.android.map.model.Layer;
+import it.geosolutions.android.map.model.LayerGroup;
 import it.geosolutions.android.map.style.AdvancedStyle;
 import it.geosolutions.android.map.style.StyleManager;
 import eu.geopaparazzi.spatialite.database.spatial.core.ISpatialDatabaseHandler;
 import eu.geopaparazzi.spatialite.database.spatial.core.SpatialRasterTable;
 
+/**
+ * Abstraction for an MBTiles Layer
+ * @author Lorenzo Pini (lorenzo.pini@geo-solutions.it)
+ */
 public class MbTilesLayer implements Layer<MbTilesSource> {
-	private String title;
-	MbTilesSource source;
-	private String tableName;
+	
+	protected String title;
+	protected MbTilesSource source;
+	protected String tableName;
+	protected LayerGroup layerGroup;
 	
 	public MbTilesLayer(SpatialRasterTable t) {
 		this.title = t.getTableName();
@@ -126,6 +133,24 @@ public class MbTilesLayer implements Layer<MbTilesSource> {
 			}
 		}
 		return null;
+	}
+
+
+	/**
+	 * Set {@link LayerGroup}
+	 */
+	@Override
+	public void setLayerGroup(LayerGroup layerGroup) {
+		this.layerGroup = layerGroup;
+	}
+
+
+	/**
+	 * Get {@link LayerGroup}
+	 */
+	@Override
+	public LayerGroup getLayerGroup() {
+		return this.layerGroup;
 	}
 
 }
