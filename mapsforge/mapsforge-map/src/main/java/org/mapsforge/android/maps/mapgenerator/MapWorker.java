@@ -66,9 +66,10 @@ public class MapWorker extends PausableThread {
 
 		MapGeneratorJob mapGeneratorJob = this.jobQueue.poll();
 
-		if (this.inMemoryTileCache.containsKey(mapGeneratorJob)) {
+		if (this.inMemoryTileCache.containsKey(mapGeneratorJob) && this.mapRenderer instanceof DatabaseRenderer) {
 			return;
-		} else if (this.fileSystemTileCache.containsKey(mapGeneratorJob)) {
+		} else if (this.fileSystemTileCache.containsKey(mapGeneratorJob)
+				&& this.mapRenderer instanceof DatabaseRenderer) {
 			return;
 		}
 

@@ -115,7 +115,7 @@ public class MbTilesDatabaseRenderer implements MapRenderer {
 	public byte getZoomLevelMax() {
 
 		// this could be read from the db too, but to allow to zoom deeper higher levels are possible
-		return 11;
+		return 22;
 	}
 
 	/**

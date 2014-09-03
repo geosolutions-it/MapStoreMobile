@@ -56,7 +56,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
@@ -103,7 +102,8 @@ public class MapView extends ViewGroup {
 	private final TouchEventHandler touchEventHandler;
 	private final ZoomAnimator zoomAnimator;
 	private Handler handler;
-	private boolean usesMbTilesRenderer = true;
+
+	// private boolean usesMbTilesRenderer = true;
 
 	/**
 	 * @param context
@@ -151,11 +151,8 @@ public class MapView extends ViewGroup {
 		this.projection = new MapViewProjection(this);
 		this.touchEventHandler = new TouchEventHandler(mapActivity.getActivityContext(), this);
 
-		// TODO, make this selectable
 		final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-
-		// setRenderer(prefs.getBoolean("UseMbTiles", false), false);
-		setRenderer(true, false);
+		setRenderer(prefs.getBoolean("UseMbTiles", false), false);
 
 		this.mapWorker = new MapWorker(this);
 		this.mapWorker.start();
@@ -268,31 +265,25 @@ public class MapView extends ViewGroup {
 		return this.mapFile;
 	}
 
-	/**
-	 * @return if this mapView uses the MbTileRenderer
-	 */
-	public boolean usesMbTilesRenderer() {
-		return this.usesMbTilesRenderer;
-	}
-
 	public void setRenderer(final boolean pUsesMbTilesRenderer, final boolean setMapWorkerRenderer) {
 
-		this.usesMbTilesRenderer = pUsesMbTilesRenderer;
-
-		if (this.usesMbTilesRenderer) {
-			Log.e("MapView", "using Mb Tiles");
+		if (pUsesMbTilesRenderer) {
 			// TODO to use a different database pass its name as parameter
 			this.mapRenderer = new MbTilesDatabaseRenderer(this.getContext(), "premium-slope.mbtiles");
 
 		} else {
 
-			Log.e("MapView", "using Mapsforge Tiles");
 			this.mapRenderer = new DatabaseRenderer(this.mapDatabase);
 		}
 
 		if (setMapWorkerRenderer) {
 			this.mapWorker.setDatabaseRenderer(this.mapRenderer);
 		}
+	}
+
+	public boolean usesMbTilesRenderer() {
+
+		return this.mapRenderer instanceof MbTilesDatabaseRenderer;
 	}
 
 	/**
@@ -412,54 +403,55 @@ public class MapView extends ViewGroup {
 
 		MapPosition mapPosition = this.mapViewPosition.getMapPosition();
 
-		// if (this.mapFile != null) {
-		GeoPoint geoPoint = mapPosition.geoPoint;
-		double pixelLeft = MercatorProjection.longitudeToPixelX(geoPoint.longitude, mapPosition.zoomLevel);
-		double pixelTop = MercatorProjection.latitudeToPixelY(geoPoint.latitude, mapPosition.zoomLevel);
-		pixelLeft -= getWidth() >> 1;
-		pixelTop -= getHeight() >> 1;
+		if (this.mapFile != null) {
+			GeoPoint geoPoint = mapPosition.geoPoint;
+			double pixelLeft = MercatorProjection.longitudeToPixelX(geoPoint.longitude, mapPosition.zoomLevel);
+			double pixelTop = MercatorProjection.latitudeToPixelY(geoPoint.latitude, mapPosition.zoomLevel);
+			pixelLeft -= getWidth() >> 1;
+			pixelTop -= getHeight() >> 1;
 
-		long tileLeft = MercatorProjection.pixelXToTileX(pixelLeft, mapPosition.zoomLevel);
-		long tileTop = MercatorProjection.pixelYToTileY(pixelTop, mapPosition.zoomLevel);
-		long tileRight = MercatorProjection.pixelXToTileX(pixelLeft + getWidth(), mapPosition.zoomLevel);
-		long tileBottom = MercatorProjection.pixelYToTileY(pixelTop + getHeight(), mapPosition.zoomLevel);
+			long tileLeft = MercatorProjection.pixelXToTileX(pixelLeft, mapPosition.zoomLevel);
+			long tileTop = MercatorProjection.pixelYToTileY(pixelTop, mapPosition.zoomLevel);
+			long tileRight = MercatorProjection.pixelXToTileX(pixelLeft + getWidth(), mapPosition.zoomLevel);
+			long tileBottom = MercatorProjection.pixelYToTileY(pixelTop + getHeight(), mapPosition.zoomLevel);
 
-		for (long tileY = tileTop; tileY <= tileBottom; ++tileY) {
-			for (long tileX = tileLeft; tileX <= tileRight; ++tileX) {
-				Tile tile = new Tile(tileX, tileY, mapPosition.zoomLevel);
-				MapGeneratorJob mapGeneratorJob = new MapGeneratorJob(tile, this.mapFile, this.jobParameters,
-						this.debugSettings);
+			final boolean usesMB = this.mapRenderer instanceof MbTilesDatabaseRenderer;
 
-				if (this.inMemoryTileCache.containsKey(mapGeneratorJob) && !this.usesMbTilesRenderer) {
-					Log.e("MapView", "using inmemory cache");
-					Bitmap bitmap = this.inMemoryTileCache.get(mapGeneratorJob);
-					this.frameBuffer.drawBitmap(mapGeneratorJob.tile, bitmap);
-				} else if (this.fileSystemTileCache.containsKey(mapGeneratorJob) && !this.usesMbTilesRenderer) {
-					Bitmap bitmap = this.fileSystemTileCache.get(mapGeneratorJob);
+			for (long tileY = tileTop; tileY <= tileBottom; ++tileY) {
+				for (long tileX = tileLeft; tileX <= tileRight; ++tileX) {
+					Tile tile = new Tile(tileX, tileY, mapPosition.zoomLevel);
+					MapGeneratorJob mapGeneratorJob = new MapGeneratorJob(tile, this.mapFile, this.jobParameters,
+							this.debugSettings);
 
-					if (bitmap != null) {
-						Log.e("MapView", "using external cache");
+					if (this.inMemoryTileCache.containsKey(mapGeneratorJob) && !usesMB) {
+
+						Bitmap bitmap = this.inMemoryTileCache.get(mapGeneratorJob);
 						this.frameBuffer.drawBitmap(mapGeneratorJob.tile, bitmap);
-						// only cache "real" mapsforge tiles, no mb tiles
-						if (!this.usesMbTilesRenderer) {
-							this.inMemoryTileCache.put(mapGeneratorJob, bitmap);
+					} else if (this.fileSystemTileCache.containsKey(mapGeneratorJob) && !usesMB) {
+						Bitmap bitmap = this.fileSystemTileCache.get(mapGeneratorJob);
+
+						if (bitmap != null) {
+							this.frameBuffer.drawBitmap(mapGeneratorJob.tile, bitmap);
+							// only cache "real" mapsforge tiles, no mb tiles
+							if (!usesMB) {
+								this.inMemoryTileCache.put(mapGeneratorJob, bitmap);
+							}
+						} else {
+							// the image data could not be read from the cache
+							this.jobQueue.addJob(mapGeneratorJob);
 						}
 					} else {
-						// the image data could not be read from the cache
+						// cache miss
 						this.jobQueue.addJob(mapGeneratorJob);
 					}
-				} else {
-					// cache miss
-					this.jobQueue.addJob(mapGeneratorJob);
 				}
 			}
-		}
 
-		this.jobQueue.requestSchedule();
-		synchronized (this.mapWorker) {
-			this.mapWorker.notify();
+			this.jobQueue.requestSchedule();
+			synchronized (this.mapWorker) {
+				this.mapWorker.notify();
+			}
 		}
-		// }
 		if (forceOverlayRedraw == true) {
 			this.overlayController.redrawOverlays();
 		}

@@ -289,12 +289,12 @@ public class MapsActivity extends MapActivityBase {
 	        layerManager.loadMap((MSMMap)data.getSerializable(MSM_MAP));
 
 		}
-		/*
+		
 		ArrayList<Layer> layersToAdd = (ArrayList<Layer>) data.getSerializable(LAYERS_TO_ADD);
 		if(layersToAdd != null){
 			addLayers(layersToAdd);
 		}
-		*/
+		
 	}
 
 	/**
@@ -716,6 +716,7 @@ public class MapsActivity extends MapActivityBase {
 			//return false;
 		}
 		
+		
 		return true;
 	}
 	/**
@@ -1052,16 +1053,13 @@ public class MapsActivity extends MapActivityBase {
 	 */
     public void  checkIfMapViewNeedsBackgroundUpdate()
     {
-    	final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    	final boolean mbTiles = sharedPreferences.getBoolean("UseMbTiles", false);
+    	final boolean mbTiles = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("UseMbTiles", false);
     	final boolean mapViewUsesMbTiles = this.mapView.usesMbTilesRenderer();
         
         if(mbTiles != mapViewUsesMbTiles){
         	//things changed, need to recreate the map
-
-        	mapView.setRenderer(!mapView.usesMbTilesRenderer(), true);
+        	mapView.setRenderer(!mapViewUsesMbTiles, true);
         	mapView.clearAndRedrawMapView();
-
         }
     }
 	@Override
