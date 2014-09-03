@@ -3,7 +3,7 @@ package org.mapsforge.android.maps.mapgenerator;
 import org.mapsforge.core.model.GeoPoint;
 
 /**
- * an interface which defines what a 'background' renderer should be able to
+ * an interface which defines what a 'background' renderer must be able to
  * 
  * @author Robert Oehler
  */

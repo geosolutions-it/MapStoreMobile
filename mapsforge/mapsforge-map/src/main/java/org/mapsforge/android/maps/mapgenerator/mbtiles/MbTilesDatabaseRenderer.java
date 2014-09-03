@@ -2,6 +2,7 @@ package org.mapsforge.android.maps.mapgenerator.mbtiles;
 
 import org.mapsforge.android.maps.mapgenerator.MapGeneratorJob;
 import org.mapsforge.android.maps.mapgenerator.MapRenderer;
+import org.mapsforge.core.model.BoundingBox;
 import org.mapsforge.core.model.GeoPoint;
 import org.mapsforge.core.model.Tile;
 
@@ -11,21 +12,25 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 
 /**
- * @author Robert Oehler
+ * @author Robert Oehler class which uses a local mbtiles database to render tiles for the mapsforge library
  */
 
 public class MbTilesDatabaseRenderer implements MapRenderer {
 
-	final static String TAG = MbTilesDatabaseRenderer.class.getSimpleName();
+	private final static String TAG = MbTilesDatabaseRenderer.class.getSimpleName();
 
-	MbTilesDatabase db;
+	private MbTilesDatabase db;
 
-	public MbTilesDatabaseRenderer(final Context pContext) {
+	public MbTilesDatabaseRenderer(final Context pContext, final String dbName) {
 
-		this.db = new MbTilesDatabase(pContext);
+		this.db = new MbTilesDatabase(pContext, dbName);
 
 	}
 
+	/**
+	 * called from MapWorker: executes a mapgeneratorJob and modifies the @param bitmap which will be the result
+	 * according to the parameters inside @param mapGeneratorJob
+	 */
 	@Override
 	public boolean executeJob(MapGeneratorJob mapGeneratorJob, Bitmap bitmap) {
 
@@ -33,7 +38,12 @@ public class MbTilesDatabaseRenderer implements MapRenderer {
 
 		final Tile tile = mapGeneratorJob.tile;
 
-		final int[] tmsTileXY = googleTile2TmsTile(tile.tileX, tile.tileY, tile.zoomLevel);
+		long localTileX = tile.tileX;
+		long localTileY = tile.tileY;
+
+		// conversion needed to fit the MbTiles coordinate system
+		final int[] tmsTileXY = googleTile2TmsTile(localTileX, localTileY, tile.zoomLevel);
+
 		// Log.d(TAG,String.format("Tile requested %d %d is now %d %d", tile.tileX, tile.tileY, tmsTileXY[0],
 		// tmsTileXY[1]));
 
@@ -75,24 +85,42 @@ public class MbTilesDatabaseRenderer implements MapRenderer {
 		return true;
 	}
 
+	/**
+	 * @return the center point of this database data's bounding box
+	 */
 	@Override
 	public GeoPoint getStartPoint() {
 
-		return new GeoPoint(10.799223, 46.31746);
+		this.db.openDataBase();
+		final BoundingBox bb = this.db.getBoundingBox();
+		this.db.close();
+
+		return bb.getCenterPoint();
 	}
 
+	/**
+	 * @return the default start zoom level of this renderer
+	 */
 	@Override
 	public Byte getStartZoomLevel() {
 
+		// this could be read from the db too, but actually Mapsforge uses the zoom the user is using anyway
 		return Byte.valueOf((byte) 8);
 	}
 
+	/**
+	 * @return the max zoom level this renderer has data for
+	 */
 	@Override
 	public byte getZoomLevelMax() {
 
+		// this could be read from the db too, but to allow to zoom deeper higher levels are possible
 		return 11;
 	}
 
+	/**
+	 * closes and destroys any resources needed
+	 */
 	@Override
 	public void destroy() {
 
@@ -102,7 +130,23 @@ public class MbTilesDatabaseRenderer implements MapRenderer {
 
 	}
 
+	/**
+	 * Converts Google tile coordinates to TMS Tile coordinates.
+	 * <p>
+	 * Code copied from: http://code.google.com/p/gmap-tile-generator/
+	 * </p>
+	 * 
+	 * @param tx
+	 *            the x tile number.
+	 * @param ty
+	 *            the y tile number.
+	 * @param zoom
+	 *            the current zoom level.
+	 * @return the converted values.
+	 */
+
 	public static int[] googleTile2TmsTile(long tx, long ty, byte zoom) {
 		return new int[] { (int) tx, (int) ((Math.pow(2, zoom) - 1) - ty) };
 	}
+
 }

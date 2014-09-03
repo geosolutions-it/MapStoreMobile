@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.mapsforge.core.model.BoundingBox;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -28,16 +30,17 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 /**
- * @author Robert Oehler
+ * @author Robert Oehler class which connects to a database from the assets of the current running application if it is
+ *         not yet installed in the Android application path, it is copied This follows a tutorial found here:
+ *         http://www.reigndesign.com/blog/using-your-own-sqlite-database-in-android-applications/ it may be necessary
+ *         to add the "android-metadata" table to database before actually running this code
  */
 
 public class MbTilesDatabase extends SQLiteOpenHelper {
 
-	// private static String DB_PATH = "/data/data/org.mapsforge.android/databases/";
-
 	private static String DB_PATH;
 
-	private static String DB_NAME = "premium-slope.mbtiles";
+	private static String DB_NAME;
 
 	private SQLiteDatabase mDataBase;
 
@@ -48,12 +51,17 @@ public class MbTilesDatabase extends SQLiteOpenHelper {
 	 * resources.
 	 * 
 	 * @param context
+	 *            of the according mapView
+	 * @param dbName
+	 *            the name of the database in the /assets order of the application -> this must fit
 	 */
-	public MbTilesDatabase(Context context) {
+	public MbTilesDatabase(Context context, final String dbName) {
 
-		super(context, DB_NAME, null, 1);
+		super(context, dbName, null, 1);
 
 		this.mContext = context;
+
+		DB_NAME = dbName;
 
 		DB_PATH = "/data/data/" + this.mContext.getApplicationContext().getPackageName() + "/databases/";
 
@@ -65,7 +73,10 @@ public class MbTilesDatabase extends SQLiteOpenHelper {
 	}
 
 	/**
-	 * Creates a empty database on the system and rewrites it with the mbtiles database.
+	 * Creates a empty database on the system and rewrites it with the mbtiles database if necessary
+	 * 
+	 * @throws IOException
+	 *             in case of an IOE
 	 */
 	public void createDataBase() throws IOException {
 
@@ -83,7 +94,7 @@ public class MbTilesDatabase extends SQLiteOpenHelper {
 
 				this.close();
 				copyDataBase();
-				this.openDataBase();
+				this.openDataBase(); // opening and closing is advisable to test if all works fine
 				this.close();
 
 			} catch (IOException e) {
@@ -151,6 +162,11 @@ public class MbTilesDatabase extends SQLiteOpenHelper {
 
 	}
 
+	/**
+	 * opens the database from the applications path
+	 * 
+	 * @throws SQLException
+	 */
 	public void openDataBase() throws SQLException {
 
 		// Open the database
@@ -159,6 +175,9 @@ public class MbTilesDatabase extends SQLiteOpenHelper {
 
 	}
 
+	/**
+	 * closes the database
+	 */
 	@Override
 	public synchronized void close() {
 
@@ -169,27 +188,34 @@ public class MbTilesDatabase extends SQLiteOpenHelper {
 
 	}
 
+	/**
+	 * needed to implement SQLiteOpenHelper
+	 */
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		// TODO Auto-generated method stub
-
+		// nothing
 	}
-
-	@Override
-	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		// TODO Auto-generated method stub
-
-	}
-
-	// //***Actual DB ACCESS****/////////
 
 	/**
-	 * from MBTilesDroidSplitter
+	 * needed to implement SQLiteOpenHelper
+	 */
+	@Override
+	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		// nothing
+	}
+
+	// //***Actual DB ACCESS comes here ****/////////
+
+	/**
+	 * queries the database for the data of an raster image
 	 * 
 	 * @param x
+	 *            the x coordinate
 	 * @param y
+	 *            the y coordinate
 	 * @param z
-	 * @return
+	 *            the z coordinate
+	 * @return the data, if available for these coordinates
 	 */
 	public byte[] getTileAsBytes(String x, String y, String z) {
 
@@ -203,6 +229,32 @@ public class MbTilesDatabase extends SQLiteOpenHelper {
 		byte[] bb = c.getBlob(c.getColumnIndex("tile_data"));
 		c.close();
 		return bb;
+	}
+
+	/**
+	 * retrieves the bounding box of the metadata table of the database renders it and return @return an BoundingBox
+	 * object
+	 * 
+	 * @return the boundingbox of the data in this database file
+	 */
+	public BoundingBox getBoundingBox() {
+		final Cursor c = this.mDataBase.rawQuery("select value from metadata where name=?", new String[] { "bounds" });
+		if (!c.moveToFirst()) {
+			c.close();
+			return null;
+		}
+		final String box = c.getString(c.getColumnIndex("value"));
+
+		String[] split = box.split(",");
+		if (split.length != 4) {
+			return null;
+		}
+		double minlon = Double.parseDouble(split[0]);
+		double minlat = Double.parseDouble(split[1]);
+		double maxlon = Double.parseDouble(split[2]);
+		double maxlat = Double.parseDouble(split[3]);
+
+		return new BoundingBox(minlat, minlon, maxlat, maxlon);
 	}
 
 }

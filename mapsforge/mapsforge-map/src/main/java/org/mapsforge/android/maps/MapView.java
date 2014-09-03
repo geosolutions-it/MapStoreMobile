@@ -100,6 +100,7 @@ public class MapView extends ViewGroup {
 	private final TouchEventHandler touchEventHandler;
 	private final ZoomAnimator zoomAnimator;
 	private Handler handler;
+	private boolean usesMbTilesRenderer = true;
 
 	/**
 	 * @param context
@@ -147,12 +148,12 @@ public class MapView extends ViewGroup {
 		this.projection = new MapViewProjection(this);
 		this.touchEventHandler = new TouchEventHandler(mapActivity.getActivityContext(), this);
 
-		// TODO, make this selectable, for now select here
-		final boolean useMbTilesRenderer = false;
+		// TODO, make this selectable
 
-		if (useMbTilesRenderer) {
+		if (this.usesMbTilesRenderer) {
 
-			this.mapRenderer = new MbTilesDatabaseRenderer(this.getContext());
+			// TODO to use a different database pass its name as parameter
+			this.mapRenderer = new MbTilesDatabaseRenderer(this.getContext(), "premium-slope.mbtiles");
 
 		} else {
 

@@ -16,6 +16,7 @@ package org.mapsforge.android.maps.mapgenerator;
 
 import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.PausableThread;
+import org.mapsforge.android.maps.mapgenerator.databaserenderer.DatabaseRenderer;
 import org.mapsforge.core.model.Tile;
 
 import android.graphics.Bitmap;
@@ -62,6 +63,7 @@ public class MapWorker extends PausableThread {
 
 	@Override
 	protected void doWork() {
+
 		MapGeneratorJob mapGeneratorJob = this.jobQueue.poll();
 
 		if (this.inMemoryTileCache.containsKey(mapGeneratorJob)) {
