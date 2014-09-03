@@ -31,9 +31,11 @@ import org.mapsforge.android.maps.mapgenerator.InMemoryTileCache;
 import org.mapsforge.android.maps.mapgenerator.JobParameters;
 import org.mapsforge.android.maps.mapgenerator.JobQueue;
 import org.mapsforge.android.maps.mapgenerator.MapGeneratorJob;
+import org.mapsforge.android.maps.mapgenerator.MapRenderer;
 import org.mapsforge.android.maps.mapgenerator.MapWorker;
 import org.mapsforge.android.maps.mapgenerator.TileCache;
 import org.mapsforge.android.maps.mapgenerator.databaserenderer.DatabaseRenderer;
+import org.mapsforge.android.maps.mapgenerator.mbtiles.MbTilesDatabaseRenderer;
 import org.mapsforge.android.maps.overlay.Overlay;
 import org.mapsforge.android.maps.overlay.OverlayController;
 import org.mapsforge.core.model.GeoPoint;
@@ -77,7 +79,7 @@ public class MapView extends ViewGroup {
 	private static final int DEFAULT_TILE_CACHE_SIZE_FILE_SYSTEM = 100;
 	private static final int DEFAULT_TILE_CACHE_SIZE_IN_MEMORY = 20;
 
-	private final DatabaseRenderer databaseRenderer;
+	private final MapRenderer mapRenderer;
 	private DebugSettings debugSettings;
 	private final TileCache fileSystemTileCache;
 	private final FpsCounter fpsCounter;
@@ -145,13 +147,22 @@ public class MapView extends ViewGroup {
 		this.projection = new MapViewProjection(this);
 		this.touchEventHandler = new TouchEventHandler(mapActivity.getActivityContext(), this);
 
-		this.databaseRenderer = new DatabaseRenderer(this.mapDatabase);
+		// for now select here
+		final boolean useMbTilesRenderer = true;
+		if (useMbTilesRenderer) {
+
+			this.mapRenderer = new MbTilesDatabaseRenderer();
+
+		} else {
+
+			this.mapRenderer = new DatabaseRenderer(this.mapDatabase);
+		}
 
 		this.mapWorker = new MapWorker(this);
 		this.mapWorker.start();
 
 		this.mapMover = new MapMover(this);
-		this.mapWorker.setDatabaseRenderer(this.databaseRenderer);
+		this.mapWorker.setDatabaseRenderer(this.mapRenderer);
 		this.mapMover.start();
 
 		this.zoomAnimator = new ZoomAnimator(this);
@@ -173,8 +184,8 @@ public class MapView extends ViewGroup {
 		this.overlayController = new OverlayController(this, handler);
 		this.overlayController.start();
 
-		GeoPoint startPoint = this.databaseRenderer.getStartPoint();
-		Byte startZoomLevel = this.databaseRenderer.getStartZoomLevel();
+		GeoPoint startPoint = this.mapRenderer.getStartPoint();
+		Byte startZoomLevel = this.mapRenderer.getStartZoomLevel();
 		if (startPoint != null) {
 			this.mapViewPosition.setCenter(startPoint);
 		}
@@ -198,8 +209,8 @@ public class MapView extends ViewGroup {
 	/**
 	 * @return the currently used DatabaseRenderer (may be null).
 	 */
-	public DatabaseRenderer getDatabaseRenderer() {
-		return this.databaseRenderer;
+	public MapRenderer getDatabaseRenderer() {
+		return this.mapRenderer;
 	}
 
 	/**
@@ -375,49 +386,49 @@ public class MapView extends ViewGroup {
 
 		MapPosition mapPosition = this.mapViewPosition.getMapPosition();
 
-		if (this.mapFile != null) {
-			GeoPoint geoPoint = mapPosition.geoPoint;
-			double pixelLeft = MercatorProjection.longitudeToPixelX(geoPoint.longitude, mapPosition.zoomLevel);
-			double pixelTop = MercatorProjection.latitudeToPixelY(geoPoint.latitude, mapPosition.zoomLevel);
-			pixelLeft -= getWidth() >> 1;
-			pixelTop -= getHeight() >> 1;
+		// if (this.mapFile != null) {
+		GeoPoint geoPoint = mapPosition.geoPoint;
+		double pixelLeft = MercatorProjection.longitudeToPixelX(geoPoint.longitude, mapPosition.zoomLevel);
+		double pixelTop = MercatorProjection.latitudeToPixelY(geoPoint.latitude, mapPosition.zoomLevel);
+		pixelLeft -= getWidth() >> 1;
+		pixelTop -= getHeight() >> 1;
 
-			long tileLeft = MercatorProjection.pixelXToTileX(pixelLeft, mapPosition.zoomLevel);
-			long tileTop = MercatorProjection.pixelYToTileY(pixelTop, mapPosition.zoomLevel);
-			long tileRight = MercatorProjection.pixelXToTileX(pixelLeft + getWidth(), mapPosition.zoomLevel);
-			long tileBottom = MercatorProjection.pixelYToTileY(pixelTop + getHeight(), mapPosition.zoomLevel);
+		long tileLeft = MercatorProjection.pixelXToTileX(pixelLeft, mapPosition.zoomLevel);
+		long tileTop = MercatorProjection.pixelYToTileY(pixelTop, mapPosition.zoomLevel);
+		long tileRight = MercatorProjection.pixelXToTileX(pixelLeft + getWidth(), mapPosition.zoomLevel);
+		long tileBottom = MercatorProjection.pixelYToTileY(pixelTop + getHeight(), mapPosition.zoomLevel);
 
-			for (long tileY = tileTop; tileY <= tileBottom; ++tileY) {
-				for (long tileX = tileLeft; tileX <= tileRight; ++tileX) {
-					Tile tile = new Tile(tileX, tileY, mapPosition.zoomLevel);
-					MapGeneratorJob mapGeneratorJob = new MapGeneratorJob(tile, this.mapFile, this.jobParameters,
-							this.debugSettings);
+		for (long tileY = tileTop; tileY <= tileBottom; ++tileY) {
+			for (long tileX = tileLeft; tileX <= tileRight; ++tileX) {
+				Tile tile = new Tile(tileX, tileY, mapPosition.zoomLevel);
+				MapGeneratorJob mapGeneratorJob = new MapGeneratorJob(tile, this.mapFile, this.jobParameters,
+						this.debugSettings);
 
-					if (this.inMemoryTileCache.containsKey(mapGeneratorJob)) {
-						Bitmap bitmap = this.inMemoryTileCache.get(mapGeneratorJob);
+				if (this.inMemoryTileCache.containsKey(mapGeneratorJob)) {
+					Bitmap bitmap = this.inMemoryTileCache.get(mapGeneratorJob);
+					this.frameBuffer.drawBitmap(mapGeneratorJob.tile, bitmap);
+				} else if (this.fileSystemTileCache.containsKey(mapGeneratorJob)) {
+					Bitmap bitmap = this.fileSystemTileCache.get(mapGeneratorJob);
+
+					if (bitmap != null) {
 						this.frameBuffer.drawBitmap(mapGeneratorJob.tile, bitmap);
-					} else if (this.fileSystemTileCache.containsKey(mapGeneratorJob)) {
-						Bitmap bitmap = this.fileSystemTileCache.get(mapGeneratorJob);
-
-						if (bitmap != null) {
-							this.frameBuffer.drawBitmap(mapGeneratorJob.tile, bitmap);
-							this.inMemoryTileCache.put(mapGeneratorJob, bitmap);
-						} else {
-							// the image data could not be read from the cache
-							this.jobQueue.addJob(mapGeneratorJob);
-						}
+						this.inMemoryTileCache.put(mapGeneratorJob, bitmap);
 					} else {
-						// cache miss
+						// the image data could not be read from the cache
 						this.jobQueue.addJob(mapGeneratorJob);
 					}
+				} else {
+					// cache miss
+					this.jobQueue.addJob(mapGeneratorJob);
 				}
 			}
-
-			this.jobQueue.requestSchedule();
-			synchronized (this.mapWorker) {
-				this.mapWorker.notify();
-			}
 		}
+
+		this.jobQueue.requestSchedule();
+		synchronized (this.mapWorker) {
+			this.mapWorker.notify();
+		}
+		// }
 		if (forceOverlayRedraw == true) {
 			this.overlayController.redrawOverlays();
 		}
@@ -484,12 +495,12 @@ public class MapView extends ViewGroup {
 		if (fileOpenResult.isSuccess()) {
 			this.mapFile = mapFile;
 
-			GeoPoint startPoint = this.databaseRenderer.getStartPoint();
+			GeoPoint startPoint = this.mapRenderer.getStartPoint();
 			if (startPoint != null) {
 				this.mapViewPosition.setCenter(startPoint);
 			}
 
-			Byte startZoomLevel = this.databaseRenderer.getStartZoomLevel();
+			Byte startZoomLevel = this.mapRenderer.getStartZoomLevel();
 			if (startZoomLevel != null) {
 				this.mapViewPosition.setZoomLevel(startZoomLevel.byteValue());
 			}
@@ -636,7 +647,7 @@ public class MapView extends ViewGroup {
 		this.mapScaleBar.destroy();
 		this.inMemoryTileCache.destroy();
 		this.fileSystemTileCache.destroy();
-		this.databaseRenderer.destroy();
+		this.mapRenderer.destroy();
 
 		this.mapDatabase.closeFile();
 	}
@@ -645,7 +656,7 @@ public class MapView extends ViewGroup {
 	 * @return the maximum possible zoom level.
 	 */
 	public byte getZoomLevelMax() {
-		return (byte) Math.min(this.mapZoomControls.getZoomLevelMax(), this.databaseRenderer.getZoomLevelMax());
+		return (byte) Math.min(this.mapZoomControls.getZoomLevelMax(), this.mapRenderer.getZoomLevelMax());
 	}
 
 	public void onPause() {

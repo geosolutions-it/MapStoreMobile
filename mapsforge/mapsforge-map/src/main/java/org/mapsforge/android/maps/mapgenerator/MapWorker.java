@@ -16,7 +16,6 @@ package org.mapsforge.android.maps.mapgenerator;
 
 import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.PausableThread;
-import org.mapsforge.android.maps.mapgenerator.databaserenderer.DatabaseRenderer;
 import org.mapsforge.core.model.Tile;
 
 import android.graphics.Bitmap;
@@ -28,7 +27,7 @@ import android.graphics.Bitmap;
 public class MapWorker extends PausableThread {
 	private static final String THREAD_NAME = "MapWorker";
 
-	private DatabaseRenderer databaseRenderer;
+	private MapRenderer mapRenderer;
 	private final TileCache fileSystemTileCache;
 	private final TileCache inMemoryTileCache;
 	private final JobQueue jobQueue;
@@ -52,8 +51,8 @@ public class MapWorker extends PausableThread {
 	 * @param databaseRenderer
 	 *            the DatabaseRenderer which this MapWorker should use.
 	 */
-	public void setDatabaseRenderer(DatabaseRenderer databaseRenderer) {
-		this.databaseRenderer = databaseRenderer;
+	public void setDatabaseRenderer(MapRenderer pMapRenderer) {
+		this.mapRenderer = pMapRenderer;
 	}
 
 	@Override
@@ -71,7 +70,7 @@ public class MapWorker extends PausableThread {
 			return;
 		}
 
-		boolean success = this.databaseRenderer.executeJob(mapGeneratorJob, this.tileBitmap);
+		boolean success = this.mapRenderer.executeJob(mapGeneratorJob, this.tileBitmap);
 
 		if (!isInterrupted() && success) {
 			if (this.mapView.getFrameBuffer().drawBitmap(mapGeneratorJob.tile, this.tileBitmap)) {
