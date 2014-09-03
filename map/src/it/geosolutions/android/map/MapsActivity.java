@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.mapsforge.android.maps.DebugSettings;
+import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.mapgenerator.TileCache;
 import org.mapsforge.core.model.GeoPoint;
 import org.mapsforge.core.model.MapPosition;
@@ -67,6 +68,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -393,6 +395,7 @@ public class MapsActivity extends MapActivityBase {
 	protected void onResume() {
 	    super.onResume();
 	    loadPersistencePreferences();
+	    checkIfMapViewNeedsBackgroundUpdate();
 	    //Refresh control beacuse any changes can be changed
 	    for(MapControl mic : mapView.getControls()){
 	    	mic.refreshControl(GetFeatureInfoLayerListActivity.BBOX_REQUEST, GetFeatureInfoLayerListActivity.BBOX_REQUEST, null);	    
@@ -696,7 +699,7 @@ public class MapsActivity extends MapActivityBase {
 		mapView.setClickable(true);
 		mapView.setBuiltInZoomControls(true);
 		
-		mapView.setDebugSettings(new DebugSettings(true, true, false));
+//		mapView.setDebugSettings(new DebugSettings(true, true, false));
 
 		// TODO parametrize these zoom levels
 		mapView.getMapZoomControls().setZoomLevelMax((byte) 24);
@@ -1043,7 +1046,24 @@ public class MapsActivity extends MapActivityBase {
         String textScaleDefault = getString(R.string.preferences_text_scale_default);
         this.mapView.setTextScale(Float.parseFloat(sharedPreferences.getString("mapTextScale", textScaleDefault)));
     }
-	
+	/**
+	 * checks if the preferences of the background renderer changed
+	 * if so, the mapview is informed and it is cleared and redrawed
+	 */
+    public void  checkIfMapViewNeedsBackgroundUpdate()
+    {
+    	final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    	final boolean mbTiles = sharedPreferences.getBoolean("UseMbTiles", false);
+    	final boolean mapViewUsesMbTiles = this.mapView.usesMbTilesRenderer();
+        
+        if(mbTiles != mapViewUsesMbTiles){
+        	//things changed, need to recreate the map
+
+        	mapView.setRenderer(!mapView.usesMbTilesRenderer(), true);
+        	mapView.clearAndRedrawMapView();
+
+        }
+    }
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 	    if (keyCode == KeyEvent.KEYCODE_MENU) {

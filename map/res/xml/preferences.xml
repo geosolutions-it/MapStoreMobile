@@ -22,6 +22,8 @@
 		<it.geosolutions.android.map.preferences.CacheSizePreference
 			android:title="@string/preferences_cache_size" android:summary="@string/preferences_cache_size_desc" android:key="TileCacheSize" 
 			/>
+		<CheckBoxPreference android:title="@string/preferences_mbtiles" android:summary="@string/preferences_mbtiles_desc"
+			android:key="UseMbTiles" android:defaultValue="false"/>
 		<!--  <it.geosolutions.android.map.preferences.MoveSpeedPreference
 			android:title="@string/preferences_move_speed" android:summary="@string/preferences_move_speed_desc" android:key="moveSpeed" /> -->
 	</PreferenceCategory> 

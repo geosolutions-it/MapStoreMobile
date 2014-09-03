@@ -76,10 +76,14 @@ public class MapWorker extends PausableThread {
 
 		if (!isInterrupted() && success) {
 			if (this.mapView.getFrameBuffer().drawBitmap(mapGeneratorJob.tile, this.tileBitmap)) {
-				this.inMemoryTileCache.put(mapGeneratorJob, this.tileBitmap);
+				// only cache "real" mapsforge tiles, no mb tiles
+				if (!this.mapView.usesMbTilesRenderer())
+					this.inMemoryTileCache.put(mapGeneratorJob, this.tileBitmap);
 			}
 			this.mapView.postInvalidate();
-			this.fileSystemTileCache.put(mapGeneratorJob, this.tileBitmap);
+			// only cache "real" mapsforge tiles, no mb tiles
+			if (!this.mapView.usesMbTilesRenderer())
+				this.fileSystemTileCache.put(mapGeneratorJob, this.tileBitmap);
 		}
 	}
 

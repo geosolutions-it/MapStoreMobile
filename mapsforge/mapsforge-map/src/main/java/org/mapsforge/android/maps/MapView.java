@@ -48,12 +48,15 @@ import org.mapsforge.map.rendertheme.ExternalRenderTheme;
 import org.mapsforge.map.rendertheme.InternalRenderTheme;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Canvas;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
@@ -79,7 +82,7 @@ public class MapView extends ViewGroup {
 	private static final int DEFAULT_TILE_CACHE_SIZE_FILE_SYSTEM = 100;
 	private static final int DEFAULT_TILE_CACHE_SIZE_IN_MEMORY = 20;
 
-	private final MapRenderer mapRenderer;
+	private MapRenderer mapRenderer;
 	private DebugSettings debugSettings;
 	private final TileCache fileSystemTileCache;
 	private final FpsCounter fpsCounter;
@@ -149,16 +152,10 @@ public class MapView extends ViewGroup {
 		this.touchEventHandler = new TouchEventHandler(mapActivity.getActivityContext(), this);
 
 		// TODO, make this selectable
+		final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
 
-		if (this.usesMbTilesRenderer) {
-
-			// TODO to use a different database pass its name as parameter
-			this.mapRenderer = new MbTilesDatabaseRenderer(this.getContext(), "premium-slope.mbtiles");
-
-		} else {
-
-			this.mapRenderer = new DatabaseRenderer(this.mapDatabase);
-		}
+		// setRenderer(prefs.getBoolean("UseMbTiles", false), false);
+		setRenderer(true, false);
 
 		this.mapWorker = new MapWorker(this);
 		this.mapWorker.start();
@@ -269,6 +266,33 @@ public class MapView extends ViewGroup {
 	 */
 	public File getMapFile() {
 		return this.mapFile;
+	}
+
+	/**
+	 * @return if this mapView uses the MbTileRenderer
+	 */
+	public boolean usesMbTilesRenderer() {
+		return this.usesMbTilesRenderer;
+	}
+
+	public void setRenderer(final boolean pUsesMbTilesRenderer, final boolean setMapWorkerRenderer) {
+
+		this.usesMbTilesRenderer = pUsesMbTilesRenderer;
+
+		if (this.usesMbTilesRenderer) {
+			Log.e("MapView", "using Mb Tiles");
+			// TODO to use a different database pass its name as parameter
+			this.mapRenderer = new MbTilesDatabaseRenderer(this.getContext(), "premium-slope.mbtiles");
+
+		} else {
+
+			Log.e("MapView", "using Mapsforge Tiles");
+			this.mapRenderer = new DatabaseRenderer(this.mapDatabase);
+		}
+
+		if (setMapWorkerRenderer) {
+			this.mapWorker.setDatabaseRenderer(this.mapRenderer);
+		}
 	}
 
 	/**
@@ -406,15 +430,20 @@ public class MapView extends ViewGroup {
 				MapGeneratorJob mapGeneratorJob = new MapGeneratorJob(tile, this.mapFile, this.jobParameters,
 						this.debugSettings);
 
-				if (this.inMemoryTileCache.containsKey(mapGeneratorJob)) {
+				if (this.inMemoryTileCache.containsKey(mapGeneratorJob) && !this.usesMbTilesRenderer) {
+					Log.e("MapView", "using inmemory cache");
 					Bitmap bitmap = this.inMemoryTileCache.get(mapGeneratorJob);
 					this.frameBuffer.drawBitmap(mapGeneratorJob.tile, bitmap);
-				} else if (this.fileSystemTileCache.containsKey(mapGeneratorJob)) {
+				} else if (this.fileSystemTileCache.containsKey(mapGeneratorJob) && !this.usesMbTilesRenderer) {
 					Bitmap bitmap = this.fileSystemTileCache.get(mapGeneratorJob);
 
 					if (bitmap != null) {
+						Log.e("MapView", "using external cache");
 						this.frameBuffer.drawBitmap(mapGeneratorJob.tile, bitmap);
-						this.inMemoryTileCache.put(mapGeneratorJob, bitmap);
+						// only cache "real" mapsforge tiles, no mb tiles
+						if (!this.usesMbTilesRenderer) {
+							this.inMemoryTileCache.put(mapGeneratorJob, bitmap);
+						}
 					} else {
 						// the image data could not be read from the cache
 						this.jobQueue.addJob(mapGeneratorJob);

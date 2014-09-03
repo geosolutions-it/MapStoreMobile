@@ -238,6 +238,7 @@ public class MbTilesDatabase extends SQLiteOpenHelper {
 	 * @return the boundingbox of the data in this database file
 	 */
 	public BoundingBox getBoundingBox() {
+
 		final Cursor c = this.mDataBase.rawQuery("select value from metadata where name=?", new String[] { "bounds" });
 		if (!c.moveToFirst()) {
 			c.close();
