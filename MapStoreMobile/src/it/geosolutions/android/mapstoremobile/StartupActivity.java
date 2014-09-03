@@ -22,6 +22,8 @@ import it.geosolutions.android.map.utils.ZipFileManager;
 
 import java.io.File;
 
+import org.mapsforge.core.model.GeoPoint;
+
 import android.os.Bundle;
 import android.os.Environment;
 import android.app.Activity;
@@ -49,9 +51,13 @@ public class StartupActivity extends Activity {
 			public void launchMainActivity(){
 				Intent launch = new Intent(activity,MapsActivity.class);
 				launch.setAction(Intent.ACTION_VIEW);
-				launch.putExtra(MapsActivity.PARAMETERS.LAT, 43.68411);
-				launch.putExtra(MapsActivity.PARAMETERS.LON, 10.84899);
-				launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL, (byte)13);
+//				launch.putExtra(MapsActivity.PARAMETERS.LAT, 43.68411);
+//				launch.putExtra(MapsActivity.PARAMETERS.LON, 10.84899);
+//				launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL, (byte)13);
+				//modified to fit available mb tiles db
+				launch.putExtra(MapsActivity.PARAMETERS.LAT, 47.15984001);
+				launch.putExtra(MapsActivity.PARAMETERS.LON, 10.37109375);
+				launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL, (byte) 11);
 				//For the future, passing a marker
 				/*ArrayList<MarkerDTO> markers = new ArrayList(1);
 				MarkerDTO markerDTO1 = new MarkerDTO(43.7242359188,10.9463005959, MarkerDTO.MARKER_RED); 

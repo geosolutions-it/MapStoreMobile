@@ -147,11 +147,12 @@ public class MapView extends ViewGroup {
 		this.projection = new MapViewProjection(this);
 		this.touchEventHandler = new TouchEventHandler(mapActivity.getActivityContext(), this);
 
-		// for now select here
-		final boolean useMbTilesRenderer = true;
+		// TODO, make this selectable, for now select here
+		final boolean useMbTilesRenderer = false;
+
 		if (useMbTilesRenderer) {
 
-			this.mapRenderer = new MbTilesDatabaseRenderer();
+			this.mapRenderer = new MbTilesDatabaseRenderer(this.getContext());
 
 		} else {
 

@@ -56,6 +56,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.mapsforge.android.maps.DebugSettings;
 import org.mapsforge.android.maps.mapgenerator.TileCache;
 import org.mapsforge.core.model.GeoPoint;
 import org.mapsforge.core.model.MapPosition;
@@ -694,6 +695,8 @@ public class MapsActivity extends MapActivityBase {
 		// TODO configurable controls
 		mapView.setClickable(true);
 		mapView.setBuiltInZoomControls(true);
+		
+		mapView.setDebugSettings(new DebugSettings(true, true, false));
 
 		// TODO parametrize these zoom levels
 		mapView.getMapZoomControls().setZoomLevelMax((byte) 24);
