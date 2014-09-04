@@ -420,4 +420,10 @@ public class DatabaseRenderer implements RenderCallback, MapRenderer {
 			this.renderTheme = null;
 		}
 	}
+
+	@Override
+	public String getFileName() {
+
+		return "Mapsforge";
+	}
 }

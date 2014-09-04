@@ -16,8 +16,16 @@ package it.geosolutions.android.map.preferences;
 
 
 import it.geosolutions.android.map.R;
+import it.geosolutions.android.map.dialog.FilePickerDialog;
+import it.geosolutions.android.map.dialog.FilePickerDialog.FilePickCallback;
+import android.content.SharedPreferences.Editor;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
+import android.os.Environment;
+import android.preference.Preference;
 import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
+import android.util.Log;
 import android.view.WindowManager;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
@@ -43,5 +51,35 @@ public class EditPreferences extends SherlockPreferenceActivity {
 			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
 		}
+		
 	}
+	
+
+	
+	 @Override
+	  public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen,final Preference preference) {
+		 if(preference.getKey().equals("UseMbTiles")){
+
+			 final boolean mbTiles  = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("UseMbTiles", false);
+
+			 if(mbTiles){
+				 new FilePickerDialog(this,
+						 "Select a MBTiles database file",
+						 Environment.getExternalStorageDirectory()+"/mapstore/",
+						 "mbtiles",
+						 new FilePickCallback() {
+
+					 @Override
+					 public void filePicked(final String fileName) {
+
+						 Log.d("MapsActivity", "Selected "+fileName);
+						 final Editor ed = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
+						 ed.putString("MbTilesFile", fileName);
+						 ed.commit();
+					 }
+				 });
+			 }
+		 }
+		 return false;
+    }
 }

@@ -26,6 +26,8 @@ import it.geosolutions.android.map.control.MapControl;
 import it.geosolutions.android.map.control.MapInfoControl;
 import it.geosolutions.android.map.control.MarkerControl;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
+import it.geosolutions.android.map.dialog.FilePickerDialog;
+import it.geosolutions.android.map.dialog.FilePickerDialog.FilePickCallback;
 import it.geosolutions.android.map.dto.MarkerDTO;
 import it.geosolutions.android.map.fragment.GenericMenuFragment;
 import it.geosolutions.android.map.fragment.sources.SourcesFragment;
@@ -66,10 +68,12 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -1055,11 +1059,18 @@ public class MapsActivity extends MapActivityBase {
     {
     	final boolean mbTiles = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("UseMbTiles", false);
     	final boolean mapViewUsesMbTiles = this.mapView.usesMbTilesRenderer();
-        
-        if(mbTiles != mapViewUsesMbTiles){
+    	final String fileName = PreferenceManager.getDefaultSharedPreferences(this).getString("MbTilesFile", null);
+    	
+    	//a recreation of the maprenderer is necessary if
+    	
+    	//1.changed from mapsforge to mbtiles or vice-versa
+        if(mbTiles != mapViewUsesMbTiles ||
+        //2.or mbtiles is selected and the db file of the mbtiles changed		
+          (mbTiles && !fileName.equals(mapView.getMapRenderer().getFileName()))){
+        	
         	//things changed, need to recreate the map
-        	mapView.setRenderer(!mapViewUsesMbTiles, true);
-        	mapView.clearAndRedrawMapView();
+			mapView.setRenderer(!mapViewUsesMbTiles, true);
+			mapView.clearAndRedrawMapView();
         }
     }
 	@Override

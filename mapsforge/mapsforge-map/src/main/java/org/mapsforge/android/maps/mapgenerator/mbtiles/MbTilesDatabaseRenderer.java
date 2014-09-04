@@ -119,6 +119,15 @@ public class MbTilesDatabaseRenderer implements MapRenderer {
 	}
 
 	/**
+	 * @return the currently used db file name
+	 */
+	@Override
+	public String getFileName() {
+
+		return this.db.getDBName();
+	}
+
+	/**
 	 * closes and destroys any resources needed
 	 */
 	@Override

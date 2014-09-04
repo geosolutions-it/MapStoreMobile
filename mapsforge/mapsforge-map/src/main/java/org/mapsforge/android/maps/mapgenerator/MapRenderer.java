@@ -17,6 +17,8 @@ public interface MapRenderer {
 
 	public byte getZoomLevelMax();
 
+	public String getFileName();
+
 	public void destroy();
 
 }

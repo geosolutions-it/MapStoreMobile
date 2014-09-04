@@ -33,10 +33,11 @@ import android.os.Environment;
 import android.util.Log;
 
 /**
- * @author Robert Oehler class which connects to a database from the assets of the current running application if it is
- *         not yet installed in the Android application path, it is copied This follows a tutorial found here:
- *         http://www.reigndesign.com/blog/using-your-own-sqlite-database-in-android-applications/ it may be necessary
- *         to add the "android-metadata" table to database before actually running this code
+ * class which connects to a database from downloaded zip bundle on the sdcard. If it is not yet installed in the
+ * Android application path, it is copied in there. This follows a tutorial found here:
+ * http://www.reigndesign.com/blog/using-your-own-sqlite-database-in-android-applications/
+ * 
+ * @author Robert Oehler
  */
 
 public class MbTilesDatabase extends SQLiteOpenHelper {
@@ -66,7 +67,15 @@ public class MbTilesDatabase extends SQLiteOpenHelper {
 
 		DB_NAME = dbName;
 
-		DB_PATH = "/data/data/" + this.mContext.getApplicationContext().getPackageName() + "/databases/";
+		// fix for occasional crashes
+		// as on newer sdk the directory is different, check and select
+		// from
+		// http://stackoverflow.com/questions/16636017/e-sqlitelog1893-14-cannot-open-file-at-line-30176-of-00bb9c9ce4
+		if (android.os.Build.VERSION.SDK_INT >= 17) {
+			DB_PATH = this.mContext.getApplicationInfo().dataDir + "/databases/";
+		} else {
+			DB_PATH = "/data/data/" + this.mContext.getApplicationContext().getPackageName() + "/databases/";
+		}
 
 		try {
 			createDataBase();
@@ -89,6 +98,20 @@ public class MbTilesDatabase extends SQLiteOpenHelper {
 			// do nothing - database already exist
 		} else {
 
+			// TODO check for already installed MB Tiles databases and delete them ?!
+			File databaseDirectory = new File(DB_PATH);
+			File[] files = databaseDirectory.listFiles();
+			if (files != null) {
+				for (File file : files) {
+					final String fileName = file.getName();
+					if (fileName.substring((fileName.lastIndexOf(".") + 1), fileName.length()).equals("mbtiles")) {
+
+						Log.d("MbTilesDatabase", "Found existing MB Tiles db : " + fileName);
+						// for now delete
+						file.delete();
+					}
+				}
+			}
 			// By calling this method and empty database will be created into the default system path
 			// of your application so we are gonna be able to overwrite that database with our database.
 			this.getReadableDatabase();
@@ -195,6 +218,10 @@ public class MbTilesDatabase extends SQLiteOpenHelper {
 
 		super.close();
 
+	}
+
+	public String getDBName() {
+		return DB_NAME;
 	}
 
 	/**

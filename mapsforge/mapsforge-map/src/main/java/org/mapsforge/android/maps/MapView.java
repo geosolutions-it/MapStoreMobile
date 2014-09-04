@@ -265,11 +265,21 @@ public class MapView extends ViewGroup {
 		return this.mapFile;
 	}
 
+	public MapRenderer getMapRenderer() {
+		return this.mapRenderer;
+	}
+
 	public void setRenderer(final boolean pUsesMbTilesRenderer, final boolean setMapWorkerRenderer) {
 
 		if (pUsesMbTilesRenderer) {
-			// TODO to use a different database pass its name as parameter
-			this.mapRenderer = new MbTilesDatabaseRenderer(this.getContext(), "premium-slope.mbtiles");
+			final String fileName = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(
+					"MbTilesFile", null);
+
+			if (fileName == null) {
+				throw new IllegalArgumentException("No MB Tiles file defined");
+			}
+
+			this.mapRenderer = new MbTilesDatabaseRenderer(this.getContext(), fileName);
 
 		} else {
 
