@@ -42,6 +42,8 @@ import android.util.Log;
 
 public class MbTilesDatabase extends SQLiteOpenHelper {
 
+	private static final String TAG = MbTilesDatabase.class.getSimpleName();
+
 	private static String DB_PATH;
 
 	private static String DB_NAME;
@@ -80,7 +82,7 @@ public class MbTilesDatabase extends SQLiteOpenHelper {
 		try {
 			createDataBase();
 		} catch (IOException e) {
-			Log.e("MbTilesDatabase", "IOE accessing the mbtiles db", e);
+			Log.e(TAG, "IOE accessing the mbtiles db", e);
 		}
 	}
 
@@ -98,15 +100,16 @@ public class MbTilesDatabase extends SQLiteOpenHelper {
 			// do nothing - database already exist
 		} else {
 
-			// TODO check for already installed MB Tiles databases and delete them ?!
 			File databaseDirectory = new File(DB_PATH);
 			File[] files = databaseDirectory.listFiles();
 			if (files != null) {
 				for (File file : files) {
 					final String fileName = file.getName();
-					if (fileName.substring((fileName.lastIndexOf(".") + 1), fileName.length()).equals("mbtiles")) {
+					if (fileName.substring((fileName.lastIndexOf(".") + 1), fileName.length()).equals("mbtiles")
+							|| fileName.substring((fileName.lastIndexOf(".") + 1), fileName.length()).equals(
+									"mbtiles-journal")) {
 
-						Log.d("MbTilesDatabase", "Found existing MB Tiles db : " + fileName);
+						Log.d(TAG, "Found existing MB Tiles db : " + fileName);
 						// for now delete
 						file.delete();
 					}
@@ -120,6 +123,7 @@ public class MbTilesDatabase extends SQLiteOpenHelper {
 
 				this.close();
 				copyDataBase();
+				Log.d(TAG, "database successfully copied");
 				this.openDataBase(); // opening and closing is advisable to test if all works fine
 				this.close();
 
@@ -201,7 +205,6 @@ public class MbTilesDatabase extends SQLiteOpenHelper {
 	 */
 	public void openDataBase() throws SQLException {
 
-		// Open the database
 		String myPath = DB_PATH + DB_NAME;
 		this.mDataBase = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READONLY);
 
@@ -254,17 +257,21 @@ public class MbTilesDatabase extends SQLiteOpenHelper {
 	 * @return the data, if available for these coordinates
 	 */
 	public byte[] getTileAsBytes(String x, String y, String z) {
-
-		final Cursor c = this.mDataBase.rawQuery(
-				"select tile_data from tiles where tile_column=? and tile_row=? and zoom_level=?", new String[] { x, y,
-						z });
-		if (!c.moveToFirst()) {
+		try {
+			final Cursor c = this.mDataBase.rawQuery(
+					"select tile_data from tiles where tile_column=? and tile_row=? and zoom_level=?", new String[] {
+							x, y, z });
+			if (!c.moveToFirst()) {
+				c.close();
+				return null;
+			}
+			byte[] bb = c.getBlob(c.getColumnIndex("tile_data"));
 			c.close();
+			return bb;
+		} catch (NullPointerException e) {
+			Log.e(TAG, "NPE retrieving tile from db", e);
 			return null;
 		}
-		byte[] bb = c.getBlob(c.getColumnIndex("tile_data"));
-		c.close();
-		return bb;
 	}
 
 	/**
@@ -275,23 +282,30 @@ public class MbTilesDatabase extends SQLiteOpenHelper {
 	 */
 	public BoundingBox getBoundingBox() {
 
-		final Cursor c = this.mDataBase.rawQuery("select value from metadata where name=?", new String[] { "bounds" });
-		if (!c.moveToFirst()) {
-			c.close();
+		try {
+			final Cursor c = this.mDataBase.rawQuery("select value from metadata where name=?",
+					new String[] { "bounds" });
+			if (!c.moveToFirst()) {
+				c.close();
+				return null;
+			}
+			final String box = c.getString(c.getColumnIndex("value"));
+
+			String[] split = box.split(",");
+			if (split.length != 4) {
+				return null;
+			}
+			double minlon = Double.parseDouble(split[0]);
+			double minlat = Double.parseDouble(split[1]);
+			double maxlon = Double.parseDouble(split[2]);
+			double maxlat = Double.parseDouble(split[3]);
+
+			return new BoundingBox(minlat, minlon, maxlat, maxlon);
+
+		} catch (NullPointerException e) {
+			Log.e(TAG, "NPE retrieving boundingbox from db", e);
 			return null;
 		}
-		final String box = c.getString(c.getColumnIndex("value"));
-
-		String[] split = box.split(",");
-		if (split.length != 4) {
-			return null;
-		}
-		double minlon = Double.parseDouble(split[0]);
-		double minlat = Double.parseDouble(split[1]);
-		double maxlon = Double.parseDouble(split[2]);
-		double maxlat = Double.parseDouble(split[3]);
-
-		return new BoundingBox(minlat, minlon, maxlat, maxlon);
 	}
 
 }

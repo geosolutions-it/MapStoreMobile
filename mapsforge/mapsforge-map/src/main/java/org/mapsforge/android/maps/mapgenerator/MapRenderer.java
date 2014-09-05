@@ -19,6 +19,12 @@ public interface MapRenderer {
 
 	public String getFileName();
 
+	public void start();
+
+	public void stop();
+
+	public boolean isWorking();
+
 	public void destroy();
 
 }

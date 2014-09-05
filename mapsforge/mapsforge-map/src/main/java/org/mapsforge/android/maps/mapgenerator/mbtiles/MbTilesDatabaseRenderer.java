@@ -21,6 +21,8 @@ public class MbTilesDatabaseRenderer implements MapRenderer {
 
 	private MbTilesDatabase db;
 
+	private boolean isDBOpen = false;
+
 	public MbTilesDatabaseRenderer(final Context pContext, final String dbName) {
 
 		this.db = new MbTilesDatabase(pContext, dbName);
@@ -33,8 +35,6 @@ public class MbTilesDatabaseRenderer implements MapRenderer {
 	 */
 	@Override
 	public boolean executeJob(MapGeneratorJob mapGeneratorJob, Bitmap bitmap) {
-
-		this.db.openDataBase();
 
 		final Tile tile = mapGeneratorJob.tile;
 
@@ -55,24 +55,30 @@ public class MbTilesDatabaseRenderer implements MapRenderer {
 				Byte.toString(tile.zoomLevel));
 
 		if (rasterBytes == null) {
-			// got nothing
-			this.db.close();
-			return false;
-		}
 
-		decodedBitmap = BitmapFactory.decodeByteArray(rasterBytes, 0, rasterBytes.length);
-
-		// check if the input stream could be decoded into a bitmap
-		if (decodedBitmap != null) {
-			// copy all pixels from the decoded bitmap to the color array
-			decodedBitmap.getPixels(pixels, 0, Tile.TILE_SIZE, 0, 0, Tile.TILE_SIZE, Tile.TILE_SIZE);
-			decodedBitmap.recycle();
-		} else {
+			// got nothing,return to zoom for higher zoom levels
+			if (tile.zoomLevel > 11) { // TODO register the "real" max zoom level and compare here
+				return false;
+			}
+			// got nothing,make white pixels for lower zoom levels
 			for (int i = 0; i < pixels.length; i++) {
-				pixels[i] = Color.WHITE;
+				pixels[i] = 0xff << 24 | (0xff << 16) | (0xff << 8) | 0xff;
+			}
+		} else {
+
+			decodedBitmap = BitmapFactory.decodeByteArray(rasterBytes, 0, rasterBytes.length);
+
+			// check if the input stream could be decoded into a bitmap
+			if (decodedBitmap != null) {
+				// copy all pixels from the decoded bitmap to the color array
+				decodedBitmap.getPixels(pixels, 0, Tile.TILE_SIZE, 0, 0, Tile.TILE_SIZE, Tile.TILE_SIZE);
+				decodedBitmap.recycle();
+			} else {
+				for (int i = 0; i < pixels.length; i++) {
+					pixels[i] = Color.WHITE;
+				}
 			}
 		}
-
 		if (bitmap == null) {
 			Bitmap.Config conf = Bitmap.Config.ARGB_8888;
 			bitmap = Bitmap.createBitmap(Tile.TILE_SIZE, Tile.TILE_SIZE, conf);
@@ -81,7 +87,6 @@ public class MbTilesDatabaseRenderer implements MapRenderer {
 		// copy all pixels from the color array to the tile bitmap
 		bitmap.setPixels(pixels, 0, Tile.TILE_SIZE, 0, 0, Tile.TILE_SIZE, Tile.TILE_SIZE);
 
-		this.db.close();
 		return true;
 	}
 
@@ -94,8 +99,11 @@ public class MbTilesDatabaseRenderer implements MapRenderer {
 		this.db.openDataBase();
 		final BoundingBox bb = this.db.getBoundingBox();
 		this.db.close();
-
-		return bb.getCenterPoint();
+		try {
+			return bb.getCenterPoint();
+		} catch (NullPointerException e) {
+			return new GeoPoint(43.7242359188, 10.9463005959);
+		}
 	}
 
 	/**
@@ -125,6 +133,31 @@ public class MbTilesDatabaseRenderer implements MapRenderer {
 	public String getFileName() {
 
 		return this.db.getDBName();
+	}
+
+	@Override
+	public void start() {
+
+		if (!this.isDBOpen) {
+			this.db.openDataBase();
+			this.isDBOpen = true;
+		}
+
+	}
+
+	@Override
+	public void stop() {
+
+		if (this.isDBOpen) {
+			this.db.close();
+			this.isDBOpen = false;
+		}
+	}
+
+	@Override
+	public boolean isWorking() {
+
+		return this.isDBOpen;
 	}
 
 	/**

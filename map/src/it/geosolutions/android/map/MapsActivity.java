@@ -1064,12 +1064,15 @@ public class MapsActivity extends MapActivityBase {
     	//a recreation of the maprenderer is necessary if
     	
     	//1.changed from mapsforge to mbtiles or vice-versa
-        if(mbTiles != mapViewUsesMbTiles ||
-        //2.or mbtiles is selected and the db file of the mbtiles changed		
-          (mbTiles && !fileName.equals(mapView.getMapRenderer().getFileName()))){
+        if(mbTiles != mapViewUsesMbTiles){
         	
-        	//things changed, need to recreate the map
-			mapView.setRenderer(!mapViewUsesMbTiles, true);
+        	mapView.setRenderer(!mapViewUsesMbTiles, true);
+			mapView.clearAndRedrawMapView();
+			
+		//2.or mbtiles is selected and the db file of the mbtiles changed		
+        }else if(mbTiles && !fileName.equals(mapView.getMapRenderer().getFileName())){
+
+			mapView.setRenderer(mapViewUsesMbTiles, true);
 			mapView.clearAndRedrawMapView();
         }
     }

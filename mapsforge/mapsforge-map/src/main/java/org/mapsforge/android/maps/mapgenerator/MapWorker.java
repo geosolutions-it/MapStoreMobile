@@ -49,7 +49,7 @@ public class MapWorker extends PausableThread {
 	}
 
 	/**
-	 * @param databaseRenderer
+	 * @param pMapRenderer
 	 *            the DatabaseRenderer which this MapWorker should use.
 	 */
 	public void setDatabaseRenderer(MapRenderer pMapRenderer) {
@@ -63,6 +63,11 @@ public class MapWorker extends PausableThread {
 
 	@Override
 	protected void doWork() {
+
+		// open the MBTiles DB if necessary
+		if (!this.mapRenderer.isWorking()) {
+			this.mapRenderer.start();
+		}
 
 		MapGeneratorJob mapGeneratorJob = this.jobQueue.poll();
 
@@ -85,6 +90,10 @@ public class MapWorker extends PausableThread {
 			// only cache "real" mapsforge tiles, no mb tiles
 			if (!this.mapView.usesMbTilesRenderer())
 				this.fileSystemTileCache.put(mapGeneratorJob, this.tileBitmap);
+		}
+		// close the MB Tiles DB if queue is empty
+		if (this.jobQueue.isEmpty()) {
+			this.mapRenderer.stop();
 		}
 	}
 

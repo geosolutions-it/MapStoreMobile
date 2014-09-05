@@ -40,8 +40,7 @@ public class FilePickerDialog {
 	protected String[] acceptedFileExtensions;
 
 	public FilePickerDialog(final Context context,final String message,final String directory,final String extension,final FilePickCallback filePickCallback) {
-		
-		Log.d("FilePickerDialog", "onCreate");
+
 		LayoutInflater inflator = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		final View mapSelectionView = inflator.inflate(R.layout.filepick_selection, null);
 		final ListView lv = (ListView) mapSelectionView.findViewById(R.id.waypoint_listview);
@@ -140,7 +139,9 @@ public class FilePickerDialog {
 		}
 		mAdapter.notifyDataSetChanged();
 	}
-	
+	/**
+	 * sets the properties of the view of a file in the listview
+	 */
 	private class FilePickerListAdapter extends ArrayAdapter<File> {
 
 		private List<File> mObjects;

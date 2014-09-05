@@ -426,4 +426,22 @@ public class DatabaseRenderer implements RenderCallback, MapRenderer {
 
 		return "Mapsforge";
 	}
+
+	@Override
+	public void start() {
+		// nothing
+
+	}
+
+	@Override
+	public void stop() {
+		// nothing
+
+	}
+
+	@Override
+	public boolean isWorking() {
+		return true;
+	}
+
 }
