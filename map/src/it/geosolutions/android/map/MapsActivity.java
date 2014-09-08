@@ -60,7 +60,10 @@ import java.util.List;
 
 import org.mapsforge.android.maps.DebugSettings;
 import org.mapsforge.android.maps.MapView;
+import org.mapsforge.android.maps.mapgenerator.MapRenderer;
 import org.mapsforge.android.maps.mapgenerator.TileCache;
+import org.mapsforge.android.maps.mapgenerator.databaserenderer.DatabaseRenderer;
+import org.mapsforge.android.maps.mapgenerator.mbtiles.MbTilesDatabaseRenderer;
 import org.mapsforge.core.model.GeoPoint;
 import org.mapsforge.core.model.MapPosition;
 
@@ -1057,24 +1060,54 @@ public class MapsActivity extends MapActivityBase {
 	 */
     public void  checkIfMapViewNeedsBackgroundUpdate()
     {
-    	final boolean mbTiles = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("UseMbTiles", false);
-    	final boolean mapViewUsesMbTiles = this.mapView.usesMbTilesRenderer();
-    	final String fileName = PreferenceManager.getDefaultSharedPreferences(this).getString("MbTilesFile", null);
+    	final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+    	final int currentMapRendererType = this.mapView.getMapRendererType();
+    	final String fileName = prefs.getString("mapsforge_background_file", null);
+    	final int type = Integer.parseInt(prefs.getString("mapsforge_background_type", "0"));
     	
-    	//a recreation of the maprenderer is necessary if
-    	
-    	//1.changed from mapsforge to mbtiles or vice-versa
-        if(mbTiles != mapViewUsesMbTiles){
-        	
-        	mapView.setRenderer(!mapViewUsesMbTiles, true);
-			mapView.clearAndRedrawMapView();
-			
-		//2.or mbtiles is selected and the db file of the mbtiles changed		
-        }else if(mbTiles && !fileName.equals(mapView.getMapRenderer().getFileName())){
+    	//1. renderer changed
+    	if(type != currentMapRendererType){
 
-			mapView.setRenderer(mapViewUsesMbTiles, true);
-			mapView.clearAndRedrawMapView();
-        }
+    		MapRenderer mapRenderer = null;
+    		switch (type) {
+    		case 0:
+    			final String filePath = prefs.getString("mapsforge_background_filepath", null);
+    			if(filePath == null){
+    				throw new IllegalArgumentException("no filepath selected to change to mapsforge renderer");
+    			}
+    			//mapView.setMapFile(new File(fileName));
+    			mapRenderer = new DatabaseRenderer(mapView.getMapDatabase());
+    			break;
+    		case 1:
+    			mapRenderer = new MbTilesDatabaseRenderer(getBaseContext(), fileName);
+    			break;
+    		case 2:
+    			// TODO
+    			break;
+    		default:
+    			break;
+    		}
+    		mapView.setRenderer(mapRenderer, true);
+    		mapView.clearAndRedrawMapView();
+
+    	}else if(fileName != null && !fileName.equals(mapView.getMapRenderer().getFileName())){
+
+    		//2.renderer is the same but file changed
+    		switch (type) {
+    		case 0:
+    			mapView.setMapFile(new File(fileName));
+    			break;
+    		case 1:
+    			mapView.setRenderer(new MbTilesDatabaseRenderer(getBaseContext(), fileName), true);
+    			break;
+    		case 2:
+    			// TODO
+    			break;
+    		default:
+    			break;
+    		}
+    		mapView.clearAndRedrawMapView();
+    	}
     }
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {

@@ -15,6 +15,8 @@
 package it.geosolutions.android.map.preferences;
 
 
+import java.io.File;
+
 import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.dialog.FilePickerDialog;
 import it.geosolutions.android.map.dialog.FilePickerDialog.FilePickCallback;
@@ -23,6 +25,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.Preference;
+import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.util.Log;
@@ -58,28 +61,53 @@ public class EditPreferences extends SherlockPreferenceActivity {
 	
 	 @Override
 	  public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen,final Preference preference) {
-		 if(preference.getKey().equals("UseMbTiles")){
+		 if(preference.getKey().equals("mapsforge_background_type")){
 
-			 final boolean mbTiles  = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("UseMbTiles", false);
+			 preference.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+		            @Override
+		            public boolean onPreferenceChange(Preference preference, Object newValue) {
+		            	
+		            	final int type = Integer.parseInt(newValue.toString());
+		            	
+//		            	final int type = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString("mapsforge_background_type", "1"));
+		            	
+		            	String extension = null;
+		            	
+		            	switch(type){
+		            	case 0:
+		            		extension = "map";
+		            		break;
+		            	case 1:
+		            		extension = "mbtiles";
+		            		break;
+		            	case 2:
+		            		extension = "gpkg";
+		            		break;
+		            	}
+		            	
+		            	
+		            	new FilePickerDialog(EditPreferences.this,
+		            			"Select a background file",
+		            			Environment.getExternalStorageDirectory()+"/mapstore/",
+		            			extension,
+		            			new FilePickCallback() {
+		            		
+		            		@Override
+		            		public void filePicked(final File file) {
+		            			
+		            			//Log.d("MapsActivity", "Selected "+fileName);
+		            			final Editor ed = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
+		            			ed.putString("mapsforge_background_file", file.getName());
+		            			ed.putString("mapsforge_background_filepath", file.getAbsolutePath());
+		            			ed.commit();
+		            		}
+		            	});
 
-			 if(mbTiles){
-				 new FilePickerDialog(this,
-						 "Select a MBTiles database file",
-						 Environment.getExternalStorageDirectory()+"/mapstore/",
-						 "mbtiles",
-						 new FilePickCallback() {
-
-					 @Override
-					 public void filePicked(final String fileName) {
-
-						 Log.d("MapsActivity", "Selected "+fileName);
-						 final Editor ed = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
-						 ed.putString("MbTilesFile", fileName);
-						 ed.commit();
-					 }
-				 });
-			 }
+		                return true;
+		            }
+		        });
+			 
 		 }
-		 return false;
+		 return true;
     }
 }

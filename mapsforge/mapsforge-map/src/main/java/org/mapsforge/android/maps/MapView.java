@@ -152,7 +152,25 @@ public class MapView extends ViewGroup {
 		this.touchEventHandler = new TouchEventHandler(mapActivity.getActivityContext(), this);
 
 		final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-		setRenderer(prefs.getBoolean("UseMbTiles", false), false);
+		final int type = Integer.parseInt(prefs.getString("mapsforge_background_type", "0"));
+		final String mapsforge_background_file = prefs.getString("mapsforge_background_file", null);
+		MapRenderer _mapRenderer = null;
+		switch (type) {
+			case 0:
+				if (mapsforge_background_file != null)
+					// this.setMapFile(new File(mapsforge_background_file));
+					_mapRenderer = new DatabaseRenderer(this.mapDatabase);
+				break;
+			case 1:
+				_mapRenderer = new MbTilesDatabaseRenderer(this.getContext(), mapsforge_background_file);
+				break;
+			case 2:
+				// TODO
+				break;
+			default:
+				break;
+		}
+		setRenderer(_mapRenderer, false);
 
 		this.mapWorker = new MapWorker(this);
 		this.mapWorker.start();
@@ -269,31 +287,31 @@ public class MapView extends ViewGroup {
 		return this.mapRenderer;
 	}
 
-	public void setRenderer(final boolean pUsesMbTilesRenderer, final boolean setMapWorkerRenderer) {
-
-		if (pUsesMbTilesRenderer) {
-			final String fileName = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(
-					"MbTilesFile", null);
-
-			if (fileName == null) {
-				throw new IllegalArgumentException("No MB Tiles file defined");
-			}
-
-			this.mapRenderer = new MbTilesDatabaseRenderer(this.getContext(), fileName);
-
+	public int getMapRendererType() {
+		if (this.mapRenderer instanceof DatabaseRenderer) {
+			return 0;
+		} else if (this.mapRenderer instanceof MbTilesDatabaseRenderer) {
+			return 1;
 		} else {
-
-			this.mapRenderer = new DatabaseRenderer(this.mapDatabase);
+			return 2;
 		}
+	}
+
+	public String getMapRendererFile() {
+		return this.getMapRenderer().getFileName();
+	}
+
+	public boolean usesMapsforgeBackground() {
+		return this.getMapRendererType() == 0;
+	}
+
+	public void setRenderer(final MapRenderer pMapRenderer, final boolean setMapWorkerRenderer) {
+
+		this.mapRenderer = pMapRenderer;
 
 		if (setMapWorkerRenderer) {
 			this.mapWorker.setDatabaseRenderer(this.mapRenderer);
 		}
-	}
-
-	public boolean usesMbTilesRenderer() {
-
-		return this.mapRenderer instanceof MbTilesDatabaseRenderer;
 	}
 
 	/**

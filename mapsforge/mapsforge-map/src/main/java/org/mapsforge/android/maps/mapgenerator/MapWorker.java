@@ -71,10 +71,9 @@ public class MapWorker extends PausableThread {
 
 		MapGeneratorJob mapGeneratorJob = this.jobQueue.poll();
 
-		if (this.inMemoryTileCache.containsKey(mapGeneratorJob) && this.mapRenderer instanceof DatabaseRenderer) {
+		if (this.inMemoryTileCache.containsKey(mapGeneratorJob) && this.mapView.usesMapsforgeBackground()) {
 			return;
-		} else if (this.fileSystemTileCache.containsKey(mapGeneratorJob)
-				&& this.mapRenderer instanceof DatabaseRenderer) {
+		} else if (this.fileSystemTileCache.containsKey(mapGeneratorJob) && this.mapView.usesMapsforgeBackground()) {
 			return;
 		}
 
@@ -82,14 +81,16 @@ public class MapWorker extends PausableThread {
 
 		if (!isInterrupted() && success) {
 			if (this.mapView.getFrameBuffer().drawBitmap(mapGeneratorJob.tile, this.tileBitmap)) {
-				// only cache "real" mapsforge tiles, no mb tiles
-				if (!this.mapView.usesMbTilesRenderer())
+
+				if (this.mapView.usesMapsforgeBackground()) {
 					this.inMemoryTileCache.put(mapGeneratorJob, this.tileBitmap);
+				}
 			}
 			this.mapView.postInvalidate();
-			// only cache "real" mapsforge tiles, no mb tiles
-			if (!this.mapView.usesMbTilesRenderer())
+
+			if (this.mapView.usesMapsforgeBackground()) {
 				this.fileSystemTileCache.put(mapGeneratorJob, this.tileBitmap);
+			}
 		}
 		// close the MB Tiles DB if queue is empty
 		if (this.jobQueue.isEmpty()) {

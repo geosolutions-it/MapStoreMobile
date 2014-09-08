@@ -81,7 +81,7 @@ public class FilePickerDialog {
 					if(fileName.substring(dot + 1).equals(extension)){
 
 						//picked
-						filePickCallback.filePicked(newFile.getName());						
+						filePickCallback.filePicked(newFile);						
 						currentAlert.dismiss();
 					}else{
 						Toast.makeText(context,"Invalid file, please select an ."+extension+" file", Toast.LENGTH_SHORT).show();	
@@ -225,7 +225,7 @@ public class FilePickerDialog {
 	
 	public interface FilePickCallback {
 		
-		public void filePicked(final String fileName);
+		public void filePicked(final File file);
 
 	}
 
