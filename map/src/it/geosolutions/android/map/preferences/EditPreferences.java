@@ -30,6 +30,7 @@ import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.util.Log;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
 
@@ -55,6 +56,13 @@ public class EditPreferences extends SherlockPreferenceActivity {
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
 		}
 		
+		//sets the currently selected filename if available
+		Preference source = findPreference("mapsforge_background_type");
+		final String fileName = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString("mapsforge_background_file", null);
+		if(fileName != null){
+			source.setSummary(fileName);
+		}
+		
 	}
 	
 
@@ -63,13 +71,18 @@ public class EditPreferences extends SherlockPreferenceActivity {
 	  public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen,final Preference preference) {
 		 if(preference.getKey().equals("mapsforge_background_type")){
 
+			 //listens to changes of this preference and launches a file selection dialog according to the select source
 			 preference.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
 		            @Override
-		            public boolean onPreferenceChange(Preference preference, Object newValue) {
+		            public boolean onPreferenceChange(final Preference preference, Object newValue) {
 		            	
 		            	final int type = Integer.parseInt(newValue.toString());
 		            	
-//		            	final int type = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString("mapsforge_background_type", "1"));
+		            	//TODO implement geopackage
+		            	if(type == 2){
+		            		Toast.makeText(getBaseContext(), "not implemented yet", Toast.LENGTH_SHORT).show();
+		            		return false;
+		            	}
 		            	
 		            	String extension = null;
 		            	
@@ -85,7 +98,6 @@ public class EditPreferences extends SherlockPreferenceActivity {
 		            		break;
 		            	}
 		            	
-		            	
 		            	new FilePickerDialog(EditPreferences.this,
 		            			"Select a background file",
 		            			Environment.getExternalStorageDirectory()+"/mapstore/",
@@ -95,13 +107,15 @@ public class EditPreferences extends SherlockPreferenceActivity {
 		            		@Override
 		            		public void filePicked(final File file) {
 		            			
-		            			//Log.d("MapsActivity", "Selected "+fileName);
 		            			final Editor ed = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
+		            			ed.putBoolean("mapsforge_background_file_changed", true);
 		            			ed.putString("mapsforge_background_file", file.getName());
 		            			ed.putString("mapsforge_background_filepath", file.getAbsolutePath());
 		            			ed.commit();
+		            			preference.setSummary(file.getName());
 		            		}
 		            	});
+		            	
 
 		                return true;
 		            }

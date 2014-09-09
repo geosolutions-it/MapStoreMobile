@@ -103,8 +103,6 @@ public class MapView extends ViewGroup {
 	private final ZoomAnimator zoomAnimator;
 	private Handler handler;
 
-	// private boolean usesMbTilesRenderer = true;
-
 	/**
 	 * @param context
 	 *            the enclosing MapActivity instance.
@@ -153,15 +151,13 @@ public class MapView extends ViewGroup {
 
 		final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
 		final int type = Integer.parseInt(prefs.getString("mapsforge_background_type", "0"));
-		final String mapsforge_background_file = prefs.getString("mapsforge_background_file", null);
 		MapRenderer _mapRenderer = null;
 		switch (type) {
 			case 0:
-				if (mapsforge_background_file != null)
-					// this.setMapFile(new File(mapsforge_background_file));
-					_mapRenderer = new DatabaseRenderer(this.mapDatabase);
+				_mapRenderer = new DatabaseRenderer(this.mapDatabase);
 				break;
 			case 1:
+				final String mapsforge_background_file = prefs.getString("mapsforge_background_file", null);
 				_mapRenderer = new MbTilesDatabaseRenderer(this.getContext(), mapsforge_background_file);
 				break;
 			case 2:

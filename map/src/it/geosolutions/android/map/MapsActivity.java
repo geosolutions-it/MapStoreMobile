@@ -713,11 +713,21 @@ public class MapsActivity extends MapActivityBase {
 		mapView.getMapZoomControls().setZoomLevelMin((byte) 1);
 
 		// TODO d get this path on initialization
-		
-		if (MAP_FILE!=null) {
+
+    	final String filePath = PreferenceManager.getDefaultSharedPreferences(this).getString("mapsforge_background_filepath", null);
+    	final int type = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString("mapsforge_background_type", "0"));
+    	
+    	//if the map file was edited in the preferences
+		if(filePath != null && type == 0){
+			//use it
+			mapView.setMapFile(new File(filePath));
+			
+		}else if (MAP_FILE!=null) {
+			
 			Log.i("MAP","setting background file");
 			mapView.setMapFile(MAP_FILE);
 			loadPersistencePreferences();
+			
 		} else {
 			Log.i("MAP","unable to set background file");
 			//return false;
@@ -1056,14 +1066,21 @@ public class MapsActivity extends MapActivityBase {
     }
 	/**
 	 * checks if the preferences of the background renderer changed
-	 * if so, the mapview is informed and it is cleared and redrawed
+	 * if so, the mapview is informed and is cleared and redrawed
 	 */
     public void  checkIfMapViewNeedsBackgroundUpdate()
     {
     	final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+    	final boolean thingsChanged = prefs.getBoolean("mapsforge_background_file_changed", false);
+    	if(!thingsChanged)return;
+    	
     	final int currentMapRendererType = this.mapView.getMapRendererType();
     	final String fileName = prefs.getString("mapsforge_background_file", null);
+    	final String filePath = prefs.getString("mapsforge_background_filepath", null);
     	final int type = Integer.parseInt(prefs.getString("mapsforge_background_type", "0"));
+    	final Editor ed = prefs.edit();
+    	ed.putBoolean("mapsforge_background_file_changed", false);
+    	ed.commit();
     	
     	//1. renderer changed
     	if(type != currentMapRendererType){
@@ -1071,11 +1088,10 @@ public class MapsActivity extends MapActivityBase {
     		MapRenderer mapRenderer = null;
     		switch (type) {
     		case 0:
-    			final String filePath = prefs.getString("mapsforge_background_filepath", null);
     			if(filePath == null){
     				throw new IllegalArgumentException("no filepath selected to change to mapsforge renderer");
     			}
-    			//mapView.setMapFile(new File(fileName));
+    			mapView.setMapFile(new File(filePath));
     			mapRenderer = new DatabaseRenderer(mapView.getMapDatabase());
     			break;
     		case 1:
@@ -1095,7 +1111,10 @@ public class MapsActivity extends MapActivityBase {
     		//2.renderer is the same but file changed
     		switch (type) {
     		case 0:
-    			mapView.setMapFile(new File(fileName));
+    			if(filePath == null){
+    				throw new IllegalArgumentException("no filepath selected to change to mapsforge renderer");
+    			}
+    			mapView.setMapFile(new File(filePath));
     			break;
     		case 1:
     			mapView.setRenderer(new MbTilesDatabaseRenderer(getBaseContext(), fileName), true);
