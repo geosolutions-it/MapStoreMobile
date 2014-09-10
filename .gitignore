@@ -33,3 +33,6 @@ Thumbs.db
 #Maven targed dir 
 **/target/*
 **/target/**
+
+# Mac
+.DS_Store

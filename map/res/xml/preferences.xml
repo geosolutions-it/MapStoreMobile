@@ -22,6 +22,12 @@
 		<it.geosolutions.android.map.preferences.CacheSizePreference
 			android:title="@string/preferences_cache_size" android:summary="@string/preferences_cache_size_desc" android:key="TileCacheSize" 
 			/>
+		<ListPreference
+            android:title="@string/preferences_background_source" 
+		    android:summary="@string/preferences_background_source_desc"
+            android:key="mapsforge_background_type"
+            android:entries="@array/mapsforge_background_types"
+            android:entryValues="@array/mapsforge_background_types_values" />
 		<!--  <it.geosolutions.android.map.preferences.MoveSpeedPreference
 			android:title="@string/preferences_move_speed" android:summary="@string/preferences_move_speed_desc" android:key="moveSpeed" /> -->
 	</PreferenceCategory> 
