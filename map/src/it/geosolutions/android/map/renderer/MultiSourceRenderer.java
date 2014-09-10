@@ -137,7 +137,7 @@ public class MultiSourceRenderer implements OverlayRenderer<Layer> {
 	public void refreshLayer(Layer layer) {
 		synchronized (renderers) {
 			for(OverlayRenderer r:renderers){
-				if(r.getLayers().contains(layer)){
+				if(r.getLayers() != null && r.getLayers().contains(layer)){
 					r.refresh();
 					return;
 				}
