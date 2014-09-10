@@ -68,7 +68,7 @@ public class SpatialiteRenederer implements OverlayRenderer<SpatialiteLayer> {
 	@Override
 	public void setLayers(ArrayList<SpatialiteLayer> layers) {
 		
-		layers = new ArrayList<SpatialiteLayer>();
+		this.layers = new ArrayList<SpatialiteLayer>();
 		
 		for(Layer l : layers){
 			if(l instanceof SpatialiteLayer){
