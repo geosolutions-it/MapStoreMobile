@@ -29,18 +29,13 @@ import it.geosolutions.android.map.utils.ProjectionUtils;
 import it.geosolutions.android.map.utils.StyleUtils;
 
 import java.util.ArrayList;
-import java.util.List;
-
 import jsqlite.Exception;
 
 import org.mapsforge.android.maps.Projection;
 import org.mapsforge.core.model.BoundingBox;
 import org.mapsforge.core.model.GeoPoint;
-import org.mapsforge.core.util.MercatorProjection;
-
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.util.Log;
 
 import com.vividsolutions.jts.android.PointTransformation;
@@ -56,21 +51,20 @@ import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
  * 
  */
 
-public class SpatialiteRenederer implements OverlayRenderer<SpatialiteLayer> {
+public class SpatialiteRenderer implements OverlayRenderer<SpatialiteLayer> {
 	private ArrayList<SpatialiteLayer> layers;
 	private Projection projection;
 
-	// public ArrayList<WMSLayer> layers =new ArrayList<WMSLayer>();
 	public void render(Canvas c, BoundingBox boundingBox, byte zoomLevel) {
 		drawFromSpatialite(c, boundingBox, zoomLevel);
 	}
 
 	@Override
-	public void setLayers(ArrayList<SpatialiteLayer> layers) {
+	public void setLayers(ArrayList<SpatialiteLayer> pLayers) {
 		
 		this.layers = new ArrayList<SpatialiteLayer>();
 		
-		for(Layer l : layers){
+		for(Layer l : pLayers){
 			if(l instanceof SpatialiteLayer){
 				this.layers.add((SpatialiteLayer) l);
 			}
@@ -167,7 +161,7 @@ public class SpatialiteRenederer implements OverlayRenderer<SpatialiteLayer> {
 			}
 		} catch (Exception e1) {
 			Log.e("SpatialiteRenderer","Exception while rendering spatialite data");
-			Log.e("SpatialiteRenderer",e1.getStackTrace().toString());
+			Log.e("SpatialiteRenderer", e1.getLocalizedMessage(), e1);
 		}
 	}
 
