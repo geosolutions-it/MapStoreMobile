@@ -15,39 +15,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.geosolutions.android.map.spatialite;
+package it.geosolutions.android.map.mbtiles;
 
 import android.util.Log;
 import jsqlite.Exception;
+import it.geosolutions.android.map.BuildConfig;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
 import it.geosolutions.android.map.model.Layer;
 import it.geosolutions.android.map.model.LayerGroup;
 import it.geosolutions.android.map.style.AdvancedStyle;
 import it.geosolutions.android.map.style.StyleManager;
 import eu.geopaparazzi.spatialite.database.spatial.core.ISpatialDatabaseHandler;
-import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
+import eu.geopaparazzi.spatialite.database.spatial.core.SpatialRasterTable;
 
 /**
- * Abstraction of a Vector layer
- * The source is a Spatialite database
- * 
- * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
+ * Abstraction for an MBTiles Layer
  * @author Lorenzo Pini (lorenzo.pini@geo-solutions.it)
  */
-public class SpatialiteLayer implements Layer<SpatialiteSource> {
+public class MbTilesLayer implements Layer<MbTilesSource> {
 	
-	private String title;
-	SpatialiteSource source;
-	private String tableName;
-	
-	/**
-	 * LayerGroup of this Layer, can be null
-	 */
+	protected String title;
+	protected MbTilesSource source;
+	protected String tableName;
 	protected LayerGroup layerGroup;
-
-	public SpatialiteLayer(SpatialVectorTable t) {
-		this.title = t.getName();
-		this.tableName = t.getName();
+	
+	public MbTilesLayer(SpatialRasterTable t) {
+		this.title = t.getTableName();
+		this.tableName = t.getTableName();
 		SpatialDataSourceManager.getInstance().getSpatialDataSourceHandler(t);
 	}
 
@@ -59,12 +53,12 @@ public class SpatialiteLayer implements Layer<SpatialiteSource> {
 	
 	boolean visibility =true;
 	private int status;
-	public SpatialiteSource getSource() {
+	public MbTilesSource getSource() {
 		return source;
 	}
 
 
-	public void setSource(SpatialiteSource source) {
+	public void setSource(MbTilesSource source) {
 		this.source = source;
 	}
 
@@ -128,17 +122,20 @@ public class SpatialiteLayer implements Layer<SpatialiteSource> {
 		SpatialDataSourceManager sdsm = SpatialDataSourceManager.getInstance();
 		if(sdsm != null){
 			try {
-				if(sdsm.getVectorTableByName(tableName)!=null){
-					return sdsm.getVectorHandler(sdsm.getVectorTableByName(tableName));
+				if(sdsm.getRasterTableByName(tableName)!=null){
+					return sdsm.getRasterHandler(sdsm.getRasterTableByName(tableName));
 				}
 			} catch (Exception e) {
-				Log.e("SpatialiteLayer","Exception while getting SpatialDatabaseHandler");
-				Log.e("SpatialiteLayer",Log.getStackTraceString(e));
+				if(BuildConfig.DEBUG){
+					Log.e("MbTilesLayer", "Exception while getting SpatialDatabaseHandler");
+					Log.e("MbTilesLayer", e.getLocalizedMessage(), e);
+				}
 			}
 		}
 		return null;
 	}
-	
+
+
 	/**
 	 * Set {@link LayerGroup}
 	 */

@@ -26,6 +26,8 @@ import it.geosolutions.android.map.control.MapControl;
 import it.geosolutions.android.map.control.MapInfoControl;
 import it.geosolutions.android.map.control.MarkerControl;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
+import it.geosolutions.android.map.dialog.FilePickerDialog;
+import it.geosolutions.android.map.dialog.FilePickerDialog.FilePickCallback;
 import it.geosolutions.android.map.dto.MarkerDTO;
 import it.geosolutions.android.map.fragment.GenericMenuFragment;
 import it.geosolutions.android.map.fragment.sources.SourcesFragment;
@@ -56,7 +58,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.mapsforge.android.maps.DebugSettings;
+import org.mapsforge.android.maps.MapView;
+import org.mapsforge.android.maps.mapgenerator.MapRenderer;
 import org.mapsforge.android.maps.mapgenerator.TileCache;
+import org.mapsforge.android.maps.mapgenerator.databaserenderer.DatabaseRenderer;
+import org.mapsforge.android.maps.mapgenerator.mbtiles.MbTilesDatabaseRenderer;
 import org.mapsforge.core.model.GeoPoint;
 import org.mapsforge.core.model.MapPosition;
 
@@ -64,9 +71,12 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -286,12 +296,12 @@ public class MapsActivity extends MapActivityBase {
 	        layerManager.loadMap((MSMMap)data.getSerializable(MSM_MAP));
 
 		}
-		/*
+		
 		ArrayList<Layer> layersToAdd = (ArrayList<Layer>) data.getSerializable(LAYERS_TO_ADD);
 		if(layersToAdd != null){
 			addLayers(layersToAdd);
 		}
-		*/
+		
 	}
 
 	/**
@@ -392,6 +402,7 @@ public class MapsActivity extends MapActivityBase {
 	protected void onResume() {
 	    super.onResume();
 	    loadPersistencePreferences();
+	    checkIfMapViewNeedsBackgroundUpdate();
 	    //Refresh control beacuse any changes can be changed
 	    for(MapControl mic : mapView.getControls()){
 	    	mic.refreshControl(GetFeatureInfoLayerListActivity.BBOX_REQUEST, GetFeatureInfoLayerListActivity.BBOX_REQUEST, null);	    
@@ -694,21 +705,34 @@ public class MapsActivity extends MapActivityBase {
 		// TODO configurable controls
 		mapView.setClickable(true);
 		mapView.setBuiltInZoomControls(true);
+		
+//		mapView.setDebugSettings(new DebugSettings(true, true, false));
 
 		// TODO parametrize these zoom levels
 		mapView.getMapZoomControls().setZoomLevelMax((byte) 24);
 		mapView.getMapZoomControls().setZoomLevelMin((byte) 1);
 
 		// TODO d get this path on initialization
-		
-		if (MAP_FILE!=null) {
+
+    	final String filePath = PreferenceManager.getDefaultSharedPreferences(this).getString("mapsforge_background_filepath", null);
+    	final int type = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString("mapsforge_background_type", "0"));
+    	
+    	//if the map file was edited in the preferences
+		if(filePath != null && type == 0){
+			//use it
+			mapView.setMapFile(new File(filePath));
+			
+		}else if (MAP_FILE!=null) {
+			
 			Log.i("MAP","setting background file");
 			mapView.setMapFile(MAP_FILE);
 			loadPersistencePreferences();
+			
 		} else {
 			Log.i("MAP","unable to set background file");
 			//return false;
 		}
+		
 		
 		return true;
 	}
@@ -1040,7 +1064,70 @@ public class MapsActivity extends MapActivityBase {
         String textScaleDefault = getString(R.string.preferences_text_scale_default);
         this.mapView.setTextScale(Float.parseFloat(sharedPreferences.getString("mapTextScale", textScaleDefault)));
     }
-	
+	/**
+	 * checks if the preferences of the background renderer changed
+	 * if so, the mapview is informed and is cleared and redrawed
+	 */
+    public void  checkIfMapViewNeedsBackgroundUpdate()
+    {
+    	final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+    	final boolean thingsChanged = prefs.getBoolean("mapsforge_background_file_changed", false);
+    	if(!thingsChanged)return;
+    	
+    	final int currentMapRendererType = this.mapView.getMapRendererType();
+    	final String fileName = prefs.getString("mapsforge_background_file", null);
+    	final String filePath = prefs.getString("mapsforge_background_filepath", null);
+    	final int type = Integer.parseInt(prefs.getString("mapsforge_background_type", "0"));
+    	final Editor ed = prefs.edit();
+    	ed.putBoolean("mapsforge_background_file_changed", false);
+    	ed.commit();
+    	
+    	//1. renderer changed
+    	if(type != currentMapRendererType){
+
+    		MapRenderer mapRenderer = null;
+    		switch (type) {
+    		case 0:
+    			if(filePath == null){
+    				throw new IllegalArgumentException("no filepath selected to change to mapsforge renderer");
+    			}
+    			mapView.setMapFile(new File(filePath));
+    			mapRenderer = new DatabaseRenderer(mapView.getMapDatabase());
+    			break;
+    		case 1:
+    			mapRenderer = new MbTilesDatabaseRenderer(getBaseContext(), fileName);
+    			break;
+    		case 2:
+    			// TODO
+    			break;
+    		default:
+    			break;
+    		}
+    		mapView.setRenderer(mapRenderer, true);
+    		mapView.clearAndRedrawMapView();
+
+    	}else if(fileName != null && !fileName.equals(mapView.getMapRenderer().getFileName())){
+
+    		//2.renderer is the same but file changed
+    		switch (type) {
+    		case 0:
+    			if(filePath == null){
+    				throw new IllegalArgumentException("no filepath selected to change to mapsforge renderer");
+    			}
+    			mapView.setMapFile(new File(filePath));
+    			break;
+    		case 1:
+    			mapView.setRenderer(new MbTilesDatabaseRenderer(getBaseContext(), fileName), true);
+    			break;
+    		case 2:
+    			// TODO
+    			break;
+    		default:
+    			break;
+    		}
+    		mapView.clearAndRedrawMapView();
+    	}
+    }
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 	    if (keyCode == KeyEvent.KEYCODE_MENU) {

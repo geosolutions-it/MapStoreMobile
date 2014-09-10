@@ -18,6 +18,7 @@
 package it.geosolutions.android.map.wms;
 
 import it.geosolutions.android.map.model.Layer;
+import it.geosolutions.android.map.model.LayerGroup;
 
 import java.util.HashMap;
 /**
@@ -25,29 +26,39 @@ import java.util.HashMap;
  * @author  Lorenzo Natali (lorenzo.natali@geo-solutions.it) 
  */
 public class WMSLayer implements Layer<WMSSource>{
+	
 	/**
 	 * The name of the layer
 	 */
 	private String name;
+	
 	/**
 	 * The Source of the WMSLayer
 	 */
 	private WMSSource source;
+	
 	/**
 	 * The group of the layer
 	 */
 	private String group;
+	
 	/**
 	 * the visibility
 	 */
 	private boolean visibility =true;
+
 	/**
 	 * The title of the layer
 	 */
-	
 	private String title;
 	
 	private boolean tiled = false;
+	
+	/**
+	 * LayerGroup of this Layer, can be null
+	 */
+	protected LayerGroup layerGroup;
+
 	
 	/**
 	 * Create a WMS layer getting the source and the layer name
@@ -82,11 +93,16 @@ public class WMSLayer implements Layer<WMSSource>{
 		this.group = group;
 	}
 
-
+	/**
+	 * True if the Layer is visible
+	 */
 	public boolean isVisibility() {
 		return visibility;
 	}
 
+	/**
+	 * Set the Layer visibility
+	 */
 	public void setVisibility(boolean visibility) {
 		this.visibility = visibility;
 	}
@@ -170,4 +186,22 @@ public class WMSLayer implements Layer<WMSSource>{
 	public int getStatus() {
 		return status;
 	}
+	
+	/**
+	 * Set {@link LayerGroup}
+	 */
+	@Override
+	public void setLayerGroup(LayerGroup layerGroup) {
+		this.layerGroup = layerGroup;
+	}
+
+
+	/**
+	 * Get {@link LayerGroup}
+	 */
+	@Override
+	public LayerGroup getLayerGroup() {
+		return this.layerGroup;
+	}
+
 }
