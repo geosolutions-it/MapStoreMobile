@@ -28,6 +28,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.zip.*;
 
+import it.geosolutions.android.map.BuildConfig;
 import it.geosolutions.android.map.MapsActivity;
 import it.geosolutions.android.map.R;
 import android.app.Activity;
@@ -36,13 +37,22 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.util.Log;
 
 /** Class to manage download and decompression of a sample data test archive from web.
  * This class manager uses two class that extend AsyncTask to perform computations in background.
  * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com).
  */
 public class ZipFileManager {
+	
+	/**
+	 * Tag for logging
+	 */
+	private static String TAG = "ZipFileManager";
+	
 	private AlertDialog download_dialog;
+	
+	private AlertDialog error_dialog;
 	public Activity activity; //Necessary for the dialog
 
 	private final static String file_name = "data_test_archive.zip"; //Archive that must be to download
@@ -116,7 +126,7 @@ public class ZipFileManager {
 	 * Class DownloadFileAsyncTask downloads a data test archive from web.
 	 * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com).
 	 */
-	class DownloadFileAsyncTask extends AsyncTask<String,Integer,String>{	
+	class DownloadFileAsyncTask extends AsyncTask<String,Integer,Boolean>{	
 		private ProgressDialog barDialog; //Dialog to show progress of download
 		private String dir_path; //Directory where the archive will be downloaded 
 		private String path_file; //Complete path of archive downloaded
@@ -146,9 +156,12 @@ public class ZipFileManager {
 		 * @ param Data
 		 */
 		@Override
-		protected String doInBackground(String ... Data) {
+		protected Boolean doInBackground(String ... Data) {
 			dir_path = Data[1];
 			int count;
+			Boolean success = false;
+			InputStream input = null;
+			OutputStream output = null;
 			try {
 				URL url = new URL(Data[0]);
 				URLConnection conexion = url.openConnection();
@@ -156,9 +169,9 @@ public class ZipFileManager {
 		
 				int file_length = conexion.getContentLength();
 		
-				InputStream input = new BufferedInputStream(url.openStream());
+				input = new BufferedInputStream(url.openStream());
 				path_file = dir_path + "/" + file_name;
-				OutputStream output = new FileOutputStream(path_file);
+				output = new FileOutputStream(path_file);
 		
 				byte data[] = new byte[1024];
 		
@@ -169,13 +182,34 @@ public class ZipFileManager {
 						output.write(data, 0, count);
 				}
 				output.flush();
-				output.close();
-				input.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
 				
-			return null;		
+				success = true;
+				
+			} catch (IOException e) {
+				
+				success = false;
+				
+				if(BuildConfig.DEBUG){
+					Log.e(TAG, e.getLocalizedMessage(), e);
+				}
+			}finally{
+				if(input != null){
+					try {
+						input.close();
+					} catch (IOException e) {
+						// ignore
+					}
+				}
+				if(output != null){
+					try {
+						output.close();
+					} catch (IOException e) {
+						// ignore
+					}
+				}
+			}
+				
+			return success;		
 		}
 		
 		/**
@@ -192,10 +226,34 @@ public class ZipFileManager {
 		 * @ param unused
 		 */
 		@Override
-		protected void onPostExecute(String unused) {
+		protected void onPostExecute(Boolean success) {
 			barDialog.dismiss();
-			String[] data = {path_file, dir_path};
-			new UnzipFileAsyncTask().execute(data);
+			
+			if(success != null && success == true){
+				String[] data = {path_file, dir_path};
+				new UnzipFileAsyncTask().execute(data);
+			}else{
+				
+				// Something went wrong
+				AlertDialog.Builder download_dialog_builder;
+				download_dialog_builder = new AlertDialog.Builder(activity);
+				download_dialog_builder.setTitle(R.string.dialog_title);
+				download_dialog_builder.setMessage(R.string.download_error_message);
+				download_dialog_builder.setCancelable(false);
+				download_dialog_builder.setPositiveButton(R.string.button_close_content, new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {	
+						
+						error_dialog.dismiss();
+					}
+				});
+				
+				error_dialog = download_dialog_builder.create();
+				
+				//Show an alert dialog to notify user that an error occurred
+				error_dialog.show();
+			}
 		}	
 	}
 	
@@ -232,28 +290,60 @@ public class ZipFileManager {
 		@Override
 		protected String doInBackground(String ... path) {	
 			this.dir_path = path[1];
+			
+			FileInputStream fis = null;
+			ZipInputStream zis = null;
+			FileOutputStream fout = null;
 			try {
-		    	FileInputStream fis = new FileInputStream(path[0]);
-		        ZipInputStream zis = new ZipInputStream(fis);
+		    	fis = new FileInputStream(path[0]);
+		        zis = new ZipInputStream(fis);
 		        ZipEntry ze = null;
 	        	while((ze = zis.getNextEntry())!=null){
 	        		if(ze.isDirectory())
 	        			dirChecker(path[1]+ "/" + ze.getName());
 	        		else{
-		                FileOutputStream fout = new FileOutputStream(path[1] + "/" + ze.getName(),true);
+	        			
+		                fout = new FileOutputStream(path[1] + "/" + ze.getName(),true);
 		                byte[] buffer = new byte[1024];
-		                for (int lenght = zis.read(buffer); lenght != -1; lenght = zis.read(buffer))
+		                for (int lenght = zis.read(buffer); lenght != -1; lenght = zis.read(buffer)){
 		                    fout.write(buffer,0,lenght);
+		                }
 		                    
 		                //zis.closeEntry();
 		                fout.close();
 	        			}	
 	        	}
-	            zis.close();
-	        	fis.close();
+	            
 		    }catch(Exception e ){
-		    	e.printStackTrace();
-		    }		
+		    	if(BuildConfig.DEBUG){
+		    		Log.e(TAG, e.getLocalizedMessage(), e);
+		    	}
+		    }finally{
+		    	if(zis != null){
+		    		try {
+						zis.close();
+					} catch (IOException e) {
+						// ignore
+					}
+		    	}
+		    	
+		    	if(fis != null){
+		    		try {
+		    			fis.close();
+					} catch (IOException e) {
+						// ignore
+					}
+		    	}
+		    	
+		    	if(fout != null){
+		    		try {
+		    			fout.close();
+					} catch (IOException e) {
+						// ignore
+					}
+		    	}
+		    	
+		    }
 			
 			return null;	
 		}
@@ -264,8 +354,9 @@ public class ZipFileManager {
 		 */
 		private void dirChecker(String location) {
 			File f = new File(location);
-			if(!f.exists())
+			if(!f.exists()){
 				f.mkdirs();
+			}
 		}
 		
 		/**
@@ -276,8 +367,9 @@ public class ZipFileManager {
 		protected void onPostExecute(String unused) {
 			//Delete downloaded archive
 			File file = new File(dir_path+"/"+file_name);
-			if(file.exists())
+			if(file.exists()){
 				file.delete();
+			}
 			
 			zipDialog.dismiss();
 			launchMainActivity();

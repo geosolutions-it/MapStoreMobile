@@ -20,6 +20,7 @@ import java.io.File;
 import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.dialog.FilePickerDialog;
 import it.geosolutions.android.map.dialog.FilePickerDialog.FilePickCallback;
+import it.geosolutions.android.map.utils.MapFilesProvider;
 import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
@@ -100,7 +101,7 @@ public class EditPreferences extends SherlockPreferenceActivity {
 		            	
 		            	new FilePickerDialog(EditPreferences.this,
 		            			"Select a background file",
-		            			Environment.getExternalStorageDirectory()+"/mapstore/",
+		            			MapFilesProvider.getEnvironmentDirPath(null)+"/mapstore/",
 		            			extension,
 		            			new FilePickCallback() {
 		            		
