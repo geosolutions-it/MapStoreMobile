@@ -32,7 +32,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 /**
  * Described Highlighted Marker
  * @author Lorenzo Natali (www.geo-solutions.it)
@@ -50,6 +49,8 @@ public class DescribedMarker extends Marker {
 	private String featureId;
 	private Feature feature;
 	
+	private boolean textVisible = false;
+	
 	public String getFeatureId() {
         return featureId;
     }
@@ -65,6 +66,7 @@ public class DescribedMarker extends Marker {
 	private static final int STROKE_WIDTH = 3;
 	private static final Paint PAINT_STROKE=new Paint();
 	private static final Paint PAINT_FILL=new Paint();
+	private static final Paint PAINT_TEXT=new Paint();
 	
 	/**
 	 * Create a marker
@@ -89,6 +91,14 @@ public class DescribedMarker extends Marker {
 		PAINT_STROKE.setColor(STROKE_COLOR);
 		PAINT_STROKE.setAlpha(STROKE_ALPHA);
 		PAINT_STROKE.setStrokeWidth(STROKE_WIDTH);
+		
+	    // text
+		PAINT_TEXT.setAntiAlias(true);
+		PAINT_TEXT.setColor(STROKE_COLOR);
+		PAINT_TEXT.setAlpha(STROKE_ALPHA);
+		PAINT_TEXT.setStrokeWidth(STROKE_WIDTH);
+		PAINT_TEXT.setTextSize(40);
+		PAINT_TEXT.setUnderlineText(true);
 		
 	}
 	public String getId() {
@@ -118,6 +128,18 @@ public class DescribedMarker extends Marker {
 		
 	}
 	
+	/**
+	 * @return the textVisible
+	 */
+	public boolean isTextVisible() {
+		return textVisible;
+	}
+	/**
+	 * @param textVisible the textVisible to set
+	 */
+	public void setTextVisible(boolean textVisible) {
+		this.textVisible = textVisible;
+	}
 	@Override
 	/* (non-Javadoc)
 	 * @see org.mapsforge.android.maps.overlay.Marker#draw(org.mapsforge.core.model.BoundingBox, byte, android.graphics.Canvas, org.mapsforge.core.model.Point)
@@ -149,6 +171,10 @@ public class DescribedMarker extends Marker {
 		if(isHighlight()){
 			canvas.drawCircle(pixelX, pixelY, drawableBounds.width()/2,PAINT_FILL) ;
 			canvas.drawCircle(pixelX, pixelY, drawableBounds.width()/2,PAINT_STROKE) ;
+		}
+		
+		if(textVisible){
+			canvas.drawText(description+" cm",pixelX-40, pixelY+30, PAINT_TEXT);
 		}
 		
 		drawable.setBounds(left, top, right, bottom);
