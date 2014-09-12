@@ -95,7 +95,7 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 	 * @param boundingBox
 	 * @param drawZoomLevel
 	 */
-	private void drawFromMbTile (Canvas canvas, BoundingBox boundingBox, byte drawZoomLevel) {
+	private void drawFromMbTile (Canvas canvas, BoundingBox boundingBox,final byte drawZoomLevel) {
 
 		double n = boundingBox.maxLatitude;
 		double w = boundingBox.minLongitude;
@@ -208,30 +208,26 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 
 								int currentZoomLevel = drawZoomLevel;
 								double[] latlon = tileXYToLatLon(tile_x, tile_y, drawZoomLevel);
-								double latDiff = 0.0d, lonDiff = 0.0d;
 								int zoomLevelDiff = 0;
 								int newCoords[] = null;
 								int count = 0;
-								
+
 								//decrease the zoom level and try to fetch a tile
 								while(rasterBytes == null){
-									
+
 									if(count > 6)break; //give up
 
 									currentZoomLevel--;
 									sb.delete(0, sb.length());
-									
+
 									//convert original coordinates to coordinates according to this current zoom level
 									newCoords = latLonZoomToTileXY(latlon[0], latlon[1], currentZoomLevel);
 									sb.append(currentZoomLevel).append(",").append(newCoords[0]).append(",").append(newCoords[1]);
 
-									String newtileQuery = sb.toString();
-									rasterBytes = spatialDatabaseHandler.getRasterTile(newtileQuery);
-									
+									String newestTileQuery = sb.toString();
+									rasterBytes = spatialDatabaseHandler.getRasterTile(newestTileQuery);
+
 									if(rasterBytes != null){//found, remember properties
-										double[] foundLatLon = tileXYToLatLon(newCoords[0], newCoords[1], (byte) currentZoomLevel);
-										latDiff = latlon[0] - foundLatLon[0];
-										lonDiff = latlon[1] - foundLatLon[1];
 										zoomLevelDiff = drawZoomLevel - currentZoomLevel;
 									}
 									count++;
@@ -245,27 +241,24 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 									//an interpolation would not make anymore sense, continue
 									continue;
 								}
-								
-								OnTilePosition pos = latlonDeltasToPositionOnTile(latDiff, lonDiff);
-								//Log.d(TAG, String.format("tile found on level %d for level %d lat diff %f, lon diff %f pos : %s",currentZoomLevel,drawZoomLevel,latDiff,lonDiff,pos.toString()));
 
 								//decoded the byte to get the pixels
 								decodedBitmap = BitmapFactory.decodeByteArray(rasterBytes, 0, rasterBytes.length);
 								decodedBitmap.getPixels(pixels, 0, Tile.TILE_SIZE, 0, 0, Tile.TILE_SIZE, Tile.TILE_SIZE);
 
 								int[] foundPixels = findPixels(pixels, tile_x, tile_y, drawZoomLevel, newCoords[0], newCoords[1], currentZoomLevel);
-								
-								//interpolate until 256*256, prepared for more levels of zoomdifference
-								int[] tempPixels = foundPixels.clone();
+
+								//	interpolate until 256*256, prepared for more levels of zoomdifference
+								int[] tempPixels = foundPixels;
 								while(true){
-									int[] scaledPixels = scalePixels(tempPixels);
-									tempPixels = scaledPixels.clone();
+									int[] scaledPixels = scalePixels(foundPixels);
+									tempPixels = scaledPixels;
 									//Log.d(TAG, "scaling, now " + tempPixels.length);
 									if(tempPixels.length == (Tile.TILE_SIZE * Tile.TILE_SIZE)){
 										break;
 									}
 								}
-								pixels = tempPixels.clone();
+								pixels = tempPixels;
 							}
 
 						}else{
@@ -487,7 +480,21 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 	 * @param zoom
 	 * @return
 	 */
-	public static double[] tileXYToLatLon(int tile_x, int tile_y, byte zoom){
+	public static double[] tileXYToLatLon(int tile_x_, int tile_y_, byte zoom){
+		
+
+		//\quote {http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
+		//
+		//   Normally this returns the NW-corner of the square. 
+		//   Use the function with xtile+1 and/or ytile+1 to get the other corners. 
+		//   With xtile+0.5 & ytile+0.5 it will return the center of the tile.
+		//}
+
+		
+		// calculates the center position of the tile
+		double tile_x = tile_x_ + 0.5d;
+		double tile_y = tile_y_ + 0.5d;
+		
 		double lon = tile_x / Math.pow(2.0, zoom) * 360.0 - 180;
 		double n = Math.PI - (2.0 * Math.PI * tile_y) / Math.pow(2.0, zoom);
 		double lat = Math.toDegrees(Math.atan(Math.sinh(n)));
@@ -532,17 +539,19 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 	  */
 	 public static OnTilePosition latlonDeltasToPositionOnTile(double latDelta, double lonDelta){
 		 
-		if(latDelta == 0 && lonDelta == 0){
-			return OnTilePosition.UPPER_LEFT;
-		}else if(latDelta == 0 && lonDelta > 0){
-			return OnTilePosition.UPPER_RIGHT;
-		}else if (latDelta < 0 && lonDelta == 0 ){
-			return OnTilePosition.LOWER_LEFT;
-		}else if (latDelta < 0 && lonDelta > 0){
-			return OnTilePosition.LOWER_RIGHT;
-		}else{
-			throw new IllegalArgumentException("illegal deltas calculated lat : "+latDelta+" lon : "+lonDelta);
-		}
+		 //now seen from center
+		 
+		 if(latDelta > 0 && lonDelta < 0){
+				return OnTilePosition.UPPER_LEFT;
+			}else if(latDelta > 0 && lonDelta > 0){
+				return OnTilePosition.UPPER_RIGHT;
+			}else if (latDelta < 0 && lonDelta < 0 ){
+				return OnTilePosition.LOWER_LEFT;
+			}else if (latDelta < 0 && lonDelta > 0){
+				return OnTilePosition.LOWER_RIGHT;
+			}else{
+				throw new IllegalArgumentException("illegal deltas calculated lat : "+latDelta+" lon : "+lonDelta);
+			}
 		 
 	 }
 	 /**
@@ -579,7 +588,6 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 			x_end   = width;
 			y_start = width / 2;
 			y_end =   width;
-			
 			break;
 
 		default:
@@ -607,10 +615,8 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
  * @param foundX
  * @param foundY
  * @param foundZoom
- * @return
+ * @return the extracted pixels
  */
-	 //TODO this currently works only for 1 zoom level, more than one needs a
-	 //repositioning of the reference location(line 631 (coordsAccordingtoPos()) what is currently not working correctly)
 	 public static int[] findPixels(final int[] origPixels,
 			 final int origX, final int origY, final int origZoom,
 			 final int foundX, final int foundY, final int foundZoom){
@@ -631,49 +637,19 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 			 double	latDiff = origLatlon[0] - currentLatlon[0];
 			 double	lonDiff = origLatlon[1] - currentLatlon[1];
 			 //cut out pixels of pos
-			 OnTilePosition pos = latlonDeltasToPositionOnTile(latDiff, lonDiff);
+			 final OnTilePosition pos = latlonDeltasToPositionOnTile(latDiff, lonDiff);
 
 			 //cut out the current quarter
 			 int[] tempPixels = cutOutPixels(currentPixels, pos);
 			 currentPixels = tempPixels;
-			 //calculate position of next level
-
-			 
+			 						 
 			 currentZoomLevel++;
-			 //coords according to the new zoom level
-			 currentTileCoords = latLonZoomToTileXY(currentLatlon[0], currentLatlon[1], currentZoomLevel);
-			 //adjust them according to the tile pos
-			 currentTileCoords = coordsAccordingtoPos(currentTileCoords, pos);
 			 
-			 //Log.d(TAG, String.format("current zoom %d x %d y %d pos %s", currentZoomLevel,currentTileCoords[0],currentTileCoords[1],pos.toString()));
 		 }
-		 return currentPixels;
-
-	 }
-	 /**
-	  * adjust the coordinates according to the allegedly positon of the desired area on the next tile level
-	  * not working correctly at the moment
-	  * @param currentTileCoords
-	  * @param pos
-	  * @return
-	  */
-	 public static int[] coordsAccordingtoPos(final int[] currentTileCoords, final OnTilePosition pos){
-		 switch (pos) { 
-			case UPPER_LEFT:
-				return new int[]{currentTileCoords[0] - 1,currentTileCoords[1] - 1};
-				
-			case UPPER_RIGHT :
-				return new int[]{currentTileCoords[0] - 1,currentTileCoords[1]};
-			case LOWER_LEFT:
-				return new int[]{currentTileCoords[0],currentTileCoords[1] - 1};
-			case LOWER_RIGHT :
-				return new int[]{currentTileCoords[0] ,currentTileCoords[1] };
-
-			default:
-				throw new IllegalArgumentException("invalid onttile position");
-			}
 		 
+		 return currentPixels;
 	 }
+
 	 /**
 	  * scales up an pixel array by the amount of 2
 	  * hence an 16 pixels array will contain 64
