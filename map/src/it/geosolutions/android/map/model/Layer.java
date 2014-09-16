@@ -77,6 +77,12 @@ public interface Layer <T extends Source> extends Serializable{
 	
 	public LayerGroup getLayerGroup();
 	
+	/**
+	 * The Opacity value of this layer
+	 */
+	public void setOpacity(double opacityValue);
+	
+	public double getOpacity();
 	
 	
 }

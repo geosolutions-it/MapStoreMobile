@@ -34,15 +34,24 @@ import eu.geopaparazzi.spatialite.database.spatial.core.SpatialRasterTable;
  */
 public class MbTilesLayer implements Layer<MbTilesSource> {
 	
+	/**
+	 * Tag for logging
+	 */
+	protected static final String TAG = "MbTilesLayer";
+	
 	protected String title;
 	protected MbTilesSource source;
 	protected String tableName;
 	protected LayerGroup layerGroup;
+	protected int opacity;
+	
+	public static int MAX_OPACITY = 255;	
 	
 	public MbTilesLayer(SpatialRasterTable t) {
 		this.title = t.getTableName();
 		this.tableName = t.getTableName();
 		SpatialDataSourceManager.getInstance().getSpatialDataSourceHandler(t);
+		this.opacity = MAX_OPACITY;
 	}
 
 
@@ -151,6 +160,36 @@ public class MbTilesLayer implements Layer<MbTilesSource> {
 	@Override
 	public LayerGroup getLayerGroup() {
 		return this.layerGroup;
+	}
+
+
+	@Override
+	public void setOpacity(double opacityValue) {
+		
+		if(opacityValue < 0 || opacityValue > 255){
+			
+			// Fully visible
+			this.opacity = MAX_OPACITY;
+			
+		}else{
+			
+			try{
+				this.opacity = (int) Math.floor(opacityValue);
+			}catch(ClassCastException cce){
+				if(BuildConfig.DEBUG){
+					Log.w(TAG, "Cannot cast opacity value to INT");
+				}
+				this.opacity = MAX_OPACITY;		
+			}
+			
+		}
+		
+	}
+
+
+	@Override
+	public double getOpacity() {
+		return this.opacity;
 	}
 
 }

@@ -52,12 +52,20 @@ public class WMSLayer implements Layer<WMSSource>{
 	 */
 	private String title;
 	
+	/**
+	 * Flag if this Layer is tiled
+	 */
 	private boolean tiled = false;
 	
 	/**
 	 * LayerGroup of this Layer, can be null
 	 */
 	protected LayerGroup layerGroup;
+
+	/**
+	 * Opacity in decimal values (0.0 - 1.0)
+	 */
+	protected double opacity;
 
 	
 	/**
@@ -202,6 +210,17 @@ public class WMSLayer implements Layer<WMSSource>{
 	@Override
 	public LayerGroup getLayerGroup() {
 		return this.layerGroup;
+	}
+
+	@Override
+	public void setOpacity(double opacityValue) {
+		this.opacity = opacityValue;
+		
+	}
+
+	@Override
+	public double getOpacity() {
+		return opacity;
 	}
 
 }

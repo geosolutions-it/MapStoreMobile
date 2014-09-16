@@ -40,6 +40,8 @@ public class SpatialiteLayer implements Layer<SpatialiteSource> {
 	SpatialiteSource source;
 	private String tableName;
 	
+	private double opacity;
+	
 	/**
 	 * LayerGroup of this Layer, can be null
 	 */
@@ -154,6 +156,19 @@ public class SpatialiteLayer implements Layer<SpatialiteSource> {
 	@Override
 	public LayerGroup getLayerGroup() {
 		return this.layerGroup;
+	}
+
+
+	@Override
+	public void setOpacity(double opacityValue) {
+
+		this.opacity = opacityValue;
+	}
+
+
+	@Override
+	public double getOpacity() {
+		return this.opacity;
 	}
 
 }

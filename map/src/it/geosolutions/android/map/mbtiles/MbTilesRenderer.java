@@ -17,6 +17,7 @@
  */
 package it.geosolutions.android.map.mbtiles;
 
+import it.geosolutions.android.map.BuildConfig;
 import it.geosolutions.android.map.renderer.OverlayRenderer;
 import it.geosolutions.android.map.style.AdvancedStyle;
 import it.geosolutions.android.map.utils.StyleUtils;
@@ -33,6 +34,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.util.Log;
 import android.util.TimingLogger;
 import eu.geopaparazzi.spatialite.database.spatial.core.ISpatialDatabaseHandler;
 
@@ -185,6 +187,15 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 				Bitmap decodedBitmap = null;
 				Bitmap bitmap = null;		
 
+				Paint paint = new Paint();
+
+				try {
+					paint.setAlpha((int) l.getOpacity()); // set transparent value here 
+				}catch(ClassCastException cce){
+					if(BuildConfig.DEBUG){
+						Log.w(TAG, "Cannot cast opacity to INT");
+					}
+				}
 
 				for(int tile_y = i_min_y_osm; tile_y<=i_max_y_osm; tile_y++ ){
 
@@ -287,9 +298,6 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 						bitmap.setPixels(pixels, 0, Tile.TILE_SIZE, 0, 0, Tile.TILE_SIZE, Tile.TILE_SIZE);
 
 						// do the actual drawing on canvas
-						// TODO: make this Paint configurable
-						Paint paint = new Paint();    
-						paint.setAlpha(60); // set transparent value here  
 						/* 
 						 * TODO: investigate the why the tiles must be drawn with an additional Y offset of (-tileSize)
 						 * ((tile_y - i_min_y_osm -1 )*tileSize) -offsetY
