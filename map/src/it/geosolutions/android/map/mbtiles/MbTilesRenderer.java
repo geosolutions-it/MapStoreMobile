@@ -34,6 +34,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Build;
 import android.util.Log;
 import android.util.TimingLogger;
 import eu.geopaparazzi.spatialite.database.spatial.core.ISpatialDatabaseHandler;
@@ -52,6 +53,18 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 	// -----------------------------------------------
 	
 	public static double originShift = 2 * Math.PI * 6378137 / 2.0;
+	
+	
+	/**
+	 * zoom level difference that is max to zoom
+	 * eg. a zoom level x tile is cut out one quarter 
+	 * and scaled up to fit zoom level x + ZOOM_LEVEL_DIFFERENCE_TO_ZOOM
+	 */
+	private static int ZOOM_LEVEL_DIFFERENCE_TO_ZOOM = 1;
+	/**
+	 * zoom level from which zooms are launched
+	 */
+	private static int MIN_ZOOM_LEVEL_TO_ZOOM = 11;
 	
 	private ArrayList<MbTilesLayer> layers;
 	private Projection projection;
@@ -197,6 +210,7 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 					}
 				}
 
+
 				for(int tile_y = i_min_y_osm; tile_y<=i_max_y_osm; tile_y++ ){
 
 					for(int tile_x = i_min_x; tile_x<=i_max_x; tile_x++ ){
@@ -214,67 +228,78 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 						if( rasterBytes == null){
 							// got nothing, check if we can interpolate a desired tile out of an available tile
 
-							//but only for higher zoom levels
-							if(drawZoomLevel > 10){
-
-								int currentZoomLevel = drawZoomLevel;
-								double[] latlon = tileXYToLatLon(tile_x, tile_y, drawZoomLevel);
-								int zoomLevelDiff = 0;
-								int newCoords[] = null;
-								int count = 0;
-
-								//decrease the zoom level and try to fetch a tile
-								while(rasterBytes == null){
-
-									if(count > 6)break; //give up
-
-									currentZoomLevel--;
-									sb.delete(0, sb.length());
-
-									//convert original coordinates to coordinates according to this current zoom level
-									newCoords = latLonZoomToTileXY(latlon[0], latlon[1], currentZoomLevel);
-									sb.append(currentZoomLevel).append(",").append(newCoords[0]).append(",").append(newCoords[1]);
-
-									String newestTileQuery = sb.toString();
-									rasterBytes = spatialDatabaseHandler.getRasterTile(newestTileQuery);
-
-									if(rasterBytes != null){//found, remember properties
-										zoomLevelDiff = drawZoomLevel - currentZoomLevel;
-									}
-									count++;
-								}
-								if(rasterBytes == null){//we gave up finding something
-									continue;
-								}
-								//we have raster data, check zoom level difference
-								if(zoomLevelDiff > 1){ 
-									//for large differences between available data and wanted zoom level 
-									//an interpolation would not make anymore sense, continue
-									continue;
-								}
-
-								//decoded the byte to get the pixels
-								decodedBitmap = BitmapFactory.decodeByteArray(rasterBytes, 0, rasterBytes.length);
-								decodedBitmap.getPixels(pixels, 0, Tile.TILE_SIZE, 0, 0, Tile.TILE_SIZE, Tile.TILE_SIZE);
-
-								int[] foundPixels = findPixels(pixels, tile_x, tile_y, drawZoomLevel, newCoords[0], newCoords[1], currentZoomLevel);
-
-								//	interpolate until 256*256, prepared for more levels of zoomdifference
-								int[] tempPixels = foundPixels;
-								while(true){
-									int[] scaledPixels = scalePixels(foundPixels);
-									tempPixels = scaledPixels;
-									//Log.d(TAG, "scaling, now " + tempPixels.length);
-									if(tempPixels.length == (Tile.TILE_SIZE * Tile.TILE_SIZE)){
-										break;
-									}
-								}
-								pixels = tempPixels;
+							//if not wanted continue
+							if(ZOOM_LEVEL_DIFFERENCE_TO_ZOOM == 0 || drawZoomLevel < MIN_ZOOM_LEVEL_TO_ZOOM){
+								continue;
 							}
+
+							int currentZoomLevel = drawZoomLevel;
+							double[] latlon = tileXYToLatLon(tile_x, tile_y, drawZoomLevel);
+
+							int zoomLevelDiff = 0;
+							int newCoords[] = null;
+							int count = 0;
+
+							//decrease the zoom level and try to fetch a tile
+							while(rasterBytes == null){
+
+								if(count > 6)break; //give up
+
+								currentZoomLevel--;
+								sb.delete(0, sb.length());
+
+								//convert original coordinates to coordinates according to this current zoom level
+								newCoords = latLonZoomToTileXY(latlon[0], latlon[1], currentZoomLevel);
+								sb.append(currentZoomLevel).append(",").append(newCoords[0]).append(",").append(newCoords[1]);
+
+								String newestTileQuery = sb.toString();
+								rasterBytes = spatialDatabaseHandler.getRasterTile(newestTileQuery);
+
+								if(rasterBytes != null){//found, remember properties
+
+									zoomLevelDiff = drawZoomLevel - currentZoomLevel;
+								}
+								count++;
+							}
+							if(rasterBytes == null){//we gave up finding something
+								continue;
+							}
+							//we have raster data, check zoom level difference
+							if(zoomLevelDiff > ZOOM_LEVEL_DIFFERENCE_TO_ZOOM){ 
+								//for large differences between available data and wanted zoom level 
+								//an interpolation would not make anymore sense, continue
+								continue;
+							}
+
+
+							//decoded the byte to get the pixels
+							decodedBitmap = BitmapFactory.decodeByteArray(rasterBytes, 0, rasterBytes.length);
+							decodedBitmap.getPixels(pixels, 0, Tile.TILE_SIZE, 0, 0, Tile.TILE_SIZE, Tile.TILE_SIZE);
+
+							int[] foundPixels = findPixels(pixels, tile_x, tile_y, drawZoomLevel, newCoords[0], newCoords[1], currentZoomLevel);
+
+							//	interpolate until 256*256, prepared for more levels of zoomdifference
+							int[] tempPixels = foundPixels;
+							while(true){
+								int[] scaledPixels = scalePixels(foundPixels);
+								tempPixels = scaledPixels;
+								//Log.d(TAG, "scaling, now " + tempPixels.length);
+								if(tempPixels.length == (Tile.TILE_SIZE * Tile.TILE_SIZE)){
+									break;
+								}
+							}
+							if(BuildConfig.DEBUG){
+								Log.d(TAG, String.format("tile zoomed %d %d %d",newCoords[0], newCoords[1], currentZoomLevel));
+							}
+							pixels = tempPixels;
+
 
 						}else{
 							//rasterBytes found
 
+							if(BuildConfig.DEBUG){
+								Log.d(TAG, String.format("native tile %d %d %d",tile_x,tile_y,drawZoomLevel));
+							}
 							decodedBitmap = BitmapFactory.decodeByteArray(rasterBytes, 0, rasterBytes.length);
 
 							// check if the input stream could be decoded into a bitmap
