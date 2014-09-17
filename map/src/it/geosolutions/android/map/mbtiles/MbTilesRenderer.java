@@ -54,17 +54,21 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 	
 	public static double originShift = 2 * Math.PI * 6378137 / 2.0;
 	
+	/**
+	 *  first zoom level from which zooms are launched
+	 */
+	private static int MIN_ZOOM_LEVEL_TO_ZOOM = 11;
 	
 	/**
-	 * zoom level difference that is max to zoom
+	 * min zoom level difference that is zoomed
 	 * eg. a zoom level x tile is cut out one quarter 
 	 * and scaled up to fit zoom level x + ZOOM_LEVEL_DIFFERENCE_TO_ZOOM
 	 */
-	private static int ZOOM_LEVEL_DIFFERENCE_TO_ZOOM = 1;
+	private static int MIN_ZOOM_LEVEL_DIFFERENCE = 1;
 	/**
-	 * zoom level from which zooms are launched
+	 * max zoom level difference for which zoomed tiles are produced
 	 */
-	private static int MIN_ZOOM_LEVEL_TO_ZOOM = 11;
+	private static int MAX_ZOOM_LEVEL_DIFFERENCE = 3;
 	
 	private ArrayList<MbTilesLayer> layers;
 	private Projection projection;
@@ -228,8 +232,8 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 						if( rasterBytes == null){
 							// got nothing, check if we can interpolate a desired tile out of an available tile
 
-							//if not wanted continue
-							if(ZOOM_LEVEL_DIFFERENCE_TO_ZOOM == 0 || drawZoomLevel < MIN_ZOOM_LEVEL_TO_ZOOM){
+							//if no difference or low zoom level, continue
+							if(MIN_ZOOM_LEVEL_DIFFERENCE == 0 || drawZoomLevel < MIN_ZOOM_LEVEL_TO_ZOOM){
 								continue;
 							}
 
@@ -243,7 +247,7 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 							//decrease the zoom level and try to fetch a tile
 							while(rasterBytes == null){
 
-								if(count > 6)break; //give up
+								if(count > MAX_ZOOM_LEVEL_DIFFERENCE)break; //give up
 
 								currentZoomLevel--;
 								sb.delete(0, sb.length());
@@ -265,7 +269,7 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 								continue;
 							}
 							//we have raster data, check zoom level difference
-							if(zoomLevelDiff > ZOOM_LEVEL_DIFFERENCE_TO_ZOOM){ 
+							if(zoomLevelDiff > MIN_ZOOM_LEVEL_DIFFERENCE){ 
 								//for large differences between available data and wanted zoom level 
 								//an interpolation would not make anymore sense, continue
 								continue;
