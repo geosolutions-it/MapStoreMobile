@@ -284,7 +284,9 @@ public class MultiSourceOverlayManager implements OverlayManager {
 	 * @param the <MapStoreConfiguration> object to load
 	 */
 	public void loadMapStoreConfig(MapStoreConfiguration result){
-		if(result == null) return ;
+		if(result == null) {
+			return ;
+		}
 		ArrayList<Layer> l = MapStoreUtils.buildWMSLayers(result);
 		setLayers(l);
 		setMapStoreConfig(result);

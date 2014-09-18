@@ -48,9 +48,10 @@ public class MbTilesLayer implements Layer<MbTilesSource> {
 	public static int MAX_OPACITY = 255;	
 	
 	public MbTilesLayer(SpatialRasterTable t) {
-		this.title = t.getTableName();
-		this.tableName = t.getTableName();
-		SpatialDataSourceManager.getInstance().getSpatialDataSourceHandler(t);
+		if(t != null){
+			this.title = t.getTableName();
+			this.tableName = t.getTableName();
+		}
 		this.opacity = MAX_OPACITY;
 	}
 

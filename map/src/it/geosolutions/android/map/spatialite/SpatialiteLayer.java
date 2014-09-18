@@ -48,9 +48,10 @@ public class SpatialiteLayer implements Layer<SpatialiteSource> {
 	protected LayerGroup layerGroup;
 
 	public SpatialiteLayer(SpatialVectorTable t) {
-		this.title = t.getName();
-		this.tableName = t.getName();
-		SpatialDataSourceManager.getInstance().getSpatialDataSourceHandler(t);
+		if(t != null){
+			this.title = t.getName();
+			this.tableName = t.getName();
+		}
 	}
 
 
