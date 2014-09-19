@@ -28,7 +28,7 @@ public class MBTilesDroidSpitter {
 
     public void open( boolean fetchMetadata, String metadataVersion ) {
         // db = mbtilesdb.getReadableDatabase();
-        db = SQLiteDatabase.openDatabase(dbpath.getAbsolutePath(), null, SQLiteDatabase.OPEN_READONLY&SQLiteDatabase.NO_LOCALIZED_COLLATORS);
+        db = SQLiteDatabase.openDatabase(dbpath.getAbsolutePath(), null, SQLiteDatabase.OPEN_READONLY|SQLiteDatabase.NO_LOCALIZED_COLLATORS);
 
         if (!fetchMetadata)
             return;
