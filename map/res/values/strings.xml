@@ -26,11 +26,12 @@
     <string name="menu_geostore">MapStore</string>
    	<string name="dialog_title">Test Data Download</string>
 	<string name="dialog_message">Do you want to download data files test archive?</string>
+	<string name="download_error_message">Could not download data</string>
 	<string name="button_download">OK</string>
-	<string name="button_undownload">Not now</string>
-	<string name="progress_dialog_title">Wait please</string>
-	<string name="progress_dialog_message">Download data</string>
-	<string name="progress_dialog_unzipping">Unzipping...</string>
+	<string name="button_undownload">Later</string>
+	<string name="progress_dialog_title">Please Wait</string>
+	<string name="progress_dialog_message">Downloading data&#8230;</string>
+	<string name="progress_dialog_unzipping">Unzipping&#8230;</string>
 	<string name="next">Next</string>
 	<string name="previous">Previous</string>
 	<string name="other">Other</string>

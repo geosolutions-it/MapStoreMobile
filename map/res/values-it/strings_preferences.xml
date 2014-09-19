@@ -10,6 +10,9 @@
 	<string name="preferences_fullscreen">Modalità schermo intero</string>
 	<string name="preferences_fullscreen_desc">Nascondi la barra di stato</string>
 	<string name="preferences_map">Impostazioni mappa</string>
+	<string name="preferences_background_source">Sfondo</string>
+	<string name="preferences_background_source_desc">Seleziona il tipo di sfondo</string>
+	<string name="preferences_background_source_file">"Seleziona il file di sfondo"</string>
 <!-- <string name="preferences_move_speed">Velocit&agrave; movimento</string>
 	<string name="preferences_move_speed_desc">Adjust the move speed of the map</string>
 	<string name="preferences_move_speed_value">%d %% move speed</string>

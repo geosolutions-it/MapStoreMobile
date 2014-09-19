@@ -21,6 +21,7 @@ import com.google.gson.JsonParseException;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
 /**
  * <JsonDeserializer> for GeoJson Geometry part
  * @author Lorenzo Natali (lorenzo.natali at geo-solutions.it)
@@ -62,8 +63,18 @@ public class GeometryJsonDeserializer implements JsonDeserializer<Geometry> {
 			     return fact.createLineString(getCoordinatesArray(jc.getAsJsonArray()));
 			 }
         } else if (geometryType.equals(TYPE_MULTILINESTRING)) {
-            // NOT SUPPORTED YET
-        	
+        	JsonElement jc = obj.get(COORDINATES);
+        	if(jc != null){
+        		JsonArray ja = jc.getAsJsonArray();
+        		if(ja != null){
+        			int ja_size = ja.size();
+        			LineString[] lineStringArray = new LineString[ja_size];
+        			for(int i = 0; i < ja_size ; i++){
+        				lineStringArray[i] = fact.createLineString(getCoordinatesArray(ja.get(i).getAsJsonArray()));
+        			}
+        			return fact.createMultiLineString(lineStringArray);
+        		}
+    		}
         } else if (geometryType.equals(TYPE_POLYGON)) {
         	JsonElement jc = obj.get(COORDINATES);
         	if(jc != null){
