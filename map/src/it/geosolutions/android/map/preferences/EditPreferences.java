@@ -100,7 +100,7 @@ public class EditPreferences extends SherlockPreferenceActivity {
 		            	}
 		            	
 		            	new FilePickerDialog(EditPreferences.this,
-		            			"Select a background file",
+		            			getString(R.string.preferences_background_source_file),
 		            			MapFilesProvider.getEnvironmentDirPath(null)+"/mapstore/",
 		            			extension,
 		            			new FilePickCallback() {

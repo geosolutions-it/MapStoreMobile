@@ -12,6 +12,7 @@
 	<string name="preferences_map">Map settings</string>
 	<string name="preferences_background_source">Background source</string>
 	<string name="preferences_background_source_desc">Select background source</string>
+	<string name="preferences_background_source_file">"Select a background file"</string>
 	<string name="preferences_scale_bar_unit">Scale bar unit</string>
 	<string name="preferences_scale_bar_unit_desc">Select the unit for the map scale bar</string>
 	<string name="preferences_show_fps_counter">Frame rate</string>

@@ -42,7 +42,7 @@
             android:paddingLeft="5dip"
             android:paddingRight="5dip"
             android:paddingTop="5dip"
-            android:text="Cancel" />
+            android:text="@android:string/cancel" />
     </LinearLayout>
 
 </RelativeLayout>
