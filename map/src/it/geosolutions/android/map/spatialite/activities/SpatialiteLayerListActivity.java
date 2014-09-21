@@ -280,7 +280,7 @@ public class SpatialiteLayerListActivity extends SherlockListActivity {
             public void onClick(DialogInterface dialog, int which) {
 
             	Intent mIntent = new Intent();
-                MSMMap m = SpatialDbUtils.mapFromDb();
+                MSMMap m = SpatialDbUtils.mapFromDb(true);
                 mIntent.putExtra(MapsActivity.MSM_MAP, m);
                 setResult(RESULT_OK, mIntent);
                 finish();

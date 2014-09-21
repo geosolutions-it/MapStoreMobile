@@ -16,6 +16,7 @@
  */
 package it.geosolutions.android.map.utils;
 
+import it.geosolutions.android.map.BuildConfig;
 import it.geosolutions.android.map.database.SpatialDataSourceHandler;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
 import it.geosolutions.android.map.mbtiles.MbTilesLayer;
@@ -195,12 +196,24 @@ public static GeoPoint getGeopointFromLayer( String attributeName, String attrib
     return null;
 }
 
+
 /**
  * Creates a <MSMMap> getting the whole database configuration.
  * This should be changed once the db are loaded as sources 
- * @return
+ * @return MSMMap
  */
 public static MSMMap mapFromDb(){
+	return mapFromDb(false);
+}
+
+
+/**
+ * Creates a <MSMMap> getting the whole database configuration.
+ * If vectorOnly is true, does not look for raster tables.
+ * This should be changed once the db are loaded as sources 
+ * @return MSMMap
+ */
+public static MSMMap mapFromDb(boolean vectorOnly){
 	MSMMap m = new MSMMap();
 	try {
 		
@@ -217,7 +230,9 @@ public static MSMMap mapFromDb(){
 				SpatialDataSourceHandler dsm = SpatialDataSourceManager.getInstance().getSpatialDataSourceHandler(tables.get(0));
 				if(dsm != null){
 					s = new SpatialiteSource(dsm);
-					Log.v("SpatialiteDBload","Created source from datasource"+s.getTitle());
+					if(BuildConfig.DEBUG){
+						Log.v("SpatialiteDBload","Created SpatialiteSource from datasource"+s.getTitle());
+					}
 				}else{
 					s = new SpatialiteSource(h);
 				}
@@ -231,35 +246,51 @@ public static MSMMap mapFromDb(){
 				l.setSource(s);
 				m.layers.add(l);
 			}
-		
-			// Get Raster Layers
-			List<SpatialRasterTable> rasterTables =  h.getSpatialRasterTables(true);
-			MbTilesSource mbs = null;
-			//inspect and create the source
-			if(tables.size()>0){
-				ISpatialDatabaseHandler dsm = SpatialDataSourceManager.getInstance().getSpatialDataSourceHandler(rasterTables.get(0));
-				if(dsm != null){
-					mbs = new MbTilesSource(dsm);
-					Log.v("SpatialiteDBload","Created source from datasource"+mbs.getTitle());
-				}else{
-					mbs = new MbTilesSource(h);
-				}
-			}else{
-				mbs = new MbTilesSource(h);
-		}
 			
-			//add the source to the layers that has the same handler source
-			for (SpatialRasterTable t : rasterTables) {
-				MbTilesLayer l = new MbTilesLayer(t);
-				l.setSource(mbs);
-				m.layers.add(l);
+			// Lookup for raster tables
+			if(!vectorOnly){
+				/*
+				 * Geopaparazzi throws jsqlite.Exception if it fails to find metadata
+				 */
+				try {
+					
+					// Get Raster Layers
+					List<SpatialRasterTable> rasterTables =  h.getSpatialRasterTables(true);
+					MbTilesSource mbs = null;
+					//inspect and create the source
+					if(tables.size()>0){
+						ISpatialDatabaseHandler dsm = SpatialDataSourceManager.getInstance().getSpatialDataSourceHandler(rasterTables.get(0));
+						if(dsm != null){
+							mbs = new MbTilesSource(dsm);
+							if(BuildConfig.DEBUG){
+								Log.v("SpatialiteDBload","Created MbTilesSource from datasource"+mbs.getTitle());
+							}
+						}else{
+							mbs = new MbTilesSource(h);
+						}
+					}else{
+						mbs = new MbTilesSource(h);
+					}
+					
+					//add the source to the layers that has the same handler source
+					for (SpatialRasterTable t : rasterTables) {
+						MbTilesLayer l = new MbTilesLayer(t);
+						l.setSource(mbs);
+						m.layers.add(l);
+					}
+				
+				} catch (Exception e) {
+					if(BuildConfig.DEBUG){
+						Log.e("Spatialite","error retrieving raster tables", e);
+					}
+				}
 			}
-		
 		}
 
 	} catch (Exception e) {
-		// TODO Auto-generated catch block
-		Log.e("Spatialite","error retrieving spatial vector tables");
+		if(BuildConfig.DEBUG){
+			Log.e("Spatialite","error retrieving spatial tables", e);
+		}
 		return m;
 	}
 	return m;

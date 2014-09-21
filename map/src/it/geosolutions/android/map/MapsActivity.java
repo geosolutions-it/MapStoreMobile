@@ -330,7 +330,7 @@ public class MapsActivity extends MapActivityBase {
 			if(layers != null){
 				layerManager.setLayers(layers);
 			}else{
-				MSMMap map = SpatialDbUtils.mapFromDb();
+				MSMMap map = SpatialDbUtils.mapFromDb(true);
 				StorageUtils.setupSources(this);
 		        layerManager.loadMap(map);
 			}
