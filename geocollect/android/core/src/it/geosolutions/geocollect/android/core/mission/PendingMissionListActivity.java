@@ -20,6 +20,7 @@ package it.geosolutions.geocollect.android.core.mission;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.mapsforge.android.maps.BackgroundSourceType;
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
 
@@ -50,6 +51,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.widget.FrameLayout;
@@ -243,27 +245,26 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         	
     		//ArrayList<Layer> layers =  (ArrayList<Layer>) LocalPersistence.readObjectFromFile(this, LocalPersistence.CURRENT_MAP);
         	//if(layers == null || layers.isEmpty()){
-    			MapFilesProvider.setBaseDir("/geocollect");
     			
-				MSMMap m = SpatialDbUtils.mapFromDb();
-	    		if(m.layers == null || m.layers.isEmpty()){
-	    			// retry, SpatialDataSourceManager is buggy
-	    			SpatialDataSourceManager dbManager = SpatialDataSourceManager.getInstance();
-
-	    			try {
-	    				//Only if not already loaded some tables
-	    				if (dbManager.getSpatialVectorTables(false).size() <= 0) {
-	    					dbManager.init(this, MapFilesProvider.getBaseDirectoryFile());
-	    				} 
-	    			} catch (Exception e) {
-	    				// ignore
-	    			}
-	    			m = SpatialDbUtils.mapFromDb();
-	    		}
+//				MSMMap m = SpatialDbUtils.mapFromDb();
+//	    		if(m.layers == null || m.layers.isEmpty()){
+//	    			// retry, SpatialDataSourceManager is buggy
+//	    			SpatialDataSourceManager dbManager = SpatialDataSourceManager.getInstance();
+//
+//	    			try {
+//	    				//Only if not already loaded some tables
+//	    				if (dbManager.getSpatialVectorTables(false).size() <= 0) {
+//	    					dbManager.init(this, MapFilesProvider.getBaseDirectoryFile());
+//	    				} 
+//	    			} catch (Exception e) {
+//	    				// ignore
+//	    			}
+//	    			m = SpatialDbUtils.mapFromDb();
+//	    		}
 	    		launch.putExtra(MapsActivity.PARAMETERS.LAT, 44.40565);
 	    		launch.putExtra(MapsActivity.PARAMETERS.LON, 8.946256);
 	    		launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL, (byte)11);
-	    		launch.putExtra(MapsActivity.MSM_MAP, m);
+//	    		launch.putExtra(MapsActivity.MSM_MAP, m);
 			//}
         	
         	launch.putExtra(MapsActivity.PARAMETERS.CUSTOM_MAPINFO_CONTROL, new ReturningMapInfoControl());

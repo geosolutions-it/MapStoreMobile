@@ -78,6 +78,7 @@ public class EditPreferences extends SherlockPreferenceActivity {
 		            public boolean onPreferenceChange(final Preference preference, Object newValue) {
 		            	
 		            	final int type = Integer.parseInt(newValue.toString());
+		            	final String oldType = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString("mapsforge_background_type", "0");
 		            	
 		            	//TODO implement geopackage
 		            	if(type == 2){
@@ -101,7 +102,7 @@ public class EditPreferences extends SherlockPreferenceActivity {
 		            	
 		            	new FilePickerDialog(EditPreferences.this,
 		            			getString(R.string.preferences_background_source_file),
-		            			MapFilesProvider.getEnvironmentDirPath(null)+"/mapstore/",
+		            			MapFilesProvider.getEnvironmentDirPath(null)+MapFilesProvider.getBaseDir(),
 		            			extension,
 		            			new FilePickCallback() {
 		            		
@@ -110,11 +111,20 @@ public class EditPreferences extends SherlockPreferenceActivity {
 		            			
 		            			final Editor ed = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
 		            			ed.putBoolean("mapsforge_background_file_changed", true);
-		            			ed.putString("mapsforge_background_file", file.getName());
 		            			ed.putString("mapsforge_background_filepath", file.getAbsolutePath());
 		            			ed.commit();
 		            			preference.setSummary(file.getName());
 		            		}
+
+							@Override
+							public void noFilePicked() {
+								
+								//no file was selected, reset to previous type
+								Editor ed = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
+								ed.putString("mapsforge_background_type", oldType);
+								ed.commit();
+								
+							}
 		            	});
 		            	
 

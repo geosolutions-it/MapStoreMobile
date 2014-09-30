@@ -17,6 +17,8 @@
  */
 package it.geosolutions.android.map.mbtiles;
 
+import org.mapsforge.android.maps.BackgroundSourceType;
+
 import android.util.Log;
 import jsqlite.Exception;
 import it.geosolutions.android.map.BuildConfig;
@@ -25,6 +27,7 @@ import it.geosolutions.android.map.model.Layer;
 import it.geosolutions.android.map.model.LayerGroup;
 import it.geosolutions.android.map.style.AdvancedStyle;
 import it.geosolutions.android.map.style.StyleManager;
+import it.geosolutions.android.map.utils.MapFilesProvider;
 import eu.geopaparazzi.spatialite.database.spatial.core.ISpatialDatabaseHandler;
 import eu.geopaparazzi.spatialite.database.spatial.core.SpatialRasterTable;
 
@@ -52,7 +55,18 @@ public class MbTilesLayer implements Layer<MbTilesSource> {
 			this.title = t.getTableName();
 			this.tableName = t.getTableName();
 		}
-		this.opacity = MAX_OPACITY;
+		
+		if(MapFilesProvider.getBaseDir().equals("/geocollect") && MapFilesProvider.getBackgroundSourceType() == BackgroundSourceType.MAPSFORGE){
+			if(BuildConfig.DEBUG){				
+				Log.d(TAG, "MBTiles overlay on Mapsforge background setting opacity to 0.75");
+			}
+			this.opacity = 192;
+		}else{
+			if(BuildConfig.DEBUG){								
+				Log.d(TAG, "Full OPACITY "+MapFilesProvider.getBaseDir() +" "+ MapFilesProvider.getBackgroundSourceType());
+			}
+			this.opacity = MAX_OPACITY;
+		}
 	}
 
 

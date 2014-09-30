@@ -292,18 +292,18 @@ public class MbTilesRenderer implements OverlayRenderer<MbTilesLayer> {
 									break;
 								}
 							}
-							if(BuildConfig.DEBUG){
-								Log.d(TAG, String.format("tile zoomed %d %d %d",newCoords[0], newCoords[1], currentZoomLevel));
-							}
+//							if(BuildConfig.DEBUG){
+//								Log.d(TAG, String.format("tile zoomed %d %d %d",newCoords[0], newCoords[1], currentZoomLevel));
+//							}
 							pixels = tempPixels;
 
 
 						}else{
 							//rasterBytes found
 
-							if(BuildConfig.DEBUG){
-								Log.d(TAG, String.format("native tile %d %d %d",tile_x,tile_y,drawZoomLevel));
-							}
+//							if(BuildConfig.DEBUG){
+//								Log.d(TAG, String.format("native tile %d %d %d",tile_x,tile_y,drawZoomLevel));
+//							}
 							decodedBitmap = BitmapFactory.decodeByteArray(rasterBytes, 0, rasterBytes.length);
 
 							// check if the input stream could be decoded into a bitmap
