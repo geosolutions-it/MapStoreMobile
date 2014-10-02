@@ -19,6 +19,7 @@ package it.geosolutions.android.map.mbtiles;
 
 import org.mapsforge.android.maps.BackgroundSourceType;
 
+import android.preference.PreferenceManager;
 import android.util.Log;
 import jsqlite.Exception;
 import it.geosolutions.android.map.BuildConfig;
@@ -55,18 +56,9 @@ public class MbTilesLayer implements Layer<MbTilesSource> {
 			this.title = t.getTableName();
 			this.tableName = t.getTableName();
 		}
+
+		this.opacity = MAX_OPACITY;
 		
-		if(MapFilesProvider.getBaseDir().equals("/geocollect") && MapFilesProvider.getBackgroundSourceType() == BackgroundSourceType.MAPSFORGE){
-			if(BuildConfig.DEBUG){				
-				Log.d(TAG, "MBTiles overlay on Mapsforge background setting opacity to 0.75");
-			}
-			this.opacity = 192;
-		}else{
-			if(BuildConfig.DEBUG){								
-				Log.d(TAG, "Full OPACITY "+MapFilesProvider.getBaseDir() +" "+ MapFilesProvider.getBackgroundSourceType());
-			}
-			this.opacity = MAX_OPACITY;
-		}
 	}
 
 

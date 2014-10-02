@@ -18,6 +18,7 @@
 package it.geosolutions.android.map;
 
 import it.geosolutions.android.map.activities.GetFeatureInfoLayerListActivity;
+import it.geosolutions.android.map.activities.MBTilesLayerOpacitySettingActivity;
 import it.geosolutions.android.map.activities.MapActivityBase;
 import it.geosolutions.android.map.activities.about.InfoView;
 import it.geosolutions.android.map.control.CoordinateControl;
@@ -328,7 +329,12 @@ public class MapsActivity extends MapActivityBase {
 			boolean dontLoadMBTileLayer = MapFilesProvider.getBackgroundSourceType() == BackgroundSourceType.MBTILES ? true : false;
 			MSMMap map = SpatialDbUtils.mapFromDb(dontLoadMBTileLayer);
 			StorageUtils.setupSources(this);
-		    layerManager.loadMap(map);
+			
+			//This adds layers also if its called loadMap but it will not order layers
+		    //layerManager.loadMap(map);
+			//so use this instead
+			addLayersOrdered(map.layers);
+			
 //			}
 			//setup left drawer fragments
 	        osf =  new LayerSwitcherFragment();
@@ -858,6 +864,26 @@ public class MapsActivity extends MapActivityBase {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
+		Log.d(MapsActivity.class.getSimpleName(), "MapsActivity onActivityResult");
+		
+		if(requestCode == LayerSwitcherFragment.OPACITY_SETTIN_REQUEST_ID){
+
+			final int newValue = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getInt(MBTilesLayerOpacitySettingActivity.MBTILES_OPACITY_ID, 192);
+
+			ArrayList<Layer> layers = layerManager.getLayers();
+
+			for(Layer l : layers){
+				if(l instanceof MbTilesLayer){
+					l.setOpacity(newValue);
+					layerManager.redrawLayer(l);
+
+				}
+			}
+
+			//its not necessary to handle the other stuff
+			return;
+		}
+		
 		if(requestCode == GetFeatureInfoLayerListActivity.BBOX_REQUEST && resultCode == RESULT_OK){
 			//the response can contain a feature to use to replace the current marker 
 			//on the map
@@ -1096,15 +1122,8 @@ public class MapsActivity extends MapActivityBase {
     			
     			MSMMap map = SpatialDbUtils.mapFromDb(false);
     			Log.d(MapsActivity.class.getSimpleName(), "to mapsforge maps includes "+map.layers.size()+" layers");
-    			for(Layer layer : map.layers){
-    				
-    				Log.d(MapsActivity.class.getSimpleName(), "layer "+layer.getClass().getSimpleName());
-    				if(layer instanceof MbTilesLayer){
-    					layer.setOpacity(192);
-    				}
-    			}
     			
-    			layerManager.setLayers(map.layers);
+    			addLayersOrdered(map.layers);
     			
     			break;
     		case MBTILES:
@@ -1166,6 +1185,46 @@ public class MapsActivity extends MapActivityBase {
     @Override
     public void onActionModeFinished(ActionMode mode) {
     	currentActionMode = null;
+    }
+    
+    public void addLayersOrdered(final ArrayList<Layer> layers){
+    	
+		ArrayList<Layer> originalLayers =  layers;
+		ArrayList<Layer> orderedLayers = new ArrayList<Layer>();
+		
+		//check if there is a MBTiles layer which needs to be ordered
+		boolean layersContainMBTilesLayer = false;
+		for(Layer l : originalLayers){
+			if(l instanceof MbTilesLayer){
+				layersContainMBTilesLayer = true;
+				break;
+			}
+		}
+		//if there is, add this flag to wait until it has been added
+		boolean mbTilesAdded = !layersContainMBTilesLayer;
+		
+		while(!originalLayers.isEmpty()){
+			
+			final Layer layer = originalLayers.get(originalLayers.size() - 1); // get last
+			
+			if(layer instanceof MbTilesLayer){
+				
+				final int currentValue = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getInt(MBTilesLayerOpacitySettingActivity.MBTILES_OPACITY_ID, 192);
+				layer.setOpacity(currentValue);
+				orderedLayers.add(layer);
+				mbTilesAdded = true;
+				originalLayers.remove(layer);
+				Log.d(MapsActivity.class.getSimpleName(), "mbtiles layer added , size "+orderedLayers.size());
+			}else if(mbTilesAdded == true){
+				orderedLayers.add(layer);
+				originalLayers.remove(layer);
+				Log.d(MapsActivity.class.getSimpleName(), "other added , size "+orderedLayers.size());
+			}
+			
+			
+		}
+		
+		layerManager.setLayers(orderedLayers);
     }
 
 }

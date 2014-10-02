@@ -91,5 +91,8 @@
     <string name="decimation">Decimation</string>
     <string name="decimation_factor_default">0.000001</string>
     <string name="dash">Stroke dashed</string>
+    
+    <string name="mbtiles_opacity_setting">Set the opacity for the MBTiles overlay</string>
+    
 
 </resources>

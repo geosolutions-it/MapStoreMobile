@@ -106,6 +106,8 @@
         <activity android:name="it.geosolutions.android.map.activities.NewSourceActivity"></activity>
         <!-- About  -->
         <activity android:name="it.geosolutions.android.map.activities.about.InfoView"></activity>
+        <!-- MBTilesOpacitySetting  -->
+        <activity android:name="it.geosolutions.android.map.activities.MBTilesLayerOpacitySettingActivity"></activity>
         <!-- ********************** -->
         <!-- END OF MAPSTORE MOBILE -->
         <!-- ********************** -->
