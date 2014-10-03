@@ -104,10 +104,11 @@ public class MbTilesDatabaseRenderer implements MapRenderer {
 			this.db.close();
 			return bb.getCenterPoint();
 		} catch (NullPointerException e) {
-			return new GeoPoint(43.7242359188, 10.9463005959);
+			Log.e(TAG, "NullPointerException getStartPoint", e);
+			return null;
 		} catch (SQLiteException e) {
 			Log.e(TAG, "SQLiteException getStartPoint", e);
-			return new GeoPoint(43.7242359188, 10.9463005959);
+			return null;
 		}
 	}
 
@@ -118,9 +119,10 @@ public class MbTilesDatabaseRenderer implements MapRenderer {
 			this.db.close();
 			return bb;
 		} catch (NullPointerException e) {
+			Log.e(TAG, "NullPointerException getBoundingBox", e);
 			return null;
 		} catch (SQLiteException e) {
-			Log.e(TAG, "SQLiteException getStartPoint", e);
+			Log.e(TAG, "SQLiteException getBoundingBox", e);
 			return null;
 		}
 	}

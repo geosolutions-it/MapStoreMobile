@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.mapsforge.android.maps.BackgroundSourceType;
+import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.mapgenerator.MapRenderer;
 import org.mapsforge.android.maps.mapgenerator.TileCache;
 import org.mapsforge.android.maps.mapgenerator.databaserenderer.DatabaseRenderer;
@@ -717,8 +718,8 @@ public class MapsActivity extends MapActivityBase {
 
 		// TODO d get this path on initialization
 
-    	final String filePath = PreferenceManager.getDefaultSharedPreferences(this).getString("mapsforge_background_filepath", null);
-    	final int type = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString("mapsforge_background_type", "0"));
+    	final String filePath = PreferenceManager.getDefaultSharedPreferences(this).getString(MapView.MAPSFORGE_BACKGROUND_FILEPATH, null);
+    	final int type = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString(MapView.MAPSFORGE_BACKGROUND_RENDERER_TYPE, "0"));
     	
     	//if the map file was edited in the preferences
 		if(filePath != null && type == 0){
@@ -1094,17 +1095,17 @@ public class MapsActivity extends MapActivityBase {
     public void  checkIfMapViewNeedsBackgroundUpdate()
     {
     	final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-    	final boolean thingsChanged = prefs.getBoolean("mapsforge_background_file_changed", false);
+    	final boolean thingsChanged = prefs.getBoolean(MapView.MAPSFORGE_BACKGROUND_FILEPATH_CHANGED, false);
     	if(!thingsChanged)return;
     	
     	final BackgroundSourceType currentMapRendererType = this.mapView.getMapRendererType();
 
-    	final String filePath = prefs.getString("mapsforge_background_filepath", null);
+    	final String filePath = prefs.getString(MapView.MAPSFORGE_BACKGROUND_FILEPATH, null);
     	final String defaultType = getApplicationContext().getPackageName().equals("it.geosolutions.geocollect.android.app") ? "1" : "0";
-    	final BackgroundSourceType type = BackgroundSourceType.values()[Integer.parseInt(prefs.getString("mapsforge_background_type", defaultType))];
+    	final BackgroundSourceType type = BackgroundSourceType.values()[Integer.parseInt(prefs.getString(MapView.MAPSFORGE_BACKGROUND_RENDERER_TYPE, defaultType))];
 
     	final Editor ed = prefs.edit();
-    	ed.putBoolean("mapsforge_background_file_changed", false);
+    	ed.putBoolean(MapView.MAPSFORGE_BACKGROUND_FILEPATH_CHANGED, false);
     	ed.commit();
     	
     	//1. renderer changed

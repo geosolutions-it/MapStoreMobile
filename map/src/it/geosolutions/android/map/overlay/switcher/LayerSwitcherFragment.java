@@ -172,17 +172,18 @@ public class LayerSwitcherFragment extends SherlockListFragment implements
 			}else{
 				mbTilesLayerSelected = false;
 			}
-
+			boolean wasDeselected = false;
 			if (!selected.contains(sel)) {
 				selected.add(sel);
 			} else {
+				wasDeselected = true;
 				selected.remove(sel);
 			}
 			updateSelected();
 			int numSelected = selected.size();
 			if (numSelected > 0) {
 				if (actionMode != null) {
-					updateCAB(numSelected);
+					updateCAB(numSelected,wasDeselected);
 				} else {
 					actionMode = getSherlockActivity().startActionMode(
 							callback);
@@ -289,18 +290,18 @@ public class LayerSwitcherFragment extends SherlockListFragment implements
 	 */
 	private void reload() {
 		if (adapter != null) {
-		adapter.clear();
+			adapter.clear();
 			// force reload
 			Loader<?> l = getSherlockActivity().getSupportLoaderManager()
 					.getLoader(LOADER_INDEX);
 			if (l != null) {
-			l.forceLoad();
+				l.forceLoad();
 			} else {
-			Log.e("LAYER_SWITCHER", "Unable to reload layers");
+				Log.e("LAYER_SWITCHER", "Unable to reload layers");
+			}
+
 		}
-		
-	}
-	
+
 	}
 
 	/**
@@ -331,26 +332,29 @@ public class LayerSwitcherFragment extends SherlockListFragment implements
 
 	// ACTION MODE CALLBACKS
 	public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-	ListView lv = getListView();
-	Resources res = getResources();
+		Log.d(LayerSwitcherFragment.class.getSimpleName(), "onPrepareActionMode");
+		ListView lv = getListView();
+		Resources res = getResources();
 		int number = selected.size();
-	updateCAB(number);
-	
-	return false;
+		updateCAB(number,false);
+
+		return false;
 	}
 
 	public void onDestroyActionMode(ActionMode mode) {
-	ListView lv = getListView();
-	lv.clearFocus();
-	lv.clearChoices();
-	selected = new ArrayList<Layer<?>>();
+		Log.d(LayerSwitcherFragment.class.getSimpleName(), "onDestroyActionmode ");
+		ListView lv = getListView();
+		lv.clearFocus();
+		lv.clearChoices();
+		selected = new ArrayList<Layer<?>>();
 		if (this.actionMode != null) {
-		this.actionMode = null;
-	}
-	adapter.notifyDataSetChanged();
+			this.actionMode = null;
+		}
+		adapter.notifyDataSetChanged();
 	}
 
 	public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+		Log.d(LayerSwitcherFragment.class.getSimpleName(), "onCreateActionMode");
 		if(mbTilesLayerSelected){
 			mode.getMenuInflater().inflate(R.menu.edit_delete_up_down, menu);
 			//for some reasons the icon is dark, though this is the holo_dark icon
@@ -366,7 +370,7 @@ public class LayerSwitcherFragment extends SherlockListFragment implements
 	public boolean onActionItemClicked(ActionMode mode, MenuItem menu) {
 	int itemId = menu.getItemId();
 	ArrayList<Layer> layers = getLayers();
-	
+	Log.d(LayerSwitcherFragment.class.getSimpleName(), "actionitemclicked "+itemId);
 	ListView lv = getListView();
 	MultiSourceOverlayManager om = getOverlayManager();
 	
@@ -435,27 +439,28 @@ public class LayerSwitcherFragment extends SherlockListFragment implements
  * Clear selections and close the action mode
  */
 	private void closeActionMode() {
-	selected = new ArrayList<Layer<?>>();
+		Log.d(LayerSwitcherFragment.class.getSimpleName(), "close actionmode ");
+		selected = new ArrayList<Layer<?>>();
 		if (actionMode != null) {
-		actionMode.finish();
-		actionMode = null;
-	}
+			actionMode.finish();
+			actionMode = null;
+		}
 	}
 
 	/**
  * Update the selected layers in the list view
  */
 	private void updateSelected() {
-	ListView lv = getListView();
-	lv.clearFocus();
-	lv.clearChoices();
-	ArrayList<Layer> layers = getLayers();
-	int size = layers.size();
+		ListView lv = getListView();
+		lv.clearFocus();
+		lv.clearChoices();
+		ArrayList<Layer> layers = getLayers();
+		int size = layers.size();
 		for (Layer l : selected) {
-		int i = layers.indexOf(l);
+			int i = layers.indexOf(l);
 			lv.setItemChecked(size - 1 - i, true);
-		
-	}
+
+		}
 	}
 
 	/*
@@ -475,25 +480,58 @@ public class LayerSwitcherFragment extends SherlockListFragment implements
 	 * Updates the ActionBar if it is in "ACTION_MODE"
 	 * @param numSelected
 	 */
-	private void updateCAB(int numSelected) {
-		
+	private void updateCAB(int numSelected, boolean wasDeselected) {
+
 		if (actionMode == null){
 			// nothing to update
 			return;
 		}
 		String title = getResources().getQuantityString(
 				R.plurals.quantity_layers_selected, numSelected, numSelected);
-	actionMode.setTitle(title);
-	Menu menu = actionMode.getMenu();
+		actionMode.setTitle(title);
+		Menu menu = actionMode.getMenu();
 		if (numSelected > 1) {
-		menu.findItem(R.id.up).setVisible(false);
-		menu.findItem(R.id.down).setVisible(false);
-		
-		} else {
-		menu.findItem(R.id.up).setVisible(true);
-		menu.findItem(R.id.down).setVisible(true);
+			menu.findItem(R.id.up).setVisible(false);
+			menu.findItem(R.id.down).setVisible(false);
+
+		} else if(numSelected == 1 && wasDeselected) {
+			//from multiple selections, one remains, what is it ?
+			if(selected != null && selected.size() > 0){
+				
+				MenuItem editItem = menu.findItem(R.id.edit);
+				
+				if(selected.get(0) instanceof MbTilesLayer){
+					
+					//the remaining is an MbTilesLayer item, config and add edit item if necessary				
+					menu.findItem(R.id.up).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+					menu.findItem(R.id.down).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+					menu.findItem(R.id.up).setVisible(true);
+					menu.findItem(R.id.down).setVisible(true);
+					
+					//this was a vector entry, add the edit entry as first item
+					if(editItem == null){
+						Drawable d = getResources().getDrawable(R.drawable.ic_action_settings);
+						d.mutate().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
+						menu.add(Menu.CATEGORY_SYSTEM, R.id.edit, Menu.FIRST, getString(R.string.edit))
+				        .setIcon(d)
+				        .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+					}
+				}else{
+					//the remaining is a raster layer, config and remove edit if necessary
+					menu.findItem(R.id.up).setVisible(true);
+					menu.findItem(R.id.down).setVisible(true);
+					
+					//this was a raster entry, remove edit
+					if(editItem != null){
+						menu.removeItem(R.id.edit);
+					}
+				}
+			}
+		} else { //should not be called anymore
+			menu.findItem(R.id.up).setVisible(true);
+			menu.findItem(R.id.down).setVisible(true);
+		}
 	}
-	}
-	
+
 
 }

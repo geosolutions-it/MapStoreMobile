@@ -81,6 +81,10 @@ public class MapView extends ViewGroup {
 	private static final int DEFAULT_TILE_CACHE_SIZE_FILE_SYSTEM = 100;
 	private static final int DEFAULT_TILE_CACHE_SIZE_IN_MEMORY = 20;
 
+	public static final String MAPSFORGE_BACKGROUND_FILEPATH = "mapsforge_background_filepath";
+	public static final String MAPSFORGE_BACKGROUND_FILEPATH_CHANGED = "mapsforge_background_file_changed";
+	public static final String MAPSFORGE_BACKGROUND_RENDERER_TYPE = "mapsforge_background_type";
+
 	private MapRenderer mapRenderer;
 	private DebugSettings debugSettings;
 	private final TileCache fileSystemTileCache;
@@ -151,12 +155,12 @@ public class MapView extends ViewGroup {
 
 		final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
 		BackgroundSourceType type = BackgroundSourceType.values()[Integer.parseInt(prefs.getString(
-				"mapsforge_background_type", "0"))];
+				MAPSFORGE_BACKGROUND_RENDERER_TYPE, "0"))];
 
 		// TODO add a default filepath inside the downloaded zip file
 		// like MapFilesProvider.getEnvironmentDirPath(null) + MapFilesProvider.getBaseDir() + fileName.mbtiles
 
-		final String filePath = prefs.getString("mapsforge_background_filepath", null);
+		final String filePath = prefs.getString(MAPSFORGE_BACKGROUND_FILEPATH, null);
 
 		if (filePath == null && type == BackgroundSourceType.MBTILES) {
 			// no chance to use MBTiles come background without file

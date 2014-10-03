@@ -18,9 +18,9 @@ import com.actionbarsherlock.app.SherlockActivity;
 /**
  * shows a seekbar to select the opacity for MBTiles Layer
  * 
- * between 25 and 75 %
+ * between 25 % and 100 %
  * 
- * @author robertoehler
+ * @author Robert Oehler
  *
  */
 public class MBTilesLayerOpacitySettingActivity  extends SherlockActivity implements OnSeekBarChangeListener{

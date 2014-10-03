@@ -17,6 +17,8 @@ package it.geosolutions.android.map.preferences;
 
 import java.io.File;
 
+import org.mapsforge.android.maps.MapView;
+
 import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.dialog.FilePickerDialog;
 import it.geosolutions.android.map.dialog.FilePickerDialog.FilePickCallback;
@@ -59,9 +61,13 @@ public class EditPreferences extends SherlockPreferenceActivity {
 		
 		//sets the currently selected filename if available
 		Preference source = findPreference("mapsforge_background_type");
-		final String fileName = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString("mapsforge_background_file", null);
-		if(fileName != null){
-			source.setSummary(fileName);
+		final String filePath = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString(MapView.MAPSFORGE_BACKGROUND_FILEPATH, null);
+		if(filePath != null){
+			if(filePath.contains("/")){			
+				source.setSummary(filePath.substring(filePath.lastIndexOf("/") + 1));
+			}else{
+				source.setSummary(filePath);		
+			}
 		}
 		
 	}
@@ -78,7 +84,7 @@ public class EditPreferences extends SherlockPreferenceActivity {
 		            public boolean onPreferenceChange(final Preference preference, Object newValue) {
 		            	
 		            	final int type = Integer.parseInt(newValue.toString());
-		            	final String oldType = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString("mapsforge_background_type", "0");
+		            	final String oldType = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString(MapView.MAPSFORGE_BACKGROUND_RENDERER_TYPE, "0");
 		            	
 		            	//TODO implement geopackage
 		            	if(type == 2){
@@ -110,8 +116,8 @@ public class EditPreferences extends SherlockPreferenceActivity {
 		            		public void filePicked(final File file) {
 		            			
 		            			final Editor ed = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
-		            			ed.putBoolean("mapsforge_background_file_changed", true);
-		            			ed.putString("mapsforge_background_filepath", file.getAbsolutePath());
+		            			ed.putBoolean(MapView.MAPSFORGE_BACKGROUND_FILEPATH_CHANGED, true);
+		            			ed.putString(MapView.MAPSFORGE_BACKGROUND_FILEPATH, file.getAbsolutePath());
 		            			ed.commit();
 		            			preference.setSummary(file.getName());
 		            		}
@@ -121,7 +127,7 @@ public class EditPreferences extends SherlockPreferenceActivity {
 								
 								//no file was selected, reset to previous type
 								Editor ed = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
-								ed.putString("mapsforge_background_type", oldType);
+								ed.putString(MapView.MAPSFORGE_BACKGROUND_RENDERER_TYPE, oldType);
 								ed.commit();
 								
 							}
