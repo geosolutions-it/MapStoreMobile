@@ -27,7 +27,6 @@ import it.geosolutions.geocollect.model.config.MissionTemplate;
 import java.util.List;
 
 import jsqlite.Database;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -584,19 +583,10 @@ public class PendingMissionListFragment
 	@Override
 	public void onResume() {
 		super.onResume();
-		if(getListView()!= null){
-			int pos = getListView().getCheckedItemPosition();
-			int max = getListView().getCount();
-			if( pos != AbsListView.INVALID_POSITION && pos < max){
-				MissionFeature f = (MissionFeature) getListView().getItemAtPosition(pos);
-				if(f != null){
-					f.editing = true;
-					getListView().invalidateViews();
-				}
-			}
-		}
-	}
-	
+
+		getListView().invalidateViews();
+
+	}	
 
 	/**
 	 * Handle the results

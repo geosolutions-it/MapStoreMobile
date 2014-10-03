@@ -150,7 +150,7 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 	    if(requestCode == EDIT_ACTIVITY_CODE){
 			MissionTemplate t = MissionUtils.getDefaultTemplate(getSherlockActivity());
 
-			PersistenceUtils.loadPageData(t.preview, mFormView, mission, getSherlockActivity());
+			PersistenceUtils.loadPageData(t.preview, mFormView, mission, getSherlockActivity(),true);
 
 	    }
 	}
@@ -165,7 +165,7 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 		MissionTemplate t = MissionUtils.getDefaultTemplate(getSherlockActivity());
 		FormBuilder.buildForm(getActivity(), this.mFormView,t.preview.fields,mission);//TODO page is not enough, some data should be accessible like constants and data
 
-		PersistenceUtils.loadPageData(t.preview, mFormView, mission, getSherlockActivity());
+		PersistenceUtils.loadPageData(t.preview, mFormView, mission, getSherlockActivity(),false);
 		// the view hierarchy is now complete
 		mDone = true;
 	}

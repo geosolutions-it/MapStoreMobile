@@ -17,17 +17,9 @@
  */
 package it.geosolutions.geocollect.android.core.mission;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.mapsforge.android.maps.MapActivity;
-import org.mapsforge.android.maps.MapView;
-
 import it.geosolutions.android.map.MapsActivity;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
-import it.geosolutions.android.map.model.Layer;
 import it.geosolutions.android.map.model.MSMMap;
-import it.geosolutions.android.map.utils.LocalPersistence;
 import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.android.map.utils.SpatialDbUtils;
 import it.geosolutions.android.map.view.MapViewManager;
@@ -45,6 +37,12 @@ import it.geosolutions.geocollect.android.core.preferences.GeoCollectPreferences
 import it.geosolutions.geocollect.android.map.ReturningMapInfoControl;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.source.XDataType;
+
+import java.util.HashMap;
+
+import org.mapsforge.android.maps.MapActivity;
+import org.mapsforge.android.maps.MapView;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -90,6 +88,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 	 * Spatialite Database for persistence
 	 */
 	jsqlite.Database spatialiteDatabase;
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -169,8 +168,6 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 					.setActivateOnItemClick(true);
 		}
 
-
-		
 		// TODO: If exposing deep links into your app, handle intents here.
 	}
 

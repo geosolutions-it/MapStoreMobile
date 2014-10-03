@@ -24,6 +24,7 @@ import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.form.utils.FormBuilder;
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
+import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
 import it.geosolutions.geocollect.android.core.widgets.DatePicker;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.source.XDataType;
@@ -34,6 +35,7 @@ import jsqlite.Database;
 import jsqlite.Exception;
 import jsqlite.Stmt;
 import android.content.Context;
+import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -223,6 +225,7 @@ public class PersistenceUtils {
 					// ignore
 				}
 			}
+			
 			return true;
 		}else{
 			Log.w(TAG, "Database not found, aborting...");
@@ -303,8 +306,10 @@ public class PersistenceUtils {
 	}
 	/**
 	 * Default method for loadPageData
+	 * @param createIfNotPresent create a entry in the table if the requested entry is not found
+	 * this will cause the entry to show up as "inEditing"
 	 */
-	public static boolean loadPageData(Page page, LinearLayout layout, Mission mission, Context context){
+	public static boolean loadPageData(Page page, LinearLayout layout, Mission mission, Context context,boolean createIfNotPresent){
 		if(mission == null || mission.getTemplate() == null){
 			Log.w(TAG, "Mission or MissionTemplate could not be found, abort loading..");
 			return false;
@@ -317,15 +322,17 @@ public class PersistenceUtils {
     			&& !mission.getTemplate().source.localFormStore.isEmpty()){
     		tableName = mission.getTemplate().source.localFormStore;
     	}
-		return loadPageData(page, layout, mission, context, tableName);
+		return loadPageData(page, layout, mission, context, tableName,createIfNotPresent);
 	}
 	
 	
 	/**
 	 * Load the page data from the give database
+	 * @param createIfNotPresent create a entry in the table if the requested entry is not found
+	 * this will cause the entry to show up as "inEditing"
 	 * @return
 	 */
-	public static boolean loadPageData(Page page, LinearLayout layout, Mission mission, Context context, String tableName){
+	public static boolean loadPageData(Page page, LinearLayout layout, Mission mission, Context context, String tableName, boolean createIfNotPresent){
 		
 		
 		if(mission.db != null){
@@ -474,9 +481,10 @@ public class PersistenceUtils {
 										((TextView)v).setText(st.column_string(0));
 								}
 							}							
-						}else{
+						}else if(createIfNotPresent){
 							// no record found, creating..
 							Log.v(TAG, "No record found, creating..");
+							//This causes the write of ORIGIN_ID which will lead to "inediting" in pendingmissionlist
 							s = "INSERT INTO '"+tableName+"' ( ORIGIN_ID ) VALUES ( '"+mission.getOrigin().id+"');";
 							st = mission.db.prepare(s);
 							if(st.step()){
