@@ -24,6 +24,7 @@ import it.geosolutions.android.map.overlay.FreezableOverlay;
 import it.geosolutions.android.map.overlay.MarkerOverlay;
 import it.geosolutions.android.map.overlay.managers.MultiSourceOverlayManager;
 import it.geosolutions.android.map.overlay.managers.OverlayManager;
+import it.geosolutions.android.map.utils.MapFilesProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +74,6 @@ public class AdvancedMapView extends MapView {
 		if(context instanceof MapsActivity){
 			activity = (MapsActivity) context; 
 		}
-
 	}
 	
 	/**

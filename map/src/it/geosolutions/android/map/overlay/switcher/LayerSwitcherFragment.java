@@ -20,16 +20,22 @@ package it.geosolutions.android.map.overlay.switcher;
 import it.geosolutions.android.map.MapsActivity;
 import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.activities.BrowseSourcesActivity;
+import it.geosolutions.android.map.activities.MBTilesLayerOpacitySettingActivity;
 import it.geosolutions.android.map.adapters.LayerSwitcherAdapter;
 import it.geosolutions.android.map.listeners.LayerChangeListener;
+import it.geosolutions.android.map.mbtiles.MbTilesLayer;
 import it.geosolutions.android.map.model.Layer;
 import it.geosolutions.android.map.overlay.managers.MultiSourceOverlayManager;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
@@ -40,10 +46,10 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemLongClickListener;
 
 import com.actionbarsherlock.app.SherlockListFragment;
 import com.actionbarsherlock.view.ActionMode;
@@ -77,6 +83,9 @@ public class LayerSwitcherFragment extends SherlockListFragment implements
 	private boolean isLoading = false;
 	private ActionMode actionMode;
 	private ArrayList<Layer<?>> selected = new ArrayList<Layer<?>>();
+	
+	private boolean mbTilesLayerSelected = false;
+	public final static int OPACITY_SETTIN_REQUEST_ID = 999;
 
 	/**
  * Called only once
@@ -148,51 +157,57 @@ public class LayerSwitcherFragment extends SherlockListFragment implements
 	//
 		// Set Contextual ACTION BAR CALLBACKS
     //
-    final LayerSwitcherFragment callback = this;
-    ListView lv = getListView();
-    lv.setLongClickable(true);
-    lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE); 
-    
-    lv.setOnItemLongClickListener(new OnItemLongClickListener() {
-			public boolean onItemLongClick(AdapterView<?> parent, View view,
-					int position, long id) {
-    	     System.out.println("Long click");
-    	     Layer<?> sel = adapter.getItem(position);
-    	     
-				if (!selected.contains(sel)) {
-    	    	 selected.add(sel);
+	final LayerSwitcherFragment callback = this;
+	ListView lv = getListView();
+	lv.setLongClickable(true);
+	lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE); 
+
+	lv.setOnItemLongClickListener(new OnItemLongClickListener() {
+		public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+			Log.d(LayerSwitcherFragment.class.getSimpleName(), "layer long pressed : "+position);
+			Layer<?> sel = adapter.getItem(position);
+			
+			if(sel instanceof MbTilesLayer){
+				mbTilesLayerSelected = true;
+			}else{
+				mbTilesLayerSelected = false;
+			}
+			boolean wasDeselected = false;
+			if (!selected.contains(sel)) {
+				selected.add(sel);
+			} else {
+				wasDeselected = true;
+				selected.remove(sel);
+			}
+			updateSelected();
+			int numSelected = selected.size();
+			if (numSelected > 0) {
+				if (actionMode != null) {
+					updateCAB(numSelected,wasDeselected);
 				} else {
-    	    	 selected.remove(sel);
-    	     }
-    	     updateSelected();
-				int numSelected = selected.size();
-				if (numSelected > 0) {
-					if (actionMode != null) {
-    	    		 	updateCAB(numSelected);
-					} else {
-						actionMode = getSherlockActivity().startActionMode(
-								callback);
-						// override the done button to deselect all when the
-						// button is pressed
-						int doneButtonId = Resources.getSystem().getIdentifier(
-								"action_mode_close_button", "id", "android");
-						View doneButton = getActivity().findViewById(
-								doneButtonId);
-						doneButton
-								.setOnClickListener(new View.OnClickListener() {
-	
-	    	    	     @Override
-	    	    	     public void onClick(View v) {
-	    	    	         closeActionMode();
-	    	    	     }
-	    	    	 });
-    	    	 }
-				} else {
-    	    	 closeActionMode();
-    	     }
-    	     
-    	     return true;
-    	   }
+					actionMode = getSherlockActivity().startActionMode(
+							callback);
+					// override the done button to deselect all when the
+					// button is pressed
+					int doneButtonId = Resources.getSystem().getIdentifier(
+							"action_mode_close_button", "id", "android");
+					View doneButton = getActivity().findViewById(
+							doneButtonId);
+					doneButton
+					.setOnClickListener(new View.OnClickListener() {
+
+						@Override
+						public void onClick(View v) {
+							closeActionMode();
+						}
+					});
+				}
+			} else {
+				closeActionMode();
+			}
+
+			return true;
+		}
 
 	});
     
@@ -275,18 +290,18 @@ public class LayerSwitcherFragment extends SherlockListFragment implements
 	 */
 	private void reload() {
 		if (adapter != null) {
-		adapter.clear();
+			adapter.clear();
 			// force reload
 			Loader<?> l = getSherlockActivity().getSupportLoaderManager()
 					.getLoader(LOADER_INDEX);
 			if (l != null) {
-			l.forceLoad();
+				l.forceLoad();
 			} else {
-			Log.e("LAYER_SWITCHER", "Unable to reload layers");
+				Log.e("LAYER_SWITCHER", "Unable to reload layers");
+			}
+
 		}
-		
-	}
-	
+
 	}
 
 	/**
@@ -317,27 +332,36 @@ public class LayerSwitcherFragment extends SherlockListFragment implements
 
 	// ACTION MODE CALLBACKS
 	public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-	ListView lv = getListView();
-	Resources res = getResources();
+		Log.d(LayerSwitcherFragment.class.getSimpleName(), "onPrepareActionMode");
+		ListView lv = getListView();
+		Resources res = getResources();
 		int number = selected.size();
-	updateCAB(number);
-	
-	return false;
+		updateCAB(number,false);
+
+		return false;
 	}
 
 	public void onDestroyActionMode(ActionMode mode) {
-	ListView lv = getListView();
-	lv.clearFocus();
-	lv.clearChoices();
-	selected = new ArrayList<Layer<?>>();
+		Log.d(LayerSwitcherFragment.class.getSimpleName(), "onDestroyActionmode ");
+		ListView lv = getListView();
+		lv.clearFocus();
+		lv.clearChoices();
+		selected = new ArrayList<Layer<?>>();
 		if (this.actionMode != null) {
-		this.actionMode = null;
-	}
-	adapter.notifyDataSetChanged();
+			this.actionMode = null;
+		}
+		adapter.notifyDataSetChanged();
 	}
 
 	public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-	mode.getMenuInflater().inflate(R.menu.delete_up_down, menu);
+		Log.d(LayerSwitcherFragment.class.getSimpleName(), "onCreateActionMode");
+		if(mbTilesLayerSelected){
+			mode.getMenuInflater().inflate(R.menu.edit_delete_up_down, menu);
+			//for some reasons the icon is dark, though this is the holo_dark icon
+			menu.findItem(R.id.edit).getIcon().mutate().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
+		}else{
+			mode.getMenuInflater().inflate(R.menu.delete_up_down, menu);
+		}
 		this.actionMode = mode;
 	
 	return true;
@@ -346,10 +370,13 @@ public class LayerSwitcherFragment extends SherlockListFragment implements
 	public boolean onActionItemClicked(ActionMode mode, MenuItem menu) {
 	int itemId = menu.getItemId();
 	ArrayList<Layer> layers = getLayers();
-	
+	Log.d(LayerSwitcherFragment.class.getSimpleName(), "actionitemclicked "+itemId);
 	ListView lv = getListView();
 	MultiSourceOverlayManager om = getOverlayManager();
-		if (itemId == R.id.delete) {
+	
+		if(itemId == R.id.edit){
+			getActivity().startActivityForResult(new Intent(getActivity(), MBTilesLayerOpacitySettingActivity.class),OPACITY_SETTIN_REQUEST_ID);
+		}else if (itemId == R.id.delete) {
 		layers.removeAll(selected);
 			om.setLayers(new ArrayList<Layer>(layers), true);
 		om.forceRedraw();
@@ -412,27 +439,28 @@ public class LayerSwitcherFragment extends SherlockListFragment implements
  * Clear selections and close the action mode
  */
 	private void closeActionMode() {
-	selected = new ArrayList<Layer<?>>();
+		Log.d(LayerSwitcherFragment.class.getSimpleName(), "close actionmode ");
+		selected = new ArrayList<Layer<?>>();
 		if (actionMode != null) {
-		actionMode.finish();
-		actionMode = null;
-	}
+			actionMode.finish();
+			actionMode = null;
+		}
 	}
 
 	/**
  * Update the selected layers in the list view
  */
 	private void updateSelected() {
-	ListView lv = getListView();
-	lv.clearFocus();
-	lv.clearChoices();
-	ArrayList<Layer> layers = getLayers();
-	int size = layers.size();
+		ListView lv = getListView();
+		lv.clearFocus();
+		lv.clearChoices();
+		ArrayList<Layer> layers = getLayers();
+		int size = layers.size();
 		for (Layer l : selected) {
-		int i = layers.indexOf(l);
+			int i = layers.indexOf(l);
 			lv.setItemChecked(size - 1 - i, true);
-		
-	}
+
+		}
 	}
 
 	/*
@@ -452,24 +480,58 @@ public class LayerSwitcherFragment extends SherlockListFragment implements
 	 * Updates the ActionBar if it is in "ACTION_MODE"
 	 * @param numSelected
 	 */
-	private void updateCAB(int numSelected) {
-		
+	private void updateCAB(int numSelected, boolean wasDeselected) {
+
 		if (actionMode == null){
 			// nothing to update
 			return;
 		}
 		String title = getResources().getQuantityString(
 				R.plurals.quantity_layers_selected, numSelected, numSelected);
-	actionMode.setTitle(title);
-	Menu menu = actionMode.getMenu();
+		actionMode.setTitle(title);
+		Menu menu = actionMode.getMenu();
 		if (numSelected > 1) {
-		menu.findItem(R.id.up).setVisible(false);
-		menu.findItem(R.id.down).setVisible(false);
-		
-		} else {
-		menu.findItem(R.id.up).setVisible(true);
-		menu.findItem(R.id.down).setVisible(true);
+			menu.findItem(R.id.up).setVisible(false);
+			menu.findItem(R.id.down).setVisible(false);
+
+		} else if(numSelected == 1 && wasDeselected) {
+			//from multiple selections, one remains, what is it ?
+			if(selected != null && selected.size() > 0){
+				
+				MenuItem editItem = menu.findItem(R.id.edit);
+				
+				if(selected.get(0) instanceof MbTilesLayer){
+					
+					//the remaining is an MbTilesLayer item, config and add edit item if necessary				
+					menu.findItem(R.id.up).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+					menu.findItem(R.id.down).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+					menu.findItem(R.id.up).setVisible(true);
+					menu.findItem(R.id.down).setVisible(true);
+					
+					//this was a vector entry, add the edit entry as first item
+					if(editItem == null){
+						Drawable d = getResources().getDrawable(R.drawable.ic_action_settings);
+						d.mutate().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
+						menu.add(Menu.CATEGORY_SYSTEM, R.id.edit, Menu.FIRST, getString(R.string.edit))
+				        .setIcon(d)
+				        .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+					}
+				}else{
+					//the remaining is a raster layer, config and remove edit if necessary
+					menu.findItem(R.id.up).setVisible(true);
+					menu.findItem(R.id.down).setVisible(true);
+					
+					//this was a raster entry, remove edit
+					if(editItem != null){
+						menu.removeItem(R.id.edit);
+					}
+				}
+			}
+		} else { //should not be called anymore
+			menu.findItem(R.id.up).setVisible(true);
+			menu.findItem(R.id.down).setVisible(true);
+		}
 	}
-	}
+
 
 }

@@ -91,5 +91,6 @@
     <string name="decimation">Decimation</string>
     <string name="decimation_factor_default">0.000001</string>
     <string name="dash">Stroke dashed</string>
+        
 
 </resources>

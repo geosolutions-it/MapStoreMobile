@@ -18,11 +18,19 @@
  *******************************************************************************/
 package it.geosolutions.geocollect.android.core;
 
+import it.geosolutions.android.map.utils.MapFilesProvider;
+
+import java.io.File;
+
+import org.mapsforge.android.maps.BackgroundSourceType;
+
 import android.annotation.TargetApi;
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences.Editor;
 import android.os.Build;
 import android.os.StrictMode;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
@@ -39,14 +47,55 @@ public class GeoCollectApplication extends Application {
 	@Override
 	public void onCreate() {
 		// TODO: remove this block on production
-		if (true && Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-			StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().detectAll().penaltyDialog().build());
-			StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyDeath().build());
-		}
+//		if (true && Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+//			StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().detectAll().penaltyDialog().build());
+//			StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyDeath().build());
+//		}
 
 		super.onCreate();
-
+		
 		initImageLoader(getApplicationContext());
+		
+		Log.d(GeoCollectApplication.class.getSimpleName(), "App onCreate");
+		
+		MapFilesProvider.setBaseDir("/geocollect");
+		
+		//setupMBTilesBackgroundConfiguration();
+	}
+
+	public void setupMBTilesBackgroundConfiguration() {
+    		
+    		final String defType = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString("mapsforge_background_type", null);
+    		final String mbTilesPath = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString("mapsforge_background_filepath", null);
+
+    		if(mbTilesPath == null && defType == null){ //only on first run, check files and set geocollect defaults
+
+    			//geocollect default not setup yet, check if mbtiles file is available
+    			final File dir = new File(MapFilesProvider.getEnvironmentDirPath(null)+MapFilesProvider.getBaseDir());
+    			File mbtileFile = null;
+    			File files[] = dir.listFiles();
+    			if(files != null){
+    				for(int i = 0; i < files.length;i++){
+    					final String path = files[i].getAbsolutePath();
+    					if(path.substring(path.lastIndexOf(".") + 1).equals("mbtiles")){
+    						mbtileFile = files[i];
+    						break;
+    					}
+    				}
+    				final Editor ed = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
+    				if(mbtileFile != null){
+    					ed.putString("mapsforge_background_filepath", mbtileFile.getAbsolutePath());
+    				}
+    				ed.putString("mapsforge_background_type", "1");
+    				ed.commit();
+    			}
+    			
+    		}
+    		
+    		final BackgroundSourceType type = BackgroundSourceType.values()[Integer.parseInt(defType == null ? "1" : defType)];
+    		MapFilesProvider.setBackgroundSourceType(type);
+
+		
 	}
 
 	/*

@@ -1,6 +1,7 @@
 package it.geosolutions.android.map.dialog;
 
 import it.geosolutions.android.map.R;
+import it.geosolutions.android.map.utils.MapFilesProvider;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -102,7 +103,7 @@ public class FilePickerDialog {
 		
 
 		builder.setIcon(R.drawable.ic_launcher)
-		.setTitle("MapStoreMobile")
+		.setTitle(MapFilesProvider.getBaseDir().substring(1).toUpperCase())
 		.setMessage(message)
 		.setView(mapSelectionView);
 
@@ -226,6 +227,8 @@ public class FilePickerDialog {
 	public interface FilePickCallback {
 		
 		public void filePicked(final File file);
+		
+		public void noFilePicked();
 
 	}
 

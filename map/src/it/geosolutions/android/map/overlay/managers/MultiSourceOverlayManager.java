@@ -137,7 +137,7 @@ public class MultiSourceOverlayManager implements OverlayManager {
 	public void toggleOverlayVisibility(int itemId, boolean enable) {
 		boolean present = false;
 		Overlay overlay = null;
-		Log.v("LAYERS", mapView.getOverlays().size() + " overays found");
+		Log.v("LAYERS", mapView.getOverlays().size() + " overlays found");
 		for (Overlay o : mapView.getOverlays()) {
 			if (o.equals(spatialiteOverlay) && itemId == R.id.data) {
 				present = true;
