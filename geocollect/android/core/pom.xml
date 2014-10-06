@@ -2,20 +2,20 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>it.geosolutions.geocollect.android</groupId>
   <artifactId>geocollect-android-core</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.2.0-SNAPSHOT</version>
   <packaging>apklib</packaging>
   <name>GeoCollect - Android Core</name>
   <parent>
        <groupId>it.geosolutions.geocollect.android</groupId>
 		<artifactId>geocollect-android</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.2.0-SNAPSHOT</version>
   </parent>
   <dependencies>
         <!-- MapStore Mobile base libs -->
       	<dependency>
 			<groupId>it.geosolutions.android.map</groupId>
 			<artifactId>MapActivity</artifactId>
-			<version>1.1.0-SNAPSHOT</version>
+			<version>1.2.0-SNAPSHOT</version>
 			<type>apklib</type>
 		</dependency>
 		<dependency>
