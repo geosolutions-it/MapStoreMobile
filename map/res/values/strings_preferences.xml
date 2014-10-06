@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>	
-    <string name="preferences_debug">Debug settings</string>
-	<string name="preferences_general">General settings</string>
-	<string name="preferences_cache_persistence">Cache persistence</string>
+    <string name="preferences_debug">Debug Settings</string>
+	<string name="preferences_general">General Settings</string>
+	<string name="preferences_cache_persistence">Cache Persistence</string>
 	<string name="preferences_cache_persistence_desc">Keep cached images on exit</string>
 	<string name="preferences_cache_size">External storage</string>
 	<string name="preferences_cache_size_desc">Adjust the size of the cache</string>
@@ -10,7 +10,7 @@
 	<string name="preferences_fullscreen">Full screen mode</string>
 	<string name="preferences_fullscreen_desc">Hide the status bar</string>
 	<string name="preferences_map">Map settings</string>
-	<string name="preferences_background_source">Background source</string>
+	<string name="preferences_background_source">Background Source</string>
 	<string name="preferences_background_source_desc">Select background source</string>
 	<string name="preferences_background_source_file">Select a background file</string>
 	<string name="preferences_scale_bar_unit">Scale bar unit</string>
@@ -19,16 +19,16 @@
 	<string name="preferences_show_fps_counter_desc">Enable frames per second counter</string>
 	<string name="preferences_show_scale_bar">Map scale bar</string>
 	<string name="preferences_show_scale_bar_desc">Show the scale of the map</string>
-	<string name="preferences_text_scale">Size of carachters</string>
-	<string name="preferences_text_scale_desc">Set labels size</string>
+	<string name="preferences_text_scale">Characters Size</string>
+	<string name="preferences_text_scale_desc">Set labels characters size</string>
 	<string-array name="preferences_text_scale_values">
-		<item>tiny</item>
-		<item>small</item>
-		<item>normal</item>
-		<item>large</item>
-		<item>huge</item>
+		<item>Tiny</item>
+		<item>Small</item>
+		<item>Normal</item>
+		<item>Large</item>
+		<item>Huge</item>
 	</string-array>
-	<string name="preferences_advanced">Advanced settings</string>
+	<string name="preferences_advanced">Advanced Settings</string>
 	<string name="preferences_fill_color">Fill Color</string>
 	<string name="preferences_fill_color_desc">Change the fill color of the selected area</string>
 	<string name="preferences_fill_alpha">Fill Opacity</string>
@@ -52,9 +52,9 @@
 	<string name="preferences_stroke_shape_dimension_desc">Set dashes size</string>
 	<string name="preferences_fill_category">Fill style</string>
 	<string name="preferences_stroke_category">Border style</string>
-	<string name="preferences_dashed_stroke_screen">Style of dashed border</string>
+	<string name="preferences_dashed_stroke_screen">Dash Style</string>
 	<string name="preferences_dashed_stroke_screen_desc">Set style of dashed border</string>
-	<string name="preferences_shape_selection">Shape of selection</string>
+	<string name="preferences_shape_selection">Selection Shape</string>
 	<string name="preferences_shape_selection_desc">Set shape of selection</string>
 	<string name="preferences_radius">Radius</string>
 	<string name="preferences_radius_desc">Set radius of one point selection</string>

@@ -2,9 +2,9 @@
 <resources>	
     <string name="preferences_debug">Impostazioni di Debug</string>
 	<string name="preferences_general">Impostazioni generali</string>
-	<string name="preferences_cache_persistence">Persistenza cache</string>
+	<string name="preferences_cache_persistence">Persistenza Cache</string>
 	<string name="preferences_cache_persistence_desc">Mantieni le immagini nella cache all\'uscita</string>
-	<string name="preferences_cache_size">Memoria esterna</string>
+	<string name="preferences_cache_size">Memoria Esterna</string>
 	<string name="preferences_cache_size_desc">Imposta le dimensioni della cache</string>
 	<string name="preferences_cache_size_value">%.1f MB</string>
 	<string name="preferences_fullscreen">Modalità schermo intero</string>
@@ -37,13 +37,13 @@
 	<string name="preferences_wake_lock_desc">Stop the screen from dimming</string>
 	 -->
 	<string-array name="preferences_text_scale_values">
-		<item>molto piccolo</item>
-		<item>piccolo</item>
-		<item>normale</item>
-		<item>grande</item>
-		<item>molto grande</item>
+		<item>Molto Piccolo</item>
+		<item>Piccolo</item>
+		<item>Normale</item>
+		<item>Grande</item>
+		<item>Molto Grande</item>
 	</string-array>
-	<string name="preferences_advanced">Impostazioni avanzate</string>
+	<string name="preferences_advanced">Impostazioni Avanzate</string>
 	<string name="preferences_fill_color">Colore</string>
 	<string name="preferences_fill_color_desc">Varia il colore di riempimento della selezione</string>
 	<string name="preferences_fill_alpha">Opacità</string>
@@ -59,17 +59,17 @@
 	<string name="preferences_advanced_desc">Impostazioni per la selezione sulla mappa</string>
 	<string name="preferences_line_joins_stroke">Angoli</string>
 	<string name="preferences_line_joins_stroke_desc">Imposta lo stile per gli angoli del bordo</string>
-	<string name="preferences_dashed_stroke">Bordo tratteggiato</string>
+	<string name="preferences_dashed_stroke">Bordo Tratteggiato</string>
 	<string name="preferences_dashed_stroke_desc">Clicca qui se vuoi il bordo tratteggiato</string>
 	<string name="preferences_stroke_spaces">Spaziatura</string>
 	<string name="preferences_stroke_spaces_desc">Imposta il valore della spaziatura tra i tratti del bordo</string>
-	<string name="preferences_stroke_shape_dimension">Dimensione dei tratti</string>
+	<string name="preferences_stroke_shape_dimension">Dimensione Tratti</string>
 	<string name="preferences_stroke_shape_dimension_desc">Imposta la dimensione dei tratti</string>
 	<string name="preferences_fill_category">Stile del riempimento</string>
 	<string name="preferences_stroke_category">Stile del bordo</string>
-	<string name="preferences_dashed_stroke_screen">Stile del bordo tratteggiato</string>
+	<string name="preferences_dashed_stroke_screen">Tratteggio</string>
 	<string name="preferences_dashed_stroke_screen_desc">Imposta lo stile del bordo tratteggiato</string>
-	<string name="preferences_shape_selection">Forma della selezione</string>
+	<string name="preferences_shape_selection">Forma Selezione</string>
  	<string name="preferences_shape_selection_desc">Scegli la forma della selezione</string>
  	<string name="preferences_radius">Raggio</string>
 	<string name="preferences_radius_desc">Imposta il raggio della selezione puntuale</string>
