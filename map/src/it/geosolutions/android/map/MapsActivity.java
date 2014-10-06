@@ -18,6 +18,7 @@
 package it.geosolutions.android.map;
 
 import it.geosolutions.android.map.activities.GetFeatureInfoLayerListActivity;
+import it.geosolutions.android.map.activities.MBTilesLayerOpacitySettingActivity;
 import it.geosolutions.android.map.activities.MapActivityBase;
 import it.geosolutions.android.map.activities.about.InfoView;
 import it.geosolutions.android.map.control.CoordinateControl;
@@ -26,8 +27,6 @@ import it.geosolutions.android.map.control.MapControl;
 import it.geosolutions.android.map.control.MapInfoControl;
 import it.geosolutions.android.map.control.MarkerControl;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
-import it.geosolutions.android.map.dialog.FilePickerDialog;
-import it.geosolutions.android.map.dialog.FilePickerDialog.FilePickCallback;
 import it.geosolutions.android.map.dto.MarkerDTO;
 import it.geosolutions.android.map.fragment.GenericMenuFragment;
 import it.geosolutions.android.map.fragment.sources.SourcesFragment;
@@ -36,6 +35,7 @@ import it.geosolutions.android.map.geostore.activities.GeoStoreResourcesActivity
 import it.geosolutions.android.map.geostore.model.Resource;
 import it.geosolutions.android.map.mapstore.model.MapStoreConfiguration;
 import it.geosolutions.android.map.mapstore.utils.MapStoreUtils;
+import it.geosolutions.android.map.mbtiles.MbTilesLayer;
 import it.geosolutions.android.map.model.Attribute;
 import it.geosolutions.android.map.model.Feature;
 import it.geosolutions.android.map.model.Layer;
@@ -58,7 +58,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.mapsforge.android.maps.DebugSettings;
+import org.mapsforge.android.maps.BackgroundSourceType;
 import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.mapgenerator.MapRenderer;
 import org.mapsforge.android.maps.mapgenerator.TileCache;
@@ -74,10 +74,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.FragmentManager;
@@ -238,7 +235,7 @@ public class MapsActivity extends MapActivityBase {
 		//Setup the left menu (Drawer)
         
         //
-		// MAP INIZIALIZATION 
+		// MAP INITIALIZATION 
 		//
 		//create overlay manager
 		boolean mapLoaded = initMap(savedInstanceState);
@@ -292,15 +289,15 @@ public class MapsActivity extends MapActivityBase {
 			loadGeoStoreResource(resource, geoStoreUrl);
 		}
 
-		if(data.containsKey(MSM_MAP)){
-	        layerManager.loadMap((MSMMap)data.getSerializable(MSM_MAP));
-
-		}
-		
-		ArrayList<Layer> layersToAdd = (ArrayList<Layer>) data.getSerializable(LAYERS_TO_ADD);
-		if(layersToAdd != null){
-			addLayers(layersToAdd);
-		}
+//		if(data.containsKey(MSM_MAP)){
+//	        layerManager.loadMap((MSMMap)data.getSerializable(MSM_MAP));
+//
+//		}
+//		
+//		ArrayList<Layer> layersToAdd = (ArrayList<Layer>) data.getSerializable(LAYERS_TO_ADD);
+//		if(layersToAdd != null){
+//			addLayers(layersToAdd);
+//		}
 		
 	}
 
@@ -325,15 +322,21 @@ public class MapsActivity extends MapActivityBase {
 			
 		}else{
 			layerManager.defaultInit();
-			@SuppressWarnings("unchecked")
-			ArrayList<Layer> layers =  (ArrayList<Layer>) LocalPersistence.readObjectFromFile(this, LocalPersistence.CURRENT_MAP);
-			if(layers != null){
-				layerManager.setLayers(layers);
-			}else{
-				MSMMap map = SpatialDbUtils.mapFromDb(true);
-				StorageUtils.setupSources(this);
-		        layerManager.loadMap(map);
-			}
+//			@SuppressWarnings("unchecked")
+//			ArrayList<Layer> layers =  (ArrayList<Layer>) LocalPersistence.readObjectFromFile(this, LocalPersistence.CURRENT_MAP);
+//			if(layers != null){
+//				layerManager.setLayers(layers);
+//			}else{
+			boolean dontLoadMBTileLayer = MapFilesProvider.getBackgroundSourceType() == BackgroundSourceType.MBTILES ? true : false;
+			MSMMap map = SpatialDbUtils.mapFromDb(dontLoadMBTileLayer);
+			StorageUtils.setupSources(this);
+			
+			//This adds layers also if its called loadMap but it will not order layers
+		    //layerManager.loadMap(map);
+			//so use this instead
+			addLayersOrdered(map.layers);
+			
+//			}
 			//setup left drawer fragments
 	        osf =  new LayerSwitcherFragment();
 	        layerManager.setLayerChangeListener(osf);
@@ -489,7 +492,8 @@ public class MapsActivity extends MapActivityBase {
 	@Override
 	public void onPause() {
 		super.onPause();
-		LocalPersistence.writeObjectToFile(this, layerManager.getLayers() , LocalPersistence.CURRENT_MAP);
+		Log.d(MapsActivity.class.getSimpleName(), "onPause saving layers");
+//		LocalPersistence.writeObjectToFile(this, layerManager.getLayers() , LocalPersistence.CURRENT_MAP);
 		
 	}
 	
@@ -714,8 +718,8 @@ public class MapsActivity extends MapActivityBase {
 
 		// TODO d get this path on initialization
 
-    	final String filePath = PreferenceManager.getDefaultSharedPreferences(this).getString("mapsforge_background_filepath", null);
-    	final int type = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString("mapsforge_background_type", "0"));
+    	final String filePath = PreferenceManager.getDefaultSharedPreferences(this).getString(MapView.MAPSFORGE_BACKGROUND_FILEPATH, null);
+    	final int type = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString(MapView.MAPSFORGE_BACKGROUND_RENDERER_TYPE, "0"));
     	
     	//if the map file was edited in the preferences
 		if(filePath != null && type == 0){
@@ -861,6 +865,26 @@ public class MapsActivity extends MapActivityBase {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
+		Log.d(MapsActivity.class.getSimpleName(), "MapsActivity onActivityResult");
+		
+		if(requestCode == LayerSwitcherFragment.OPACITY_SETTIN_REQUEST_ID){
+
+			final int newValue = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getInt(MBTilesLayerOpacitySettingActivity.MBTILES_OPACITY_ID, 192);
+
+			ArrayList<Layer> layers = layerManager.getLayers();
+
+			for(Layer l : layers){
+				if(l instanceof MbTilesLayer){
+					l.setOpacity(newValue);
+					layerManager.redrawLayer(l);
+
+				}
+			}
+
+			//its not necessary to handle the other stuff
+			return;
+		}
+		
 		if(requestCode == GetFeatureInfoLayerListActivity.BBOX_REQUEST && resultCode == RESULT_OK){
 			//the response can contain a feature to use to replace the current marker 
 			//on the map
@@ -1071,15 +1095,17 @@ public class MapsActivity extends MapActivityBase {
     public void  checkIfMapViewNeedsBackgroundUpdate()
     {
     	final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-    	final boolean thingsChanged = prefs.getBoolean("mapsforge_background_file_changed", false);
+    	final boolean thingsChanged = prefs.getBoolean(MapView.MAPSFORGE_BACKGROUND_FILEPATH_CHANGED, false);
     	if(!thingsChanged)return;
     	
-    	final int currentMapRendererType = this.mapView.getMapRendererType();
-    	final String fileName = prefs.getString("mapsforge_background_file", null);
-    	final String filePath = prefs.getString("mapsforge_background_filepath", null);
-    	final int type = Integer.parseInt(prefs.getString("mapsforge_background_type", "0"));
+    	final BackgroundSourceType currentMapRendererType = this.mapView.getMapRendererType();
+
+    	final String filePath = prefs.getString(MapView.MAPSFORGE_BACKGROUND_FILEPATH, null);
+    	final String defaultType = getApplicationContext().getPackageName().equals("it.geosolutions.geocollect.android.app") ? "1" : "0";
+    	final BackgroundSourceType type = BackgroundSourceType.values()[Integer.parseInt(prefs.getString(MapView.MAPSFORGE_BACKGROUND_RENDERER_TYPE, defaultType))];
+
     	final Editor ed = prefs.edit();
-    	ed.putBoolean("mapsforge_background_file_changed", false);
+    	ed.putBoolean(MapView.MAPSFORGE_BACKGROUND_FILEPATH_CHANGED, false);
     	ed.commit();
     	
     	//1. renderer changed
@@ -1087,39 +1113,50 @@ public class MapsActivity extends MapActivityBase {
 
     		MapRenderer mapRenderer = null;
     		switch (type) {
-    		case 0:
+    		case MAPSFORGE:
     			if(filePath == null){
     				throw new IllegalArgumentException("no filepath selected to change to mapsforge renderer");
     			}
     			mapView.setMapFile(new File(filePath));
     			mapRenderer = new DatabaseRenderer(mapView.getMapDatabase());
+    			//TODO it was MBTILES with no or dimmed mbtiles layer, add MBTiles layer ?
+    			
+    			MSMMap map = SpatialDbUtils.mapFromDb(false);
+    			Log.d(MapsActivity.class.getSimpleName(), "to mapsforge maps includes "+map.layers.size()+" layers");
+    			
+    			addLayersOrdered(map.layers);
+    			
     			break;
-    		case 1:
-    			mapRenderer = new MbTilesDatabaseRenderer(getBaseContext(), fileName);
+    		case MBTILES:
+    			mapRenderer = new MbTilesDatabaseRenderer(getBaseContext(), filePath);
+    		
+    			MSMMap map2 = SpatialDbUtils.mapFromDb(true);
+    			
+    			layerManager.setLayers(map2.layers);
+    			
     			break;
-    		case 2:
+    		case GEOCOLLECT:
     			// TODO
     			break;
     		default:
     			break;
     		}
+    		mDrawerToggle.syncState();
     		mapView.setRenderer(mapRenderer, true);
     		mapView.clearAndRedrawMapView();
+    		MapFilesProvider.setBackgroundSourceType(type);
 
-    	}else if(fileName != null && !fileName.equals(mapView.getMapRenderer().getFileName())){
+    	}else if(filePath != null && !filePath.equals(mapView.getMapRenderer().getFileName())){
 
     		//2.renderer is the same but file changed
     		switch (type) {
-    		case 0:
-    			if(filePath == null){
-    				throw new IllegalArgumentException("no filepath selected to change to mapsforge renderer");
-    			}
+    		case MAPSFORGE:
     			mapView.setMapFile(new File(filePath));
     			break;
-    		case 1:
-    			mapView.setRenderer(new MbTilesDatabaseRenderer(getBaseContext(), fileName), true);
+    		case MBTILES:
+    			mapView.setRenderer(new MbTilesDatabaseRenderer(getBaseContext(), filePath), true);
     			break;
-    		case 2:
+    		case GEOCOLLECT:
     			// TODO
     			break;
     		default:
@@ -1149,6 +1186,46 @@ public class MapsActivity extends MapActivityBase {
     @Override
     public void onActionModeFinished(ActionMode mode) {
     	currentActionMode = null;
+    }
+    
+    public void addLayersOrdered(final ArrayList<Layer> layers){
+    	
+		ArrayList<Layer> originalLayers =  layers;
+		ArrayList<Layer> orderedLayers = new ArrayList<Layer>();
+		
+		//check if there is a MBTiles layer which needs to be ordered
+		boolean layersContainMBTilesLayer = false;
+		for(Layer l : originalLayers){
+			if(l instanceof MbTilesLayer){
+				layersContainMBTilesLayer = true;
+				break;
+			}
+		}
+		//if there is, add this flag to wait until it has been added
+		boolean mbTilesAdded = !layersContainMBTilesLayer;
+		
+		while(!originalLayers.isEmpty()){
+			
+			final Layer layer = originalLayers.get(originalLayers.size() - 1); // get last
+			
+			if(layer instanceof MbTilesLayer){
+				
+				final int currentValue = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getInt(MBTilesLayerOpacitySettingActivity.MBTILES_OPACITY_ID, 192);
+				layer.setOpacity(currentValue);
+				orderedLayers.add(layer);
+				mbTilesAdded = true;
+				originalLayers.remove(layer);
+				Log.d(MapsActivity.class.getSimpleName(), "mbtiles layer added , size "+orderedLayers.size());
+			}else if(mbTilesAdded == true){
+				orderedLayers.add(layer);
+				originalLayers.remove(layer);
+				Log.d(MapsActivity.class.getSimpleName(), "other added , size "+orderedLayers.size());
+			}
+			
+			
+		}
+		
+		layerManager.setLayers(orderedLayers);
     }
 
 }

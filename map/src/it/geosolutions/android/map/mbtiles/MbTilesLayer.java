@@ -17,6 +17,9 @@
  */
 package it.geosolutions.android.map.mbtiles;
 
+import org.mapsforge.android.maps.BackgroundSourceType;
+
+import android.preference.PreferenceManager;
 import android.util.Log;
 import jsqlite.Exception;
 import it.geosolutions.android.map.BuildConfig;
@@ -25,6 +28,7 @@ import it.geosolutions.android.map.model.Layer;
 import it.geosolutions.android.map.model.LayerGroup;
 import it.geosolutions.android.map.style.AdvancedStyle;
 import it.geosolutions.android.map.style.StyleManager;
+import it.geosolutions.android.map.utils.MapFilesProvider;
 import eu.geopaparazzi.spatialite.database.spatial.core.ISpatialDatabaseHandler;
 import eu.geopaparazzi.spatialite.database.spatial.core.SpatialRasterTable;
 
@@ -52,7 +56,9 @@ public class MbTilesLayer implements Layer<MbTilesSource> {
 			this.title = t.getTableName();
 			this.tableName = t.getTableName();
 		}
+
 		this.opacity = MAX_OPACITY;
+		
 	}
 
 

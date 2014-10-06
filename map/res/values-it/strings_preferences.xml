@@ -12,7 +12,7 @@
 	<string name="preferences_map">Impostazioni mappa</string>
 	<string name="preferences_background_source">Sfondo</string>
 	<string name="preferences_background_source_desc">Seleziona il tipo di sfondo</string>
-	<string name="preferences_background_source_file">"Seleziona il file di sfondo"</string>
+	<string name="preferences_background_source_file">Seleziona il file di sfondo</string>
 <!-- <string name="preferences_move_speed">Velocit&agrave; movimento</string>
 	<string name="preferences_move_speed_desc">Adjust the move speed of the map</string>
 	<string name="preferences_move_speed_value">%d %% move speed</string>
@@ -73,4 +73,5 @@
  	<string name="preferences_shape_selection_desc">Scegli la forma della selezione</string>
  	<string name="preferences_radius">Raggio</string>
 	<string name="preferences_radius_desc">Imposta il raggio della selezione puntuale</string>
+    <string name="preferences_mbtiles_opacity_setting">Imposta la opacità per gli strati MBTiles</string>
 </resources>

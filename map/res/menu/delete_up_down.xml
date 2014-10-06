@@ -3,14 +3,20 @@
 
     <item
         android:id="@+id/delete"
+        android:menuCategory="system"
+        android:orderInCategory="2"
         android:icon="@drawable/ic_content_discard"
         android:title="@string/remove"/>
     <item
         android:id="@+id/up"
+        android:menuCategory="system"
+        android:orderInCategory="3"
         android:icon="@drawable/ic_navigation_collapse"
         android:title="@string/move_up"/>
     <item
         android:id="@+id/down"
+        android:menuCategory="system"
+        android:orderInCategory="4"
         android:icon="@drawable/ic_navigation_expand"
         android:title="@string/move_down"/>
     

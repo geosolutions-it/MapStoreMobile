@@ -20,6 +20,8 @@ package it.geosolutions.android.map.utils;
 import java.io.File;
 import java.io.FilenameFilter;
 
+import org.mapsforge.android.maps.BackgroundSourceType;
+
 import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
@@ -38,12 +40,18 @@ public class MapFilesProvider {
 	private static String environmentDir;
 	
 	private static String baseDir ="/mapstore";
+
 	private static String baseStyle = baseDir + "/styles/";
 	private static String backgroundFileName =  "bg.map";
+	
+	private static BackgroundSourceType backgroundSourceType = BackgroundSourceType.MAPSFORGE;
 	
 	public static void setBaseDir(String baseDir){
 		MapFilesProvider.baseDir = baseDir;
 		MapFilesProvider.baseStyle = baseDir + "/styles/";
+	}
+	public static String getBaseDir() {
+		return baseDir;
 	}
 	
 	/**
@@ -126,6 +134,12 @@ public class MapFilesProvider {
 	 */
 	private static String getBackgroundFilePath() {
 		return baseDir + "/" + backgroundFileName;
+	}
+	public static BackgroundSourceType getBackgroundSourceType() {
+		return backgroundSourceType;
+	}
+	public static void setBackgroundSourceType(BackgroundSourceType backgroundSourceType) {
+		MapFilesProvider.backgroundSourceType = backgroundSourceType;
 	}
 	/**
 	 * @return

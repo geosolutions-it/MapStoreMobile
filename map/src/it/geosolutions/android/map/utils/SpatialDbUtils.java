@@ -31,6 +31,7 @@ import java.util.List;
 
 import jsqlite.Exception;
 
+import org.mapsforge.android.maps.BackgroundSourceType;
 import org.mapsforge.core.model.GeoPoint;
 
 import android.util.Log;
@@ -216,7 +217,7 @@ public static MSMMap mapFromDb(){
 public static MSMMap mapFromDb(boolean vectorOnly){
 	MSMMap m = new MSMMap();
 	try {
-		
+
 		List<ISpatialDatabaseHandler> handlers = SpatialDataSourceManager.getInstance().getSpatialDatabaseHandlers();
 		//SpatialDataSourceManager.getInstance().getSpatialVectorTables(true);
 		
@@ -248,7 +249,7 @@ public static MSMMap mapFromDb(boolean vectorOnly){
 			}
 			
 			// Lookup for raster tables
-			if(!vectorOnly){
+			if(!vectorOnly ){
 				/*
 				 * Geopaparazzi throws jsqlite.Exception if it fails to find metadata
 				 */

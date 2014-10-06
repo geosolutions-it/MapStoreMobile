@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>	
+    <string name="preferences_debug">Debug Einstellungen</string>
+	<string name="preferences_general">Allgemeine Einstellungen</string>
+	<string name="preferences_cache_persistence">Cache Einstellung</string>
+	<string name="preferences_cache_persistence_desc">Behalte zwischengespeicherte Bilder beim Beenden</string>
+	<string name="preferences_cache_size">Externer Speicher</string>
+	<string name="preferences_cache_size_desc">Verändere die Größe des Caches</string>
+	<string name="preferences_cache_size_value">%.1f MB</string>
+	<string name="preferences_fullscreen">Vollbild Modus</string>
+	<string name="preferences_fullscreen_desc">Verstecke die Statusleiste</string>
+	<string name="preferences_map">Karten Einstellungen</string>
+	<string name="preferences_background_source">Hintergrund Datenquelle</string>
+	<string name="preferences_background_source_desc">Wähle die Hintergrund Datenquelle</string>
+	<string name="preferences_background_source_file">Wähle eine Datei für den Hintergrund</string>
+	<string name="preferences_scale_bar_unit">Einheit des Maßstabs</string>
+	<string name="preferences_scale_bar_unit_desc">Wähle eine Einheit für den Maßstab der Karte</string>
+	<string name="preferences_show_fps_counter">Bildwiederholrate</string>
+	<string name="preferences_show_fps_counter_desc">Schalte die Darstellung der Bildwiederholrate ein</string>
+	<string name="preferences_show_scale_bar">Karten Maßstab</string>
+	<string name="preferences_show_scale_bar_desc">Zeige den Maßstab der Karte</string>
+	<string name="preferences_text_scale">Buchstabengröße</string>
+	<string name="preferences_text_scale_desc">Stelle die Größe der Kartensymbole ein</string>
+	<string-array name="preferences_text_scale_values">
+		<item>Sehr klein</item>
+		<item>klein</item>
+		<item>Normal</item>
+		<item>Groß</item>
+		<item>Sehr groß</item>
+	</string-array>
+	<string name="preferences_advanced">Erweiterte Einstellungen</string>
+	<string name="preferences_fill_color">Füllfarbe</string>
+	<string name="preferences_fill_color_desc">Verändere die Füllfarbe der ausgewählten Fläche</string>
+	<string name="preferences_fill_alpha">Füll Deckkraft</string>
+	<string name="preferences_fill_alpha_desc">Verändere die Deckkraft der Füllung der ausgewählten Fläche</string>
+	<string name="preferences_stroke_color">Randfarbe</string>
+	<string name="preferences_stroke_color_desc">Verändere die Randfarbe</string>
+	<string name="preferences_stroke_alpha">Rand Deckkraft</string>
+	<string name="preferences_stroke_alpha_desc">Verändere die Deckkraft der Randfarbe</string>
+	<string name="preferences_stroke_width">Breite</string>
+	<string name="preferences_stroke_width_desc">Ändere die Randbreite</string>
+	<string name="preferences_selector_style">Karten Auswahl</string>
+	<string name="preferences_selector_style_desc">Ändere die Ansicht der Auswahl auf der Karte</string>
+	<string name="preferences_advanced_desc">Einstellungen der Karten Auswahl</string>
+	<string name="preferences_line_joins_stroke">Eckem</string>
+	<string name="preferences_line_joins_stroke_desc">Ändere die Darstellung der Ecken</string>
+	<string name="preferences_dashed_stroke">Strichellinien</string>
+	<string name="preferences_dashed_stroke_desc">Klicke wenn du Strichellinien als Rand möchtest</string>
+	<string name="preferences_stroke_spaces">Abstand</string>
+	<string name="preferences_stroke_spaces_desc">Stelle den Abstand der Strichellinien ein</string>
+	<string name="preferences_stroke_shape_dimension">Strich Größe</string>
+	<string name="preferences_stroke_shape_dimension_desc">Stelle die Größe der Striche ein</string>
+	<string name="preferences_fill_category">Füll Stil</string>
+	<string name="preferences_stroke_category">Rand Stil</string>
+	<string name="preferences_dashed_stroke_screen">Stil des gestrichelten Randes</string>
+	<string name="preferences_dashed_stroke_screen_desc">Stelle den Stil des gestrichelten Randes ein</string>
+	<string name="preferences_shape_selection">Rand der Auswahl</string>
+	<string name="preferences_shape_selection_desc">Stelle den Rand der Auswahl ein</string>
+	<string name="preferences_radius">Radius</string>
+	<string name="preferences_radius_desc">Stelle den Radius der Auswahl eines Punktes ein</string>
+    <string name="preferences_mbtiles_opacity_setting">Stelle die Deckkraft der MBTiles Ebene ein</string>
+</resources>

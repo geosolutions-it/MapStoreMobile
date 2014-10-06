@@ -47,9 +47,9 @@ public class StartupActivity extends Activity {
 		//setContentView(R.layout.activity_startup);	
 		//TODO place from a click on the item
 		 
-		 MapFilesProvider.setBaseDir("/geocollect");
+//		 MapFilesProvider.setBaseDir("/geocollect");
 		 String dir_path = Environment.getExternalStorageDirectory().getPath();
-         ZipFileManager zfm = new ZipFileManager(this,dir_path,"/geocollect",getResources().getString(R.string.url_data_test_archive)){
+         ZipFileManager zfm = new ZipFileManager(this,dir_path, MapFilesProvider.getBaseDir(), getResources().getString(R.string.url_data_test_archive)){
  			@Override
  			public void launchMainActivity(){
  				
