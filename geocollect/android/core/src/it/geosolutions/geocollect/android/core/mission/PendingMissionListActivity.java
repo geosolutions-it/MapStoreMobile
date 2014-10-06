@@ -264,6 +264,8 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 	    		launch.putExtra(MapsActivity.PARAMETERS.LAT, 44.40565);
 	    		launch.putExtra(MapsActivity.PARAMETERS.LON, 8.946256);
 	    		launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL, (byte)11);
+	    		launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL_MIN, (byte)11);
+	    		launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL_MAX, (byte)19);
 //	    		launch.putExtra(MapsActivity.MSM_MAP, m);
 			//}
         	

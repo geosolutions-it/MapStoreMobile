@@ -131,6 +131,8 @@ public class MapsActivity extends MapActivityBase {
 		public static final String LON = "LON";
 		public static final String LAT = "LAT";
 		public static final String ZOOM_LEVEL = "ZOOM_LEVEL";
+		public static final String ZOOM_LEVEL_MIN = "ZOOM_LEVEL_MIN";
+		public static final String ZOOM_LEVEL_MAX = "ZOOM_LEVEL_MAX";
 		public static final String RESOURCE = "RESOURCE";
 		public static final String GEOSTORE_URL = "GEOSTORE_URL";
 		public static final String CONFIRM_ON_EXIT = "CONFIRM_ON_EXIT";
@@ -827,18 +829,22 @@ public class MapsActivity extends MapActivityBase {
        	 	 double lat = intent.getDoubleExtra(PARAMETERS.LAT, 43.68411);
         	 double lon = intent.getDoubleExtra(PARAMETERS.LON, 10.84899);
         	 byte zoom_level = intent.getByteExtra(PARAMETERS.ZOOM_LEVEL, (byte) 13);
+        	 byte zoom_level_min = intent.getByteExtra(PARAMETERS.ZOOM_LEVEL_MIN, (byte) 0);
+        	 byte zoom_level_max = intent.getByteExtra(PARAMETERS.ZOOM_LEVEL_MAX, (byte) 30);
         	 /*ArrayList<MarkerDTO> list_marker = intent.getParcelableArrayListExtra(PARAMETERS.MARKERS);
         	 MarkerDTO mark = list_marker.get(0);*/
         	 mp = new MapPosition(new GeoPoint(lat,lon),zoom_level);
         	 mapView.getMapViewPosition().setMapPosition(mp);
-   	 	}
-   	 	else{
+        	 mapView.getMapZoomControls().setZoomLevelMin(zoom_level_min);        	 
+        	 mapView.getMapZoomControls().setZoomLevelMax(zoom_level_max);
+   	 	} else {
    	 	 if(mo!=null){   	       	 
     	 	//support only one marker
          	MapPosition newMp = MarkerUtils.getMarkerCenterZoom(mo.getMarkers(),mp);
-             if(newMp!=null)
+	             if(newMp!=null){
                  mapView.getMapViewPosition().setMapPosition(newMp);
    	 	 	}	       
+	   	 	}	       
         }
 	}
 
