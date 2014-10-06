@@ -51,7 +51,7 @@ public class GetFeatureInfoLayerListActivity  extends SherlockFragmentActivity {
         requestWindowFeature(Window.FEATURE_PROGRESS);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         FragmentManager fm = getSupportFragmentManager();
-    	
+        
    	 	// During initial setup, plug in the details fragment.
     	mTaskFragment = (FeatureInfoLayerListFragment) fm.findFragmentByTag("featureInfoLayerList");
     	if(mTaskFragment == null){

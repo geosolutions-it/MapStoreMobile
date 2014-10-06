@@ -31,5 +31,7 @@
     <string name="button_confirm_image_delete_title">Elimina Immagine</string>
     <string name="undo_filter">Rimuovi Filtraggio</string>
 	<string name="data_send_success">Invio dati completato</string>
+    <string name="selection_filtered">La tua selezione é stata filtrata</string>    
+    <string name="create_rectangle">Crea un rettangolo sulla mappa per filtrare su una zona di interesse</string>
     
 </resources>

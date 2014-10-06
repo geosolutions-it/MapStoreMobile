@@ -17,6 +17,7 @@
  */
 package it.geosolutions.android.map.control;
 
+import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.view.AdvancedMapView;
 
 import java.util.List;
@@ -28,6 +29,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 /**
  * A controller for the AdvancedMapView class.
@@ -77,7 +79,7 @@ public abstract class MapControl {
 	            	}
 	            }
 	            button.setSelected(true);
-	            enable();
+	            enable();				
 	        }			
 		}		 
 	};

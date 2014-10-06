@@ -4,11 +4,15 @@ import android.app.Activity;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
-import it.geosolutions.android.map.R;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Toast;
+import it.geosolutions.android.map.control.MapControl;
 import it.geosolutions.android.map.control.MapInfoControl;
 import it.geosolutions.android.map.view.AdvancedMapView;
+import it.geosolutions.geocollect.android.core.R;
 
-public class ReturningMapInfoControl extends MapInfoControl implements Parcelable{
+public class ReturningMapInfoControl extends MapInfoControl implements Parcelable {
 
 	/**
 	 * 
@@ -21,9 +25,9 @@ public class ReturningMapInfoControl extends MapInfoControl implements Parcelabl
 
 	/**
 	 * Empty Constructor to create a MapInfoControl without an attached
-	 * {@link AdvancedMapView} and {@link Activity}
-	 * The receiving Activity MUST attach an {@link AdvancedMapView} and 
-	 * an {@link Activity} to this control before use.
+	 * {@link AdvancedMapView} and {@link Activity} The receiving Activity MUST
+	 * attach an {@link AdvancedMapView} and an {@link Activity} to this control
+	 * before use.
 	 */
 	public ReturningMapInfoControl() {
 		super(null, null);
@@ -38,7 +42,6 @@ public class ReturningMapInfoControl extends MapInfoControl implements Parcelabl
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		// TODO Auto-generated method stub
-		
 	}
 
     // this is used to regenerate your object. All Parcelables must have a CREATOR that implements these two methods
@@ -61,4 +64,32 @@ public class ReturningMapInfoControl extends MapInfoControl implements Parcelabl
 			defaultShapeSelection = activity.getResources().getString(R.string.preferences_selection_shape_default); //default selection rectangular
 		}
     };
+
+	@Override
+	public OnClickListener getActivationListener() {
+
+		return new OnClickListener(){
+
+			@Override
+			public void onClick(View button) {
+
+				if (button.isSelected()){
+					button.setSelected(false);
+					disable();	            
+				} else {
+					if(getGroup() != null){
+						for(MapControl c : getGroup()){
+							c.disable();
+							c.getActivationButton().setSelected(false);
+						}
+					}
+					button.setSelected(true);
+					enable();				
+					
+					Toast.makeText(button.getContext(),button.getContext().getString(R.string.create_rectangle), Toast.LENGTH_SHORT).show();
+				}			
+			}
+
+		};
+	}
 }

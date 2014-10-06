@@ -864,7 +864,7 @@ public class MapsActivity extends MapActivityBase {
 		if(requestCode == GetFeatureInfoLayerListActivity.BBOX_REQUEST && resultCode == RESULT_OK){
 			//the response can contain a feature to use to replace the current marker 
 			//on the map
-			manageMarkerSubstitutionAction(data);
+			manageMarkerSubstitutionAction(data);			        
 		}
 		
 		//controls can be refreshed getting the result of an intent, in this case
