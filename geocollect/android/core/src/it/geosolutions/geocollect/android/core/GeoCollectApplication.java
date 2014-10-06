@@ -60,10 +60,10 @@ public class GeoCollectApplication extends Application {
 		
 		MapFilesProvider.setBaseDir("/geocollect");
 		
-		setupMBTilesBackgroundConfiguration();
+		//setupMBTilesBackgroundConfiguration();
 	}
 
-	private void setupMBTilesBackgroundConfiguration() {
+	public void setupMBTilesBackgroundConfiguration() {
     		
     		final String defType = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString("mapsforge_background_type", null);
     		final String mbTilesPath = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString("mapsforge_background_filepath", null);
