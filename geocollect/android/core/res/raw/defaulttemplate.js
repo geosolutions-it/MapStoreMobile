@@ -384,7 +384,8 @@
 		"submitURL": "http://sample.com"
 	},
 	"config":{
-		"myAllowedValues1":["value1","value2","value3"]
+		"myAllowedValues1":["value1","value2","value3"],
+		"maxImageSize" : "1000"
 	},
 	"priorityField":"GRAVITA",
 	"priorityValuesColors":{

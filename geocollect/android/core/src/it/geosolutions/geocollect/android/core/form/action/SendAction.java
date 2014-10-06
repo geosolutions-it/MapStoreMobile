@@ -150,7 +150,7 @@ public class SendAction extends AndroidAction {
 			FragmentTransaction ft = fm.beginTransaction();
 			String url = (String) action.attributes.get("url");//TODO extenalize
 			String murl = (String) action.attributes.get("mediaurl");
-			FormUtils.getPhotoUriStrings(m.getOrigin().id);
+
 			mTaskFragment = new UploadDialog(){
 				/**
 				 * Navigate up to the list
@@ -175,13 +175,22 @@ public class SendAction extends AndroidAction {
 				}
 			};
 			
+			int defaultImageSize = 1000;
+			try{
+				defaultImageSize = Integer.parseInt((String) m.getValueByTag("config.maxImageSize"));	
+			}catch(NumberFormatException | NullPointerException e){
+				Log.e(SendAction.class.getSimpleName(), e.getClass().getSimpleName(),e);
+			}
+			
+			FormUtils.resizeFotosToMax(fragment.getActivity().getBaseContext(), m.getOrigin().id, defaultImageSize);
+			
 			Bundle arguments = new Bundle();
 			arguments.putString(UploadDialog.PARAMS.DATAURL, url);
 			arguments.putString(UploadDialog.PARAMS.MEDIAURL, murl);
 			arguments.putString(UploadDialog.PARAMS.DATA, MissionUtils.generateJsonString(null,m));
 			arguments.putString(UploadDialog.PARAMS.ORIGIN_ID, m.getOrigin().id);
 			arguments.putString(UploadDialog.PARAMS.MISSION_ID, m.getTemplate().id);
-			arguments.putStringArray(UploadDialog.PARAMS.MEDIA, FormUtils.getPhotoUriStrings(m.getOrigin().id));
+			arguments.putStringArray(UploadDialog.PARAMS.MEDIA, FormUtils.getPhotoUriStrings(fragment.getActivity().getBaseContext(),m.getOrigin().id));
 			
 			mTaskFragment.setArguments(arguments);
 			
