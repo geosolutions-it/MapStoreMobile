@@ -27,7 +27,6 @@ import it.geosolutions.geocollect.model.config.MissionTemplate;
 import java.util.List;
 
 import jsqlite.Database;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -579,24 +578,17 @@ public class PendingMissionListFragment
 	}
 	
 	/**
-	 * Shows the "editing" icon upon resuming from launched detail activity
+	 * Refresh the list
 	 */
 	@Override
 	public void onResume() {
 		super.onResume();
-		if(getListView()!= null){
-			int pos = getListView().getCheckedItemPosition();
-			int max = getListView().getCount();
-			if( pos != AbsListView.INVALID_POSITION && pos < max){
-				MissionFeature f = (MissionFeature) getListView().getItemAtPosition(pos);
-				if(f != null){
-					f.editing = true;
-					getListView().invalidateViews();
-				}
-			}
+
+		if(adapter != null && loader != null){
+			adapter.clear();
+			loader.forceLoad();
 		}
-	}
-	
+	}	
 
 	/**
 	 * Handle the results
