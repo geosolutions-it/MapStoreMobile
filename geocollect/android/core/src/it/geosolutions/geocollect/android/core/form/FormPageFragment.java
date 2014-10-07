@@ -197,7 +197,7 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 		FormBuilder.buildForm(getActivity(), this.mFormView, page.fields, mission);//TODO page is not enough, some data should be accessible like constants and data
 		
 		// It is safe to initialize field here because buildForm is a callback of the onActivityCreated();
-		PersistenceUtils.loadPageData(page, mFormView, mission, getActivity());
+		PersistenceUtils.loadPageData(page, mFormView, mission, getActivity(),true);
 
 		// TODO: add a timer and start an animation for the tutorial
 		if(page.attributes != null && page.attributes.containsKey("tutorial")){
