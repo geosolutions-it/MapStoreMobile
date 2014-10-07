@@ -486,8 +486,10 @@ public class FormBuilder {
 		editView.setId(id());
 		editView.setTag(field.fieldId);
 		editView.setInputType(type);
+		editView.setText( mission.getValueAsString(field) );//TODO make it parameterizable
 		
-		editView.setText( mission.getValueAsString(field));//TODO make it parameterizable
+		final String mandatoryTag = field.mandatory ? " ("+mFormView.getContext().getString(R.string.mandatory)+")" : "";
+		tvLabel.setText(tvLabel.getText()+mandatoryTag);
 		
 		mFormView.addView(tvLabel);
 		mFormView.addView(editView);

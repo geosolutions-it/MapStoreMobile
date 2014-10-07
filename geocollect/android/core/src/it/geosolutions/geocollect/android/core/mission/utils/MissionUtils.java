@@ -20,11 +20,12 @@ package it.geosolutions.geocollect.android.core.mission.utils;
 import it.geosolutions.android.map.wfs.WFSGeoJsonFeatureLoader;
 import it.geosolutions.android.map.wfs.geojson.GeoJson;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
-import it.geosolutions.android.map.wfs.geojson.feature.FeatureCollection;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
+import it.geosolutions.geocollect.model.viewmodel.Field;
+import it.geosolutions.geocollect.model.viewmodel.Page;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -37,9 +38,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import jsqlite.Database;
+import jsqlite.Exception;
+import jsqlite.Stmt;
 import android.content.Context;
 import android.support.v4.content.Loader;
+import android.util.Log;
+import android.util.Pair;
 
+import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.google.gson.Gson;
 
@@ -129,6 +135,70 @@ public class MissionUtils {
 		GeoJson gson = new GeoJson();
 		String c = gson.toJson( f);
 		return c;
+	}
+	
+	/**
+	 * checks if mandatory fields were compiled using the mandatory field of the defaulttemplate
+	 * 
+	 * @param dataMapping
+	 * @return ArrayList with the fields label which was not compiled or an empty list if all was done
+	 */
+	public static ArrayList<String> checkIfAllMandatoryFieldsAreSatisfied(final SherlockFragment fragment,final Mission mission) {
+		
+		ArrayList<String> missingEntries = new ArrayList<String>();
+		
+		MissionTemplate t = MissionUtils.getDefaultTemplate(fragment.getActivity());
+		
+		String tableName = mission.getTemplate().id+"_data";
+		if(mission.getTemplate().source != null && mission.getTemplate().source.localFormStore != null && !mission.getTemplate().source.localFormStore.isEmpty()){
+    		tableName = mission.getTemplate().source.localFormStore;
+    	}
+		
+		Stmt st = null;
+		//find mandatory fields
+		ArrayList<Pair<String,String>> missingFieldIDs = new ArrayList<Pair<String,String>>();
+		for(Page page : t.form.pages){
+			for(Field f : page.fields){
+				if(f.mandatory){				
+					missingFieldIDs.add(new Pair<String, String>(f.fieldId, f.label));
+				}
+			}
+		}
+		//if no mandatory fields no need to continue
+		if(missingFieldIDs.isEmpty()){
+			return missingEntries;
+		}
+		
+		//create selection
+		String selection = "";
+		for(int i = 0; i < missingFieldIDs.size();i++){
+			selection += missingFieldIDs.get(i).first;
+			if(i < missingFieldIDs.size() -1 ){
+				selection += ",";
+			}
+		}
+		//create query
+		final String s = "SELECT " + selection +" FROM '" + tableName + "' WHERE ORIGIN_ID = '" + mission.getOrigin().id+"';";
+		
+		//do the query
+		if(jsqlite.Database.complete(s)){
+			try {
+				st = mission.db.prepare(s);
+			if(st.step()){
+				for(int j = 0; j < st.column_count(); j++){	
+					
+					//if mandatory field is null or empty, add it to the missing entries
+					if(st.column_string(j) == null || st.column_string(j).equals("")){
+						missingEntries.add(missingFieldIDs.get(j).second);
+					}
+				}
+			}
+			} catch (Exception e) {
+				Log.d(MissionUtils.class.getSimpleName(), "Error checkIfAllMandatoryFieldsArsSatisfied",e);
+			}
+		}
+		
+		return missingEntries;
 	}
 	
 }

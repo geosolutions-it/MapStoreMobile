@@ -161,13 +161,15 @@
 					"type":"person",
 					"xtype":"textfield",
 					"value":"${local.user_name}",
-					"label":"Nome Rilevatore"
+					"label":"Nome Rilevatore",
+					"mandatory":"true"
 				},{
 					"fieldId": "COGNOME_RILEVATORE",
 					"type":"person",
 					"xtype":"textfield",
 					"value":"${local.user_surname}",
-					"label":"Cognome Rilevatore"
+					"label":"Cognome Rilevatore",
+					"mandatory":"true"
 				},{
 					"fieldId": "ENTE_RILEVATORE",
 					"type":"person",
