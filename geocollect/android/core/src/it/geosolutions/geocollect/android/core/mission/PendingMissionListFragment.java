@@ -578,14 +578,16 @@ public class PendingMissionListFragment
 	}
 	
 	/**
-	 * Shows the "editing" icon upon resuming from launched detail activity
+	 * Refresh the list
 	 */
 	@Override
 	public void onResume() {
 		super.onResume();
 
-		getListView().invalidateViews();
-
+		if(adapter != null && loader != null){
+			adapter.clear();
+			loader.forceLoad();
+		}
 	}	
 
 	/**
