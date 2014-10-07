@@ -81,7 +81,8 @@
 		"fields":[{
 					
 					"type":"text",
-					"xtype":"separator",
+					"xtype":"separatorWithIcon",
+					"value":"${origin.GRAVITA}",
 					"label":"${origin.CODICE}"
 				},{
 					

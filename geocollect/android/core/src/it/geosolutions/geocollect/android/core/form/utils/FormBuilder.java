@@ -47,9 +47,13 @@ import org.mapsforge.core.model.GeoPoint;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.text.InputType;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -59,6 +63,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.SimpleAdapter;
@@ -128,6 +133,9 @@ public class FormBuilder {
 					break;
 				case separator:
 					addSeparator(f,mFormView,context,mission);
+					break;
+				case separatorWithIcon:
+					addSeparatorWithIcon(f,mFormView,context,mission);
 					break;
 				case mapViewPoint:
 					addMapViewPoint(f,mFormView,context,mission);
@@ -266,6 +274,81 @@ public class FormBuilder {
 		tvLabel.setText(label);
 		mFormView.addView(tvLabel);
 		
+	}
+	
+	/**
+	 * Create an Header with separator and icon
+	 * @param f
+	 * @param mFormView
+	 * @param context
+	 * @param mission 
+	 */
+	private static void addSeparatorWithIcon(Field field, LinearLayout mFormView, Context context, Mission mission) {
+		
+		String label = mission.getValueAsString(field, field.label);
+		
+		LinearLayout linearLayout = new LinearLayout(context);
+		linearLayout.setLayoutParams(new LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
+		linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+		
+		TextView tvLabel = new TextView(context);
+		LayoutParams tvParams = new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+		tvLabel.setTextAppearance(context, android.R.style.TextAppearance_Medium);
+		tvLabel.setTypeface(Typeface.create("sans-serif", Typeface.BOLD));
+		tvLabel.setGravity(Gravity.CENTER_VERTICAL|Gravity.LEFT);
+		tvParams.topMargin = 20;
+		tvParams.leftMargin = 10;
+		tvParams.rightMargin =10;
+		tvParams.gravity = Gravity.LEFT;
+		tvParams.weight = 0.8f;
+		tvLabel.setLayoutParams(tvParams);
+		tvLabel.setText(label);
+		
+		ImageView imageView = new ImageView(context);
+		LayoutParams ivParams = new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+		ivParams.topMargin = 10;
+		ivParams.leftMargin = 10;
+		ivParams.rightMargin = 10;
+		ivParams.gravity = Gravity.RIGHT;
+		tvParams.weight = 0.2f;
+		imageView.setLayoutParams(ivParams);
+		
+		// Get the icon and tweak the color
+		Drawable d = context.getResources().getDrawable(R.drawable.ic_action_important_light);
+		HashMap <String,String> colors  = mission.getTemplate().priorityValuesColors;
+
+		final String key = mission.getValueAsString(field);
+		
+		final String color = colors.get(key);	
+
+		if ( color != null ){
+			try{
+				d.mutate().setColorFilter(Color.parseColor(color), PorterDuff.Mode.SRC_ATOP);
+			}catch(IllegalArgumentException iae){
+				Log.e("FeatureAdapter", "A feature has an incorrect color value" );
+			}
+		}else{
+			d.mutate().clearColorFilter();
+		}
+
+		imageView.setImageDrawable(d);
+		
+		linearLayout.addView(tvLabel);
+		linearLayout.addView(imageView);
+
+		mFormView.addView(linearLayout);
+		
+		View separator = new View(context);
+		
+		LayoutParams sepParams = new LayoutParams(LayoutParams.MATCH_PARENT,3);
+		separator.setBackgroundColor(0xffababab);
+		sepParams.bottomMargin = 5;
+		sepParams.topMargin = 2;
+		sepParams.leftMargin = 10;
+		sepParams.rightMargin =10;
+		separator.setLayoutParams(sepParams);
+		
+		mFormView.addView(separator);
 	}
 
 	

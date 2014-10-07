@@ -30,5 +30,6 @@ public enum XType {
 	checkbox,
 	spinner,
 	photo,
-	mapViewPoint
+	mapViewPoint,
+	separatorWithIcon
 }
