@@ -183,7 +183,7 @@ public class PendingMissionListFragment
 	        Bundle savedInstanceState) {
 		footer = View.inflate(getActivity(), R.layout.loading_footer, null);
 	    
-	    // Gest the list fragment's content view
+	    // Get the list fragment's content view
         final View listFragmentView = inflater.inflate(R.layout.mission_resource_list, container, false);
  
         // Now create a SwipeRefreshLayout to wrap the fragment's content view
@@ -389,7 +389,7 @@ public class PendingMissionListFragment
 			}
 		}
 		
-		inflater.inflate(R.menu.refreshable, menu);
+		//inflater.inflate(R.menu.refreshable, menu);
 	}
 	
 	/* (non-Javadoc)
@@ -399,14 +399,7 @@ public class PendingMissionListFragment
 	public boolean onOptionsItemSelected(MenuItem item) {
 		
 		int id = item.getItemId();
-		if(id==R.id.refresh){
-
-			//getLoaderManager().getLoader(LOADER_INDEX);
-			if(loader !=null){
-				this.onRefresh();
-			}
-			return true;
-		} else if (id==R.id.order){
+		if (id==R.id.order){
 
 			// Get it from the mission template
 			if(loader !=null){

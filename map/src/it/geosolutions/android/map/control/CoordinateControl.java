@@ -40,25 +40,30 @@ public class CoordinateControl extends MapControl{
 	private String format ="##.00000";
 	private int x=0;
 	private int y=0;
-	private static int textSize = 20;
+	private static int textSize = 16;
+	
+	private static float dpiFactor;
+	
 	private static void configurePaints() {
 
 		COORDINATE_TEXT.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-		COORDINATE_TEXT.setTextSize(textSize);
+		COORDINATE_TEXT.setTextSize(textSize * dpiFactor);
 		COORDINATE_TEXT.setColor(Color.BLACK);
 		COORDINATE_TEXT_STROKE.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
 		COORDINATE_TEXT_STROKE.setStyle(Paint.Style.STROKE);
 		COORDINATE_TEXT_STROKE.setColor(Color.WHITE);
 		COORDINATE_TEXT_STROKE.setStrokeWidth(2);
-		COORDINATE_TEXT_STROKE.setTextSize(textSize);
+		COORDINATE_TEXT_STROKE.setTextSize(textSize * dpiFactor);
 	}
 	
 	public CoordinateControl(AdvancedMapView m){
 		super(m);
+		dpiFactor = m.getContext().getResources().getDisplayMetrics().density;
 		configurePaints();
 	}
 	public CoordinateControl(AdvancedMapView m,boolean enabled){
 		super(m,enabled);
+		dpiFactor = m.getContext().getResources().getDisplayMetrics().density;
 		configurePaints();
 	}
 	@Override
@@ -70,8 +75,8 @@ public class CoordinateControl extends MapControl{
 		f.format(gp.latitude);
 		f.format(gp.longitude);
 		String message = (f.format(gp.latitude) +","+f.format(gp.longitude));
-	    canvas.drawText(message,x , y+textSize, COORDINATE_TEXT_STROKE);
-		canvas.drawText(message,x , y+textSize, COORDINATE_TEXT);
+	    canvas.drawText(message,x , y+(textSize * dpiFactor), COORDINATE_TEXT_STROKE);
+		canvas.drawText(message,x , y+(textSize * dpiFactor), COORDINATE_TEXT);
 		
 	}
 	public void setPosition( int x, int y){
