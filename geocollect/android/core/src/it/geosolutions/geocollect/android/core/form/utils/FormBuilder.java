@@ -17,6 +17,8 @@
  */
 package it.geosolutions.geocollect.android.core.form.utils;
 
+import it.geosolutions.android.map.control.CoordinateControl;
+import it.geosolutions.android.map.control.LocationControl;
 import it.geosolutions.android.map.control.MarkerControl;
 import it.geosolutions.android.map.dto.MarkerDTO;
 import it.geosolutions.android.map.overlay.MarkerOverlay;
@@ -59,6 +61,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.SimpleAdapter;
@@ -153,26 +156,36 @@ public class FormBuilder {
 	 * @param mission
 	 */
 	private static void addMapViewPoint(Field field, LinearLayout mFormView,
-			Context context, Mission mission) {
+			final Context context, Mission mission) {
 		TextView tvLabel = getLabelForField(field, context);
 		AdvancedMapView mapView =null;
+		ImageButton buttonLocation = null;
 		//setup view
 		//ImageButton infoButton = new ImageButton(context);
 		//infoButton.setImageResource(R.drawable.ic_menu_info_details); //TODO move icon to main project
 		//infoButton.setVisibility(ImageButton.GONE);
 		//infoButton.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT));
 		//TODO find a mapview in layout to provide a better GUI
-		if(mapView==null){
-			mapView = new AdvancedMapView(context);
-			mapView.setLayoutParams(getMapLayoutParams(field));//if not in layout
-			mFormView.addView(tvLabel);
-			//mFormView.addView(infoButton);
-			mapView.setMinimumHeight(100);//it doesn't work, try a different method
-			mapView.setMinimumWidth(100);
-			mapView.setTag(field.fieldId);
-			mFormView.addView(mapView);
-		}
 		
+		if(context instanceof FormEditActivity){
+			View formView = ((FormEditActivity)context).getLayoutInflater().inflate(R.layout.form_mapview, null);
+			mapView = (AdvancedMapView) formView.findViewById(R.id.advancedMapView);
+			buttonLocation = (ImageButton) formView.findViewById(R.id.ButtonLocation);
+			mFormView.addView(tvLabel);
+			mapView.setTag(field.fieldId);
+			mFormView.addView(formView);
+		}else{
+			if(mapView==null){
+				mapView = new AdvancedMapView(context);
+				mapView.setLayoutParams(getMapLayoutParams(field));//if not in layout
+				mFormView.addView(tvLabel);
+				//mFormView.addView(infoButton);
+				mapView.setMinimumHeight(100);//it doesn't work, try a different method
+				mapView.setMinimumWidth(100);
+				mapView.setTag(field.fieldId);
+				mFormView.addView(mapView);
+			}
+		}
 		//setup overlay Manager
 		MultiSourceOverlayManager o = new MultiSourceOverlayManager(mapView);
 		mapView.setOverlayManger(o);
@@ -247,6 +260,18 @@ public class FormBuilder {
 			m.getOverlayItems().add(marker);
 			//mc.selectMarker(marker);
 			mapView.getMapViewPosition().setCenter(geoPoint);
+		}
+		if(context instanceof FormEditActivity){
+			
+			
+			//add coordinates control
+			 mapView.addControl(new CoordinateControl(mapView, true));
+			
+			 //add "location" control connected to the button
+			 LocationControl lc  =new LocationControl(mapView);
+			 lc.setActivationButton(buttonLocation);
+			 mapView.addControl(lc);
+
 		}
 	}
 
