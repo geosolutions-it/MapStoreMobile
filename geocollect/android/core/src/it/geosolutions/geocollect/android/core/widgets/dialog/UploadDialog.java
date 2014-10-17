@@ -201,8 +201,9 @@ public class UploadDialog extends RetainedDialogFragment {
             
                  HttpPost post = new HttpPost(url);
                 
-                 StringEntity se = new StringEntity( json.toString());  
+                 StringEntity se = new StringEntity( json.toString(), "UTF-8");  
                  se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+                 se.setContentEncoding(new BasicHeader(HTTP.CHARSET_PARAM, "UTF-8"));
                  post.setEntity(se);
                  response = client.execute(post);
 

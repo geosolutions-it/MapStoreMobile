@@ -29,6 +29,7 @@ import it.geosolutions.geocollect.model.config.MissionTemplate;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -128,7 +129,12 @@ public class MissionUtils {
 		Feature f = PersistenceUtils.loadFeatureById(m);
 		GeoJson gson = new GeoJson();
 		String c = gson.toJson( f);
-		return c;
+		try {
+			return new String(c.getBytes("UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			// return the original string
+			return c;
+		}
 	}
 	
 }
