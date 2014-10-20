@@ -1,0 +1,140 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ff0463B5" >
+
+    <!-- Logout progress -->
+
+    <LinearLayout
+        android:id="@+id/logout_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <ProgressBar
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/login_status_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:fontFamily="sans-serif-light"
+            android:text="@string/login_progress_signing_in"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </LinearLayout>
+
+    <!-- Logout form -->
+
+    <LinearLayout
+        android:id="@+id/logout_form"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#ff0463B5"
+        android:orientation="vertical"
+         android:visibility="gone" >
+
+        <RelativeLayout
+            android:id="@+id/logout_upper_spacer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".2" >
+
+            <ImageView
+                android:id="@+id/imageView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/geocollect_header" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/logout_content"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".4" >
+
+            <TextView
+                android:id="@+id/logout_logged_in_as"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:fontFamily="sans-serif"
+                android:gravity="center_horizontal"
+                android:paddingBottom="15dp"
+                android:text="@string/logout_logged_in_as"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@android:color/white" />
+
+            <TextView
+                android:id="@+id/logout_email_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/logout_logged_in_as"
+                android:layout_centerHorizontal="true"
+                android:fontFamily="sans-serif"
+                android:paddingTop="5dp"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@android:color/white"
+                android:textStyle="italic" />
+
+            <TextView
+                android:id="@+id/logout_username_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/logout_email_tv"
+                android:layout_centerHorizontal="true"
+                android:fontFamily="sans-serif"
+                android:paddingTop="5dp"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@android:color/white"
+                android:textStyle="italic" />
+
+            <TextView
+                android:id="@+id/logout_ente_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/logout_username_tv"
+                android:layout_centerHorizontal="true"
+                android:fontFamily="sans-serif"
+                android:paddingTop="5dp"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@android:color/white"
+                android:textStyle="italic" />
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/logout_lower_spacer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".4" >
+
+            <Button
+                android:id="@+id/logout_button"
+                android:layout_width="fill_parent"
+                android:layout_height="45dp"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/red_button"
+                android:fontFamily="sans-serif"
+                android:textSize="20sp"
+                android:text="@string/logout_logout"
+                android:textColor="@android:color/white" />
+        </RelativeLayout>
+    </LinearLayout>
+
+</FrameLayout>

@@ -49,6 +49,19 @@
 	     android:name="it.geosolutions.geocollect.android.core.preferences.GeoCollectPreferences"
 	    android:theme="@android:style/Theme.Black.NoTitleBar" >
 	  </activity>
+            <!-- Login/Logout -->
+        <activity
+            android:name="it.geosolutions.geocollect.android.core.login.LoginActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.NoTitleBar"
+            android:windowSoftInputMode="adjustPan|stateVisible" />
+        <activity
+            android:name="it.geosolutions.geocollect.android.core.login.LogoutActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.NoTitleBar" />
+
         <!-- *************** -->
         <!-- MAPSTORE_MOBILE -->
         <!-- *************** -->

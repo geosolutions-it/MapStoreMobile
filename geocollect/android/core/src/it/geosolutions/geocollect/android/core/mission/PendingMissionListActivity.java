@@ -27,6 +27,8 @@ import it.geosolutions.android.map.MapsActivity;
 import it.geosolutions.android.map.view.MapViewManager;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.R;
+import it.geosolutions.geocollect.android.core.login.LoginActivity;
+import it.geosolutions.geocollect.android.core.login.LogoutActivity;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.NavUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
@@ -39,15 +41,17 @@ import it.geosolutions.geocollect.android.core.preferences.GeoCollectPreferences
 import it.geosolutions.geocollect.android.map.ReturningMapInfoControl;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.source.XDataType;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 /**
  * An activity representing a list of Pending Missions. This activity has
@@ -91,6 +95,18 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Log.v("MISSION_LIST", "onCreate()");
+		
+		//TODO when is the login data necessary to load mission data ?
+		final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+		
+		final String authKey = prefs.getString(LoginActivity.PREFS_AUTH_KEY, null);
+		
+		if(authKey == null){
+
+			startActivityForResult(new Intent(this, LoginActivity.class), LoginActivity.REQUEST_LOGIN);
+
+		}
+		
 		// Initialize database
 		// This should be the first thing the Activity does
 		if(spatialiteDatabase == null){
@@ -269,9 +285,19 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
             break;
         //Settings	
         case 203:
-        	Intent intent = new Intent(this,
-        			GeoCollectPreferences.class);
-		      startActivity(intent);
+        	final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+
+        	final String user_email = prefs.getString(LoginActivity.PREFS_USER_EMAIL, null);
+        	final String user_pw    = prefs.getString(LoginActivity.PREFS_PASSWORD, null);
+        	
+        	if(user_email != null && user_pw != null){
+        		//user is most likely logged in, show LogoutActivity
+        		startActivityForResult(new Intent(this, LogoutActivity.class),LogoutActivity.REQUEST_LOGOUT);
+        	}else{
+        		
+        		startActivity(new Intent(this,LoginActivity.class));
+        	}
+
         	break;
         //quit
         case 204:
@@ -366,6 +392,23 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
+		
+		 if(requestCode == LoginActivity.REQUEST_LOGIN){
+	    		
+	    		if(resultCode == RESULT_CANCELED){
+	    			//user cancelled to enter credentials
+	    			Toast.makeText(getBaseContext(), getString(R.string.login_canceled), Toast.LENGTH_LONG).show();
+	    			finish();
+	    			return;
+	    		}
+	    	}
+		 if(requestCode == LogoutActivity.REQUEST_LOGOUT){
+			 if(resultCode == LogoutActivity.LOGGED_OUT){
+				 //there is a notification in LogoutActivity already
+				 finish();
+				 return;
+			 }
+		 }
 		// We need to explicitly call the child Fragments onActivityResult()
 		for (Fragment fragment : getSupportFragmentManager().getFragments()) {
             fragment.onActivityResult(requestCode, resultCode, data);
