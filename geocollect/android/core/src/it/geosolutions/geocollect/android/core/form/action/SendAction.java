@@ -17,24 +17,21 @@
  */
 package it.geosolutions.geocollect.android.core.form.action;
 
-import java.util.Map;
-
-import com.actionbarsherlock.app.SherlockFragment;
-
 import it.geosolutions.geocollect.android.core.BuildConfig;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.utils.FormUtils;
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
-import it.geosolutions.geocollect.android.core.widgets.dialog.TaskFragment;
 import it.geosolutions.geocollect.android.core.widgets.dialog.UploadDialog;
 import it.geosolutions.geocollect.model.http.CommitResponse;
 import it.geosolutions.geocollect.model.viewmodel.FormAction;
 import it.geosolutions.geocollect.model.viewmodel.Page;
+
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -42,12 +39,11 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NavUtils;
+import android.text.Html;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
+
+import com.actionbarsherlock.app.SherlockFragment;
 
 /**
  * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
@@ -99,14 +95,37 @@ public class SendAction extends AndroidAction {
 			}
 			return;
 		}
+
+		// check database for mandatory fields
+		ArrayList<String> notFilledMandatoryEntries = MissionUtils.checkIfAllMandatoryFieldsAreSatisfied(fragment, m);	
+		
+		if(notFilledMandatoryEntries.size() > 0){
+			String missing = fragment.getString(R.string.mandatory_fields_not_filled)+"\n\n";
+			for(String string : notFilledMandatoryEntries){
+				missing+=" \u2022 "+ string+"\n";
+			}
+			missing += "\n"+fragment.getString(R.string.mandatory_fields_please_fill);
+			Log.d(TAG, "missing "+Html.fromHtml(missing));
+			
+			new AlertDialog.Builder(fragment.getActivity())
+		    .setTitle(R.string.missing_data)
+		    .setMessage(missing)
+		    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+		        public void onClick(DialogInterface dialog, int which) { 
+		        	//nothing		        	
+		        }
+		     })
+		     .show();
+			
+			return;
+		}
+		
 		
 		
 		String confirm =null;
 			if(attributes!=null){
 				confirm= (String) attributes.get(ATTRIBUTE_CONFIRM_MESSAGE);
 			}
-			
-			// TODO: add validation
 			
 			if(confirm !=null){
 				
