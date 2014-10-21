@@ -196,7 +196,7 @@
 				}]
 			},{
 				"title": "Discarica",
-				fields:[{
+				"fields":[{
 					"fieldId": "CODICE_DISCARICA",
 					"type": "text",
 					"xtype":"label",
@@ -342,7 +342,7 @@
 					"text":"Scatta Foto",
 					"name":"photos",
 					"type":"photo",
-					iconCls:"ic_camera"
+					"iconCls":"ic_camera"
 				}]
 			},{
 				"title": "Invio",
