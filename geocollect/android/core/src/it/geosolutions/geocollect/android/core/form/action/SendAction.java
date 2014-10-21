@@ -102,7 +102,7 @@ public class SendAction extends AndroidAction {
 		if(notFilledMandatoryEntries.size() > 0){
 			String missing = fragment.getString(R.string.mandatory_fields_not_filled)+"\n\n";
 			for(String string : notFilledMandatoryEntries){
-				missing+=" • "+ string+"\n";
+				missing+=" \u2022 "+ string+"\n";
 			}
 			missing += "\n"+fragment.getString(R.string.mandatory_fields_please_fill);
 			Log.d(TAG, "missing "+Html.fromHtml(missing));
