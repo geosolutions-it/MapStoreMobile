@@ -617,6 +617,9 @@ public class PendingMissionListFragment
 					loader.forceLoad();
 					// TODO: This call could need to move the onCreateMenu() code into a onPrepareOptionMenu()
 					getSherlockActivity().supportInvalidateOptionsMenu();
+					
+
+					Toast.makeText(getActivity(), getString(R.string.selection_filtered), Toast.LENGTH_SHORT).show();
 	    	    }
 
 	    	    //else if(query instanceof CircleQuery){ }
