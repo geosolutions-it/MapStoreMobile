@@ -106,8 +106,8 @@
 					
 					"type":"text",
 					"xtype":"label",
-					"value":"${origin.QUANTITA_R}",
-					"label":"Quantità"
+					"value":"${origin.GRAVITA}",
+					"label":"Gravità"
 				},{
 					
 					"type":"text",
