@@ -77,7 +77,7 @@ public abstract class MapControl {
 	            	}
 	            }
 	            button.setSelected(true);
-	            enable();
+	            enable();				
 	        }			
 		}		 
 	};

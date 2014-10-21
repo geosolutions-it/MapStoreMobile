@@ -30,11 +30,12 @@
     <string name="button_confirm_image_delete">L\'immagine verrà eliminata.\nContinuare?</string>
     <string name="button_confirm_image_delete_title">Elimina Immagine</string>
     <string name="undo_filter">Rimuovi Filtraggio</string>
-	<string name="data_send_success">Invio dati completato</string>
-  
+	<string name="data_send_success">Invio dati completato</string>  
     <string name="mandatory">Obbligatorio</string>
     <string name="missing_data">Dati mancanti</string>
     <string name="mandatory_fields_not_filled">I seguenti campi non sono stati compilati :</string>
     <string name="mandatory_fields_please_fill">Si prega di compilare prima di inviare.</string>
+    <string name="selection_filtered">La tua selezione é stata filtrata</string>    
+    <string name="create_rectangle">Crea un rettangolo sulla mappa per filtrare su una zona di interesse</string>
     
 </resources>
