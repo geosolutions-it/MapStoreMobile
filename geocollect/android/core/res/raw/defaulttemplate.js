@@ -81,7 +81,8 @@
 		"fields":[{
 					
 					"type":"text",
-					"xtype":"separator",
+					"xtype":"separatorWithIcon",
+					"value":"${origin.GRAVITA}",
 					"label":"${origin.CODICE}"
 				},{
 					
@@ -105,8 +106,8 @@
 					
 					"type":"text",
 					"xtype":"label",
-					"value":"${origin.QUANTITA_R}",
-					"label":"Quantità"
+					"value":"${origin.GRAVITA}",
+					"label":"Gravità"
 				},{
 					
 					"type":"text",
@@ -195,7 +196,7 @@
 				}]
 			},{
 				"title": "Discarica",
-				fields:[{
+				"fields":[{
 					"fieldId": "CODICE_DISCARICA",
 					"type": "text",
 					"xtype":"label",
@@ -341,7 +342,7 @@
 					"text":"Scatta Foto",
 					"name":"photos",
 					"type":"photo",
-					iconCls:"ic_camera"
+					"iconCls":"ic_camera"
 				}]
 			},{
 				"title": "Invio",
