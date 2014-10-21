@@ -36,7 +36,7 @@
 	<string name="missing_data">Missing data</string>
 	<string name="mandatory_fields_not_filled">The following fields were not filled:</string>
 	<string name="mandatory_fields_please_fill">Please fill them before sending.</string>
-	<string name="selection_filtered">You\'re selection was filtered</string>
+	<string name="selection_filtered">Your selection was filtered</string>
     <string name="create_rectangle">Create a rectangle on the map to filter area of your interest</string>
     
 </resources>
