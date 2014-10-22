@@ -1,4 +1,4 @@
-﻿{
+{
 	"id":"punti_abbandono",
 	"title": "Punti Abbandono",
 	"source":{
@@ -150,7 +150,13 @@
 					"type":"text",
 					"xtype":"datefield",
 					"label":"Data aggiornamento scheda"
-				}]
+				},{
+				    "fieldId": "MY_ORIG_ID",
+				    "type":"text",
+				    "xtype":"text",
+				    "value":"${origin.ID}",
+				    "label":"Original Mission ID"
+				   }]
 			},{
 				"title": "Rilevatore",
 				"iconCls":"not_supported_yet",
@@ -370,6 +376,7 @@
 					"xtype":"label",
 					"label":"Quantità Presunta (mc)"
 				}],
+				   
 				"actions":[{
 					"id":2,
 					"text":"Invia",
@@ -377,8 +384,8 @@
 					"name":"send",
 					"iconCls":"ic_send",
 					"attributes":{
-						"url":"http://192.168.2.107:8080/opensdi2-web/mvc/geocollect/action/asd",
-						"mediaurl":"http://192.168.2.107:8080/opensdi2-web/mvc/geocollect/data",
+						"url":"http://84.33.2.28:8082/opensdi2-manager/mvc/geocollect/action/store",
+						"mediaurl":"http://84.33.2.28:8082/opensdi2-manager/mvc/geocollect/data",
 						"confirmMessage":"Inviare?"
 					}
 				}]
