@@ -11,7 +11,7 @@
 	<string name="map">Map</string>
 	<string name="accept_mission">Accept</string>
 	<string name="action_quit">Quit</string>
-	<string name="loading_footer">Loading...</string>
+	<string name="loading_footer">Loading&#8230;</string>
 	<string name="sending_data">Sending data</string>
 	<string name="sending_media">Sending media content</string>
 	<string name="error_sending_data">Error Sending Data</string>

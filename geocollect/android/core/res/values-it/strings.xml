@@ -11,9 +11,9 @@
 	<string name="map">Mappa</string>
 	<string name="accept_mission">Accetta</string>
 	<string name="action_quit">Esci</string>
-	<string name="loading_footer">Loading...</string>
+	<string name="loading_footer">Loading&#8230;</string>
 	<string name="sending_data">Invio dati</string>
-	<string name="sending_media">Invo contenuti multimediali</string>
+	<string name="sending_media">Invio contenuti multimediali</string>
 	<string name="error_sending_data">Errore durante l\'invio dei dati</string>
 	<string name="no_media_to_send">Nessun file da inviare</string>
 	<plurals name="reporting">
