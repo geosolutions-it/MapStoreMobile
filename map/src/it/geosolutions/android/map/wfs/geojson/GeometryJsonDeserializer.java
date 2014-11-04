@@ -22,6 +22,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.LinearRing;
 /**
  * <JsonDeserializer> for GeoJson Geometry part
  * @author Lorenzo Natali (lorenzo.natali at geo-solutions.it)
@@ -78,7 +79,19 @@ public class GeometryJsonDeserializer implements JsonDeserializer<Geometry> {
         } else if (geometryType.equals(TYPE_POLYGON)) {
         	JsonElement jc = obj.get(COORDINATES);
         	if(jc != null){
-			     return fact.createPolygon(getCoordinatesArray(jc.getAsJsonArray()));
+        		//check if this polygon contains inner polygons
+        		if(jc.getAsJsonArray().size() > 1){
+        			final int holesCount = jc.getAsJsonArray().size() - 1;
+        			LinearRing[] holes = new LinearRing[holesCount];
+        			for(int i = 0; i < holesCount;i++){
+        				holes[i] = getLinearRingFromCoordinates(jc.getAsJsonArray().get(i + 1).getAsJsonArray(), fact);
+        			}
+        			return fact.createPolygon(getLinearRingFromCoordinates(jc.getAsJsonArray().get(0).getAsJsonArray(), fact), holes);
+        			
+        		}else if(jc.getAsJsonArray().size() == 1){//there is one outer polygon
+        			
+        			return fact.createPolygon(getCoordinatesArray(jc.getAsJsonArray().get(0).getAsJsonArray()));
+        		}
 			 }
         } else if (geometryType.equals(TYPE_MULTIPOLYGON)) {
         	// NOT SUPPORTED YET
@@ -87,25 +100,33 @@ public class GeometryJsonDeserializer implements JsonDeserializer<Geometry> {
         }
 		return null;
 	}
-	  
+	/**
+     * convert a <JsonArray> into a <LinearRing> 
+     * @param coordinatesArray (array of arrays)
+     * @param fact the GeometryFactory
+     * @return
+     */
+	 private LinearRing getLinearRingFromCoordinates(JsonArray coordinatesArray, GeometryFactory fact){
+		 
+		 return new LinearRing(fact.getCoordinateSequenceFactory().create(getCoordinatesArray(coordinatesArray)), fact);
+	 }
     /**
      * convert a <JsonArray> into a <Coordinate> array (case <LineString> ...)
      * @param coordinatesArray (array of arrays)
      * @return
      */
-	private Coordinate[] getCoordinatesArray(JsonArray coordinatesArray) {
-		final Coordinate[] result = new Coordinate[coordinatesArray.size()];
-		//iteration on coordinates elements
-		for (int i = 0; i < result.length; i++) {
-	      final JsonArray jca = coordinatesArray.get(i).getAsJsonArray();
-	      //create the single coordinates
-	      result[i] = getCoordinates(jca);
-	     
-	    }
-	    return result;
-	}
-	
-	  
+	 private Coordinate[] getCoordinatesArray(JsonArray coordinatesArray) {
+		 final Coordinate[] result = new Coordinate[coordinatesArray.size()];
+		 //iteration on coordinates elements
+		 for (int i = 0; i < result.length; i++) {
+			 final JsonArray jca = coordinatesArray.get(i).getAsJsonArray();
+			 //create the single coordinates
+			 result[i] = getCoordinates(jca);
+
+		 }
+		 return result;
+	 }
+
     /**
      * convert a <JsonArray> into a <Coordinate> object (case <Point>)
      * @param coordinatesArray (array of latitude - longitude)
