@@ -31,7 +31,6 @@ import java.util.List;
 import jsqlite.Exception;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import eu.geopaparazzi.spatialite.database.spatial.core.ISpatialDatabaseHandler;
 import eu.geopaparazzi.spatialite.database.spatial.core.MbtilesDatabaseHandler;
 import eu.geopaparazzi.spatialite.database.spatial.core.OrderComparator;
@@ -65,6 +64,9 @@ public class SpatialDataSourceManager {
         spatialDbManager = null;
     }
     
+    /**
+     * Resets the {@link ISpatialDatabaseHandler} list
+     */
     public void clear(){
 
     	sdbHandlers.clear();
