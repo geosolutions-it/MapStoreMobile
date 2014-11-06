@@ -63,6 +63,14 @@ public class SpatialDataSourceManager {
     public static void reset() {
         spatialDbManager = null;
     }
+    
+    /**
+     * Resets the {@link ISpatialDatabaseHandler} list
+     */
+    public void clear(){
+
+    	sdbHandlers.clear();
+    }
 
     public void init( Context context, File mapsDir ) {
         File[] sqliteFiles = mapsDir.listFiles(new FilenameFilter(){
