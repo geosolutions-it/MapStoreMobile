@@ -125,5 +125,15 @@
 	</pluginManagement>
   </build>
 				
+  <repositories>
+    <repository>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <id>geosolutions</id>
+      <name>GeoSolutions Repository</name>
+      <url>http://maven.geo-solutions.it/</url>
+    </repository>
+  </repositories>
 
 </project>

@@ -24,7 +24,7 @@
     <parent>
         <groupId>it.geosolutions.geocollect</groupId>
         <artifactId>geocollect-core</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.2.0-SNAPSHOT</version>
     </parent>
   
     <groupId>it.geosolutions.geocollect.model</groupId>
