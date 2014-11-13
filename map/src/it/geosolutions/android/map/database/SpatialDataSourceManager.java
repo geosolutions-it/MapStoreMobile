@@ -114,7 +114,7 @@ public class SpatialDataSourceManager {
         return tables;
     }
 
-    public List<SpatialRasterTable> getSpatialRasterTables( boolean forceRead ) throws Exception {
+    public synchronized List<SpatialRasterTable> getSpatialRasterTables( boolean forceRead ) throws Exception {
         List<SpatialRasterTable> tables = new ArrayList<SpatialRasterTable>();
         for( ISpatialDatabaseHandler sdbHandler : sdbHandlers ) {
             try {
