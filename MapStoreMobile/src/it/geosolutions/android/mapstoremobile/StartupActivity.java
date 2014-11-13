@@ -23,10 +23,9 @@ import it.geosolutions.android.map.utils.ZipFileManager;
 
 import java.io.File;
 
-import android.os.Bundle;
-import android.os.Environment;
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Bundle;
 
 /**
  * Startup activity loaded when launch mapstore mobile, download a data sample
@@ -34,6 +33,7 @@ import android.content.Intent;
  * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com)
  */
 public class StartupActivity extends Activity {
+	
 	private String dir_path;
 
 	/**
@@ -45,7 +45,14 @@ public class StartupActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_startup);	
 		dir_path = MapFilesProvider.getEnvironmentDirPath(this);
-		ZipFileManager zfm = new ZipFileManager(this,dir_path,"/mapstore",getResources().getString(R.string.url_data_test_archive)){
+		
+		ZipFileManager zfm = new ZipFileManager(
+				this,
+				dir_path,
+				"/mapstore",
+				getResources().getString(R.string.url_data_test_archive)
+				){
+			
 			@Override
 			public void launchMainActivity(){
 				Intent launch = new Intent(activity,MapsActivity.class);

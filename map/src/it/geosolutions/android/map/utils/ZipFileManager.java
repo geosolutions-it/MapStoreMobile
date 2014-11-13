@@ -1,6 +1,6 @@
 /*
  * GeoSolutions map - Digital field mapping on Android based devices
- * Copyright (C) 2013  GeoSolutions (www.geo-solutions.it)
+ * Copyright (C) 2013 - 2014  GeoSolutions (www.geo-solutions.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ import it.geosolutions.android.map.R;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -42,6 +43,9 @@ import android.util.Log;
 /** Class to manage download and decompression of a sample data test archive from web.
  * This class manager uses two class that extend AsyncTask to perform computations in background.
  * @author Jacopo Pianigiani (jacopo.pianigiani85@gmail.com).
+ * 
+ * Introduced the ability to set a custom message and title
+ * @author Lorenzo Pini (lorenzo.pini@geo-solutions.it)
  */
 public class ZipFileManager {
 	
@@ -55,50 +59,112 @@ public class ZipFileManager {
 	private AlertDialog error_dialog;
 	public Activity activity; //Necessary for the dialog
 
-	private final static String file_name = "data_test_archive.zip"; //Archive that must be to download
 	/**
-	 * Constructor for class ZipFileManager 
+	 * Temporary Archive name, once extracted it will be deleted
+	 */
+	private final static String file_name = "data_test_archive.zip";
+	
+	/**
+	 * Uses default message values 
 	 * @param activity
 	 * @param dir_path
 	 */
-	public ZipFileManager(final Activity activity, final String dir_path,String dest_dir,final String url){
-		this.activity = activity;
+	public ZipFileManager(Activity activity, String dir_path, String dest_dir, String url){
+		this(activity, dir_path, dest_dir, url, null, null);
+	}
+	
+	/**
+	 * Custom values for dialog message and title can be set 
+	 * If one of the dialog title of message is null, the default library value will be used
+	 * @param activity
+	 * @param dir_path
+	 */
+	public ZipFileManager(Activity activity, String dir_path, String dest_dir, String url, String dialogTitle, String dialogMessage){
 		
+		this.activity = activity;
 		
 		//Check if folder of data already exists, otherwise it will be downloaded and unzipped.
 		File f = new File(dir_path + dest_dir);
 		if(!f.isDirectory()){
-			AlertDialog.Builder download_dialog_builder;
-			download_dialog_builder = new AlertDialog.Builder(activity);
-			download_dialog_builder.setTitle(R.string.dialog_title);
-			download_dialog_builder.setMessage(R.string.dialog_message);
-			download_dialog_builder.setCancelable(false);
-			download_dialog_builder.setPositiveButton(R.string.button_download, new DialogInterface.OnClickListener() {
-				
-				@Override
-				public void onClick(DialogInterface dialog, int which) {	
-					
-					new DownloadFileAsyncTask().execute(url,dir_path);
-					download_dialog.dismiss();
-				}
-			});
+
+			askForDownload(activity, dir_path, url, dialogTitle, dialogMessage);
 			
-			download_dialog_builder.setNegativeButton(R.string.button_undownload, new DialogInterface.OnClickListener() {		
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					download_dialog.dismiss();
-					launchMainActivity();
-				}
-			});
-			
-			download_dialog = download_dialog_builder.create();
-			
-			//Show an alert dialog to ask user if wants to download data test archive from web
-			download_dialog.show();
 		}else{
+			
 			launchMainActivity();
 		}
+		
 	}
+
+	/**
+	 * Creates an AlertDialog.Builder with default parameters
+	 * @param context
+	 * @return
+	 */
+	private AlertDialog.Builder setupAlertDialogBuilder(Context context, CharSequence dialogTitle, CharSequence dialogMessage){
+		
+		AlertDialog.Builder download_dialog_builder = new AlertDialog.Builder(context);
+		
+		// Set the given title, or use the default one
+		if(dialogTitle != null){
+			download_dialog_builder.setTitle(dialogTitle);
+		}else{
+			download_dialog_builder.setTitle(R.string.dialog_title);
+		}
+		
+		// Set the given message, or use the default one
+		if(dialogMessage != null){
+			download_dialog_builder.setMessage(dialogMessage);
+		}else{
+			download_dialog_builder.setMessage(R.string.dialog_message);
+		}	
+		
+		download_dialog_builder.setCancelable(false);
+		
+		return download_dialog_builder;
+		
+	}
+	
+	/**
+	 * @param activity
+	 * @param dir_path
+	 * @param url
+	 * @param dialogTitle
+	 * @param dialogMessage
+	 */
+	public void askForDownload(
+			Activity activity, 
+			final String dir_path,
+			final String url, 
+			CharSequence dialogTitle,
+			CharSequence dialogMessage) {
+		
+		AlertDialog.Builder download_dialog_builder = setupAlertDialogBuilder(activity, dialogTitle, dialogMessage);
+		
+		download_dialog_builder.setPositiveButton(R.string.button_download, new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {	
+				
+				new DownloadFileAsyncTask().execute(url,dir_path);
+				download_dialog.dismiss();
+			}
+		});
+		
+		download_dialog_builder.setNegativeButton(R.string.button_undownload, new DialogInterface.OnClickListener() {		
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				download_dialog.dismiss();
+				launchMainActivity();
+			}
+		});
+		
+		download_dialog = download_dialog_builder.create();
+		
+		//Show an alert dialog to ask user if wants to download data test archive from web
+		download_dialog.show();
+	}
+
 	
 	/**
 	 * This method launch the main activity of MapStore Mobile(In View mode) once that archive is available,
