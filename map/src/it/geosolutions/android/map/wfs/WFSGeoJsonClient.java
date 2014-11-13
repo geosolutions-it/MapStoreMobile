@@ -1,5 +1,6 @@
 package it.geosolutions.android.map.wfs;
 
+import it.geosolutions.android.map.BuildConfig;
 import it.geosolutions.android.map.wfs.geojson.GeoJson;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.android.map.wfs.geojson.feature.FeatureCollection;
@@ -17,7 +18,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
@@ -163,11 +163,13 @@ public class WFSGeoJsonClient {
 		}
 		Log.d("WFS","request_url:"+uri.toString());
 		HttpGet get = new HttpGet(uri);
-		if (url == null)
+		if (url == null) {
+			if(BuildConfig.DEBUG){
+				Log.w("WFS-Geojson", "URL Not Present. Unable to submit the request");
+			}
 			return new ArrayList<Feature>();
-		{
-			Log.w("WFS-Geojson", "URL Not Present. Unable to submit the request");
 		}
+		
 		get.addHeader("Accept", "application/json");
 		
 		HttpResponse response;
