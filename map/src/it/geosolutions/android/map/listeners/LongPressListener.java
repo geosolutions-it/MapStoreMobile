@@ -1,5 +1,23 @@
+/*
+ * GeoSolutions Android Map Library - Digital field mapping on Android based devices
+ * Copyright (C) 2013 - 2014  GeoSolutions (www.geo-solutions.it)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package it.geosolutions.android.map.listeners;
 
+import it.geosolutions.android.map.BuildConfig;
 import it.geosolutions.android.map.overlay.SpatialiteOverlay;
 import it.geosolutions.android.map.view.AdvancedMapView;
 import android.os.SystemClock;
@@ -10,8 +28,20 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 
+/**
+ * Generic LongPress Listener
+ * 
+ * 
+ * @author Lorenzo Pini (lorenzo.pini@geo-solutions.it)
+ *
+ */
 public class LongPressListener implements OnTouchListener, OnGestureListener {
 
+	/**
+	 * TAG for logging
+	 */
+	private static final String TAG = "LongPressListener";
+	
 	private float x;
 	private float y;
 	private boolean startedDraggingSelection;
@@ -35,11 +65,17 @@ public class LongPressListener implements OnTouchListener, OnGestureListener {
 	public boolean onTouchEvent(MotionEvent event) {
 		return gestureDetector.onTouchEvent(event);
 
-		
 	}
+	
+	/**
+	 * Checks if the given {@link MotionEvent} is a single point long press
+	 * If it is, enter in a "dragging" state
+	 */
 	@Override
 	public void onLongPress(MotionEvent event) {
-        Log.v("EVENT", "onLongPress");	 
+		if(BuildConfig.DEBUG){
+			Log.v(TAG, "onLongPress");
+		}
         
     	if(event.getPointerCount()==1){
     		float newX= event.getX(0);
@@ -47,8 +83,10 @@ public class LongPressListener implements OnTouchListener, OnGestureListener {
 	        
     		if(x==newX && y==newY && startedDraggingSelection){
     			startedDraggingSelection = false;
-	    		Log.v("EVENT","LONG PRESS DETECTEED!");
-	    		//TODO check if marker under the mouse and allow drag and drop
+    			if(BuildConfig.DEBUG){
+	    			Log.v(TAG,"LONG PRESS DETECTED!");
+	    		}
+    			//TODO check if marker under the mouse and allow drag and drop
     		}
     		
     	}

@@ -1,6 +1,6 @@
 /*
  * GeoSolutions Android Map Library - Digital field mapping on Android based devices
- * Copyright (C) 2013  GeoSolutions (www.geo-solutions.it)
+ * Copyright (C) 2013 - 2014  GeoSolutions (www.geo-solutions.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
  */
 package it.geosolutions.android.map.control;
 
+import it.geosolutions.android.map.BuildConfig;
 import it.geosolutions.android.map.R;
 import it.geosolutions.android.map.activities.FeatureDetailsActivity;
 import it.geosolutions.android.map.model.Feature;
@@ -50,6 +51,11 @@ import android.widget.Toast;
  *
  */
 public class MarkerControl extends MapControl implements OnTouchListener, OnGestureListener,OnClickListener {
+	
+	/**
+	 * TAG for logging
+	 */
+	private static final String TAG = "MarkerControl";
 	
 	private DescribedMarker selectedMarker;
 	private DescribedMarker originalMarker;
@@ -120,8 +126,10 @@ public class MarkerControl extends MapControl implements OnTouchListener, OnGest
 	 */
 	private boolean manageDragEvent(View view, MotionEvent event) {
 		int action =event.getAction();
+		Log.d("DRAG", "Action: "+action);
 		switch(action){
 			case MotionEvent.ACTION_UP:
+			case MotionEvent.ACTION_CANCEL:
 				isDragging=false;
 				this.view.thawOverlays();
 				promptChangeFeature();
@@ -229,18 +237,22 @@ public class MarkerControl extends MapControl implements OnTouchListener, OnGest
 	    if(mode!=MODE_EDIT){
 	        return;
 	    }
-		Log.v("EVENT", "onLongPress");	 
+	    
+		if(BuildConfig.DEBUG) {
+			Log.v(TAG, "onLongPress");	
+		}
         
-    	    if(event.getPointerCount()==1){
+    	if(event.getPointerCount()==1){
+    		
     		float newX= event.getX(0);
 	        float newY =event.getY(0);
 	        
     		if(x==newX && y==newY && startedDraggingSelection){
     			startedDraggingSelection = false;
-	    		Log.v("EVENT","LONG PRESS DETECTEED!");
-	    		
-	    		    startDragging(newX,newY);
-	    		
+	    		if(BuildConfig.DEBUG){
+	    			Log.v(TAG,"LONG PRESS DETECTED!");
+	    		}
+	    		startDragging(newX,newY);
 	    		
     		}
     		
@@ -260,6 +272,9 @@ public class MarkerControl extends MapControl implements OnTouchListener, OnGest
 		if(mo==null){
 		    return;
 		}
+		// Request to handle all the touch events
+		view.getParent().requestDisallowInterceptTouchEvent(true);
+		
 		DescribedMarker dm = mo.queryPixel(view.getMapViewPosition(),view.getProjection(), x, y);
 		if(dm !=null){
 			selectMarker(dm);
