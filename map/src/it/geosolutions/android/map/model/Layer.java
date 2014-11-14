@@ -84,5 +84,15 @@ public interface Layer <T extends Source> extends Serializable{
 	
 	public double getOpacity();
 	
+	/**
+	 * @return the label String associated with this layer
+	 */
+	public String getLabel();
+	
+	/**
+	 * set the label of the layer
+	 * @param label the label
+	 */
+	public void  setLabel(String label);
 	
 }

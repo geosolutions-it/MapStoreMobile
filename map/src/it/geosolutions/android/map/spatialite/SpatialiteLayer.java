@@ -37,6 +37,7 @@ import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
 public class SpatialiteLayer implements Layer<SpatialiteSource> {
 	
 	private String title;
+	private String label;
 	SpatialiteSource source;
 	private String tableName;
 	
@@ -170,6 +171,19 @@ public class SpatialiteLayer implements Layer<SpatialiteSource> {
 	@Override
 	public double getOpacity() {
 		return this.opacity;
+	}
+
+
+	@Override
+	public String getLabel() {
+		return this.label;
+	}
+
+
+	@Override
+	public void setLabel(String label) {
+		this.label = label;
+		
 	}
 
 }

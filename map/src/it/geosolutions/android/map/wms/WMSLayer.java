@@ -53,6 +53,11 @@ public class WMSLayer implements Layer<WMSSource>{
 	private String title;
 	
 	/**
+	 * The label of the layer
+	 */
+	private String label;
+	
+	/**
 	 * Flag if this Layer is tiled
 	 */
 	private boolean tiled = false;
@@ -221,6 +226,18 @@ public class WMSLayer implements Layer<WMSSource>{
 	@Override
 	public double getOpacity() {
 		return opacity;
+	}
+
+	@Override
+	public String getLabel() {
+		return this.label;
+	}
+
+
+	@Override
+	public void setLabel(String label) {
+		this.label = label;
+		
 	}
 
 }
