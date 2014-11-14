@@ -41,7 +41,7 @@
 		<repository>
 			<uniqueVersion>false</uniqueVersion>
 		   <id>geosolutions</id>
-		   <url>ftp://maven.geo-solutions.it</url>
+		   <url>ftp://demo.geo-solutions.it</url>
 		</repository>
 	</distributionManagement>
   <build>
@@ -82,5 +82,5 @@
       <url>http://maven.geo-solutions.it/</url>
     </repository>
   </repositories>
-
+	
 </project>
