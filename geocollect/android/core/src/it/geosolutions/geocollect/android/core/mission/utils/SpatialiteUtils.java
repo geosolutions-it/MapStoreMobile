@@ -413,6 +413,7 @@ public class SpatialiteUtils {
 			if(columnName != null){
 				
 				if(columnName.equalsIgnoreCase("PK_UID")||columnName.equalsIgnoreCase("ORIGIN_ID")){
+					// The output Feature ID should not be the same as the input Feature one
 					f.id = stmt.column_string(colpos);
 				}else if(columnName.equalsIgnoreCase("GEOMETRY")){
 					// At the moment, only Point is supported

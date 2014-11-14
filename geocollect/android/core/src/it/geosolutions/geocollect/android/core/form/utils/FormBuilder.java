@@ -178,10 +178,13 @@ public class FormBuilder {
 		if(context instanceof FormEditActivity){
 			View formView = ((FormEditActivity)context).getLayoutInflater().inflate(R.layout.form_mapview, null);
 			mapView = (AdvancedMapView) formView.findViewById(R.id.advancedMapView);
+			
 			buttonLocation = (ImageButton) formView.findViewById(R.id.ButtonLocation);
+			
 			mFormView.addView(tvLabel);
 			mapView.setTag(field.fieldId);
 			mFormView.addView(formView);
+			
 		}else{
 			if(mapView==null){
 				mapView = new AdvancedMapView(context);

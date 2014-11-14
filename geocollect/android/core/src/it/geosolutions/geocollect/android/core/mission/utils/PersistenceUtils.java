@@ -490,7 +490,7 @@ public class PersistenceUtils {
 							if(st.step()){
 								// nothing will be returned anyway
 							}
-							Log.v(TAG, "Record created");
+							Log.v(TAG, "Record created with query:\n"+s);
 
 						}
 						st.close();

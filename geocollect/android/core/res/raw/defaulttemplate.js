@@ -384,8 +384,8 @@
 					"name":"send",
 					"iconCls":"ic_send",
 					"attributes":{
-						"url":"http://84.33.2.28:8082/opensdi2-manager/mvc/geocollect/action/store",
-						"mediaurl":"http://84.33.2.28:8082/opensdi2-manager/mvc/geocollect/data",
+						"url":"http://84.33.2.28/opensdi2-manager/mvc/geocollect/action/store",
+						"mediaurl":"http://84.33.2.28/opensdi2-manager/mvc/geocollect/data",
 						"confirmMessage":"Inviare?"
 					}
 				}]
