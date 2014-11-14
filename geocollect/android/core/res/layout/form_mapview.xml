@@ -7,7 +7,7 @@
     <it.geosolutions.android.map.view.AdvancedMapView
         android:id="@+id/advancedMapView"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentTop="true" />
     
      <ImageButton 
