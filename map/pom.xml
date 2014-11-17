@@ -64,6 +64,15 @@
 	</dependency>
   </dependencies>
 
+    <!-- deploy -->
+	<distributionManagement>
+		<repository>
+			<uniqueVersion>false</uniqueVersion>
+		   <id>geosolutions</id>
+		   <url>ftp://demo.geo-solutions.it</url>
+		</repository>
+	</distributionManagement>
+	
   <build>
     <sourceDirectory>${project.basedir}/src</sourceDirectory>
     <plugins>
@@ -123,6 +132,16 @@
 		  </plugin>
     </plugins>
 	</pluginManagement>
+	
+	<extensions>
+      <!-- Enabling the use of FTP -->
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+         <artifactId>wagon-ftp</artifactId>
+         <version>2.7</version>
+      </extension>
+    </extensions>
+
   </build>
 				
   <repositories>
