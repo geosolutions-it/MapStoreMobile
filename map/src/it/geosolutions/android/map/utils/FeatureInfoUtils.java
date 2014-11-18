@@ -27,8 +27,6 @@ import it.geosolutions.android.map.model.query.BBoxTaskQuery;
 import it.geosolutions.android.map.model.query.PolygonTaskQuery;
 
 import java.util.ArrayList;
-import jsqlite.Exception;
-import android.util.Log;
 import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
 
 /**

@@ -1,6 +1,6 @@
 /*
  * GeoSolutions map - Digital field mapping on Android based devices
- * Copyright (C) 2013  GeoSolutions (www.geo-solutions.it)
+ * Copyright (C) 2013 - 2014  GeoSolutions (www.geo-solutions.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,9 +26,6 @@ import it.geosolutions.android.map.geostore.model.Resource;
 import it.geosolutions.android.map.mapstore.activities.MapStoreLayerListActivity;
 import it.geosolutions.android.map.mapstore.model.MapStoreConfiguration;
 import it.geosolutions.android.map.mapstore.utils.MapStoreConfigTask;
-import it.geosolutions.android.map.model.MSMMap;
-import it.geosolutions.android.map.utils.SpatialDbUtils;
-
 import java.util.List;
 
 import android.app.Activity;

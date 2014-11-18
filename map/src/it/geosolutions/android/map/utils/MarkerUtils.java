@@ -23,7 +23,6 @@ import it.geosolutions.android.map.overlay.items.DescribedMarker;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.mapsforge.android.maps.MapViewPosition;
 import org.mapsforge.core.model.GeoPoint;
 import org.mapsforge.core.model.MapPosition;
 

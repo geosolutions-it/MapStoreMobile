@@ -17,21 +17,11 @@
  */
 package it.geosolutions.android.map.utils;
 
-import java.util.ArrayList;
-
-import it.geosolutions.android.map.database.SpatialDataSourceHandler;
 import it.geosolutions.android.map.database.SpatialDataSourceManager;
-import it.geosolutions.android.map.model.Feature;
-
 import org.mapsforge.core.model.GeoPoint;
-
-import android.util.Log;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.io.ParseException;
-
-import eu.geopaparazzi.spatialite.database.spatial.core.SpatialVectorTable;
 
 /**
  * @author Lorenzo Natali (www.geo-solutions.it)

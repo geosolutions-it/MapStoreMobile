@@ -2,7 +2,7 @@
  *    GeoSolutions Android Map Library
  *    http://www.geo-solutions.it
  *
- *    (C) 2012-2013, GeoSolutions S.A.S
+ *    (C) 2012-2014, GeoSolutions S.A.S
  *
  *    This library is free software; you can redistribute it and/or
  *    modify it under the terms of the GNU Lesser General Public
@@ -31,7 +31,6 @@ import java.util.List;
 
 import jsqlite.Exception;
 
-import org.mapsforge.android.maps.BackgroundSourceType;
 import org.mapsforge.core.model.GeoPoint;
 
 import android.util.Log;
@@ -283,6 +282,10 @@ public static MSMMap mapFromDb(boolean vectorOnly){
 				} catch (Exception e) {
 					if(BuildConfig.DEBUG){
 						Log.e("Spatialite","error retrieving raster tables", e);
+					}
+				} catch (android.database.sqlite.SQLiteException sqe){
+					if(BuildConfig.DEBUG){
+						Log.e("SQLite",sqe.getMessage(), sqe);
 					}
 				}
 			}
