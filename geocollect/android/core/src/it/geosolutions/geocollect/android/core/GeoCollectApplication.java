@@ -43,6 +43,8 @@ import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
  * @author Lorenzo Pini (lorenzo.pini[at]geo-solutions[dot]it)
  */
 public class GeoCollectApplication extends Application {
+
+	
 	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
 	@Override
 	public void onCreate() {

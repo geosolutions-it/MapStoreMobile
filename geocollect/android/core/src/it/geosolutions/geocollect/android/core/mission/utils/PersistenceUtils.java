@@ -445,7 +445,7 @@ public class PersistenceUtils {
 												if(tags!=null && tags.size() ==1){
 													//Get geometry now geoPoint only supported)
 													//TODO support for different formats
-													Point geom = (Point) mission.getValueByTag(tags.get(0));
+													Point geom = (Point) mission.getValueByTag(context, tags.get(0));
 													if(geom !=null){
 														if(!geom.isEmpty()){
 															double lat = geom.getY();
