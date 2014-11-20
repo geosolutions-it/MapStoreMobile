@@ -174,7 +174,7 @@ public class DescribedMarker extends Marker {
 		}
 		
 		if(textVisible){
-			canvas.drawText(description+" cm",pixelX-40, pixelY+30, PAINT_TEXT);
+			canvas.drawText(description, pixelX-40, pixelY+30, PAINT_TEXT);
 		}
 		
 		drawable.setBounds(left, top, right, bottom);
