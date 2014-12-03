@@ -1,13 +1,12 @@
 {
 	"id":"punti_abbandono",
 	"title": "Punti Abbandono",
-	"source":{
-		"type":"WFS",
-		"URL":"http://demo.geo-solutions.it/share/comunege/geocollect/punti_abbandono.geojson",
-		"typeName":"geosolutions:punti_abbandono",
-		"localSourceStore":"punti_abbandono",
-		"localFormStore":"rilevamenti_effettuati",
-		"dataTypes":{
+	"schema_seg":{		
+   		"type":"WFS",		
+   		"URL":"http://demo.geo-solutions.it/share/comunege/geocollect/punti_abbandono.geojson",	
+   		"typeName":"geosolutions:punti_abbandono",	
+   		"localSourceStore":"punti_abbandono",
+		"fields":{
 			"CODICE":"string",
 			"DATA_RILEV":"string",
 			"MACROAREA":"string",
@@ -74,7 +73,42 @@
 			"VALORE_SOC":"integer",
 			"GMROTATION":"real"
 		},
+   	 "orderingField":"CODICE"	
+    },
+	"schema_sop":{
+		"localFormStore":"punti_abbandono_sop",
+   	 	"fields":{
+   	 		"DATA_SCHEDA":"date",
+   	 		"DATA_AGG":"date",
+   	 		"MY_ORIG_ID":"string",
+   	 		"NOME_RILEVATORE":"string",
+   	 		"COGNOME_RILEVATORE":"string",
+   	 		"ENTE_RILEVATORE":"string",
+   	 		"TIPOLOGIA_SEGNALAZIONE":"string",
+   	 		"PROVENIENZA_SEGNALAZIONE":"string",
+   	 		"CODICE_DISCARICA":"string",
+   	 		"TIPOLOGIA_RIFIUTO":"string",
+   	 		"COMUNE":"string",
+   	 		"LOCALITA":"string",
+   	 		"INDIRIZZO":"string",
+   	 		"CIVICO":"string",
+   	 		"PRESA_IN_CARICO":"string",
+   	 		"EMAIL":"string",
+   	 		"RIMOZIONE":"string",
+   	 		"SEQUESTRO":"string",
+   	 		"RESPONSABILE_ABBANDONO":"string",
+   	 		"QUANTITA_PRESUNTA":"string"
+   	 	},
 		"orderingField":"CODICE"
+	},
+	"nameField":"CODICE",
+	"descriptionField":"NOTE",
+	"priorityField":"GRAVITA",
+	"priorityValuesColors":{
+		"elevata":"#FF0000",
+		"media":"#FF9933",
+		"scarsa":"#FDF600",
+		"area pulita":"#00FF00"
 	},
 	"preview":{
 		"title":"Punto Abbandono",
@@ -128,11 +162,9 @@
 					}
 				}]
 	},
-	"nameField":"CODICE",
-	"descriptionField":"RIFIUTI_NO",
-	"form": {
+	"sop_form": {
 		"id": 1,
-		"name": "SampleForm",
+		"name": "FormSopralluogo",
 		"pages":[
 			{
 				"title": "Scheda",
@@ -393,15 +425,442 @@
 			
 		"submitURL": "http://sample.com"
 	},
+	"seg_form": {
+		"id": 2,
+		"name": "FormSegnalazione",
+		"pages":[
+			{
+				"title": "Scheda",
+				"iconCls":"not_supported_yet",
+				"attributes":{
+					"message":"Scorri a sinistra per continuare"
+				},
+				"fields":[{
+					"fieldId": "DATA_RILEV",
+					"type":"text",
+					"xtype":"datefield",
+					"label":"Data Rilevazione"
+				},{
+					"fieldId": "CODICE",
+					"type":"text",
+					"xtype":"text",
+					"label":"Codice",
+					"mandatory":"true"
+				},{
+				    "fieldId": "MACROAREA",
+				    "type":"text",
+				    "xtype":"text",
+				    "label":"Macroarea"
+				},{
+				    "fieldId": "MICROAREA",
+				    "type":"text",
+				    "xtype":"text",
+				    "label":"Microarea"
+				}]
+			},{
+				"title": "Circoscrizione",
+				"iconCls":"not_supported_yet",
+				"attributes":{
+					"message":"Scorri a sinistra per continuare"
+				},
+				"fields":[{
+					"fieldId": "CIRCOSCRIZ",
+					"type":"text",
+					"xtype":"text",
+					"label":"Circoscrizione"
+				},{
+					"fieldId": "MORFOLOGIA",
+					"type":"text",
+					"xtype":"spinner",
+					"label":"Morfologia",
+					"options":["area pianegginate","scarpata","zona valliva"]
+				},{
+				"fieldId": "MORFOLOGI1",
+					"type":"text",
+					"xtype":"spinner",
+					"label":"Morfologia1",
+					"options":["area pianegginate","scarpata","zona valliva"]
+				},{
+					"fieldId": "INCLINAZIO",
+					"type":"text",
+					"xtype":"text",
+					"value":"${local.user_organization}",
+					"label":"Ente di appartenenza Rilevatore"
+				}]
+			},{
+				"title": "Copertura",
+				"attributes":{
+					"message":"Scorri a sinistra per continuare"
+				},
+				"fields":[{
+					"fieldId": "COPERTURA_",
+					"type":"text",
+					"xtype":"checkbox",
+					"label":"Copertura_"
+				},{
+					"fieldId": "COPERTURA1",
+					"type":"text",
+					"xtype":"checkbox",
+					"label":"Copertura1"
+				},{
+					"fieldId": "USO_AGRICO",
+					"type":"text",
+					"xtype":"checkbox",
+					"label":"USO_AGRICO"
+				},{
+					"fieldId": "USO_PARCHE",
+					"type":"text",
+					"xtype":"checkbox",
+					"label":"USO_PARCHE"
+				},{
+					"fieldId": "USO_COMMER",
+					"type":"text",
+					"xtype":"checkbox",
+					"label":"USO_COMMER"
+				},{
+					"fieldId": "USO_STRADA",
+					"type":"text",
+					"xtype":"checkbox",
+					"label":"USO_STRADA"
+				},{
+					"fieldId": "USO_ABBAND",
+					"type":"text",
+					"xtype":"checkbox",
+					"label":"USO_ABBAND"
+				},{
+					"fieldId": "PRESUNZION",
+					"type":"text",
+					"xtype":"checkbox",
+					"label":"PRESUNZION"
+				}]
+			},{
+				"title": "Area_Priv",
+				"fields":[{
+					"fieldId": "AREA_PRIVA",
+					"type": "text",
+					"xtype":"checkbox",
+					"label": "AREA_PRIVA"
+				},{
+					"fieldId": "AREA_PUBBL",
+					"type":"text",
+					"xtype":"checkbox",
+					"label":"AREA_PUBBL"					
+				},{
+					"fieldId": "ALTRE_CARA",
+					"type":"decimal",
+					"xtype":"textfield",
+					"label":"ALTRE_CARA"
+					
+				},{
+					"fieldId": "DISTANZA_U",
+					"type":"decimal",
+					"xtype":"textfield",
+					"label":"DISTANZA_U"
+				}]
+			},{
+				"title": "Dimensioni",
+				"iconCls":"not_supported_yet",
+				"fields":[{
+					"fieldId": "DIMENSIONI",
+					"type":"text",
+					"xtype":"spinner",
+					"label":"Dimensioni",
+					"options":["Piccole","Medie","Grandi"]
+				},{
+					"fieldId": "RIFIUTI_NO",
+					"type":"text",
+					"xtype":"text",
+					"label":"RIFIUTI_NO",
+					"mandatory":"true"
+				},{
+					"fieldId": "RIFIUTI_PE",
+					"type":"text",
+					"xtype":"text",
+					"label":"RIFIUTI_PE"
+				},{
+					"fieldId": "QUANTITA_R",
+					"type":"text",
+					"xtype":"spinner",
+					"label":"QUANTITA_R",
+					"options":["0","1","2","3"]
+				},{
+					"fieldId": "STATO_FISI",
+					"type":"text",
+					"xtype":"text",
+					"label":"STATO_FISI"
+				}]
+			},{
+				"title": "Posizione",
+				"attributes":{
+					"message":"Premi a lungo sul marker per muoverlo."
+				},
+				"iconCls":"not_supported_yet",
+				"fields":[{
+					"fieldId": "GEOMETRY",
+					"type":"geoPoint",
+					"xtype":"mapViewPoint",
+					"attributes":{
+						"editable":true,
+						"description":"Set a position"
+					}
+				}]
+			},{
+				"title": "Odore",
+				"iconCls":"not_supported_yet",
+				"fields":[{
+					"fieldId": "ODORE",
+					"type":"text",
+					"xtype":"spinner",
+					"label":"ODORE",
+					"options":["assente","presente"]
+				},{
+					"fieldId": "MODALITA_S",
+					"type":"text",
+					"xtype":"text",
+					"label":"MODALITA_S"
+				},{
+					"fieldId": "PERCOLATO",
+					"type":"text",
+					"xtype":"checkbox",
+					"label":"PERCOLATO"
+				},{
+					"fieldId": "VEGETAZION",
+					"type":"text",
+					"xtype":"spinner",
+					"label":"Vegetazione",
+					"options":["assente","presente"]
+				},{
+					"fieldId": "STABILITA",
+					"type":"decimal",
+					"xtype":"textfield",
+					"label":"Stabilità"
+				}]
+			},{
+				"title": "Insediamento",
+				"iconCls":"not_supported_yet",
+				"fields":[{
+					"fieldId": "INSEDIAME",
+					"type":"text",
+					"xtype":"checkbox",
+					"label":"INSEDIAMEN"
+				},{
+					"fieldId": "INSEDIAME1",
+					"type":"text",
+					"xtype":"checkbox",
+					"label":"INSEDIAME1"
+				},{
+					"fieldId": "DISTANZA_C",
+					"type":"text",
+					"xtype":"text",
+					"label":"DISTANZA_C"
+				},{
+					"fieldId": "INSEDIAME2",
+					"type":"text",
+					"xtype":"checkbox",
+					"label":"INSEDIAME2"
+				},{
+					"fieldId": "INSEDIAME3",
+					"type":"text",
+					"xtype":"checkbox",
+					"label":"INSEDIAME3"
+				}]
+			},{	 
+				"title": "DISTANZA_P",
+				"iconCls":"not_supported_yet",
+				"fields":[{
+					"fieldId": "DISTANZA_P",
+					"type":"text",
+					"xtype":"text",
+					"label":"DISTANZA_P"
+				},{
+					"fieldId": "BOSCATE",
+					"type":"text",
+					"xtype":"checkbox",
+					"label":"BOSCATE"
+				},{
+					"fieldId": "BOSCATE_AB",
+					"type":"text",
+					"xtype":"checkbox",
+					"label":"BOSCATE_AB"
+				},{
+					"fieldId": "AGRICOLO",
+					"type":"decimal",
+					"xtype":"textfield",
+					"label":"AGRICOLO"
+				},{
+					"fieldId": "AGRICOLO_A",
+					"type":"text",
+					"xtype":"checkbox",
+					"label":"AGRICOLO_A"
+				}]
+			},{	
+				"title": "TORRENTI_R",
+				"iconCls":"not_supported_yet",
+				"fields":[{
+					"fieldId": "TORRENTI_R",
+					"type":"text",
+					"xtype":"checkbox",
+					"label":"TORRENTI_R"
+				},{
+					"fieldId": "NOME_TORRE",
+					"type":"text",
+					"xtype":"text",
+					"label":"NOME_TORRE"
+				},{
+					"fieldId": "RISCHIO_ES",
+					"type":"text",
+					"xtype":"checkbox",
+					"label":"RISCHIO_ES"
+				},{
+					"fieldId": "RIFIUTI_IN",
+					"type":"text",
+					"xtype":"checkbox",
+					"label":"RIFIUTI_IN"
+				},{
+					"fieldId": "PROBABILE_",
+					"type":"text",
+					"xtype":"checkbox",
+					"label":"PROBABILE_"
+				},{
+					"fieldId": "IMPATTO_ES",
+					"type":"text",
+					"xtype":"spinner",
+					"label":"IMPATTO_ES",
+					"options":["nullo","lievemente negativo"]
+				}]
+			},{	
+				"title": "POZZI_FALD",
+				"iconCls":"not_supported_yet",
+				"fields":[{
+					"fieldId": "POZZI_FALD",
+					"type":"text",
+					"xtype":"checkbox",
+					"label":"POZZI_FALD"
+				},{
+					"fieldId": "CRITICITA",
+					"type":"text",
+					"xtype":"text",
+					"label":"CRITICITA"
+				},{
+					"fieldId": "IMPATTO_CO",
+					"type":"decimal",
+					"xtype":"textfield",
+					"label":"IMPATTO_CO"
+				},{
+					"fieldId": "NOTE",
+					"type":"text",
+					"xtype":"text",
+					"label":"NOTE"
+				},{
+					"fieldId": "PULIZIA",
+					"type":"text",
+					"xtype":"spinner",
+					"label":"PULIZIA",
+					"options":["nessuna","parziale","completa"]
+				},{
+					"fieldId": "DISSUASION",
+					"type":"text",
+					"xtype":"spinner",
+					"label":"DISSUASION",
+					"options":["nessuna","parziale","completa"]
+				}]
+			},{	
+				"title": "VALORE_GRA",
+				"iconCls":"not_supported_yet",
+				"fields":[{
+					"fieldId": "VALORE_GRA",
+					"type":"decimal",
+					"xtype":"textfield",
+					"label":"VALORE_GRA"
+				},{
+					"fieldId": "FATTIBILIT",
+					"type":"text",
+					"xtype":"spinner",
+					"label":"FATTIBILIT",
+					"options":["bassa","media","alta"]
+				},{
+					"fieldId": "VALORE_FAT",
+					"type":"decimal",
+					"xtype":"textfield",
+					"label":"VALORE_FAT"
+				}]
+			},{	
+				"title": "LATITUDINE",
+				"iconCls":"not_supported_yet",
+				"fields":[{
+					"fieldId": "LATITUDINE",
+					"type":"decimal",
+					"xtype":"textfield",
+					"label":"LATITUDINE"
+				},{
+					"fieldId": "LONGITUDIN",
+					"type":"decimal",
+					"xtype":"textfield",
+					"label":"LONGITUDIN"
+				},{
+					"fieldId": "ID",
+					"type":"decimal",
+					"xtype":"textfield",
+					"label":"ID"
+				},{
+					"fieldId": "ID1",
+					"type":"decimal",
+					"xtype":"textfield",
+					"label":"ID1"
+				}]
+			},{	
+				"title": "Gravita",
+				"iconCls":"not_supported_yet",
+				"fields":[{
+					"fieldId": "GRAVITA",
+					"type":"text",
+					"xtype":"spinner",
+					"label":"GRAVITA",
+					"options":["area pulita","media","scarsa","elevata"]
+				},{
+					"fieldId": "RISCHIO",
+					"type":"text",
+					"xtype":"spinner",
+					"label":"RISCHIO",
+					"options":["basso","medio","alto"]
+				},{
+					"fieldId": "VALORE_RIS",
+					"type":"decimal",
+					"xtype":"textfield",
+					"label":"VALORE_RIS"
+				},{
+					"fieldId": "SOCIO_PAES",
+					"type":"text",
+					"xtype":"spinner",
+					"label":"SOCIO_PAES",
+					"options":["basso","medio","alto"]
+				},{
+					"fieldId": "VALORE_SOC",
+					"type":"decimal",
+					"xtype":"textfield",
+					"label":"VALORE_SOC"
+				},{
+					"fieldId": "GMROTATION",
+					"type":"real",
+					"xtype":"textfield",
+					"label":"GMROTATION"
+				}],				
+				"actions":[{
+					"id":2,
+					"text":"Invia",
+					"type":"send",
+					"name":"send",
+					"iconCls":"ic_send",
+					"attributes":{
+						"url":"http://84.33.2.28/opensdi2-manager/mvc/geocollect/action/store",
+						"mediaurl":"http://84.33.2.28/opensdi2-manager/mvc/geocollect/data",
+						"confirmMessage":"Inviare?"
+					}
+				}]
+			}]
+	},
 	"config":{
 		"myAllowedValues1":["value1","value2","value3"]
-	},
-	"priorityField":"GRAVITA",
-	"priorityValuesColors":{
-				"elevata":"#FF0000",
-				"media":"#FF9933",
-				"scarsa":"#FDF600",
-				"area pulita":"#00FF00"
-			}
+	}
 	
 }

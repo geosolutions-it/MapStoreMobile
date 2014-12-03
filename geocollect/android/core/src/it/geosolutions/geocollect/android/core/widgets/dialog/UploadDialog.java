@@ -67,6 +67,9 @@ public class UploadDialog extends RetainedDialogFragment {
 	private static boolean sending = false;
 	private String[] photoURIs;
 	private String missionId;
+	
+	private boolean missionFeatureUpload = false;
+	
 	public static class PARAMS {
 		public static final String DATAURL="URL";
 		public static final String MEDIAURL="MEDIAURL";
@@ -74,6 +77,7 @@ public class UploadDialog extends RetainedDialogFragment {
 		public static final String ORIGIN_ID = "ORIGIN_ID";
 		public static final String MISSION_ID="MISSION_ID";
 		public static final String MEDIA="MEDIA";
+		public static final String MISSION_FEATURE_UPLOAD="MISSION_FEATURE_UPLOAD";
 	}
 
 	public UploadDialog() {
@@ -87,6 +91,9 @@ public class UploadDialog extends RetainedDialogFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 			//TODO the retained fragment call this method.
+		
+			this.missionFeatureUpload = getArguments().getBoolean(PARAMS.MISSION_FEATURE_UPLOAD);
+			
 			if(getView()==null){;
 				View view = inflater.inflate(R.layout.progress_send, container);
 				getDialog().setTitle(getString(R.string.sending_data));
@@ -226,10 +233,18 @@ public class UploadDialog extends RetainedDialogFragment {
 				Toast.makeText(activity, R.string.error_sending_data, Toast.LENGTH_LONG).show();
 				Activity c = activity != null ? activity : getActivity();
 				onFinish(c, result);
-			}else{
+			}else if (!missionFeatureUpload){
+				//continue with media
 				setupDataControls(false);
 				setDataSendResultUI(true);
 				new MediaSenderThread().execute(result.getId());
+			}else{
+				//SUCCESS
+				setupMediaControl(false);
+				setMediaSendResultUI(true);
+				closeDialog(true);
+				Activity c = activity != null ? activity : getActivity();
+				onFinish(c,result);
 			}
 		}
 	}

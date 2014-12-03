@@ -20,17 +20,27 @@ package it.geosolutions.geocollect.android.core.mission;
 import it.geosolutions.android.map.model.query.BBoxQuery;
 import it.geosolutions.android.map.model.query.BaseFeatureInfoQuery;
 import it.geosolutions.geocollect.android.core.R;
+import it.geosolutions.geocollect.android.core.form.FormEditActivity;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
+import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.SQLiteCascadeFeatureLoader;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import jsqlite.Database;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -44,6 +54,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -79,6 +93,18 @@ public class PendingMissionListFragment
 
 	public static final String INFINITE_SCROLL = "INFINITE_SCROLL";
 
+	public static int ARG_ENABLE_GPS = 43231;
+
+	/**
+	 * mode of this fragment
+	 */
+	public enum FragmentMode
+	{
+		PENDING,
+		CREATION
+	}
+	private FragmentMode mMode = FragmentMode.PENDING;
+	
 	/**
 	 * The fragment's current callback object, which is notified of list item
 	 * clicks.
@@ -99,6 +125,8 @@ public class PendingMissionListFragment
 	 * The adapter for the Feature
 	 */
 	private FeatureAdapter adapter;
+	
+	private MissionAdapter missionAdapter;
 	
 	/**
 	 * Callback for the Loader
@@ -371,6 +399,13 @@ public class PendingMissionListFragment
 	@Override
 	public void onCreateOptionsMenu(
 	      Menu menu, MenuInflater inflater) {
+		
+		
+		if(mMode == FragmentMode.CREATION){
+			inflater.inflate(R.menu.creating, menu);
+			return;
+		}
+		
 		// If SRID is set, a filter exists
 		SharedPreferences sp = getSherlockActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME, Context.MODE_PRIVATE);
 		if(sp.contains(SQLiteCascadeFeatureLoader.FILTER_SRID)){
@@ -378,13 +413,13 @@ public class PendingMissionListFragment
 		}
 		
 		if ( missionTemplate != null 
-				&& missionTemplate.source != null
-				&& missionTemplate.source.orderingField != null){
+				&& missionTemplate.schema_sop != null
+				&& missionTemplate.schema_sop.orderingField != null){
 			inflater.inflate(R.menu.orderable, menu);
 			MenuItem orderButton = menu.findItem(R.id.order);
 			if(orderButton != null){
 				String stringFormat = getResources().getString(R.string.order_by);
-				String formattedTitle = String.format(stringFormat, missionTemplate.source.orderingField);
+				String formattedTitle = String.format(stringFormat, missionTemplate.schema_sop.orderingField);
 				orderButton.setTitle(formattedTitle);
 			}
 		}
@@ -399,7 +434,30 @@ public class PendingMissionListFragment
 	public boolean onOptionsItemSelected(MenuItem item) {
 		
 		int id = item.getItemId();
-		if (id==R.id.order){
+		if (id == R.id.create_new){
+			
+			if(!isGPSAvailable()){
+		
+				new AlertDialog.Builder(getActivity())
+			    .setTitle(R.string.app_name)
+			    .setMessage(R.string.gps_not_enabled)
+			    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+			        public void onClick(DialogInterface dialog, int which) { 
+
+			        	startActivityForResult(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS),ARG_ENABLE_GPS);
+			        }
+			     })
+			     .show();
+			}else{
+				
+				startMissionFeatureCreation();
+			}
+			
+			
+		
+			return true;
+			
+		}else if (id==R.id.order){
 
 			// Get it from the mission template
 			if(loader !=null){
@@ -441,6 +499,24 @@ public class PendingMissionListFragment
 
 		
 		return super.onOptionsItemSelected(item);
+	}
+	/**
+	 * checks if location services are available
+	 */
+	private boolean isGPSAvailable(){
+		LocationManager manager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE );
+		return manager.isProviderEnabled(LocationManager.GPS_PROVIDER) || manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+		
+	}
+	/**
+	 * starts the missionfeature creation
+	 */
+	private void startMissionFeatureCreation() {
+		
+		Intent i = new Intent(getSherlockActivity(),FormEditActivity.class);
+		i.putExtra(PendingMissionListActivity.ARG_CREATE_MISSIONFEATURE, true);
+		startActivityForResult(i, FormEditActivity.FORM_CREATE_NEW_MISSIONFEATURE);
+		
 	}
 
 	/* (non-Javadoc)
@@ -577,10 +653,17 @@ public class PendingMissionListFragment
 	public void onResume() {
 		super.onResume();
 
-		if(adapter != null && loader != null){
-			adapter.clear();
-			loader.forceLoad();
+		if(mMode == FragmentMode.CREATION){
+			if(missionAdapter != null){
+				fillCreatedMissionFeatureAdapter();
+			}
+		}else if(mMode == FragmentMode.PENDING){			
+			if(adapter != null && loader != null){
+				adapter.clear();
+				loader.forceLoad();
+			}
 		}
+			
 	}	
 
 	/**
@@ -642,7 +725,15 @@ public class PendingMissionListFragment
 				getSherlockActivity().supportInvalidateOptionsMenu();
 	    	}
 
-	    }
+	    }else if(requestCode == ARG_ENABLE_GPS ){
+			Log.d(FormEditActivity.class.getSimpleName(), "back from GPS settings");
+
+			if(!isGPSAvailable()){
+				Toast.makeText(getActivity(), R.string.gps_still_not_enabled, Toast.LENGTH_LONG).show();
+			}else{				
+				startMissionFeatureCreation();
+			}
+		}
 	}
 
 	/**
@@ -718,4 +809,205 @@ public class PendingMissionListFragment
         }
  
     }
+    /**
+     * switches between pending mission mode and created mission mode
+     * @param FragmentMode the new mode
+     */
+    public void switchAdapter(FragmentMode newMode){
+    	
+    	if(newMode == mMode){
+    		return;
+    	}
+    	
+    	mMode = newMode;
+    	
+    	if(mMode == FragmentMode.CREATION){
+
+    		missionAdapter = new MissionAdapter(getSherlockActivity(), R.layout.created_mission_row);
+    		
+    		//delete created items on long click listener
+    		getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
+
+				@Override
+				public boolean onItemLongClick(AdapterView<?> parent,View view,final int position, long id) {
+					
+					new AlertDialog.Builder(getSherlockActivity())
+				    .setTitle(R.string.my_inspections)
+				    .setMessage(R.string.created_inspection_delete)
+				    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+				        public void onClick(DialogInterface dialog, int which) { 
+				        	dialog.dismiss();
+				        	//nothing		        	
+				        	final MissionFeature f = (MissionFeature) getListView().getItemAtPosition(position);
+				        	
+				        	final MissionTemplate t = MissionUtils.getDefaultTemplate(getSherlockActivity());
+				        	
+				        	final Database db = ((PendingMissionListActivity)getSherlockActivity()).spatialiteDatabase;
+				        	
+				        	PersistenceUtils.deleteCreatedMissionFeature(db, t.schema_seg.localSourceStore+ "_new", f);
+				        	
+				        	fillCreatedMissionFeatureAdapter();
+				        }
+				     })
+				     .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+					        public void onClick(DialogInterface dialog, int which) { 
+					        	//nothing		
+					        	dialog.dismiss();
+					        }
+					     })
+					 .show();
+					
+					return true;
+				}
+			});
+
+    		if(	getSherlockActivity() instanceof PendingMissionListActivity){
+
+    			fillCreatedMissionFeatureAdapter();
+
+    		}
+
+    		setListAdapter(missionAdapter);
+    		
+
+    	}else if (mMode == FragmentMode.PENDING){
+    		
+    		//remove longclicklistener
+    		getListView().setOnItemLongClickListener(null);
+    		
+    		setListAdapter(adapter);
+    		
+    	}
+    	
+    	//invalidate actionbar
+    	getSherlockActivity().supportInvalidateOptionsMenu();
+    	
+    	
+    }
+    /**
+     * loads the locally available "created missionfeatures" from the database
+     */
+    private void fillCreatedMissionFeatureAdapter(){
+    	
+    	final MissionTemplate t = MissionUtils.getDefaultTemplate(getSherlockActivity());
+
+    	final Database db = ((PendingMissionListActivity)getSherlockActivity()).spatialiteDatabase;
+
+		Log.v(TAG, "Loading created missions");
+		final ArrayList<MissionFeature> missions = MissionUtils.getCreatedMissionFeatures(t.schema_seg.localSourceStore+ "_new", db);
+		
+		final String prio = t.priorityField;
+		final HashMap<String,String> colors = t.priorityValuesColors;
+		if(prio != null && colors != null){			
+			for(MissionFeature f : missions){
+				if ( f.properties.containsKey(prio)){
+					 f.displayColor = colors.get(f.properties.get(prio));
+				}
+			}
+		}
+
+		missionAdapter.clear();
+		
+		missionAdapter.addAll(missions);
+
+		missionAdapter.notifyDataSetChanged();
+		
+		if (missionAdapter.isEmpty()) {
+	        setNoData();
+	    }
+    }
+    
+	/**
+	 * returns the current mode of this fragment
+	 * either PENDING or CREATING
+	 */
+	public FragmentMode getFragmentMode(){
+		return mMode;
+	}
+    /**
+     * Adapter for MissionFeatures "created missions"
+     *
+     */
+	public class MissionAdapter extends ArrayAdapter<MissionFeature>{
+
+		private int resourceId;
+		
+		public MissionAdapter(Context context, int resource) {
+			super(context, resource);
+			
+			this.resourceId = resource;
+		}
+		
+		public View getView(int position, View convertView, ViewGroup parent) {
+
+		    // assign the view we are converting to a local variable
+		    View v = convertView;
+
+		    // first check to see if the view is null. if so, we have to inflate it.
+		    // to inflate it basically means to render, or show, the view.
+		    if (v == null) {
+		        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		        v = inflater.inflate(resourceId, null);
+		    }
+
+		    /*
+		     * Recall that the variable position is sent in as an argument to this
+		     * method. The variable simply refers to the position of the current object
+		     * in the list. (The ArrayAdapter iterates through the list we sent it)
+		     * Therefore, i refers to the current Item object.
+		     */
+		    MissionFeature mission = getItem(position);
+
+		    if (mission != null) {
+
+		    	// display name
+
+		    	TextView name = (TextView) v.findViewById(R.id.created_mission_resource_name);
+		    	if (name != null && mission.properties != null && mission.properties.containsKey("CODICE")) {
+		    		Object prop =mission.properties.get("CODICE");
+		    		if(prop!=null){
+		    			name.setText(prop.toString());
+		    		}else{
+		    			name.setText("");
+		    		}
+
+		    	}
+
+		    	//display rifiuti
+
+		    	TextView desc = (TextView) v.findViewById(R.id.created_mission_resource_description);
+		    	if (desc != null && mission.properties != null && mission.properties.containsKey("RIFIUTI_NO")) {
+		    		Object prop =mission.properties.get("RIFIUTI_NO");
+		    		if(prop!=null){
+		    			desc.setText(prop.toString());
+		    		}else{
+		    			desc.setText("");
+		    		}
+
+		    	}
+		    	
+				ImageView priorityIcon = (ImageView) v.findViewById(R.id.created_mission_resource_priority_icon);
+				if ( priorityIcon != null && priorityIcon.getDrawable() != null ){
+					
+					// Get the icon and tweak the color
+					Drawable d = priorityIcon.getDrawable();
+					
+					if ( mission.displayColor != null ){
+						try{
+							d.mutate().setColorFilter(Color.parseColor(mission.displayColor), PorterDuff.Mode.SRC_ATOP);
+						}catch(IllegalArgumentException iae){
+							Log.e("MissionAdapter", "A feature has an incorrect color value" );
+						}
+			    	}else{
+			    		d.mutate().clearColorFilter();
+			    	}
+
+		    	}
+
+		    }
+		    return v;
+
+		}
+		
+	}
 }

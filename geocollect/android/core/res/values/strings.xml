@@ -39,4 +39,9 @@
 	<string name="selection_filtered">Your selection was filtered</string>
     <string name="create_rectangle">Create a rectangle on the map to filter area of your interest</string>
     
+    <string name="my_inspections">My Inspections</string>
+    <string name="create_a_inspection">Create an inspection</string>
+    <string name="created_inspection_delete">Do you really want to delete this inspection ?</string>
+    <string name="gps_not_enabled">Please enable GPS to acquire the position of the inspection</string>
+    <string name="gps_still_not_enabled">You did not enable the GPS, cannot continue</string>
 </resources>

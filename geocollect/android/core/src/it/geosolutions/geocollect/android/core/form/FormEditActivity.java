@@ -21,6 +21,8 @@ package it.geosolutions.geocollect.android.core.form;
 import it.geosolutions.android.map.view.MapViewManager;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.utils.FormUtils;
+import it.geosolutions.geocollect.android.core.mission.MissionFeature;
+import it.geosolutions.geocollect.android.core.mission.PendingMissionDetailFragment;
 import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
@@ -50,11 +52,11 @@ import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AbsListView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.GridView;
@@ -69,6 +71,8 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 public class FormEditActivity extends SherlockFragmentActivity  implements MapActivity  {
 
 	public static final int CONTEXT_IMAGE_ACTION_DELETE = 8001;
+	
+	public static final int FORM_CREATE_NEW_MISSIONFEATURE = 1234;
 
 	/**
      * The {@link android.support.v4.view.PagerAdapter} that will provide fragments representing
@@ -91,7 +95,7 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
 	/**
 	 * Spatialite Database for persistence
 	 */
-	jsqlite.Database spatialiteDatabase;
+	public jsqlite.Database spatialiteDatabase;
 
 	/**
 	 * ListView for Photo Gallery
@@ -113,52 +117,42 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
 	 * Options of the Photo Gallery
 	 */
 	DisplayImageOptions options;
+	
+	
+	MissionFeature mMission;
+	String mMissionTableName;
+	boolean mCreateMissionFeature;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
         setContentView(R.layout.form_edit_pager);
-        /* create the adapter for the pages. it contains a reference to the 
-         * mapViewManager to delete the mapViews when destroy items
-         * */
+
+        //flag to identify if this activity is for creating a sopralluogo (mission) or a segnalazione (mission) 
+        mCreateMissionFeature = getIntent().getExtras().getBoolean(PendingMissionListActivity.ARG_CREATE_MISSIONFEATURE);
+        
+        Log.d(FormEditActivity.class.getSimpleName(), "will create a missionFeature "+ Boolean.toString(mCreateMissionFeature));
         
         // Initialize database
 		if(spatialiteDatabase == null){
 			
 			spatialiteDatabase = SpatialiteUtils.openSpatialiteDB(this, "geocollect/genova.sqlite");
-			
+								
 			// Database is correctly open
 			if(spatialiteDatabase != null && !spatialiteDatabase.dbversion().equals("unknown")){
 				
-	            MissionTemplate t = MissionUtils.getDefaultTemplate(this);
-	            if(t != null && t.id != null){
-	            	HashMap<String, XDataType> hm = PersistenceUtils.getTemplateFieldsList(t);
-	            	// default value
-	            	String tableName = t.id+"_data";
-	            	if(t.source != null 
-	            			&& t.source.localFormStore != null
-	            			&& !t.source.localFormStore.isEmpty()){
-	            		tableName = t.source.localFormStore;
-	            	}
-		            if(PersistenceUtils.createTableFromTemplate(spatialiteDatabase, tableName, hm)){
-//		            if(SpatialiteUtils.checkOrCreateTable(spatialiteDatabase, t.id+"_data")){
-			            Log.v("FORM_EDIT", "Table Found, checking for schema updates");
-			            if(PersistenceUtils.updateTableFromTemplate(spatialiteDatabase, tableName, hm)){
-			            	Log.v("FORM_EDIT", "All good");
-			            }else{
-			            	Log.w("FORM_EDIT", "Something went wrong during the update, the data can be inconsistent");
-			            }
-			            
-		            }else{
-			            Log.w("FORM_EDIT", "Table could not be created, edits will not be saved");
-		            }
-	            }else{
-	            	Log.w("FORM_EDIT", "MissionTemplate could not be found, edits will not be saved");
-	            }
-	            
+	            MissionTemplate t = MissionUtils.getDefaultTemplate(this);	            
+	          
+
+				if(!PersistenceUtils.createOrUpdateTable(spatialiteDatabase,t.schema_sop.localFormStore, t.schema_sop.fields)){
+					Log.e(PendingMissionListActivity.class.getSimpleName(), "error creating "+t.schema_sop.localFormStore+" table ");
+				}	            
 			}
 		}
 		
+        /* create the adapter for the pages. it contains a reference to the 
+         * mapViewManager to delete the mapViews when destroy items
+         * */
 		formPagerAdapter = new FormCollectionPagerAdapter(getSupportFragmentManager(),this){
         	MapViewManager mapManager = mapViewManager;
         	@Override 
@@ -176,20 +170,28 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
                 //I assume only one map in the form
                 //TODO manage multiple maps
                 MissionTemplate t = MissionUtils.getDefaultTemplate(getActivityContext());
-                Page p =t.form.pages.get(position);
+                
+                Page p = null;
+                if(mCreateMissionFeature){
+                	p = t.seg_form.pages.get(position);
+                }else{
+                	p = t.sop_form.pages.get(position);
+                }
             	
             	if(p!=null && p.title != null){
-            		List<Field> fields =  t.form.pages.get(position).fields;
+            		List<Field> fields =  null;
+            		if(mCreateMissionFeature){
+            			fields = t.seg_form.pages.get(position).fields;
+            		}else{            			
+            			fields = t.sop_form.pages.get(position).fields;
+            		}
             		for(Field f: fields){
             			if(XType.mapViewPoint.equals(f.xtype)){
             				mapManager.destroyMapViews();
             			}
             		}
             	}
-            	
-                
             }
-
         };
 
         // Set up action bar.
@@ -208,7 +210,12 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
 			@Override
 			public void onPageSelected(int nPage) {
 				MissionTemplate t =MissionUtils.getDefaultTemplate(mViewPager.getContext());
-				Page p = t.form.pages.get(nPage);
+				Page p = null;
+				if(mCreateMissionFeature){
+					p = t.seg_form.pages.get(nPage);
+				}else{
+					p = t.sop_form.pages.get(nPage);
+				}
 				if(p.attributes != null && p.attributes.containsKey("message")){
 					Toast.makeText(mViewPager.getContext(), (String) p.attributes.get("message"), Toast.LENGTH_LONG).show();
 				}
@@ -227,6 +234,35 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
 				
 			}
 		});
+        
+        if(mCreateMissionFeature){
+        	
+        	MissionTemplate t = MissionUtils.getDefaultTemplate(mViewPager.getContext());
+        	mMissionTableName= t.schema_seg.localSourceStore+ "_new";
+        	
+        	//when intent has missionFeature, edit it
+        	if(getIntent().getExtras().containsKey(PendingMissionDetailFragment.ARG_ITEM_FEATURE)){
+        		
+        		mMission = (MissionFeature) getIntent().getExtras().get(PendingMissionDetailFragment.ARG_ITEM_FEATURE);
+        		
+        	}else{
+        		//otherwise create a new one
+
+        		mMission = new MissionFeature();
+        		mMission.properties = new HashMap<>();
+
+        		//insert empty row
+        		Long id = PersistenceUtils.getIDforNewMissionFeatureEntry(spatialiteDatabase, mMissionTableName);
+        		if(id == null){
+        			Log.e(FormEditActivity.class.getSimpleName(), "could not retrieve max for "+mMissionTableName);
+        		}
+        		Log.d(FormEditActivity.class.getSimpleName(), "reference id for missionFeature " + String.valueOf(id));
+        		mMission.id = String.valueOf(id);
+
+
+        		PersistenceUtils.insertCreatedMissionFeature(spatialiteDatabase, mMissionTableName, id);
+        	}
+        }
 
 
     }
@@ -237,7 +273,7 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
      * A {@link android.support.v4.app.FragmentStatePagerAdapter} that returns a fragment
      * representing an object in the collection.
      */
-    public static class FormCollectionPagerAdapter extends FragmentStatePagerAdapter {
+    public class FormCollectionPagerAdapter extends FragmentStatePagerAdapter {
 
     	MissionTemplate t;
     	/**
@@ -256,7 +292,13 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
 
         @Override
         public SherlockFragment getItem(int i) {
-            SherlockFragment fragment = new FormPageFragment();
+            SherlockFragment fragment = null;
+            if(!mCreateMissionFeature){
+            	fragment = new FormPageFragment();
+            }else{
+            	fragment = new CreateMissionFeatureFormPageFragment();
+            	
+            }
             Bundle args = new Bundle();
             
             args.putInt(FormPageFragment.ARG_OBJECT,i);
@@ -264,17 +306,18 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
             return fragment;
         }
 
+        
         @Override
         public int getCount() {
-            return t.form.pages.size();
+            return mCreateMissionFeature ? t.seg_form.pages.size() : t.sop_form.pages.size();
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-        	Page p =t.form.pages.get(position);
+        	Page p = mCreateMissionFeature ? t.seg_form.pages.get(position) : t.sop_form.pages.get(position);
         	
         	if(p!=null && p.title != null){
-        		return t.form.pages.get(position).title;
+        		return mCreateMissionFeature ? t.seg_form.pages.get(position).title : t.sop_form.pages.get(position).title;
         	}
         	
             return  "PAGE " + ( position + 1);//TODO i18n?
@@ -292,8 +335,11 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
 			//
 			// http://developer.android.com/design/patterns/navigation.html#up-vs-back
 			//
-			NavUtils.navigateUpTo(this, new Intent(this,
-					PendingMissionListActivity.class));
+			Intent i = new Intent(this,PendingMissionListActivity.class);
+			if(mCreateMissionFeature){
+				i.putExtra(PendingMissionListActivity.ARG_CREATE_MISSIONFEATURE, true);
+			}
+			NavUtils.navigateUpTo(this, i);
 			return true;
 		}
 

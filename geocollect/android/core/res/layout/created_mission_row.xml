@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/multiselect_list"
+    android:gravity="center_vertical|left"
+    android:orientation="horizontal"
+    android:paddingBottom="2dip"
+    android:paddingLeft="10dip"
+    android:paddingRight="10dip"
+    tools:context=".mission.PendingMissionDetailActivity" >
+    
+    
+    <ImageView 
+      android:id="@+id/created_mission_resource_priority_icon"
+      android:contentDescription="@string/edit"
+      android:src="@drawable/ic_action_important_light"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentLeft="true"
+      android:layout_centerVertical="true"/> 
+
+    <TextView
+        android:id="@+id/created_mission_resource_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@id/created_mission_resource_priority_icon"
+        android:paddingTop="5dip"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/created_mission_resource_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/created_mission_resource_priority_icon"
+        android:layout_below="@id/created_mission_resource_name"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:layout_marginTop="8dp"
+        android:paddingTop="5dip"
+        android:textSize="15sp" />
+
+</RelativeLayout>

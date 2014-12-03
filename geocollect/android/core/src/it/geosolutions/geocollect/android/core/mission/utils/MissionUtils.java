@@ -25,6 +25,7 @@ import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.viewmodel.Field;
+import it.geosolutions.geocollect.model.viewmodel.Form;
 import it.geosolutions.geocollect.model.viewmodel.Page;
 
 import java.io.BufferedReader;
@@ -32,7 +33,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -49,6 +49,10 @@ import android.util.Pair;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.google.gson.Gson;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.io.WKBReader;
 
 /**
  * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
@@ -70,7 +74,13 @@ public class MissionUtils {
 	public static Loader<List<MissionFeature>> createMissionLoader(
 			MissionTemplate missionTemplate,SherlockFragmentActivity activity, int page, int pagesize, Database db) {
 		
-		WFSGeoJsonFeatureLoader wfsl = new WFSGeoJsonFeatureLoader(activity,missionTemplate.source.URL,missionTemplate.source.baseParams, missionTemplate.source.typeName,page*pagesize+1,pagesize);
+		WFSGeoJsonFeatureLoader wfsl = new WFSGeoJsonFeatureLoader(
+				activity,
+				missionTemplate.schema_seg.URL,
+				missionTemplate.schema_seg.baseParams,
+				missionTemplate.schema_seg.typeName,
+				page*pagesize+1,
+				pagesize);
 		
 		
 		
@@ -78,9 +88,9 @@ public class MissionUtils {
 				activity, 
 				wfsl, 
 				db, 
-				missionTemplate.source.localSourceStore, 
-				missionTemplate.source.localFormStore, 
-				missionTemplate.source.orderingField,
+				missionTemplate.schema_seg.localSourceStore, 
+				missionTemplate.schema_sop.localFormStore, 
+				missionTemplate.schema_seg.orderingField,
 				missionTemplate.priorityField,
 				missionTemplate.priorityValuesColors);
 	}
@@ -146,24 +156,20 @@ public class MissionUtils {
 	/**
 	 * checks if mandatory fields were compiled using the mandatory field of the defaulttemplate
 	 * 
-	 * @param dataMapping
+	 * @param form the form to check
+	 * @param id to refer to
+	 * @param db to read from
+	 * @param tableName to refer to
 	 * @return ArrayList with the fields label which was not compiled or an empty list if all was done
 	 */
-	public static ArrayList<String> checkIfAllMandatoryFieldsAreSatisfied(final SherlockFragment fragment,final Mission mission) {
+	public static ArrayList<String> checkIfAllMandatoryFieldsAreSatisfied(final Form form,final String id,final Database db,final String tableName) {
 		
 		ArrayList<String> missingEntries = new ArrayList<String>();
-		
-		MissionTemplate t = MissionUtils.getDefaultTemplate(fragment.getActivity());
-		
-		String tableName = mission.getTemplate().id+"_data";
-		if(mission.getTemplate().source != null && mission.getTemplate().source.localFormStore != null && !mission.getTemplate().source.localFormStore.isEmpty()){
-    		tableName = mission.getTemplate().source.localFormStore;
-    	}
-		
+				
 		Stmt st = null;
 		//find mandatory fields
 		ArrayList<Pair<String,String>> missingFieldIDs = new ArrayList<Pair<String,String>>();
-		for(Page page : t.form.pages){
+		for(Page page : form.pages){
 			for(Field f : page.fields){
 				if(f.mandatory){				
 					missingFieldIDs.add(new Pair<String, String>(f.fieldId, f.label));
@@ -184,12 +190,12 @@ public class MissionUtils {
 			}
 		}
 		//create query
-		final String s = "SELECT " + selection +" FROM '" + tableName + "' WHERE ORIGIN_ID = '" + mission.getOrigin().id+"';";
+		final String s = "SELECT " + selection +" FROM '" + tableName + "' WHERE ORIGIN_ID = '" + id+"';";
 		
 		//do the query
 		if(jsqlite.Database.complete(s)){
 			try {
-				st = mission.db.prepare(s);
+				st = db.prepare(s);
 			if(st.step()){
 				for(int j = 0; j < st.column_count(); j++){	
 					
@@ -205,6 +211,52 @@ public class MissionUtils {
 		}
 		
 		return missingEntries;
+	}
+	/**
+	 * get "created" missionfeatures from the database
+	 * @param tableName
+	 * @param db
+	 * @return a list of created missionsfeatures
+	 */
+	public static ArrayList<MissionFeature> getCreatedMissionFeatures(final String tableName,final Database db){
+
+		ArrayList<MissionFeature> missions = new ArrayList<>();
+
+		// Reader for the Geometry field
+		WKBReader wkbReader = new WKBReader();
+
+		//create query
+		final String s = "SELECT * FROM '" + tableName + "';";
+		Stmt stmt;
+		//do the query
+		if(jsqlite.Database.complete(s)){
+			try {
+				stmt = db.prepare(s);
+				MissionFeature f;
+				while( stmt.step() ) {
+					f = new MissionFeature();
+					
+					SpatialiteUtils.populateFeatureFromStmt(wkbReader, stmt, f);
+					
+		        	if(f.geometry == null){
+		        		//workaround for a bug which does not read out the "Point" geometry in WKBreader
+		        		//read single x and y coordinates instead and create the geometry by hand
+		        		double[] xy = PersistenceUtils.getXYCoord(db, tableName, f.id);
+		        		if(xy != null){
+		        			GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(),4326);
+		        			f.geometry = geometryFactory.createPoint(new Coordinate(xy[0], xy[1]));
+		        		}
+		        	}
+		        	
+					missions.add(f);
+				}
+				stmt.close();
+			} catch (Exception e) {
+				Log.d(MissionUtils.class.getSimpleName(), "Error getCreatedMissions",e);
+			}
+		}
+
+		return missions;
 	}
 	
 }
