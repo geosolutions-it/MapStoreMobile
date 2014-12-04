@@ -2,12 +2,8 @@ package it.geosolutions.geocollect.android.core.widgets.dialog;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -24,21 +20,14 @@ import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONObject;
-
 import com.google.gson.Gson;
 
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.model.http.CommitResponse;
 import android.app.Activity;
-import android.content.Context;
 import android.graphics.Typeface;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Looper;
-import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -74,6 +63,8 @@ public class UploadDialog extends RetainedDialogFragment {
 		public static final String ORIGIN_ID = "ORIGIN_ID";
 		public static final String MISSION_ID="MISSION_ID";
 		public static final String MEDIA="MEDIA";
+		public static final String AUTH_KEY="AUTH_KEY";
+		public static final String BASIC_AUTH="BASIC_AUTH";
 	}
 
 	public UploadDialog() {
@@ -182,7 +173,7 @@ public class UploadDialog extends RetainedDialogFragment {
 			if (!skipData) {
 				
 				try {
-					String resultString = sendJson(getArguments().getString("URL"),getArguments().getString("DATA"));
+					String resultString = sendJson(getArguments().getString(PARAMS.DATAURL),getArguments().getString(PARAMS.DATA));
 					result = getCommitResponse(resultString);
 				} catch (Exception e) {
 					Log.e("SendData", "ErrorSending Data",e);
@@ -205,6 +196,9 @@ public class UploadDialog extends RetainedDialogFragment {
                  se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
                  se.setContentEncoding(new BasicHeader(HTTP.CHARSET_PARAM, "UTF-8"));
                  post.setEntity(se);
+                 
+                 post.addHeader(new BasicHeader("Authorization", getArguments().getString(PARAMS.BASIC_AUTH)));
+                 
                  response = client.execute(post);
 
                  /*Checking response */
@@ -310,7 +304,7 @@ public class UploadDialog extends RetainedDialogFragment {
 			multipartContent.addPart("file", cBody);
 			httpPost.setEntity(multipartContent); 
 			
-			
+			httpPost.addHeader(new BasicHeader("Authorization", getArguments().getString(PARAMS.BASIC_AUTH)));
 				
 				HttpResponse response = httpClient.execute(httpPost, localContext);
 				return EntityUtils.toString(response.getEntity());

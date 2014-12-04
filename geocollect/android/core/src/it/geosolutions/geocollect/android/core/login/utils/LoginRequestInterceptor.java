@@ -21,16 +21,17 @@ public class LoginRequestInterceptor implements RequestInterceptor {
 	public void intercept(RequestFacade requestFacade) {
 
 		if (mUser != null && mPass != null) {
-			final String authorizationValue = encodeCredentialsForBasicAuthorization();
+			final String authorizationValue = getB64Auth(mUser, mPass);
 			requestFacade.addHeader("Authorization", authorizationValue);
 		}else{
 			throw new IllegalArgumentException("no password or user available to intercept");	
 		}
 	}
 
-	private String encodeCredentialsForBasicAuthorization() {
-		final String userAndPassword = mUser + ":" + mPass;
-		return "Basic " + Base64.encodeToString(userAndPassword.getBytes(), Base64.NO_WRAP);
-	}
+    public static String getB64Auth( String login, String pass ) {
+        String source = login + ":" + pass;
+        String ret = "Basic " + Base64.encodeToString(source.getBytes(), Base64.URL_SAFE | Base64.NO_WRAP);
+        return ret;
+    }
 
 }

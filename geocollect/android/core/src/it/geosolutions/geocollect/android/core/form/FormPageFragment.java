@@ -156,7 +156,7 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 	 * @param a
 	 */
 	private void performAction(FormAction a) {
-		Log.v("ACTION","performing action"+a);
+		Log.v("ACTION","performing action "+a);
 		AndroidAction aa = FormUtils.getAndroidAction(a);
 		if(aa!=null){
 			aa.performAction(this, a, mission, page);

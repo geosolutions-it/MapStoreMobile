@@ -19,10 +19,12 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 
 import android.net.Uri;
 import android.net.Uri.Builder;
+import android.util.Base64;
 import android.util.Log;
 
 import com.google.gson.JsonSyntaxException;
@@ -172,8 +174,12 @@ public class WFSGeoJsonClient {
 		
 		get.addHeader("Accept", "application/json");
 		
+		if(username!= null && password!= null){
+			get.addHeader(new BasicHeader("Authorization", getB64Auth(username, password)));
+		}
+
 		HttpResponse response;
-		// TODO support pagination, filtering, account
+		// TODO support pagination, filtering
 		String responseText = null;
 
 		try {
@@ -222,7 +228,7 @@ public class WFSGeoJsonClient {
 		HttpGet get = new HttpGet(url);
 		get.addHeader("Accept", "application/json");
 		HttpResponse response;
-		// TODO support pagination, filtering, account
+		// TODO support pagination, filtering
 		try {
 			response = httpclient.execute(get);
 
@@ -247,5 +253,17 @@ public class WFSGeoJsonClient {
 		return false;
 		
 	}
+	
+	/**
+	 * Generates a string suitable as BasicAuth header value
+	 * @param login
+	 * @param pass
+	 * @return
+	 */
+    public static String getB64Auth( String login, String pass ) {
+        String source = login + ":" + pass;
+        String ret = "Basic " + Base64.encodeToString(source.getBytes(), Base64.URL_SAFE | Base64.NO_WRAP);
+        return ret;
+    }
 
 }
