@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import retrofit.RetrofitError;
-import retrofit.mime.TypedByteArray;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
@@ -24,7 +23,6 @@ import android.content.SharedPreferences.Editor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.text.util.Linkify;
@@ -85,9 +83,6 @@ public class LoginActivity extends Activity {
 		if(mEmail != null){		
 			mEmailView.setText(mEmail);
 		}
-		if(mPassword != null){
-			mPasswordView.setText(mPassword);		
-		}
 		
 		mAutoCompleteTextView = (InstantAutoComplete) findViewById(R.id.login_act);
 		
@@ -108,23 +103,32 @@ public class LoginActivity extends Activity {
 		mAutoCompleteTextView.setAdapter(adapter);
 
 		mPasswordView = (EditText) findViewById(R.id.password);
-		mPasswordView.setText(mPassword);
-		mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-					@Override
-					public boolean onEditorAction(TextView textView, int id,KeyEvent keyEvent) {
-						if (id == R.id.login || id == EditorInfo.IME_NULL) {
-							attemptLogin();
-							return true;
-						}
-						return false;
-					}
-				});
-
-		//if eMail provided but no pass set focus
-		if(mEmail != null && mPassword == null){
-			mPasswordView.requestFocus();
-		}
+		
+		if(mPasswordView != null){
 			
+			// Enter saved password
+			if(mPassword != null){
+				mPasswordView.setText(mPassword);
+			}
+			
+			mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+				@Override
+				public boolean onEditorAction(TextView textView, int id,KeyEvent keyEvent) {
+					if (id == R.id.login || id == EditorInfo.IME_NULL) {
+						attemptLogin();
+						return true;
+					}
+					return false;
+				}
+			});
+
+			//if eMail provided but no pass set focus
+			if(mEmail != null && mPassword == null){
+				mPasswordView.requestFocus();
+			}
+
+		}
+
 		mLoginFormView = findViewById(R.id.login_form);
 		mLoginStatusView = findViewById(R.id.login_status);
 		mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);
