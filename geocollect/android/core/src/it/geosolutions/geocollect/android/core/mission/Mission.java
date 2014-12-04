@@ -17,14 +17,20 @@
  */
 package it.geosolutions.geocollect.android.core.mission;
 
+import it.geosolutions.android.map.wfs.geojson.feature.Feature;
+import it.geosolutions.geocollect.android.core.GeoCollectApplication;
+import it.geosolutions.geocollect.android.core.login.LoginActivity;
+import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
+import it.geosolutions.geocollect.model.config.MissionTemplate;
+import it.geosolutions.geocollect.model.viewmodel.Field;
+
 import java.io.Serializable;
 import java.util.List;
 
 import jsqlite.Database;
-import it.geosolutions.android.map.wfs.geojson.feature.Feature;
-import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
-import it.geosolutions.geocollect.model.config.MissionTemplate;
-import it.geosolutions.geocollect.model.viewmodel.Field;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 /**
  * <Mission> Provides access to mission data, origins and configuration 
@@ -61,13 +67,13 @@ public class Mission implements Serializable{
 	 * @param field the field
 	 * @return the value of the data as String
 	 */
-	public String getValueAsString(Field field){
+	public String getValueAsString(final Context context, Field field){
 		String value = field.value;
-		return getValueAsString(field,value);
+		return getValueAsString(context, field,value);
 
 	}
 
-	public String getValueAsString(Field f,String value) {
+	public String getValueAsString(final Context context, Field f,String value) {
 		List<String> tags = MissionUtils.getTags(value);
 		//the tags are not present. the value is a pure string
 		if(tags == null){
@@ -75,7 +81,7 @@ public class Mission implements Serializable{
 		}
 		for(String tag : tags){
 			//get data and replace
-			Object val =getValueByTag(tag);
+			Object val =getValueByTag(context,tag);
 			if(val!=null){
 				value = value.replace("${"+tag+"}", val.toString());
 			}else{
@@ -95,7 +101,7 @@ public class Mission implements Serializable{
 	 * @param tag the tag
 	 * @return the value as <String>
 	 */
-	public Object getValueByTag(String tag) {
+	public Object getValueByTag(final Context context, String tag) {
 		//separate the path with points
 		String[] path = tag.split("\\.",2);
 		//nothing to do if the path is not composed by 2 parts
@@ -117,7 +123,7 @@ public class Mission implements Serializable{
 				}
 			}
 			else if(LOCAL_PROVIDER_TAG.equals(provider)){
-				return getLocalValue(path[1]);
+				return getLocalValue(context, path[1]);
 			}
 			
 		}
@@ -130,14 +136,15 @@ public class Mission implements Serializable{
 	 * @param string
 	 * @return
 	 */
-	private Object getLocalValue(String string) {
-		// TODO This is only a Mock implementation
+	private Object getLocalValue(final Context context,String string) {
+		
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		if(string.equals("user_name")){
-			return "Mario";
+			return prefs.getString(LoginActivity.PREFS_USER_FORENAME, null);
 		}else if(string.equals("user_surname")){
-			return "Rossi";
+			return prefs.getString(LoginActivity.PREFS_USER_SURNAME, null);
 		}else if(string.equals("user_organization")){
-			return "Comune di Genova";
+			return prefs.getString(LoginActivity.PREFS_USER_ENTE, null);
 		}
 		return null;
 	}

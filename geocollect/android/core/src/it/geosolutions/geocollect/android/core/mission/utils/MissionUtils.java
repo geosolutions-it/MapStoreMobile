@@ -21,6 +21,7 @@ import it.geosolutions.android.map.wfs.WFSGeoJsonFeatureLoader;
 import it.geosolutions.android.map.wfs.geojson.GeoJson;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.R;
+import it.geosolutions.geocollect.android.core.login.LoginActivity;
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
@@ -32,7 +33,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -42,6 +42,8 @@ import jsqlite.Database;
 import jsqlite.Exception;
 import jsqlite.Stmt;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v4.content.Loader;
 import android.util.Log;
 import android.util.Pair;
@@ -70,9 +72,13 @@ public class MissionUtils {
 	public static Loader<List<MissionFeature>> createMissionLoader(
 			MissionTemplate missionTemplate,SherlockFragmentActivity activity, int page, int pagesize, Database db) {
 		
-		WFSGeoJsonFeatureLoader wfsl = new WFSGeoJsonFeatureLoader(activity,missionTemplate.source.URL,missionTemplate.source.baseParams, missionTemplate.source.typeName,page*pagesize+1,pagesize);
+		// Retrieve saved credentials for BasicAuth
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+		String username = prefs.getString(LoginActivity.PREFS_USER_EMAIL, null);
+		String password = prefs.getString(LoginActivity.PREFS_PASSWORD, null);
+
 		
-		
+		WFSGeoJsonFeatureLoader wfsl = new WFSGeoJsonFeatureLoader(activity,missionTemplate.source.URL,missionTemplate.source.baseParams, missionTemplate.source.typeName,page*pagesize+1,pagesize, username, password);
 		
 		return new SQLiteCascadeFeatureLoader(
 				activity, 

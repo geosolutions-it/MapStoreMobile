@@ -209,7 +209,7 @@ public class FormBuilder {
 		if(tags!=null && tags.size() ==1){
 			//Get geometry now geoPoint only supported)
 			//TODO support for different formats
-			Point geom = (Point) mission.getValueByTag(tags.get(0));
+			Point geom = (Point) mission.getValueByTag(context, tags.get(0));
 			if(geom !=null){
 				if(!geom.isEmpty()){
 					double lat = geom.getY();
@@ -266,7 +266,7 @@ public class FormBuilder {
 		if(geoPoint!=null){
 			o.setMarkerVisible();
 			DescribedMarker marker = new MarkerDTO(geoPoint.latitude, geoPoint.longitude,MarkerDTO.MARKER_BLUE).createMarker(context);
-			marker.setDescription(mission.getValueAsString(field, (String)field.getAttribute("description")));
+			marker.setDescription(mission.getValueAsString(context, field, (String)field.getAttribute("description")));
 			
 			m.getOverlayItems().add(marker);
 			//mc.selectMarker(marker);
@@ -295,7 +295,7 @@ public class FormBuilder {
 	 */
 	private static void addSeparator(Field field, LinearLayout mFormView,
 			Context context, Mission mission) {
-		String label = mission.getValueAsString(field, field.label);
+		String label = mission.getValueAsString(context, field, field.label);
 		
 		TextView tvLabel = new TextView(context,null,android.R.attr.listSeparatorTextViewStyle);
 		tvLabel.setLayoutParams(getTextDefaultParams(field, true));
@@ -313,7 +313,7 @@ public class FormBuilder {
 	 */
 	private static void addSeparatorWithIcon(Field field, LinearLayout mFormView, Context context, Mission mission) {
 		
-		String label = mission.getValueAsString(field, field.label);
+		String label = mission.getValueAsString(context, field, field.label);
 		
 		LinearLayout linearLayout = new LinearLayout(context);
 		linearLayout.setLayoutParams(new LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -345,7 +345,7 @@ public class FormBuilder {
 		Drawable d = context.getResources().getDrawable(R.drawable.ic_action_important_light);
 		HashMap <String,String> colors  = mission.getTemplate().priorityValuesColors;
 
-		final String key = mission.getValueAsString(field);
+		final String key = mission.getValueAsString(context, field);
 		
 		final String color = colors.get(key);	
 
@@ -406,7 +406,7 @@ public class FormBuilder {
 		text.setId(id());
 		text.setTag(field.fieldId);
 		//text.setInputType(type);
-		text.setText( mission.getValueAsString(field));//TODO make it parameterizable
+		text.setText( mission.getValueAsString(context, field));//TODO make it parameterizable
 		mFormView.addView(tvLabel);
 		mFormView.addView(text);
 		
@@ -435,7 +435,7 @@ public class FormBuilder {
 		
 		
 		//set initial value
-		String value = mission.getValueAsString(field);
+		String value = mission.getValueAsString(context, field);
 		if(value!=null && allowed!=null){
 			int valueIndex=-1;
 			for(int i = 0;i<allowed.length;i++){
@@ -529,7 +529,7 @@ public class FormBuilder {
 		editView.setInputType(type);
 		mFormView.addView(tvLabel);
 		mFormView.addView(editView);
-		String value = mission.getValueAsString(field);
+		String value = mission.getValueAsString(context, field);
 		//get the value
 		if(value !=null){
 			DateFormat df = new SimpleDateFormat(field.format, Locale.getDefault());
@@ -597,10 +597,10 @@ public class FormBuilder {
 		editView.setId(id());
 		editView.setTag(field.fieldId);
 		editView.setInputType(type);
-		editView.setText( mission.getValueAsString(field) );//TODO make it parameterizable
-		
+	
 		final String mandatoryTag = field.mandatory ? " ("+mFormView.getContext().getString(R.string.mandatory)+")" : "";
 		tvLabel.setText(tvLabel.getText()+mandatoryTag);
+		editView.setText( mission.getValueAsString(context, field));//TODO make it parameterizable
 		
 		mFormView.addView(tvLabel);
 		mFormView.addView(editView);

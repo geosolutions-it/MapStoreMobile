@@ -38,5 +38,29 @@
 	<string name="mandatory_fields_please_fill">Please fill them before sending.</string>
 	<string name="selection_filtered">Your selection was filtered</string>
     <string name="create_rectangle">Create a rectangle on the map to filter area of your interest</string>
+  
+    <string name="login_title">Enter your login data</string>
+    <string name="login_email">Email</string>
+    <string name="login_password">Password</string>
+    <string name="login_check_to_save">Check to save password</string>
+    <string name="login_not_online">Internet connection needed, please go online!</string>
+    <string name="login_could_not_retrieve_cookies">Could not retrieve cookies to log you in, please check your login data</string>
+    <string name="login_progress_signing_in">Signing in&#8230;</string>
+    <string name="login_error_invalid_email">This email address is invalid</string>
+    <string name="login_error_invalid_password">This password is too short</string>
+    <string name="login_error_incorrect_password">This password is incorrect</string>
+    <string name="login_error_field_required">This field is required</string>
+    <string name="login_error_generic">Error logging in</string>
+    <string name="login_success">Success, you are logged in !</string>
+    <string name="login_take_advantage">To take advantage of this feature, you must be registered</string>
+    <string name="login_login">Login</string>
+    <string name="login_register">If you are not registered yet, sign in on www.geocollect.it</string>
+    <string name="login_password_forgotten">Password forgotten ?</string> 
+    <string name="login_canceled">You did not login, cannot load data, must close</string>
+    <string name="login_select_server">Select a server to connect to</string>
+    
+    <string name="logout_logged_in_as">You are logged in as :</string>
+    <string name="logout_logged_out">You were successfully logged out !</string>
+    <string name="logout_logout">Logout</string>
     
 </resources>

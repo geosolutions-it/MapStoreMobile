@@ -20,6 +20,8 @@ package it.geosolutions.geocollect.android.core.form.action;
 import it.geosolutions.geocollect.android.core.BuildConfig;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.utils.FormUtils;
+import it.geosolutions.geocollect.android.core.login.LoginActivity;
+import it.geosolutions.geocollect.android.core.login.utils.LoginRequestInterceptor;
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
@@ -34,7 +36,9 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -194,12 +198,20 @@ public class SendAction extends AndroidAction {
 				}
 			};
 			
+			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(fragment.getSherlockActivity());
+			
+			//String authKey = prefs.getString(LoginActivity.PREFS_AUTH_KEY, null);
+			String email = prefs.getString(LoginActivity.PREFS_USER_EMAIL, null);
+			String pass = prefs.getString(LoginActivity.PREFS_PASSWORD, null);
+			
+			
 			Bundle arguments = new Bundle();
 			arguments.putString(UploadDialog.PARAMS.DATAURL, url);
 			arguments.putString(UploadDialog.PARAMS.MEDIAURL, murl);
 			arguments.putString(UploadDialog.PARAMS.DATA, MissionUtils.generateJsonString(null,m));
 			arguments.putString(UploadDialog.PARAMS.ORIGIN_ID, m.getOrigin().id);
 			arguments.putString(UploadDialog.PARAMS.MISSION_ID, m.getTemplate().id);
+			arguments.putString(UploadDialog.PARAMS.BASIC_AUTH, LoginRequestInterceptor.getB64Auth(email, pass));
 			arguments.putStringArray(UploadDialog.PARAMS.MEDIA, FormUtils.getPhotoUriStrings(m.getOrigin().id));
 			
 			mTaskFragment.setArguments(arguments);

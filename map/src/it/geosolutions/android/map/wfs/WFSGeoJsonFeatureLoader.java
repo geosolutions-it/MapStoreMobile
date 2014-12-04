@@ -19,7 +19,6 @@ package it.geosolutions.android.map.wfs;
 
 
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
-
 import java.util.HashMap;
 import java.util.List;
 
@@ -45,6 +44,37 @@ public class WFSGeoJsonFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 	HashMap<String,String> parameters;
 	public Integer totalCount;//This hack allow infinite scrolling without total count limits.
 
+	// BasicAuth parameters
+	private String userName;
+	private String password;
+	
+	/**
+	 * This constructor handles username and password for basicauth
+	 * @param context
+	 * @param url
+	 * @param parameters
+	 * @param typeName
+	 * @param start
+	 * @param limit
+	 * @param username
+	 * @param password
+	 */
+	public WFSGeoJsonFeatureLoader(Context context,
+			String url,HashMap<String,String> parameters,String typeName,int start,int limit, String username, String password) {
+		this(context, url, parameters, typeName, start, limit);
+		this.userName = username;
+		this.password = password;
+	}
+	
+	/**
+	 * Constructor, does not handle BasicAuth params for backward compatibility
+	 * @param context
+	 * @param url
+	 * @param parameters
+	 * @param typeName
+	 * @param start
+	 * @param limit
+	 */
 	public WFSGeoJsonFeatureLoader(Context context,
 			String url,HashMap<String,String> parameters,String typeName,int start,int limit) {
 		super(context);
@@ -80,6 +110,12 @@ public class WFSGeoJsonFeatureLoader extends AsyncTaskLoader<List<Feature>> {
 	@Override
 	public List<Feature> loadInBackground() {
 		WFSGeoJsonClient gsc= new WFSGeoJsonClient();
+		
+		// If set, use BasicAuth parameters
+		if(this.userName != null && this.password != null){
+			gsc.setUsername(this.userName);
+			gsc.setPassword(this.password);
+		}
 		
 		gsc.setUrl(wfs_url);
 		if(typeName!=null){
