@@ -70,5 +70,7 @@
     <string name="gps_still_not_enabled">You did not enable the GPS, cannot continue</string>
     <string name="search_missions">Search Missions</string>
     <string name="location_searching">Acquiring position&#8230;</string>
+
+    <string name="menu_center">Center</string>
     
 </resources>
