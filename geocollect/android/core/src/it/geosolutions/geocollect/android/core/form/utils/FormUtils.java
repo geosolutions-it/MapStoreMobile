@@ -17,17 +17,27 @@
  */
 package it.geosolutions.geocollect.android.core.form.utils;
 
-import java.io.File;
-import java.net.URI;
-import java.util.ArrayList;
-
+import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.action.AndroidAction;
 import it.geosolutions.geocollect.android.core.form.action.CameraAction;
 import it.geosolutions.geocollect.android.core.form.action.SendAction;
 import it.geosolutions.geocollect.model.viewmodel.FormAction;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
 import android.net.Uri;
 import android.os.Environment;
+import android.renderscript.Sampler;
 import android.util.Log;
 
 
@@ -83,18 +93,139 @@ public class FormUtils {
 	}
 	
 	/**
+	 * resize the images in the folder to the provided max size of the larger dimension
+	 * @param feature_id
+	 * @param maxSize
+	 */
+	public static void resizeFotosToMax(final Context context,final String feature_id,final int maxSize){
+		
+		if(feature_id == null || feature_id.isEmpty()){
+			Log.w("FormUtils", "getPhotoUriStrings: Could not get feature_id");
+			return;
+		}
+			
+		File folder = new File(MapFilesProvider.getEnvironmentDirPath(context)+"/geocollect/media/"+feature_id);
+		folder.mkdirs();
+		File[] listOfFiles = folder.listFiles();
+
+		if(listOfFiles == null){
+			// Zero-length array as "not found"
+			return;
+		}
+		
+		//resize
+		
+		for (int i = 0; i < listOfFiles.length; i++) {
+
+			Bitmap resizedBitmap = null;
+			try {
+				
+				//Following http://developer.android.com/training/displaying-bitmaps/load-bitmap.html#load-bitmap
+				//to avoid OOE decoding bitmaps, read out the bounds of the image, calculate the sample size
+				//and only then decode the already resized image, which will need less memory
+				
+				BitmapFactory.Options options = new BitmapFactory.Options();
+				//this won't allocate memory but read out only the bounds of the image
+				options.inJustDecodeBounds = true;
+				BitmapFactory.decodeFile(listOfFiles[i].getAbsolutePath(), options);
+
+				// Calculate inSampleSize
+				final int sampleSize = calculateInSampleSize(options,maxSize);
+				if(sampleSize == 1){
+					//no need to resample, this image is small enough
+					continue;
+				}
+				options.inSampleSize = sampleSize;
+
+				// Decode bitmap with inSampleSize set
+				options.inJustDecodeBounds = false;
+				resizedBitmap = BitmapFactory.decodeFile(listOfFiles[i].getAbsolutePath(), options);
+
+			} catch (OutOfMemoryError e) {
+				//according to http://stackoverflow.com/questions/7138645/catching-outofmemoryerror-in-decoding-bitmap
+				//we could try to catch that OOE and do System.gc() but I think the above should avoid OOEs
+				//so for now give up
+				Log.e(FormUtils.class.getSimpleName(), "OOE decoding Bitmap ",e);
+				continue;
+			}
+
+
+			try {
+				final File origFile = listOfFiles[i];
+
+				final String newfileName = origFile.getName().substring(0,origFile.getName().lastIndexOf("."))+"_resized";
+				final String extension   = origFile.getName().substring(origFile.getName().lastIndexOf(".") + 1);
+
+				final String newFile = origFile.getPath().substring(0,origFile.getPath().lastIndexOf("/") + 1) + newfileName+"."+extension;
+
+				FileOutputStream fOut = new FileOutputStream(newFile);
+
+				resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fOut);
+
+				fOut.flush();
+				fOut.close();
+
+				//all worked out, delete original
+				origFile.delete();
+
+			} catch (FileNotFoundException e) {
+				Log.e(FormUtils.class.getSimpleName(), e.getClass().getSimpleName(),e);
+			} catch (IOException e) {
+				Log.e(FormUtils.class.getSimpleName(), e.getClass().getSimpleName(),e);
+			}
+
+		}
+	}
+	/**
+	 * calculates the samplesize (the scale factor 1 / n) to subsample the image
+	 * Note : A power of two value is calculated because the decoder uses a final value by rounding down
+	 * to the nearest power of two, as per the inSampleSize documentation.
+	 * @param options
+	 * @param maxSize
+	 * @return
+	 */
+	public static int calculateInSampleSize(BitmapFactory.Options options, final int maxSize) {
+		
+		// Raw height and width of image
+		final int height = options.outHeight;
+		final int width = options.outWidth;
+		int inSampleSize = 1;
+
+		
+		int max = height > width ? height : width;
+
+		float factor = (float) max / maxSize;
+
+		int reqWidth  = (int) (width / factor);
+		int reqHeight = (int) (height / factor);
+		
+		if (height > reqHeight || width > reqWidth) {
+
+			// Calculate the  inSampleSize value that is a power of 2 and will keep both
+			// height and width smaller than the required
+			while (height / inSampleSize > reqHeight && width / inSampleSize > reqWidth) {
+				inSampleSize *= 2;
+			}
+		}
+
+		return inSampleSize;
+	}
+
+
+
+	/**
 	 * Return a list of Strings representing Uris for the media
 	 * TODO: Filter media based on feature.id
 	 * @return
 	 */
-	public static String[] getPhotoUriStrings(String feature_id){
+	public static String[] getPhotoUriStrings(final Context context, final String feature_id){
 		
 		if(feature_id == null || feature_id.isEmpty()){
 			Log.w("FormUtils", "getPhotoUriStrings: Could not get feature_id");
 			return new String[0];
 		}
 			
-		File folder = new File(Environment.getExternalStorageDirectory().getPath()+"/geocollect/media/"+feature_id);//TODO Parametrize this
+		File folder = new File(MapFilesProvider.getEnvironmentDirPath(context)+"/geocollect/media/"+feature_id);//TODO Parametrize this
 		folder.mkdirs();
 		File[] listOfFiles = folder.listFiles();
 
@@ -109,7 +240,7 @@ public class FormUtils {
 				newFileListUri.add(Uri.fromFile(listOfFiles[i]).toString());
 			} 
 	    }
-		
+	    
 	    return newFileListUri.toArray(new String[newFileListUri.size()]);
 	}
 
