@@ -63,4 +63,7 @@
     <string name="logout_logged_out">You were successfully logged out !</string>
     <string name="logout_logout">Logout</string>
     
+    <string name="menu_center">Center</string>
+    
+    
 </resources>

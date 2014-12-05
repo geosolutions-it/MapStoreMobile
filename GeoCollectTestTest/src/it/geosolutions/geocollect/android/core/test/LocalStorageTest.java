@@ -85,7 +85,7 @@ public class LocalStorageTest extends android.test.AndroidTestCase {
 			// ignore
 		}
         assertTrue(m.db.dbversion().equals("unknown"));
-        assertFalse(PersistenceUtils.loadPageData(p, l, m, getContext()));
+        assertFalse(PersistenceUtils.loadPageData(p, l, m, getContext(),false));
 	}
 
 	/**
@@ -102,7 +102,7 @@ public class LocalStorageTest extends android.test.AndroidTestCase {
 		Mission m = new Mission();
 		
 		assertNull(m.db);
-        assertFalse(PersistenceUtils.loadPageData(p, l, m, getContext()));
+        assertFalse(PersistenceUtils.loadPageData(p, l, m, getContext(),false));
 	}
 
 	/// Metodo per l'estrazione della lista TIPATA dei campi del template ( "_data" )

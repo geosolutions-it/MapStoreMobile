@@ -67,6 +67,9 @@ public class MarkerDTO implements Serializable,Parcelable {
 	public static final int MARKER_GREEN = R.drawable.marker_green;
 	public static final int MARKER_YELLOW = R.drawable.marker_yellow;
 	public static final int MARKER_BLUE = R.drawable.marker_blue;
+	
+	public static final int PIN_BLUE = R.drawable.pin_blue;
+	public static final int PIN_RED = R.drawable.pin_red;
 	public MarkerDTO(){
 		
 	}

@@ -17,6 +17,11 @@
  */
 package it.geosolutions.geocollect.android.core.mission;
 
+import java.util.HashMap;
+import java.util.List;
+
+import jsqlite.Exception;
+import jsqlite.Stmt;
 import it.geosolutions.android.map.fragment.MapFragment;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.R;
@@ -25,8 +30,15 @@ import it.geosolutions.geocollect.android.core.form.utils.FormBuilder;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
+import it.geosolutions.geocollect.model.viewmodel.Field;
+import it.geosolutions.geocollect.model.viewmodel.type.XType;
+
+import org.mapsforge.core.model.GeoPoint;
+
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
@@ -43,6 +55,7 @@ import android.widget.ScrollView;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * A fragment representing a single Pending Mission detail screen. This fragment
@@ -119,7 +132,7 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 	@Override
 	public void onCreateOptionsMenu(
 	      Menu menu, MenuInflater inflater) {
-	   inflater.inflate(R.menu.editable, menu);
+	   inflater.inflate(R.menu.nav_map_editable, menu);
 	}
 
 	/* (non-Javadoc)
@@ -129,15 +142,173 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 	public boolean onOptionsItemSelected(MenuItem item) {
 		
 		int id = item.getItemId();
-		if(id==R.id.accept){
+		
+		if(id==R.id.accept){		
 			Intent i = new Intent(getSherlockActivity(),FormEditActivity.class);
 			i.putExtra("MISSION", mission);
 			startActivityForResult(i, EDIT_ACTIVITY_CODE);
-			return true;
+			return true;		
+		}else if(id == R.id.full_map){
+			
+			final GeoPoint geoPoint = getOriginGeoPoint();
+			
+			if(geoPoint != null){
+
+				Intent mapIntent = new Intent(getSherlockActivity(),SimpleMapActivity.class);
+				
+				mapIntent.putExtra(SimpleMapActivity.ARG_PRIORITY_COLOR, getPriorityColor());
+				
+				mapIntent.putExtra(SimpleMapActivity.ARG_FIRST_POINT_LAT, geoPoint.latitude);
+				mapIntent.putExtra(SimpleMapActivity.ARG_FIRST_POINT_LON, geoPoint.longitude);
+				mapIntent.putExtra(SimpleMapActivity.ARG_ZOOM,((byte) 18));
+				
+				final GeoPoint updatedPoint = getUpdatedGeoPoint();
+				
+				if(updatedPoint != null){
+					mapIntent.putExtra(SimpleMapActivity.ARG_SECOND_POINT_LAT, updatedPoint.latitude);
+					mapIntent.putExtra(SimpleMapActivity.ARG_SECOND_POINT_LON, updatedPoint.longitude);
+				}
+
+				startActivity(mapIntent);
+
+			}else{
+				Log.e(TAG, "could not retrieve geopoint");
+			}
+			
+		}else if(id == R.id.navigate){
+			
+			//start an intent to navigate to this position
+			GeoPoint geoPoint = getUpdatedGeoPoint();
+			
+			if(geoPoint == null){
+				geoPoint = getOriginGeoPoint();
+			}
+			
+			if(geoPoint == null){
+				Log.e(TAG, "no coordinate to navigate to available");
+				return super.onOptionsItemSelected(item);
+			}
+			
+			/**
+			 * http://stackoverflow.com/questions/5801684/intent-to-start-a-navigation-activity
+			 * 
+			 * The bad news is, there isn't a standard Intent URI for navigation.
+			 * 
+			 * possibilities :
+			 * 
+			 * Uri.parse("google.navigation:q= lat,lon) //won't start navigation
+			 * Uri.parse("geo:latitude,longitude //will only zoom map on position
+			 * Uri.parse("http://maps.google.com/maps?daddr=lat,lon) worked best for now
+			 * 
+			 * problematic for users without google maps App but they should be few ?!
+			 */
+//			String uri_string = String.format("google.navigation:q%f",geoPoint.latitude,geoPoint.longitude);
+			String uri_string = String.format("http://maps.google.com/maps?daddr=%s,%s",Double.toString(geoPoint.latitude),Double.toString(geoPoint.longitude));
+			Log.d(TAG, "uri "+ uri_string);
+			
+			Intent navIntent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(uri_string));
+			startActivity(navIntent);
 		}
 		
 		
 		return super.onOptionsItemSelected(item);
+	}
+	
+	public int getPriorityColor(){
+		
+		Field colorField = getField(XType.separatorWithIcon);
+		
+		HashMap <String,String> colors  = mission.getTemplate().priorityValuesColors;
+
+ 		final String key = mission.getValueAsString(getActivity(), colorField);
+ 		
+ 		final String color = colors.get(key);	
+
+ 		return Color.parseColor(color);
+
+	}
+	/**
+	 * reads out the missions origin GeoPoint by retrieving the mapView field and using it
+	 * to extract it out of the missions tags
+	 * @return the geopoint of this mission
+	 */
+	public GeoPoint getOriginGeoPoint(){
+				
+		final Field mapField = getField(XType.mapViewPoint);
+		//extract the point
+		GeoPoint geoPoint = null;
+		List<String> tags = MissionUtils.getTags(mapField.value);
+		if(tags != null && tags.size() ==1){
+			Point geom = (Point) mission.getValueByTag(getActivity(), tags.get(0));
+
+			if(geom !=null){
+				if(!geom.isEmpty()){
+					double lat = geom.getY();
+					double lon = geom.getX();
+					geoPoint = new GeoPoint(lat, lon);
+				}
+
+			}
+		}
+		return geoPoint;
+	}
+	/**
+	 * accesses the database to acquire an updated position for this mission
+	 * @return the updated GeoPoint or null if none available
+	 */
+	public GeoPoint getUpdatedGeoPoint(){
+		
+		final Field f = getField(XType.mapViewPoint);
+		
+		final String tableName = getTablename();
+		
+		final String s = "SELECT Y(" + f.fieldId + "), X(" + f.fieldId + ") FROM '" + tableName + "' WHERE ORIGIN_ID = '" + mission.getOrigin().id+"';";
+		
+		try {
+			if(jsqlite.Database.complete(s)){
+				Stmt st = mission.db.prepare(s);
+				if(st.step()){
+					final GeoPoint p = new GeoPoint(st.column_double(0), st.column_double(1));
+					st.close();
+					return p;
+				}
+			}
+		} catch (Exception e) {
+			Log.e(TAG, "Error retrieving updatedPoint",e);
+		}
+		
+		return null;
+		
+	}
+	/**
+	 * returns a field from the default templates previews form
+	 * @param xType to search for
+	 * @return the field according to the xType
+	 */
+	public Field getField(final XType xType){
+		
+		final MissionTemplate t = MissionUtils.getDefaultTemplate(getSherlockActivity());
+
+		for(Field f : t.preview.fields){
+			if(f.xtype == xType){
+				return f;
+			}
+		}
+		return null;
+	}
+	/**
+	 * gets the tablename of this mission's source 
+	 * @return
+	 */
+	public String getTablename(){
+		
+		String tableName = mission.getTemplate().id+"_data";
+    	if(mission.getTemplate().source != null 
+    			&& mission.getTemplate().source.localFormStore != null
+    			&& !mission.getTemplate().source.localFormStore.isEmpty()){
+    		tableName = mission.getTemplate().source.localFormStore;
+    	}
+    	return tableName;
 	}
 	
 	/**
