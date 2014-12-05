@@ -65,7 +65,7 @@ public class UILImageAdapter extends BaseAdapter {
 	 * @param options
 	 */
 	public UILImageAdapter(Context context, String missionID, DisplayImageOptions options) {
-		this(context, FormUtils.getPhotoUriStrings(missionID), options);
+		this(context, FormUtils.getPhotoUriStrings(context, missionID), options);
 		this.missionID = missionID;
 	}
 
@@ -137,7 +137,7 @@ public class UILImageAdapter extends BaseAdapter {
 	@Override
 	public void notifyDataSetChanged() {
 		if(missionID != null){
-			this.imageUrls = FormUtils.getPhotoUriStrings(missionID);
+			this.imageUrls = FormUtils.getPhotoUriStrings(this.context,missionID);
 		}
 		super.notifyDataSetChanged();
 	}
