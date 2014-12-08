@@ -1,0 +1,15 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/progress_toast_layout"
+              android:orientation="horizontal"
+              android:layout_width="wrap_content"
+              android:layout_height="fill_parent"
+              android:padding="10dp"
+              >
+
+    <ProgressBar
+        android:id="@+id/progressBar1"
+        style="@android:style/Widget.ProgressBar.Small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

@@ -337,6 +337,20 @@
 						"editable":true,
 						"description":"${origin.PROVNAME}"
 					}
+				}],
+				"actions":[
+				{
+					"id":3,
+					"text":"Localizzare",
+					"name":"Localize",
+					"type":"localize",
+					"iconCls":"ic_localize"
+				},{
+					"id":4,
+					"text":"Centrare",
+					"name":"Center",
+					"type":"center",
+					"iconCls":"ic_center"
 				}]
 			},{
 				"title": "Rilievi Fotografici",
