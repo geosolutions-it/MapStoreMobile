@@ -3,9 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="it.geosolutions.geocollect.android.core.MainActivity" >
     
+
+          <!-- @Gnafu when merging give also the other items
+          showAsAction="ifRoom"
+           to make them disappear when the search action view is expanded -->
     <item android:id="@+id/order"
           android:icon="@drawable/ic_action_sort_by_size"
-          android:showAsAction="always"
+          android:showAsAction="ifRoom"
           android:title="@string/order_by"
            /> 
 

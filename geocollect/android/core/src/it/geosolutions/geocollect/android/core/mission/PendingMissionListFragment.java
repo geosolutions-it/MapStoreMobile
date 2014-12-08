@@ -41,6 +41,7 @@ import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
@@ -52,6 +53,8 @@ import com.actionbarsherlock.app.SherlockListFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.widget.SearchView;
+import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
 
 
 /**
@@ -65,7 +68,7 @@ import com.actionbarsherlock.view.MenuItem;
  */
 public class PendingMissionListFragment 
 	extends SherlockListFragment 
-	implements  LoaderCallbacks<List<MissionFeature>>,	OnScrollListener, OnRefreshListener{
+	implements  LoaderCallbacks<List<MissionFeature>>,	OnScrollListener, OnRefreshListener,OnQueryTextListener{
 
 	/**
 	 * The serialization (saved instance state) Bundle key representing the
@@ -369,14 +372,32 @@ public class PendingMissionListFragment
 	 * Creates the actionBar buttons
 	 */
 	@Override
-	public void onCreateOptionsMenu(
-	      Menu menu, MenuInflater inflater) {
+	public void onCreateOptionsMenu(final Menu menu, MenuInflater inflater) {
 		// If SRID is set, a filter exists
 		SharedPreferences sp = getSherlockActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME, Context.MODE_PRIVATE);
 		if(sp.contains(SQLiteCascadeFeatureLoader.FILTER_SRID)){
 			inflater.inflate(R.menu.filterable, menu);
 		}
+
+		inflater.inflate(R.menu.searchable, menu);
 		
+		//get searchview and add querylistener 
+
+		SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+		searchView.setQueryHint(getString(R.string.search_missions));
+		searchView.setOnQueryTextListener(this);
+		searchView.setOnQueryTextFocusChangeListener(new OnFocusChangeListener() {
+
+			@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+
+				if(!hasFocus){
+					//keyboard was closed, collapse search action view
+					menu.findItem(R.id.search).collapseActionView();
+				}
+			}
+		}); 
+
 		if ( missionTemplate != null 
 				&& missionTemplate.source != null
 				&& missionTemplate.source.orderingField != null){
@@ -391,6 +412,20 @@ public class PendingMissionListFragment
 		
 		//inflater.inflate(R.menu.refreshable, menu);
 	}
+	@Override
+    public boolean onQueryTextSubmit(String query) {
+        return query.length() > 0;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+
+        if (adapter != null){  
+        	//filters the adapters entries using its overridden filter
+        	adapter.getFilter().filter(newText);
+        }
+        return true;
+    }
 	
 	/* (non-Javadoc)
 	 * @see com.actionbarsherlock.app.SherlockFragment#onOptionsItemSelected(com.actionbarsherlock.view.MenuItem)

@@ -103,7 +103,7 @@ public class PersTest extends android.test.AndroidTestCase {
 			// ignore
 		}
         assertTrue(m.db.dbversion().equals("unknown"));
-        assertFalse(PersistenceUtils.loadPageData(p, l, m, getContext()));
+        assertFalse(PersistenceUtils.loadPageData(p, l, m, getContext(),false));
 	}
 
 	public void testNullDatabase() {
@@ -116,7 +116,7 @@ public class PersTest extends android.test.AndroidTestCase {
 		Mission m = new Mission();
 		
 		assertNull(m.db);
-        assertFalse(PersistenceUtils.loadPageData(p, l, m, getContext()));
+        assertFalse(PersistenceUtils.loadPageData(p, l, m, getContext(),false));
 	}
 
 	public void testLoadPageDataPageLinearLayoutMissionContextString() {

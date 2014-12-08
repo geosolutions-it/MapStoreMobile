@@ -62,4 +62,6 @@
     <string name="logout_logged_out">Logout effettuato con successo!</string>
     <string name="logout_logout">Logout</string>
     
+    <string name="search_missions">Cerca missioni</string>
+    
 </resources>
