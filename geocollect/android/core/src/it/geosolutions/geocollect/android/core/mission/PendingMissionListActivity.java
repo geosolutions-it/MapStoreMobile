@@ -24,6 +24,7 @@ import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
 
 import it.geosolutions.android.map.MapsActivity;
+import it.geosolutions.android.map.MapsActivity.DrawerMode;
 import it.geosolutions.android.map.view.MapViewManager;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.R;
@@ -274,6 +275,8 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 	    		launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL, (byte)11);
 	    		launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL_MIN, (byte)11);
 	    		launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL_MAX, (byte)19);
+	    		//select here a drawer mode
+	    		launch.putExtra(MapsActivity.PARAMETERS.DRAWER_MODE, DrawerMode.ONLY_LEFT.ordinal());
 //	    		launch.putExtra(MapsActivity.MSM_MAP, m);
 			//}
         	
