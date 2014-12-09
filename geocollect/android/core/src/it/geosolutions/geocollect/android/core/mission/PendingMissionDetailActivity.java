@@ -17,15 +17,12 @@
  */
 package it.geosolutions.geocollect.android.core.mission;
 
-import java.util.HashMap;
-
 import it.geosolutions.android.map.view.MapViewManager;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.SpatialiteUtils;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
-import it.geosolutions.geocollect.model.source.XDataType;
 
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
@@ -73,32 +70,10 @@ public class PendingMissionDetailActivity extends SherlockFragmentActivity imple
 			
 			if(spatialiteDatabase != null && !spatialiteDatabase.dbversion().equals("unknown")){
 	            MissionTemplate t = MissionUtils.getDefaultTemplate(this);
-	            if(t != null && t.id != null){
-	            	
-	            	HashMap<String, XDataType> hm = PersistenceUtils.getTemplateFieldsList(t);
-	            	
-	            	// default value
-	            	String tableName = t.id+"_data";
-	            	if(t.source != null 
-	            			&& t.source.localFormStore != null
-	            			&& !t.source.localFormStore.isEmpty()){
-	            		tableName = t.source.localFormStore;
-	            	}
-	            	
-		            if(PersistenceUtils.createTableFromTemplate(spatialiteDatabase, tableName, hm)){
-		            		//SpatialiteUtils.checkOrCreateTable(spatialiteDatabase, t.id+"_data")){
-		            	Log.v("MISSION_DETAIL", "Table Found, checking for schema updates");
-			            if(PersistenceUtils.updateTableFromTemplate(spatialiteDatabase, tableName, hm)){
-			            	Log.v("MISSION_DETAIL", "All good");
-			            }else{
-			            	Log.w("MISSION_DETAIL", "Something went wrong during the update, the data can be inconsistent");
-			            }
-		            }else{
-			            Log.w("MISSION_DETAIL", "Table could not be created, edits will not be saved");
-		            }
-	            }else{
-	            	Log.w("MISSION_DETAIL", "MissionTemplate could not be found, edits will not be saved");
-	            }
+
+				if(!PersistenceUtils.createOrUpdateTable(spatialiteDatabase,t.schema_sop.localFormStore, t.schema_sop.fields)){
+					Log.e(PendingMissionListActivity.class.getSimpleName(), "error creating "+t.schema_sop.localFormStore+" table ");
+				}
 			}
 
 		}

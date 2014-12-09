@@ -26,6 +26,7 @@ import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.widgets.dialog.UploadDialog;
+import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.http.CommitResponse;
 import it.geosolutions.geocollect.model.viewmodel.FormAction;
 import it.geosolutions.geocollect.model.viewmodel.Page;
@@ -100,8 +101,16 @@ public class SendAction extends AndroidAction {
 			return;
 		}
 
+		
+		String tableName = m.getTemplate().id+"_data";
+		if(m.getTemplate().schema_sop != null && m.getTemplate().schema_sop.localFormStore != null && !m.getTemplate().schema_sop.localFormStore.isEmpty()){
+    		tableName = m.getTemplate().schema_sop.localFormStore;
+    	}
+		
+		MissionTemplate t = MissionUtils.getDefaultTemplate(fragment.getActivity());
+
 		// check database for mandatory fields
-		ArrayList<String> notFilledMandatoryEntries = MissionUtils.checkIfAllMandatoryFieldsAreSatisfied(fragment, m);	
+		ArrayList<String> notFilledMandatoryEntries = MissionUtils.checkIfAllMandatoryFieldsAreSatisfied(t.sop_form, m.getOrigin().id, m.db, tableName);	
 		
 		if(notFilledMandatoryEntries.size() > 0){
 			String missing = fragment.getString(R.string.mandatory_fields_not_filled)+"\n\n";
@@ -224,6 +233,7 @@ public class SendAction extends AndroidAction {
 			arguments.putString(UploadDialog.PARAMS.MISSION_ID, m.getTemplate().id);
 			arguments.putString(UploadDialog.PARAMS.BASIC_AUTH, LoginRequestInterceptor.getB64Auth(email, pass));
 			arguments.putStringArray(UploadDialog.PARAMS.MEDIA, FormUtils.getPhotoUriStrings(fragment.getActivity().getBaseContext(),m.getOrigin().id));
+			arguments.putBoolean(UploadDialog.PARAMS.MISSION_FEATURE_UPLOAD, false);
 			
 			mTaskFragment.setArguments(arguments);
 			

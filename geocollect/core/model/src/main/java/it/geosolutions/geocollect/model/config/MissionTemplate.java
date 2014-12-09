@@ -17,12 +17,13 @@
  */
 package it.geosolutions.geocollect.model.config;
 
-import java.io.Serializable;
-import java.util.HashMap;
-
-import it.geosolutions.geocollect.model.source.WFSSource;
+import it.geosolutions.geocollect.model.source.SegSchema;
+import it.geosolutions.geocollect.model.source.SopSchema;
 import it.geosolutions.geocollect.model.viewmodel.Form;
 import it.geosolutions.geocollect.model.viewmodel.Page;
+
+import java.io.Serializable;
+import java.util.HashMap;
 
 /**
  * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
@@ -42,9 +43,14 @@ public class MissionTemplate implements Serializable{
 	 */
 	public String title;
 	/**
-	 * Source for data to edit
+	 * Sopralluogi Schema
 	 */
-	public WFSSource source;
+	public SopSchema schema_sop;
+	
+	/**
+	 * Segnalazioni Schema
+	 */
+	public SegSchema schema_seg;
 	/**
 	 * Page to show data in the preview
 	 */
@@ -58,9 +64,13 @@ public class MissionTemplate implements Serializable{
 	 */
 	public String descriptionField;
 	/**
-	 * The form to compile
+	 * The segnalazioni form to compile
 	 */
-	public Form form;
+	public Form seg_form; 
+	/**
+	 * The sopralluogi form to compile
+	 */
+	public Form sop_form; 
 	/**
 	 * Generic data to get from the server to configure objects.
 	 * Can be used to bind form editing values.

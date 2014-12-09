@@ -1,0 +1,12 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="it.geosolutions.geocollect.android.core.MainActivity" >
+
+    <item android:id="@+id/create_new"
+          android:icon="@drawable/ic_action_plus"
+          android:showAsAction="always"
+          android:title="@string/create_a_inspection"
+           /> 
+
+</menu>

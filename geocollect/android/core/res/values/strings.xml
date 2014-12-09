@@ -63,4 +63,9 @@
     <string name="logout_logged_out">You were successfully logged out !</string>
     <string name="logout_logout">Logout</string>
     
+    <string name="my_inspections">My Inspections</string>
+    <string name="create_a_inspection">Create an inspection</string>
+    <string name="created_inspection_delete">Do you really want to delete this inspection ?</string>
+    <string name="gps_not_enabled">Please enable GPS to acquire the position of the inspection</string>
+    <string name="gps_still_not_enabled">You did not enable the GPS, cannot continue</string>
 </resources>

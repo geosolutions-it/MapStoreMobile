@@ -420,11 +420,13 @@ public class SpatialiteUtils {
 					// Here, the "GEOMETRY" column contains the result of 
 					//	ST_AsBinary(CastToXY("GEOMETRY"))
 					byte[] geomBytes = stmt.column_bytes(colpos);
-					try {
-						f.geometry = wkbReader.read(geomBytes);
-					} catch (ParseException e) {
-						Log.e(TAG,"Error reading geometry");
-						//throw new Exception(e.getMessage());
+					if(geomBytes != null){						
+						try {
+							f.geometry = wkbReader.read(geomBytes);
+						} catch (ParseException e) {
+							Log.e(TAG,"Error reading geometry");
+							//throw new Exception(e.getMessage());
+						}
 					}
 
 				}else{
