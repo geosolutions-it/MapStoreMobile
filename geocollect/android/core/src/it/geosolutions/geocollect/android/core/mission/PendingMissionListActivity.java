@@ -18,8 +18,6 @@
 package it.geosolutions.geocollect.android.core.mission;
 
 
-import java.util.HashMap;
-
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
 
@@ -29,6 +27,8 @@ import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.login.LoginActivity;
 import it.geosolutions.geocollect.android.core.login.LogoutActivity;
+import it.geosolutions.geocollect.android.core.form.FormEditActivity;
+import it.geosolutions.geocollect.android.core.mission.PendingMissionListFragment.FragmentMode;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.NavUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
@@ -37,10 +37,8 @@ import it.geosolutions.geocollect.android.core.navigation.AbstractNavDrawerActiv
 import it.geosolutions.geocollect.android.core.navigation.NavDrawerActivityConfiguration;
 import it.geosolutions.geocollect.android.core.navigation.NavDrawerAdapter;
 import it.geosolutions.geocollect.android.core.navigation.NavDrawerItem;
-import it.geosolutions.geocollect.android.core.preferences.GeoCollectPreferences;
 import it.geosolutions.geocollect.android.map.ReturningMapInfoControl;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
-import it.geosolutions.geocollect.model.source.XDataType;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -73,6 +71,8 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 		PendingMissionListFragment.Callbacks , MapActivity{
 
 	public static int SPATIAL_QUERY = 7001;
+	
+	public static final String ARG_CREATE_MISSIONFEATURE = "CREATE_MISSIONFEATURE";
 	
 	/**
 	 * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -114,52 +114,32 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 			spatialiteDatabase = SpatialiteUtils.openSpatialiteDB(this, "geocollect/genova.sqlite");
 			
 			if(spatialiteDatabase != null && !spatialiteDatabase.dbversion().equals("unknown")){
-	            MissionTemplate t = MissionUtils.getDefaultTemplate(this);
-	            if(t != null && t.id != null){
-	            	
-	            	// Save Source Missions on database
-	            	HashMap<String, XDataType> sourceDataTypes = t.source.dataTypes;
-	            	HashMap<String, XDataType> formDataTypes = PersistenceUtils.getTemplateFieldsList(t);
-	            	// default value
-	            	String formTableName = t.id+"_data";
-	            	if(t.source != null ){
-	            		if( t.source.localFormStore != null
-	            			&& !t.source.localFormStore.isEmpty()){
-		            		formTableName = t.source.localFormStore;
-		            	}
-		            	if( t.source.localSourceStore != null
-		            		&& !t.source.localSourceStore.isEmpty()){
-				            if(PersistenceUtils.createTableFromTemplate(spatialiteDatabase, t.source.localSourceStore, sourceDataTypes, true)){
-			            		//SpatialiteUtils.checkOrCreateTable(spatialiteDatabase, t.id+"_data")){
-				            	Log.v("MISSION_LIST", "Table Found, checking for schema updates");
-					            if(PersistenceUtils.updateTableFromTemplate(spatialiteDatabase, t.source.localSourceStore, sourceDataTypes)){
-					            	Log.v("MISSION_LIST", "All good");
-					            }else{
-					            	Log.w("MISSION_LIST", "Something went wrong during the update, the data can be inconsistent");
-					            }
-				            }else{
-					            Log.w("MISSION_LIST", "Table could not be created, edits will not be saved");
-				            }
-	
-		            	}
-	            	}else{
-		            	Log.w("MISSION_LIST", "MissionTemplate source could not be found!");
-		            }
-	            	
-		            if(PersistenceUtils.createTableFromTemplate(spatialiteDatabase, formTableName, formDataTypes)){
-			            Log.v("MISSION_LIST", "Table Found, checking for schema updates");
-			            if(PersistenceUtils.updateTableFromTemplate(spatialiteDatabase, formTableName, formDataTypes)){
-			            	Log.v("MISSION_LIST", "All good");
-			            }else{
-			            	Log.w("MISSION_LIST", "Something went wrong during the update, the data can be inconsistent");
-			            }
-			            
-		            }else{
-			            Log.w("MISSION_LIST", "Table could not be created, edits will not be saved");
-		            }
-	            }else{
-	            	Log.w("MISSION_LIST", "MissionTemplate could not be found, edits will not be saved");
-	            }
+				
+				MissionTemplate t = MissionUtils.getDefaultTemplate(this);
+				
+				if(t != null && t.id != null){
+					
+					//1. "create mission" table
+					
+					if(!PersistenceUtils.createTableFromTemplate(spatialiteDatabase, t.schema_seg.localSourceStore+ "_new", t.schema_seg.fields)){
+						Log.e(PendingMissionListActivity.class.getSimpleName(), "error creating \"create_mission\" table ");
+					}
+
+					//2.  "source" table
+
+					if(!PersistenceUtils.createOrUpdateTable(spatialiteDatabase,t.schema_seg.localSourceStore, t.schema_seg.fields)){
+						Log.e(PendingMissionListActivity.class.getSimpleName(), "error creating "+t.schema_seg.localSourceStore+" table ");
+					}
+					
+					//3. "form" -> rilevamenti table
+
+					if(!PersistenceUtils.createOrUpdateTable(spatialiteDatabase,t.schema_sop.localFormStore, t.schema_sop.fields)){
+						Log.e(PendingMissionListActivity.class.getSimpleName(), "error creating "+t.schema_sop.localFormStore+" table ");
+					}
+
+				}else{
+					Log.w("MISSION_LIST", "MissionTemplate could not be found, edits will not be saved");
+				}
 			}
 
 		}
@@ -182,6 +162,13 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 		}
 
 		// TODO: If exposing deep links into your app, handle intents here.
+		if(getIntent().getExtras() != null){
+			boolean createMission = getIntent().getExtras().getBoolean(ARG_CREATE_MISSIONFEATURE);
+			if(createMission){
+				((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(R.id.pendingmission_list)).switchAdapter(FragmentMode.CREATION);
+
+			}
+		}
 	}
 
 	/**
@@ -190,29 +177,45 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 	 */
 	@Override
 	public void onItemSelected(Object obj) {
-		if (mTwoPane) {
-			//DELETE PREVIOUS MAP VIEWS
-			mapViewManager.destroyMapViews();
-			// In two-pane mode, show the detail view in this activity by
-			// adding or replacing the detail fragment using a
-			// fragment transaction.
-			Bundle arguments = new Bundle();
-			arguments.putString(PendingMissionDetailFragment.ARG_ITEM_ID, ((Feature) obj).id);
-			arguments.putSerializable(PendingMissionDetailFragment.ARG_ITEM_FEATURE, (Feature) obj);
-			PendingMissionDetailFragment fragment = new PendingMissionDetailFragment();
-			fragment.setArguments(arguments);
-			getSupportFragmentManager().beginTransaction()
-					.replace(R.id.pendingmission_detail_container, fragment)
-					.commit();
+		
+		FragmentMode fragmentMode = ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(R.id.pendingmission_list)).getFragmentMode();
+		
+		if(fragmentMode == FragmentMode.PENDING){
+			if (mTwoPane) {
+				//DELETE PREVIOUS MAP VIEWS
+				mapViewManager.destroyMapViews();
+				// In two-pane mode, show the detail view in this activity by
+				// adding or replacing the detail fragment using a
+				// fragment transaction.
 
-		} else {
-			// In single-pane mode, simply start the detail activity
-			// for the selected item ID.
-			Intent detailIntent = new Intent(this,
-					PendingMissionDetailActivity.class);
-			detailIntent.putExtra(PendingMissionDetailFragment.ARG_ITEM_ID, ((Feature) obj).id);
-			detailIntent.putExtra(PendingMissionDetailFragment.ARG_ITEM_FEATURE, (Feature) obj);
-			startActivity(detailIntent);
+
+				Bundle arguments = new Bundle();
+				arguments.putString(PendingMissionDetailFragment.ARG_ITEM_ID, ((Feature) obj).id);
+				arguments.putSerializable(PendingMissionDetailFragment.ARG_ITEM_FEATURE, (Feature) obj);
+				PendingMissionDetailFragment fragment = new PendingMissionDetailFragment();
+				fragment.setArguments(arguments);
+				getSupportFragmentManager().beginTransaction()
+				.replace(R.id.pendingmission_detail_container, fragment)
+				.commit();
+
+			} else {
+				// In single-pane mode, simply start the detail activity
+				// for the selected item ID.
+				Intent detailIntent = new Intent(this,
+						PendingMissionDetailActivity.class);
+				detailIntent.putExtra(PendingMissionDetailFragment.ARG_ITEM_ID, ((Feature) obj).id);
+				detailIntent.putExtra(PendingMissionDetailFragment.ARG_ITEM_FEATURE, (Feature) obj);
+				startActivity(detailIntent);
+			}
+		}else{
+			
+			Log.d(PendingMissionListFragment.class.getSimpleName(), "created mission clicked " + ((MissionFeature) obj).id );
+			
+			Intent editIntent = new Intent(this,FormEditActivity.class);
+			editIntent.putExtra(ARG_CREATE_MISSIONFEATURE, true);
+			editIntent.putExtra(PendingMissionDetailFragment.ARG_ITEM_FEATURE, (MissionFeature) obj);
+			startActivity(editIntent);
+			
 		}
 	}
 
@@ -240,10 +243,23 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         //first option
         case 101:
             //only one fragment for now, the other options are indipendent activities
-        	//so we don't have to do anything here
-        	//getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new FriendMainFragment()).commit();
+        	//switch to pending mode
+        	        	
+        	clearDetailFragment();
+        	
+        	((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(R.id.pendingmission_list)).switchAdapter(FragmentMode.PENDING);
+        	
             break;
         //Map
+        case 1001:
+       
+        	//switch to creation mode
+        	clearDetailFragment();
+        	
+        	((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(R.id.pendingmission_list)).switchAdapter(FragmentMode.CREATION);
+					
+     	
+        	break;
         case 102:
         	//setup map options
         	//TODO parametrize it 
@@ -304,6 +320,20 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         	confirmExit();
         	break;
         }
+    }
+    /**
+     * removes the detailfragment in the twoPane layout, if necessary
+     */
+    public void clearDetailFragment(){
+    	
+    	if(mTwoPane){    		
+    		final PendingMissionDetailFragment fragment = (PendingMissionDetailFragment) getSupportFragmentManager().findFragmentById(R.id.pendingmission_detail_container);
+    		if(fragment != null){	
+    			getSupportFragmentManager().beginTransaction()
+    			.remove(fragment)
+    			.commit();
+    		}
+    	}
     }
 	
     /**

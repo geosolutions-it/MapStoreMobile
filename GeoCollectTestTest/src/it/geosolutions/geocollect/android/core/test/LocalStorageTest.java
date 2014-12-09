@@ -8,17 +8,15 @@ import com.google.gson.Gson;
 
 import jsqlite.Database;
 import jsqlite.Stmt;
-
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.SpatialiteUtils;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
-import it.geosolutions.geocollect.model.source.WFSSource;
+import it.geosolutions.geocollect.model.source.SegSchema;
 import it.geosolutions.geocollect.model.source.XDataType;
 import it.geosolutions.geocollect.model.viewmodel.Field;
 import it.geosolutions.geocollect.model.viewmodel.Form;
 import it.geosolutions.geocollect.model.viewmodel.Page;
-
 import android.util.Log;
 import android.widget.LinearLayout;
 
@@ -85,7 +83,7 @@ public class LocalStorageTest extends android.test.AndroidTestCase {
 			// ignore
 		}
         assertTrue(m.db.dbversion().equals("unknown"));
-        assertFalse(PersistenceUtils.loadPageData(p, l, m, getContext()));
+        assertFalse(PersistenceUtils.loadPageData(p, l, m, getContext(),false));
 	}
 
 	/**
@@ -102,7 +100,7 @@ public class LocalStorageTest extends android.test.AndroidTestCase {
 		Mission m = new Mission();
 		
 		assertNull(m.db);
-        assertFalse(PersistenceUtils.loadPageData(p, l, m, getContext()));
+        assertFalse(PersistenceUtils.loadPageData(p, l, m, getContext(),false));
 	}
 
 	/// Metodo per l'estrazione della lista TIPATA dei campi del template ( "_data" )
@@ -113,8 +111,8 @@ public class LocalStorageTest extends android.test.AndroidTestCase {
 		Log.v(TAG, "testGetTemplateFieldList()");
 		
 		MissionTemplate mt = new MissionTemplate();
-		mt.form = new Form();
-		mt.form.pages = new ArrayList<Page>();
+		mt.sop_form = new Form();
+		mt.sop_form.pages = new ArrayList<Page>();
 		Page p = new Page();
 		p.fields = new ArrayList<Field>();
 		
@@ -136,7 +134,7 @@ public class LocalStorageTest extends android.test.AndroidTestCase {
 		f.fieldId = "IntField";
 		p.fields.add(f);
 	
-		mt.form.pages.add(p);
+		mt.sop_form.pages.add(p);
 		
 		// Another page
 		p = new Page();
@@ -148,9 +146,9 @@ public class LocalStorageTest extends android.test.AndroidTestCase {
 		f.fieldId = "TextField";
 		p.fields.add(f);
 		
-		mt.form.pages.add(p);
+		mt.sop_form.pages.add(p);
 
-		HashMap<String,XDataType> templateDataTypes = PersistenceUtils.getTemplateFieldsList(mt);
+		HashMap<String,XDataType> templateDataTypes = PersistenceUtils.getTemplateFieldsList(mt.sop_form);
 		
 		assertNotNull(templateDataTypes);
 		
@@ -170,7 +168,7 @@ public class LocalStorageTest extends android.test.AndroidTestCase {
 		Log.v(TAG, "testGetDataTypesFromTemplate()");
 		
 		MissionTemplate mt = new MissionTemplate();
-		mt.source = new WFSSource();
+		mt.schema_seg= new SegSchema();
 		//mt.source.dataTypes;
 		db = SpatialiteUtils.openSpatialiteDB(getContext(), "geocollect/genova.sqlite");
 		
@@ -193,11 +191,11 @@ public class LocalStorageTest extends android.test.AndroidTestCase {
 		String template1 = "{	" +
 				"	\"id\":\"punti_accumulo\"," +
 				"	\"title\": \"Punti Abbandono\"," +
-				"	\"source\":{" +
+				"	\"schema_seg\":{" +
 				"		\"type\":\"WFS\"," +
 				"		\"URL\":\"http://demo.geo-solutions.it/share/comunege/geocollect/punti_abbandono.geojson\"," +
 				"		\"typeName\":\"geosolutions:punti_abbandono\"," +
-				"		\"dataTypes\":{" +
+				"		\"fields\":{" +
 				"			\"CODICE\":\"string\"," +
 				"			\"DATA_RILEV\":\"string\"," +
 				"			\"USO_AGRICO\":\"integer\"," +
@@ -231,11 +229,11 @@ public class LocalStorageTest extends android.test.AndroidTestCase {
 		String template2 = "{	" +
 				"	\"id\":\"punti_accumulo\"," +
 				"	\"title\": \"Punti Abbandono\"," +
-				"	\"source\":{" +
+				"	\"schema_seg\":{" +
 				"		\"type\":\"WFS\"," +
 				"		\"URL\":\"http://demo.geo-solutions.it/share/comunege/geocollect/punti_abbandono.geojson\"," +
 				"		\"typeName\":\"geosolutions:punti_abbandono\"," +
-				"		\"dataTypes\":{" +
+				"		\"fields\":{" +
 				"			\"CODICE\":\"string\"," +
 				"			\"DATA_RILEV\":\"string\"," +
 				"			\"USO_AGRICO\":\"integer\"," +
@@ -269,8 +267,8 @@ public class LocalStorageTest extends android.test.AndroidTestCase {
 		MissionTemplate mt1 = gson.fromJson( template1 , MissionTemplate.class);
 		MissionTemplate mt2 = gson.fromJson( template2 , MissionTemplate.class);
 		
-		HashMap<String,XDataType> templateDataTypes1 = mt1.source.dataTypes;
-		HashMap<String,XDataType> templateDataTypes2 = mt2.source.dataTypes;
+		HashMap<String,XDataType> templateDataTypes1 = mt1.schema_seg.fields;
+		HashMap<String,XDataType> templateDataTypes2 = mt2.schema_seg.fields;
 
 		
 		assertNotNull(templateDataTypes1);
@@ -401,12 +399,12 @@ public class LocalStorageTest extends android.test.AndroidTestCase {
 "{	" +
 "	\"id\":\"punti_accumulo\"," +
 "	\"title\": \"Punti Abbandono\"," +
-"	\"source\":{" +
+"	\"schema_seg\":{" +
 "		\"type\":\"WFS\"," +
 "		\"URL\":\"http://demo.geo-solutions.it/share/comunege/geocollect/punti_abbandono.geojson\"," +
 "		\"typeName\":\"geosolutions:punti_abbandono\"," +
 "		\"storeLocally\":\"localTable\"," +
-"		\"dataTypes\":{" +
+"		\"fields\":{" +
 "			\"CODICE\":\"string\"," +
 "			\"DATA_RILEV\":\"string\"," +
 "			\"MACROAREA\":\"string\"," +
@@ -476,7 +474,7 @@ public class LocalStorageTest extends android.test.AndroidTestCase {
 "	}" +
 "}"    , MissionTemplate.class);
 		
-		HashMap<String,XDataType> templateDataTypes = mt.source.dataTypes;
+		HashMap<String,XDataType> templateDataTypes = mt.schema_seg.fields;
 
 		assertNotNull(templateDataTypes);
 		assertTrue(templateDataTypes.size()>0);

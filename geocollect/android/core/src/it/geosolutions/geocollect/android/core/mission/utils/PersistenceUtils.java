@@ -29,6 +29,7 @@ import it.geosolutions.geocollect.android.core.widgets.DatePicker;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.source.XDataType;
 import it.geosolutions.geocollect.model.viewmodel.Field;
+import it.geosolutions.geocollect.model.viewmodel.Form;
 import it.geosolutions.geocollect.model.viewmodel.Page;
 import it.geosolutions.geocollect.model.viewmodel.type.XType;
 import jsqlite.Database;
@@ -56,6 +57,33 @@ public class PersistenceUtils {
 	 */
 	public static String TAG = "PersistanceUtils";
 	
+	
+	public static boolean createOrUpdateTable(final Database spatialiteDatabase, final String pTableName,final HashMap<String, XDataType> hm){
+		
+        
+        	// default value
+        	String tableName = pTableName+"_data";
+        	if(pTableName != null && !pTableName.isEmpty()){
+        		tableName = pTableName;
+        	}
+            if(PersistenceUtils.createTableFromTemplate(spatialiteDatabase, tableName, hm)){
+//            if(SpatialiteUtils.checkOrCreateTable(spatialiteDatabase, t.id+"_data")){
+	            Log.v(TAG, "Table Found, checking for schema updates");
+	            if(PersistenceUtils.updateTableFromTemplate(spatialiteDatabase, tableName, hm)){
+	            	Log.v(TAG, "All good");
+	            	return true;
+	            }else{
+	            	Log.w(TAG, "Something went wrong during the update, the data can be inconsistent");
+	            	return false;
+	            }
+	            
+            }else{
+	            Log.w(TAG, "Table could not be created, edits will not be saved");
+	            return false;
+            }
+
+	}
+	
 	/**
 	 * Default method for storePageData
 	 * Stores the view data on given database based on given Page information
@@ -68,10 +96,10 @@ public class PersistenceUtils {
 		// TODO parameterize "_data" suffix
     	// default value
     	String tableName = mission.getTemplate().id+"_data";
-    	if(mission.getTemplate().source != null 
-    			&& mission.getTemplate().source.localFormStore != null
-    			&& !mission.getTemplate().source.localFormStore.isEmpty()){
-    		tableName = mission.getTemplate().source.localFormStore;
+    	if(mission.getTemplate().schema_sop != null 
+    			&& mission.getTemplate().schema_sop.localFormStore != null
+    			&& !mission.getTemplate().schema_sop.localFormStore.isEmpty()){
+    		tableName = mission.getTemplate().schema_sop.localFormStore;
     	}
 		return storePageData(page, layout, mission, tableName);
 	}
@@ -241,7 +269,7 @@ public class PersistenceUtils {
 		}
 		// TODO parameterize "_data" suffix
     	// default value
-    	String tableName = mission.getTemplate().source.localFormStore;
+    	String tableName = mission.getTemplate().schema_sop.localFormStore;
     	//geometry needs ST_AsBinary(CastToXY(GEOMETRY)) AS GEOMETRY
     	HashMap<String, String> columns = SpatialiteUtils.getPropertiesFields(mission.db,tableName);
 
@@ -317,15 +345,42 @@ public class PersistenceUtils {
 		// TODO parameterize "_data" suffix
     	// default value
     	String tableName = mission.getTemplate().id+"_data";
-    	if(mission.getTemplate().source != null 
-    			&& mission.getTemplate().source.localFormStore != null
-    			&& !mission.getTemplate().source.localFormStore.isEmpty()){
-    		tableName = mission.getTemplate().source.localFormStore;
+    	if(mission.getTemplate().schema_sop != null 
+    			&& mission.getTemplate().schema_sop.localFormStore != null
+    			&& !mission.getTemplate().schema_sop.localFormStore.isEmpty()){
+    		tableName = mission.getTemplate().schema_sop.localFormStore;
     	}
 		return loadPageData(page, layout, mission, context, tableName,createIfNotPresent);
 	}
 	
-	
+	public static void loadSpinnerData(Page page, LinearLayout layout, Database db, Context context, String tableName, String origin_id){
+		
+		for(Field f : page.fields){
+			try {
+				if(f.xtype == XType.spinner){
+					String s = "SELECT " + f.fieldId +" FROM '" + tableName + "' WHERE ORIGIN_ID = '" + origin_id+"';";
+					Stmt st = db.prepare(s);
+					if(st.step()){
+						final View v = layout.findViewWithTag(f.fieldId);
+						if(st.column_string(0) != null && v != null){
+							Log.v(TAG, "Setting spinner value :"+st.column_string(0));
+							String fieldValue = st.column_string(0);
+							List<HashMap<String, String>> l = FormBuilder.getFieldAllowedData(f);
+							int i = 0;
+							for( i = 0; i<l.size(); i++){
+								if(l.get(i).get("f1") != null && l.get(i).get("f1").equals(fieldValue)){
+									((Spinner)v).setSelection(i);
+								}
+							}
+						}
+					}
+				}
+			} catch (Exception e) {
+				Log.e(TAG, "Error setting spinner values",e);
+			}
+		}
+		
+	}
 	/**
 	 * Load the page data from the give database
 	 * @param createIfNotPresent create a entry in the table if the requested entry is not found
@@ -523,25 +578,21 @@ public class PersistenceUtils {
 	 * @param mt
 	 * @return
 	 */
-	public static HashMap<String,XDataType> getTemplateFieldsList(MissionTemplate mt){
+	public static HashMap<String,XDataType> getTemplateFieldsList(Form form){
 		// TODO implement
 		// what if the same field name is found, but with different type?
 		
-		if(mt == null){
-			Log.v(TAG, "MissionTemplate not found");
-			return null;
-		}
 		
-		if(mt.form == null){
+		if(form == null){
 			Log.v(TAG, "Form not found");
 			return null;
 		}
 		
 		HashMap<String,XDataType> fieldsList = new HashMap<String, XDataType>();
 		
-		if(mt.form.pages != null && mt.form.pages.size()>0 ){
+		if(form.pages != null && form.pages.size()>0 ){
 			
-			for(Page p : mt.form.pages){
+			for(Page p : form.pages){
 				if (p.fields != null & p.fields.size()>0){
 					
 					for(Field f : p.fields){
@@ -885,6 +936,181 @@ public class PersistenceUtils {
 		}
 		
 		return false;
+	}
+	/**
+	 * retrieves the current max id for the created missionFeature table
+	 * if none is present yet 0 is returned
+	 * @param db the database to use
+	 * @param tableName the table to lookup
+	 * @return max + 1 
+	 */
+	public static Long getIDforNewMissionFeatureEntry(Database db,String tableName) {
+		
+		if(tableName == null || tableName.isEmpty()){
+			Log.v(TAG, "No tableName, cannot create table");
+			return null;
+		}
+		
+		String query = "SELECT max(ORIGIN_ID) FROM ('"+tableName+"');";
+		
+		Stmt stmt;
+		try {
+			stmt = db.prepare(query);
+			if(stmt.step()){
+				if(stmt.column_name(0).equalsIgnoreCase("max(ORIGIN_ID)")){
+        			String maxID = stmt.column_string(0);
+        			stmt.close();
+        			Log.d(TAG, "maxID found : "+maxID);
+        			try{
+        				return Long.valueOf(Long.parseLong(maxID) + 1);
+        			}catch(NumberFormatException e){
+        				Log.e(TAG, "error parsing Max ID for newMission");
+        				return Long.valueOf(0);
+        			}
+        		}
+			}
+		} catch (Exception e) {
+			Log.e(TAG, "error get Max ID for newMission",e);
+			return null;
+		}
+		
+		
+		return Long.valueOf(0);
+	}
+	/**
+	 * creates a new row in the created mission table identified by an id
+	 * @param db the database to write to
+	 * @param tableName the table to insert
+	 * @param id the id to refer
+	 * @return if the insert was successful
+	 */
+	public static boolean insertCreatedMissionFeature(Database db,String tableName, Long id) {
+		
+		if(tableName == null || tableName.isEmpty()){
+			Log.v(TAG, "No tableName, cannot create table");
+			return false;
+		}
+		
+		
+		String insert = "INSERT INTO '"+tableName+"' (ORIGIN_ID) VALUES ('"+id+"');";
+		
+		
+		try {
+			Stmt stmt = db.prepare(insert);
+			
+			if(stmt.step()){
+				return true;
+			}
+		} catch (Exception e) {
+			Log.e(TAG, "error inserting entry "+id + " into "+tableName,e);
+			return false;
+		}
+		
+		return true;
+	}
+	/**
+	 * deletes a "created missionFeature"
+	 * @param db the database to delete from
+	 * @param tableName the table to delete in
+	 * @param f the feature to delete
+	 */
+	public static void deleteCreatedMissionFeature(final Database db, final String tableName, final MissionFeature f){
+		
+		if(tableName == null || tableName.isEmpty()){
+			Log.v(TAG, "No tableName, cannot create table");
+			return;
+		}		
+		
+		String delete = "DELETE FROM '"+tableName+"' WHERE ORIGIN_ID = ('"+f.id+"');";
+		
+		
+		try {
+			Stmt stmt = db.prepare(delete);
+			stmt.step();
+
+		} catch (Exception e) {
+			Log.e(TAG, "error deleting entry "+f.id + " from "+tableName,e);
+		}
+	}
+	/**
+	 * gets the x and y coordinated of a geometry
+	 * @param db the database to read from
+	 * @param tableName the name of the spatialite table
+	 * @param id the origin_id to refer to
+	 * @return a double array{x,y}
+	 */
+	public static double[] getXYCoord(final Database db,final String tableName,final String id){
+		
+		double[] result = new double[2];
+		
+		String query = "SELECT x(GEOMETRY), y(GEOMETRY) FROM '"+tableName+"' WHERE ORIGIN_ID = ('"+id+"');";
+		
+		Stmt stmt;
+		try {
+			stmt = db.prepare(query);
+			if(stmt.step()){
+				if(stmt.column_name(0).equalsIgnoreCase("x(GEOMETRY)")){
+					String x = stmt.column_string(0);
+					if(x != null){        				
+						result[0] = Double.parseDouble(x);
+					}
+				}
+				if(stmt.column_name(1).equalsIgnoreCase("y(GEOMETRY)")){
+					String y = stmt.column_string(1);
+					if(y != null){        				
+						result[1] = Double.parseDouble(y);
+					}
+				}
+				stmt.close();
+			}
+		} catch (Exception e) {
+			Log.e(TAG, "error get Max ID for newMission",e);
+			return null;
+		}
+		
+		return result;
+	}
+	/**
+	 * updates a row in the "created missionsfeature" table
+	 * @param db to update
+	 * @param tableName the table to modify
+	 * @param f the field to refer
+	 * @param value the value to update
+	 * @param id the origin_id to refer
+	 */
+	public static void updateCreatedMissionFeatureRow(final Database db, final String tableName, final Field f, String value, final String id){
+
+		Stmt st = null;
+		String s;
+		if(f.xtype == XType.mapViewPoint){
+			// a geometry must be built
+			s = "UPDATE '"+tableName+"' SET "+ f.fieldId +" = "+ value +" WHERE ORIGIN_ID = '"+id+"';";
+		}else{
+			// Standard values
+			value = value.replace("'", "''");
+			s = "UPDATE '"+tableName+"' SET "+ f.fieldId +" = '"+ value +"' WHERE ORIGIN_ID = '"+id+"';";
+		}
+		Log.v(TAG, "Query :\n"+s);
+		if(Database.complete(s)){
+			try{
+				st = db.prepare(s);
+				if(st.step()){
+					//an update will not end necessarily here
+				}
+			} catch (Exception e) {
+				Log.e(TAG, "error updating entry "+f.fieldId + " into "+tableName,e);
+			}
+		}else{
+			Log.w(TAG, "Skipping non complete statement:\n"+s);
+		}
+		if(st!=null){
+			try {
+				st.close();
+			} catch (Exception e) {
+				//Log.e(TAG, Log.getStackTraceString(e));
+				// ignore
+			}
+		}
 	}
 	
 }

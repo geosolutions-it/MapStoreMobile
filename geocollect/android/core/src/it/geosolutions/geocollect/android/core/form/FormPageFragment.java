@@ -104,7 +104,7 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 		if(pageNumber!=null){
 			MissionTemplate t = MissionUtils.getDefaultTemplate(getActivity());
 			//if page number exists i suppose pages is not empty
-			page = t.form.pages.get(pageNumber);
+			page = t.sop_form.pages.get(pageNumber);
 			
 		}
 		if(savedInstanceState !=null){
