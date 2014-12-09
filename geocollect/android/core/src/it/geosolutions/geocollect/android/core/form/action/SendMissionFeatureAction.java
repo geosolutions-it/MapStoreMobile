@@ -3,6 +3,8 @@ package it.geosolutions.geocollect.android.core.form.action;
 import it.geosolutions.android.map.wfs.geojson.GeoJson;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.FormEditActivity;
+import it.geosolutions.geocollect.android.core.login.LoginActivity;
+import it.geosolutions.geocollect.android.core.login.utils.LoginRequestInterceptor;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
 import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
@@ -20,7 +22,9 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -193,6 +197,14 @@ public class SendMissionFeatureAction extends FormAction {
 			arguments.putString(UploadDialog.PARAMS.DATA, data);
 			arguments.putString(UploadDialog.PARAMS.ORIGIN_ID, missionFeature.id);
 			arguments.putBoolean(UploadDialog.PARAMS.MISSION_FEATURE_UPLOAD, true);
+			
+			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(fragment.getSherlockActivity());
+			
+			//String authKey = prefs.getString(LoginActivity.PREFS_AUTH_KEY, null);
+			String email = prefs.getString(LoginActivity.PREFS_USER_EMAIL, null);
+			String pass = prefs.getString(LoginActivity.PREFS_PASSWORD, null);
+						
+			arguments.putString(UploadDialog.PARAMS.BASIC_AUTH, LoginRequestInterceptor.getB64Auth(email, pass));
 			
 			mTaskFragment.setArguments(arguments);
 			
