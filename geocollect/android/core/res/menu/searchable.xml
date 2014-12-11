@@ -1,0 +1,15 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="it.geosolutions.geocollect.android.core.MainActivity" >
+    
+
+          <item android:id="@+id/search"
+        android:title="@string/search_missions"
+        android:icon="@drawable/ic_action_search"
+        android:showAsAction="collapseActionView|ifRoom"
+        android:actionViewClass="com.actionbarsherlock.widget.SearchView"/>
+      
+      
+          
+</menu>
