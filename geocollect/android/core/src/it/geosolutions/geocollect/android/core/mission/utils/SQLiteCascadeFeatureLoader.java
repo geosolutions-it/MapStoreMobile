@@ -224,7 +224,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 							String columnNames = " ( ";
 							String columnValues = " ( ";
 							columnNames = columnNames + "ORIGIN_ID";
-							columnValues = columnValues + f.id;
+							columnValues = columnValues + "'"+f.id+ "'";
 							
 							for(Entry<String, String> e : dbFieldValues.entrySet()){
 								//Log.v(TAG, "Got -> "+e.getKey()+" : "+e.getValue());
