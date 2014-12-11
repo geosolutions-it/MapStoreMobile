@@ -69,5 +69,6 @@
     <string name="gps_not_enabled">Please enable GPS to acquire the position of the inspection</string>
     <string name="gps_still_not_enabled">You did not enable the GPS, cannot continue</string>
     <string name="search_missions">Search Missions</string>
-
+    <string name="location_searching">Acquiring position&#8230;</string>
+    
 </resources>
