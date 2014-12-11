@@ -3,6 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="it.geosolutions.geocollect.android.core.MainActivity" >
 
+    <item android:id="@+id/order"
+          android:icon="@drawable/ic_action_sort_by_size"
+          android:showAsAction="ifRoom"
+          android:title="@string/order_by" /> 
+
     <item
         android:id="@+id/create_new"
         android:icon="@drawable/ic_action_plus"

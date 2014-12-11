@@ -21,15 +21,20 @@ package it.geosolutions.geocollect.android.core.mission;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 
+import java.util.ArrayList;
+
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -48,6 +53,8 @@ int resourceId = R.layout.mission_resource_row;
 
 private MissionTemplate template;
 
+private MissionFeatureFilter filter;
+
 /**
  * The constructor gets the resource (id of the layout for the element)
  * 
@@ -62,11 +69,11 @@ public FeatureAdapter(Context context, int resource) {
 /**
  * Create the adapter and populate it with a list of <FeatureInfoQueryResult>
  * 
- * @param context
+ * @param context a context --> for testing this must not be a SherlockFragment
  * @param feature_info_layer_list_row
  * @param feature_layer_name
  */
-public FeatureAdapter(SherlockFragmentActivity context, int resource,MissionTemplate template) {
+public FeatureAdapter(Context context, int resource,MissionTemplate template) {
     super(context, resource);
     this.resourceId = resource;
     this.template = template;
@@ -157,5 +164,108 @@ public View getView(int position, View convertView, ViewGroup parent) {
     return v;
 
 }
+
+
+@Override
+public Filter getFilter() {
+    
+	if(filter == null){
+        filter = new MissionFeatureFilter();
+    }
+    return filter;
+}
+
+/**
+ * Class to filter missions according to search/filter queries
+ * @author Robert Oehler
+ *
+ */
+private class MissionFeatureFilter extends Filter{
+	
+	private ArrayList<MissionFeature> mSource;
+	
+	public MissionFeatureFilter(){
+		
+		copySource();
+	}
+	/**
+	 * makes a copy of the currently available missionfeatures of the collegated adapter
+	 */
+	public void copySource(){
+		mSource = new ArrayList<MissionFeature>();
+				
+		final int count = getCount();
+		int i = 0;
+		while(i < count){
+			mSource.add(getItem(i));
+			i++;
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	protected void publishResults(CharSequence constraint, FilterResults results) {
+		
+		  ArrayList<MissionFeature> filtered = (ArrayList<MissionFeature>) results.values;
+		  Log.d(FeatureAdapter.class.getSimpleName(), "results size "+ filtered.size() + " after filtering : "+constraint);
+		  //apply results to the adapter if necessary
+          if(filtered != null){        	  
+        	  clear();
+        	  if(Build.VERSION.SDK_INT > 10){
+        		  addAll(filtered);
+        	  }else{        		  
+        		  for(MissionFeature f : filtered){
+        			  add(f);
+        		  }
+        	  }
+
+        	  notifyDataSetChanged();
+          }
+		
+	}
+	/**
+	 * performs the filtering
+	 * @param constraint to constraint to apply
+	 */
+	@SuppressLint("DefaultLocale")
+	@Override
+	protected FilterResults performFiltering(CharSequence constraint) {
+
+		FilterResults filterResults = new FilterResults();   
+		ArrayList<MissionFeature> tempList=new ArrayList<MissionFeature>();
+		
+		//check source
+		if(mSource == null || mSource.size() == 0){
+			copySource();
+		}
+
+		for(MissionFeature item : mSource){
+			if(constraint != null && constraint.length() > 0) {
+				//if constraint, filter
+				final String title = (String) item.properties.get(template.nameField);
+				final String desc =  (String) item.properties.get(template.descriptionField);
+
+				if(title != null && desc != null && constraint.length() > 0){
+					
+					//do filtering here however you want missions to be filtered
+					//for now it adds the item if title or desc are within the search query --> constraint
+					if(title.toLowerCase().contains(constraint.toString().toLowerCase()) ||
+					    desc.toLowerCase().contains(constraint.toString().toLowerCase())){
+						
+						tempList.add(item);
+					}
+				}		
+			}else{
+				//if constraint is null or empty ("") add all
+				tempList.add(item);
+			}
+		}
+
+		//convert to FilterResults objects
+		filterResults.values = tempList;
+		filterResults.count = tempList.size();
+		return filterResults;
+	}
+};
 }
 
