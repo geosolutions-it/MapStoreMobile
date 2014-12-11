@@ -68,5 +68,6 @@
     <string name="gps_not_enabled">Si prega di attivare la Geolocalizzazione per loccalizzare questo sopralluogo</string>
     <string name="gps_still_not_enabled">Non hai attivato la Geolocalizzazione, non é possibilie continuare</string>
     <string name="search_missions">Cerca missioni</string>
+    <string name="location_searching">Ricerca Posizione in corso&#8230;</string>
     
 </resources>

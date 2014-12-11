@@ -415,5 +415,11 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 			imageLoader.resume();
 		}
 	}
+	/**
+	 * returns the formView
+	 */
+	public LinearLayout getFormView(){
+		return this.mFormView;
+	}
 	
 }

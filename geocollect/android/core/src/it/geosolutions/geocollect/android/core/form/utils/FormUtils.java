@@ -21,6 +21,8 @@ import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.action.AndroidAction;
 import it.geosolutions.geocollect.android.core.form.action.CameraAction;
+import it.geosolutions.geocollect.android.core.form.action.CenterOnMarkerAction;
+import it.geosolutions.geocollect.android.core.form.action.LocalizeAction;
 import it.geosolutions.geocollect.android.core.form.action.SendAction;
 import it.geosolutions.geocollect.model.viewmodel.FormAction;
 
@@ -50,6 +52,8 @@ public class FormUtils {
 	private static String ICON_SEND ="ic_send";
 	private static String ICON_ACCEPT="ic_accept";
 	private static String ICON_CAMERA="ic_camera";
+	private static String ICON_CENTER_ON_MARKER="ic_center";
+	private static String ICON_LOCALIZE="ic_localize";
 
 	
 	
@@ -64,11 +68,14 @@ public class FormUtils {
 		}
 		if(ICON_SEND.equals(iconCls)){
 			return R.drawable.ic_social_send_now;
-		}
-		if(ICON_ACCEPT.equals(iconCls)){
+		}else if(ICON_ACCEPT.equals(iconCls)){
 			return R.drawable.ic_rating_good;
-		}if(ICON_CAMERA.equals(iconCls)){
+		}else if(ICON_CAMERA.equals(iconCls)){
 			return R.drawable.ic_device_access_camera;
+		}else if(ICON_CENTER_ON_MARKER.equals(iconCls)){
+			return R.drawable.ic_center;
+		}else if(ICON_LOCALIZE.equals(iconCls)){
+			return R.drawable.ic_localize_marker;
 		}else{
 			return null;
 		}
@@ -87,6 +94,11 @@ public class FormUtils {
 		case photo:
 			return new CameraAction(a);
 		case video:
+			break;
+		case localize:
+			return new LocalizeAction(a);
+		case center:
+			return new CenterOnMarkerAction(a);
 		}
 		return null;
 		
