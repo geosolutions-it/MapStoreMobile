@@ -63,6 +63,7 @@
     <string name="logout_logout">Logout</string>
     
     <string name="my_inspections">I miei sopralluoghi</string>
+    <string name="my_inspections_my">I miei</string>
     <string name="create_a_inspection">Crea un sopralluogo</string>
     <string name="created_inspection_delete">Vuoi veramente cancellare questo sopralluogo ?</string>
     <string name="gps_not_enabled">Si prega di attivare la Geolocalizzazione per loccalizzare questo sopralluogo</string>

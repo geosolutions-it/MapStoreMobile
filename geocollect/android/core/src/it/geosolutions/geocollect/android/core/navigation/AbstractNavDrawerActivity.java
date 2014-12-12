@@ -20,7 +20,7 @@ public abstract class AbstractNavDrawerActivity extends SherlockFragmentActivity
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     
-    private ListView mDrawerList;
+    protected ListView mDrawerList;
     
     private CharSequence mDrawerTitle;
     private CharSequence mTitle;

@@ -191,12 +191,15 @@ public void onLoadFinished(Loader<List<LayerStore>> loader, List<LayerStore> res
 	
 	adapter.clear();
 	ArrayList<LayerStore> ll = new ArrayList<LayerStore>();
-	int size = result.size();
-	
-	Log.v("SOURCES","Loaded sources:"+size);
-	if(size > 0){
-		for(LayerStore ls : result){
-			adapter.add(ls );
+	if(result != null){
+		
+		int size = result.size();
+		
+		Log.v("SOURCES","Loaded sources:"+size);
+		if(size > 0){
+			for(LayerStore ls : result){
+				adapter.add(ls );
+			}
 		}
 	}
 

@@ -19,6 +19,7 @@ package it.geosolutions.android.map.database;
 
 import it.geosolutions.android.map.database.spatialite.SpatialiteDataSourceHandler;
 import it.geosolutions.android.map.style.StyleManager;
+import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.android.map.utils.Coordinates.Coordinates_Query;
 
 import java.io.File;
@@ -45,7 +46,7 @@ import eu.geopaparazzi.spatialite.database.spatial.core.Style;
  */
 public class SpatialDataSourceManager {
 
-    private List<ISpatialDatabaseHandler> sdbHandlers = new ArrayList<ISpatialDatabaseHandler>();
+    private List<ISpatialDatabaseHandler> sdbHandlers = null;
     private HashMap<SpatialVectorTable, SpatialDataSourceHandler> vectorTablesMap = new HashMap<SpatialVectorTable, SpatialDataSourceHandler>();
     private HashMap<SpatialRasterTable, ISpatialDatabaseHandler> rasterTablesMap = new HashMap<SpatialRasterTable, ISpatialDatabaseHandler>();
 
@@ -68,11 +69,19 @@ public class SpatialDataSourceManager {
      * Resets the {@link ISpatialDatabaseHandler} list
      */
     public void clear(){
-
-    	sdbHandlers.clear();
+    	if(sdbHandlers != null){    		
+    		sdbHandlers.clear();
+    	}
     }
-
-    public void init( Context context, File mapsDir ) {
+    //legacy --> update calling applications (Snowmaps)
+    @Deprecated
+    public void init(Context context, File mapsDir ) {
+    	init(mapsDir);
+    }
+    public void init( File mapsDir ) {
+    
+    	sdbHandlers = new ArrayList<ISpatialDatabaseHandler>();
+    	
         File[] sqliteFiles = mapsDir.listFiles(new FilenameFilter(){
             public boolean accept( File dir, String filename ) {
                 return filename.endsWith(".sqlite") || filename.endsWith(".mbtiles");
@@ -88,14 +97,23 @@ public class SpatialDataSourceManager {
             }
             sdbHandlers.add(sdb);
         }
+        
     }
+    /**
+     * "lazy" instantiation of sdbHandlers -->
+     * 	this will return always the available handlers
+     * @return list of ISpatialDatabaseHandlers
+     */
     public List<ISpatialDatabaseHandler> getSpatialDatabaseHandlers() {
+    	if(sdbHandlers == null){
+    		init(MapFilesProvider.getBaseDirectoryFile());
+    	}
         return sdbHandlers;
     }
 
     public List<SpatialVectorTable> getSpatialVectorTables( boolean forceRead ) throws Exception {
         List<SpatialVectorTable> tables = new ArrayList<SpatialVectorTable>();
-        for( ISpatialDatabaseHandler sdbHandler : sdbHandlers ) {
+        for( ISpatialDatabaseHandler sdbHandler : getSpatialDatabaseHandlers() ) {
             List<SpatialVectorTable> spatialTables = sdbHandler.getSpatialVectorTables(forceRead);
             for( SpatialVectorTable spatialTable : spatialTables ) {
                 tables.add(spatialTable);
@@ -116,7 +134,7 @@ public class SpatialDataSourceManager {
 
     public synchronized List<SpatialRasterTable> getSpatialRasterTables( boolean forceRead ) throws Exception {
         List<SpatialRasterTable> tables = new ArrayList<SpatialRasterTable>();
-        for( ISpatialDatabaseHandler sdbHandler : sdbHandlers ) {
+        for( ISpatialDatabaseHandler sdbHandler : getSpatialDatabaseHandlers() ) {
             try {
                 List<SpatialRasterTable> spatialTables = sdbHandler.getSpatialRasterTables(forceRead);
                 for( SpatialRasterTable spatialTable : spatialTables ) {
@@ -174,7 +192,7 @@ public class SpatialDataSourceManager {
     }
 
     public void closeDatabases() throws Exception {
-        for( ISpatialDatabaseHandler sdbHandler : sdbHandlers ) {
+        for( ISpatialDatabaseHandler sdbHandler : getSpatialDatabaseHandlers() ) {
             sdbHandler.close();
         }
     }

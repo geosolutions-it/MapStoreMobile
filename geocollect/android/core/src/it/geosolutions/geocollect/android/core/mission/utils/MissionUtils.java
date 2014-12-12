@@ -24,12 +24,14 @@ import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.login.LoginActivity;
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
+import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.viewmodel.Field;
 import it.geosolutions.geocollect.model.viewmodel.Form;
 import it.geosolutions.geocollect.model.viewmodel.Page;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -108,18 +110,46 @@ public class MissionUtils {
 	 * @return
 	 */
 	public static MissionTemplate getDefaultTemplate(Context c){
-		InputStream inputStream = c.getResources().openRawResource(R.raw.defaulttemplate);
-        if (inputStream != null) {
-            final Gson gson = new Gson();
-            final BufferedReader reader =
-                new BufferedReader(new InputStreamReader(inputStream));
-            // TODO: Catch JsonSyntaxException when template is malformed
-            return gson.fromJson(reader, MissionTemplate.class);
-        }
+		
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+    	boolean usesDownloaded = prefs.getBoolean(PendingMissionListActivity.PREFS_USES_DOWNLOADED_TEMPLATE, false);
+    	
+    	if(usesDownloaded){
+    		
+    		int index = prefs.getInt(PendingMissionListActivity.PREFS_DOWNLOADED_TEMPLATE_INDEX, 0);
+    		
+    		ArrayList<MissionTemplate> templates = PersistenceUtils.loadSavedTemplates(c);
+    		
+    		return templates.get(index);
+    	}else{
+    		
+    		InputStream inputStream = c.getResources().openRawResource(R.raw.defaulttemplate);
+    		if (inputStream != null) {
+    			final Gson gson = new Gson();
+    			final BufferedReader reader =
+    					new BufferedReader(new InputStreamReader(inputStream));
+    			// TODO: Catch JsonSyntaxException when template is malformed
+    			return gson.fromJson(reader, MissionTemplate.class);
+    		}
+    	}
+		
         
         return null;
+	} 
+
+	/**
+	 * converts the Json string to an inputstream and parses it using gson
+	 * @param json String
+	 * @return the parsed template
+	 */
+	public static MissionTemplate getTemplateFromJSON(final String json){
+
+		final Gson gson = new Gson();
+		final BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(json.getBytes())));
+
+		return gson.fromJson(reader, MissionTemplate.class);
 	}
-	
+
 	/**
 	 * Parse the string to get the tags between {} (brackets) 
 	 * @param toParse the string to parse

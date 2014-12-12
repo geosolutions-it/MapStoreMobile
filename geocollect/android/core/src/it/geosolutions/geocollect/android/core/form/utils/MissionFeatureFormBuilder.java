@@ -49,15 +49,9 @@ import java.util.Locale;
 import org.mapsforge.android.maps.MapView;
 import org.mapsforge.core.model.GeoPoint;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Typeface;
 import android.location.Location;
-import android.location.LocationManager;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
@@ -302,7 +296,7 @@ public class MissionFeatureFormBuilder {
 	 */
 	public static void centerMapAndSetMarker(Context context,final GeoPoint geoPoint,MapView mapView,MarkerOverlay m,MultiSourceOverlayManager o){
 		o.setMarkerVisible();
-		DescribedMarker marker = new MarkerDTO(geoPoint.latitude, geoPoint.longitude,MarkerDTO.MARKER_BLUE).createMarker(context);
+		DescribedMarker marker = new MarkerDTO(geoPoint.latitude, geoPoint.longitude,MarkerDTO.PIN_BLUE).createMarker(context);
 		
 		m.getOverlayItems().add(marker);
 		//mc.selectMarker(marker);

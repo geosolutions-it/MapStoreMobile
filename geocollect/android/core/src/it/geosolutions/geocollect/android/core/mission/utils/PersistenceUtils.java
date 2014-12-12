@@ -4,29 +4,14 @@
 package it.geosolutions.geocollect.android.core.mission.utils;
 
 import static it.geosolutions.geocollect.android.core.mission.utils.SpatialiteUtils.populateFeatureFromStmt;
-
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-
-import org.mapsforge.android.maps.overlay.Marker;
-import org.mapsforge.core.model.GeoPoint;
-
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.io.WKBReader;
-
 import it.geosolutions.android.map.dto.MarkerDTO;
 import it.geosolutions.android.map.overlay.MarkerOverlay;
 import it.geosolutions.android.map.overlay.items.DescribedMarker;
 import it.geosolutions.android.map.view.AdvancedMapView;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
-import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.utils.FormBuilder;
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
-import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
 import it.geosolutions.geocollect.android.core.widgets.DatePicker;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.source.XDataType;
@@ -34,11 +19,27 @@ import it.geosolutions.geocollect.model.viewmodel.Field;
 import it.geosolutions.geocollect.model.viewmodel.Form;
 import it.geosolutions.geocollect.model.viewmodel.Page;
 import it.geosolutions.geocollect.model.viewmodel.type.XType;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.StreamCorruptedException;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+
 import jsqlite.Database;
 import jsqlite.Exception;
 import jsqlite.Stmt;
+
+import org.mapsforge.core.model.GeoPoint;
+
 import android.content.Context;
-import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -46,6 +47,9 @@ import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.io.WKBReader;
 
 /**
  * Utils class to store and retrieve data from SQLite database
@@ -59,6 +63,53 @@ public class PersistenceUtils {
 	 */
 	public static String TAG = "PersistanceUtils";
 	
+	private static final String DOWNLOADED_TEMPLATES = "it.geosolutions.geocollect.downloaded_templates";
+	
+	/**
+	 * wrapper method which handles the complete database integration/update for a MissionTemplate
+	 * @param t the template to integrate
+	 * @param spatialiteDatabase the database to use
+	 * @return true if the operation was successful, false otherwise
+	 */
+	
+	public static boolean createOrUpdateTablesForTemplate(final MissionTemplate t, final Database spatialiteDatabase){
+		
+		boolean success = true;
+		if(t != null && t.id != null){
+			
+			//incomplete schema check
+			if(t.schema_sop == null || t.schema_seg == null || t.schema_seg.localSourceStore == null || t.schema_sop.localFormStore == null){
+				Log.w(TAG, "incomplete MissionTemplate schema, cannot create/update tables");
+				return false;
+			}
+			
+			//1. "create mission" table
+			
+			if(!PersistenceUtils.createTableFromTemplate(spatialiteDatabase, t.schema_seg.localSourceStore+ "_new", t.schema_seg.fields)){
+				Log.e(TAG, "error creating \"create_mission\" table ");
+				success = false;
+			}
+
+			//2.  "source" table
+
+			if(!PersistenceUtils.createOrUpdateTable(spatialiteDatabase,t.schema_seg.localSourceStore, t.schema_seg.fields)){
+				Log.e(TAG, "error creating "+t.schema_seg.localSourceStore+" table ");
+				success = false;
+			}
+			
+			//3. "form" -> rilevamenti table
+
+			if(!PersistenceUtils.createOrUpdateTable(spatialiteDatabase,t.schema_sop.localFormStore, t.schema_sop.fields)){
+				Log.e(TAG, "error creating "+t.schema_sop.localFormStore+" table ");
+				success = false;
+			}
+
+		}else{
+			Log.w(TAG, "MissionTemplate could not be found, edits will not be saved");
+			success = false;
+		}
+		return success;
+	}
 	
 	public static boolean createOrUpdateTable(final Database spatialiteDatabase, final String pTableName,final HashMap<String, XDataType> hm){
 		
@@ -682,7 +733,7 @@ public class PersistenceUtils {
 			                if(nameColumn<0 || typeColumn<0){
 			                	// I have to retrieve the position of the metadata fields
 			                	for(int i = 0; i<stmt.column_count(); i++){
-			                		Log.v(TAG, stmt.column_name(i));
+//			                		Log.v(TAG, stmt.column_name(i));
 			                		if(stmt.column_name(i).equalsIgnoreCase("name")){
 			                			nameColumn = i;
 			                		}
@@ -1114,5 +1165,49 @@ public class PersistenceUtils {
 			}
 		}
 	}
-	
+
+	public static void saveDownloadedTemplates(final Context context, final ArrayList<MissionTemplate> templates){
+
+		try {
+			if(templates != null && templates.size() > 0){
+
+				FileOutputStream fo = context.openFileOutput(DOWNLOADED_TEMPLATES, Context.MODE_PRIVATE);
+				ObjectOutputStream out = new ObjectOutputStream(fo);
+				out.writeObject(templates);
+				out.flush();
+				out.close();
+				fo.close();
+			}
+		} catch (IOException e) {
+			Log.e(TAG, "Downloaded Template save failed",e);
+		}
+
+	}
+
+	public static ArrayList<MissionTemplate> loadSavedTemplates(final Context context){
+
+		try {
+
+			FileInputStream fi = context.openFileInput(DOWNLOADED_TEMPLATES);
+			ObjectInputStream in = new ObjectInputStream(fi);
+			@SuppressWarnings("unchecked")
+			ArrayList<MissionTemplate> templates = (ArrayList<MissionTemplate>) in.readObject();
+			Log.d(TAG, "Saved Templates load succeeded");
+			in.close();
+			fi.close();
+
+			return templates;
+
+		} catch (FileNotFoundException e) {
+			Log.d(TAG, "No templates saved yet");
+		} catch (StreamCorruptedException e) {
+			Log.e(TAG, "Saved Templates load failed",e);
+		} catch (IOException e) {
+			Log.e(TAG, "Saved Templates load failed",e);
+		} catch (ClassNotFoundException e) {
+			Log.e(TAG, "Saved Templates load failed",e);
+		}
+		return null;
+	}
+
 }
