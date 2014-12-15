@@ -229,6 +229,9 @@ public class FormBuilder {
 		Boolean editable = (Boolean)getAttributeWithDefault(field,"editable",true);
 		//check disablePan
 		Boolean disablePan = (Boolean)getAttributeWithDefault(field,"disablePan",false);
+		//check zoom
+		Boolean disableZoom = (Boolean)getAttributeWithDefault(field,"disableZoom",false);
+		
 		//add marker control
 		MarkerControl mc;
 		if(context instanceof FormEditActivity)
@@ -252,7 +255,10 @@ public class FormBuilder {
 		}
 		//pannable
 		mapView.setClickable(!disablePan);
-		mapView.setBuiltInZoomControls(true);
+		
+		//zoomable
+		mapView.setBuiltInZoomControls(!disableZoom);
+		
 		//set center and zoom level limits
 		Integer b = (Integer)getAttributeWithDefault(field,"zoom",18);
 		
@@ -265,7 +271,7 @@ public class FormBuilder {
 
 		if(geoPoint!=null){
 			o.setMarkerVisible();
-			DescribedMarker marker = new MarkerDTO(geoPoint.latitude, geoPoint.longitude,MarkerDTO.MARKER_BLUE).createMarker(context);
+			DescribedMarker marker = new MarkerDTO(geoPoint.latitude, geoPoint.longitude,MarkerDTO.PIN_BLUE).createMarker(context);
 			marker.setDescription(mission.getValueAsString(context, field, (String)field.getAttribute("description")));
 			
 			m.getOverlayItems().add(marker);

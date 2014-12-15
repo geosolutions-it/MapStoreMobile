@@ -156,6 +156,7 @@
 					"attributes":{
 						"editable":false,
 						"disablePan":true,
+						"disableZoom":true,
 						"description":"${origin.RIFIUTI_NO}",
 						"height":640,
 						"displayOriginalValue":true

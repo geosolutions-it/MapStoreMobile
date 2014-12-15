@@ -824,6 +824,7 @@ public class MapsActivity extends MapActivityBase {
 		MarkerOverlay mo = mapView.getMarkerOverlay();
 		MapPosition mp = mapView.getMapViewPosition().getMapPosition();
 		
+		
 		Intent intent = getIntent();
    	 	if(intent.hasExtra(PARAMETERS.LAT) && intent.hasExtra(PARAMETERS.LON) && intent.hasExtra(PARAMETERS.ZOOM_LEVEL)){
        	 	 double lat = intent.getDoubleExtra(PARAMETERS.LAT, 43.68411);

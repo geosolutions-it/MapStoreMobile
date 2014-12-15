@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.mapsforge.android.maps.overlay.Marker;
 import org.mapsforge.core.model.GeoPoint;
 
 import com.vividsolutions.jts.geom.Point;
@@ -21,6 +22,7 @@ import it.geosolutions.android.map.overlay.MarkerOverlay;
 import it.geosolutions.android.map.overlay.items.DescribedMarker;
 import it.geosolutions.android.map.view.AdvancedMapView;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
+import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.utils.FormBuilder;
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
@@ -511,13 +513,13 @@ public class PersistenceUtils {
 												}
 
 												// Add new marker based on geopoint
-												DescribedMarker origin_marker = new MarkerDTO(origin_geoPoint.latitude, origin_geoPoint.longitude,MarkerDTO.MARKER_BLUE).createMarker(context);
+												DescribedMarker origin_marker = new MarkerDTO(origin_geoPoint.latitude, origin_geoPoint.longitude,MarkerDTO.PIN_BLUE).createMarker(context);
 												mo.getOverlayItems().add(origin_marker);
 											}
 											// TODO : If displayOriginalValue is true, the map should be read-only to prevent mismatch saving marker position on database
 											
 											// Add new marker based on geopoint
-											DescribedMarker marker = new MarkerDTO(geoPoint.latitude, geoPoint.longitude,MarkerDTO.MARKER_RED).createMarker(context);
+											DescribedMarker marker = new MarkerDTO(geoPoint.latitude, geoPoint.longitude,MarkerDTO.PIN_RED).createMarker(context);
 											mo.getOverlayItems().add(marker);
 											//mc.selectMarker(marker);
 											// center map on marker

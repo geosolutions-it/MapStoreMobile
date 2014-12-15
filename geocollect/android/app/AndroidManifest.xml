@@ -44,6 +44,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="it.geosolutions.geocollect.android.core.PendingMissionListActivity" />
         </activity>
+        <activity android:name="it.geosolutions.geocollect.android.core.mission.SimpleMapActivity" />
         <!--  PREFERENCES  -->
         <activity
 	     android:name="it.geosolutions.geocollect.android.core.preferences.GeoCollectPreferences"
