@@ -19,19 +19,6 @@
 			<version>1.2.0-SNAPSHOT</version>
 			<type>apklib</type>
 		</dependency>
-		<!--dependency>
-			<groupId>it.geosolutions.android.map</groupId>
-			<artifactId>MapActivity</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-            <type>jar</type>
-            <scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.actionbarsherlock</groupId>
-			<artifactId>actionbarsherlock</artifactId>
-			<version>4.4.0</version>
-			<type>apklib</type>
-		</dependency-->
 	</dependencies>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
