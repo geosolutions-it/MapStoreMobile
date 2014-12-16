@@ -100,6 +100,9 @@ public class SendMissionFeatureAction extends FormAction {
 			return;
 		}
 		
+		// Edit the MissionFeature for a better JSON compliance
+		MissionUtils.alignPropertiesTypes(missionFeature, t.schema_seg.fields );
+		
 		String confirm =null;
 		if(attributes!=null){
 			confirm= (String) attributes.get(ATTRIBUTE_CONFIRM_MESSAGE);

@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.mapsforge.android.maps.overlay.Marker;
 import org.mapsforge.core.model.GeoPoint;
 
 import com.vividsolutions.jts.geom.Point;
@@ -22,13 +21,11 @@ import it.geosolutions.android.map.overlay.MarkerOverlay;
 import it.geosolutions.android.map.overlay.items.DescribedMarker;
 import it.geosolutions.android.map.view.AdvancedMapView;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
-import it.geosolutions.geocollect.android.core.R;
+import it.geosolutions.geocollect.android.core.BuildConfig;
 import it.geosolutions.geocollect.android.core.form.utils.FormBuilder;
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
-import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
 import it.geosolutions.geocollect.android.core.widgets.DatePicker;
-import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.source.XDataType;
 import it.geosolutions.geocollect.model.viewmodel.Field;
 import it.geosolutions.geocollect.model.viewmodel.Form;
@@ -38,7 +35,6 @@ import jsqlite.Database;
 import jsqlite.Exception;
 import jsqlite.Stmt;
 import android.content.Context;
-import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -314,6 +310,9 @@ public class PersistenceUtils {
 		if(Database.complete(query)){
 			
 		    try {
+		    	if(BuildConfig.DEBUG){
+		    		Log.i(TAG, "Loading from query: "+query);
+		    	}
 		    	stmt = m.db.prepare(query);
 		    	
 		    	WKBReader wkbReader = new WKBReader();
@@ -330,7 +329,9 @@ public class PersistenceUtils {
 		    }
 		    
 		}else{
-			Log.w(TAG, "Query is not complete:\n"+query);
+			if(BuildConfig.DEBUG){
+	    		Log.w(TAG, "Query is not complete: "+query);
+			}
 		}
 		return mData;
 	}

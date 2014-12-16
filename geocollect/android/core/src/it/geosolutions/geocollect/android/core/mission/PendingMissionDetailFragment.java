@@ -24,6 +24,7 @@ import jsqlite.Exception;
 import jsqlite.Stmt;
 import it.geosolutions.android.map.fragment.MapFragment;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
+import it.geosolutions.geocollect.android.core.BuildConfig;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.FormEditActivity;
 import it.geosolutions.geocollect.android.core.form.utils.FormBuilder;
@@ -271,6 +272,10 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 					final GeoPoint p = new GeoPoint(st.column_double(0), st.column_double(1));
 					st.close();
 					return p;
+				}
+			}else{
+				if(BuildConfig.DEBUG){
+		    		Log.w(TAG, "Query is not complete:\n"+s);
 				}
 			}
 		} catch (Exception e) {

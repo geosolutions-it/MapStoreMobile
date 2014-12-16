@@ -8,7 +8,7 @@
    		"localSourceStore":"punti_abbandono",
 		"fields":{
 			"CODICE":"string",
-			"DATA_RILEV":"string",
+			"DATA_RILEV":"date",
 			"MACROAREA":"string",
 			"MICROAREA":"string",
 			"CIRCOSCRIZ":"string",
@@ -183,13 +183,7 @@
 					"type":"text",
 					"xtype":"datefield",
 					"label":"Data aggiornamento scheda"
-				},{
-				    "fieldId": "MY_ORIG_ID",
-				    "type":"text",
-				    "xtype":"text",
-				    "value":"${origin.ID}",
-				    "label":"Original Mission ID"
-				   }]
+				}]
 			},{
 				"title": "Rilevatore",
 				"iconCls":"not_supported_yet",
@@ -431,8 +425,8 @@
 					"name":"send",
 					"iconCls":"ic_send",
 					"attributes":{
-						"url":"http://84.33.2.28/opensdi2-manager/mvc/geocollect/action/store",
-						"mediaurl":"http://84.33.2.28/opensdi2-manager/mvc/geocollect/data",
+						"url":"http://geocollect.geo-solutions.it/opensdi2-manager/mvc/geocollect/action/storeSopSequence",
+						"mediaurl":"http://geocollect.geo-solutions.it/opensdi2-manager/mvc/geocollect/data",
 						"confirmMessage":"Inviare?"
 					}
 				}]
@@ -654,7 +648,7 @@
 				"title": "Insediamento",
 				"iconCls":"not_supported_yet",
 				"fields":[{
-					"fieldId": "INSEDIAME",
+					"fieldId": "INSEDIAMEN",
 					"type":"text",
 					"xtype":"checkbox",
 					"label":"INSEDIAMEN"
@@ -800,30 +794,6 @@
 					"label":"VALORE_FAT"
 				}]
 			},{	
-				"title": "LATITUDINE",
-				"iconCls":"not_supported_yet",
-				"fields":[{
-					"fieldId": "LATITUDINE",
-					"type":"decimal",
-					"xtype":"textfield",
-					"label":"LATITUDINE"
-				},{
-					"fieldId": "LONGITUDIN",
-					"type":"decimal",
-					"xtype":"textfield",
-					"label":"LONGITUDIN"
-				},{
-					"fieldId": "ID",
-					"type":"decimal",
-					"xtype":"textfield",
-					"label":"ID"
-				},{
-					"fieldId": "ID1",
-					"type":"decimal",
-					"xtype":"textfield",
-					"label":"ID1"
-				}]
-			},{	
 				"title": "Gravita",
 				"iconCls":"not_supported_yet",
 				"fields":[{
@@ -867,8 +837,8 @@
 					"name":"send",
 					"iconCls":"ic_send",
 					"attributes":{
-						"url":"http://84.33.2.28/opensdi2-manager/mvc/geocollect/action/store",
-						"mediaurl":"http://84.33.2.28/opensdi2-manager/mvc/geocollect/data",
+						"url":"http://geocollect.geo-solutions.it/opensdi2-manager/mvc/geocollect/action/storeSegSequence",
+						"mediaurl":"http://geocollect.geo-solutions.it/opensdi2-manager/mvc/geocollect/data",
 						"confirmMessage":"Inviare?"
 					}
 				}]

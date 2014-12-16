@@ -20,6 +20,7 @@ package it.geosolutions.geocollect.android.core.mission.utils;
 
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import static it.geosolutions.geocollect.android.core.mission.utils.SpatialiteUtils.populateFeatureFromStmt;
+import it.geosolutions.geocollect.android.core.BuildConfig;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
 
 import java.util.ArrayList;
@@ -29,7 +30,6 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 
 import jsqlite.Database;
@@ -297,7 +297,6 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
         
 		if(dbFieldValues!=null){
 			
-			Stmt stmt;
 			String converted ;
 			boolean hasGeometry = false;
 			
@@ -382,7 +381,12 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 				} catch (jsqlite.Exception e) {
 					Log.e(TAG, Log.getStackTraceString(e));
 				}
+			}else{
+				if(BuildConfig.DEBUG){
+		    		Log.w(TAG, "Query is not complete: "+query);
+				}
 			}
+			
 			if(!editingIds.isEmpty()){
 				for(MissionFeature f : mData){
 					if ( editingIds.contains(f.id)){
@@ -416,8 +420,10 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 		if(Database.complete(query)){
 			
 		    try {
+		    	if(BuildConfig.DEBUG){
+		    		Log.i(TAG, "Loading from query: "+query);
+		    	}
 		    	stmt = db.prepare(query);
-		        String columnName;
 		        MissionFeature f;
 		        while( stmt.step() ) {
 		            f = new MissionFeature();
@@ -431,7 +437,9 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 		    }
 		    
 		}else{
-			Log.w(TAG, "Query is not complete:\n"+query);
+			if(BuildConfig.DEBUG){
+	    		Log.w(TAG, "Query is not complete: "+query);
+			}
 		}
 	}
 
@@ -490,7 +498,4 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 		// release resource if needed
 
 	}
-
-	
-
 }

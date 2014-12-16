@@ -20,11 +20,13 @@ package it.geosolutions.geocollect.android.core.mission.utils;
 import it.geosolutions.android.map.wfs.WFSGeoJsonFeatureLoader;
 import it.geosolutions.android.map.wfs.geojson.GeoJson;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
+import it.geosolutions.geocollect.android.core.BuildConfig;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.login.LoginActivity;
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
+import it.geosolutions.geocollect.model.source.XDataType;
 import it.geosolutions.geocollect.model.viewmodel.Field;
 import it.geosolutions.geocollect.model.viewmodel.Form;
 import it.geosolutions.geocollect.model.viewmodel.Page;
@@ -32,8 +34,10 @@ import it.geosolutions.geocollect.model.viewmodel.Page;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -46,6 +50,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.content.Loader;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 
@@ -61,6 +66,12 @@ import com.vividsolutions.jts.io.WKBReader;
  * Utilities class for Mission
  */
 public class MissionUtils {
+	
+	/**
+	 * TAG for Logging
+	 */
+	private static String TAG = "MissionUtils";
+	
 	/**
 	 * The regex to parse the tags in the json
 	 */
@@ -215,15 +226,19 @@ public class MissionUtils {
 			} catch (Exception e) {
 				Log.d(MissionUtils.class.getSimpleName(), "Error checkIfAllMandatoryFieldsArsSatisfied",e);
 			}
+		}else{
+			if(BuildConfig.DEBUG){
+	    		Log.w(TAG, "Query is not complete: "+s);
+			}
 		}
 		
 		return missingEntries;
 	}
 	/**
-	 * get "created" missionfeatures from the database
+	 * get "created" {@link MissionFeature} from the database
 	 * @param tableName
 	 * @param db
-	 * @return a list of created missionsfeatures
+	 * @return a list of created {@link MissionFeature}
 	 */
 	public static ArrayList<MissionFeature> getCreatedMissionFeatures(final String tableName,final Database db){
 
@@ -233,12 +248,46 @@ public class MissionUtils {
 		WKBReader wkbReader = new WKBReader();
 
 		//create query
-		final String s = "SELECT * FROM '" + tableName + "';";
+		////////////////////////////////////////////////////////////////
+		// SQLite Geometry cannot be read with direct wkbreader
+		// We must do a double conversion with ST_AsBinary and CastToXY 
+		////////////////////////////////////////////////////////////////
+		
+		// Cycle all the columns to find the "Point" type one
+		HashMap<String, String> columns = SpatialiteUtils.getPropertiesFields(db,tableName);
+
+    	List<String> selectFields = new ArrayList<String>();
+    	for(String columnName : columns.keySet()){
+    		//Spatialite custom field point
+    		if("point".equalsIgnoreCase(columns.get(columnName))){
+    			selectFields.add("ST_AsBinary(CastToXY(" + columnName + ")) AS GEOMETRY");
+    		}else{
+    			selectFields.add(columnName);
+    		}
+    	}
+    	
+    	// Merge all the column names
+    	String selectString = TextUtils.join(",",selectFields);
+    	
+    	// Build the query
+    	StringWriter queryWriter = new StringWriter();
+    	queryWriter.append("SELECT ")
+    		.append(selectString)
+    		.append(" FROM ")
+    		.append(tableName)
+    		.append(";");
+    	
+    	// The resulting query
+    	String query = queryWriter.toString();
+		
 		Stmt stmt;
 		//do the query
-		if(jsqlite.Database.complete(s)){
+		if(jsqlite.Database.complete(query)){
 			try {
-				stmt = db.prepare(s);
+				if(BuildConfig.DEBUG){
+					Log.i("getCreatedMissionFeatures", "Loading from query: "+query);
+				}
+				stmt = db.prepare(query);
 				MissionFeature f;
 				while( stmt.step() ) {
 					f = new MissionFeature();
@@ -261,9 +310,83 @@ public class MissionUtils {
 			} catch (Exception e) {
 				Log.d(MissionUtils.class.getSimpleName(), "Error getCreatedMissions",e);
 			}
+		}else{
+			if(BuildConfig.DEBUG){
+	    		Log.w(TAG, "Query is not complete: "+query);
+			}
 		}
 
 		return missions;
 	}
 	
+	/**
+	 * Modifies the Feature aligning the field types with the give ones
+	 * @param inputFeature
+	 * @param fieldTypes
+	 */
+	public static void alignPropertiesTypes(Feature inputFeature, HashMap<String,XDataType> fieldTypes){
+		
+		if(inputFeature == null 
+			|| fieldTypes == null
+			|| inputFeature.properties == null
+			|| inputFeature.properties.isEmpty()
+			){
+			// Nothing to do
+			return;
+		}
+		
+		ArrayList<String> propList = new ArrayList<String>();
+		for(String s : inputFeature.properties.keySet()){
+			propList.add(s);
+		}
+		
+		// Cycle the properties
+		for(String propertyString : propList){
+			if(fieldTypes.containsKey(propertyString)){
+				if(inputFeature.properties.get(propertyString) instanceof String){
+					// Get property value
+					String pValue = (String) inputFeature.properties.get(propertyString);
+					
+					if ( fieldTypes.get(propertyString) == XDataType.integer ){
+						
+						
+						if(pValue == null || pValue.isEmpty()){
+							// 
+							inputFeature.properties.remove(propertyString);
+						}
+						
+						try{
+							inputFeature.properties.put(
+									propertyString, 
+									Integer.parseInt(pValue));
+						}catch(NumberFormatException nfe){
+							Log.w(TAG, "Wrong Integer String format, removing property " + propertyString  + "with value " + pValue);
+							inputFeature.properties.remove(propertyString);
+						}
+						
+					}else if ( fieldTypes.get(propertyString) == XDataType.decimal
+							|| fieldTypes.get(propertyString) == XDataType.real){
+							
+						if(pValue == null || pValue.isEmpty()){
+							// 
+							inputFeature.properties.remove(propertyString);
+						}
+						
+						try{
+							inputFeature.properties.put(
+									propertyString, 
+									Double.parseDouble(pValue));
+						}catch(NumberFormatException nfe){
+							Log.w(TAG, "Wrong Double String format, removing property " + propertyString  + "with value " + pValue);
+							inputFeature.properties.remove(propertyString);
+						}
+						
+					}
+				}
+			}
+		}
+		
+		
+	}
+
 }
