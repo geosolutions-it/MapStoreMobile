@@ -109,8 +109,10 @@ public class SendAction extends AndroidAction {
 		
 		MissionTemplate t = MissionUtils.getDefaultTemplate(fragment.getActivity());
 
+		String originIDString = MissionUtils.getMissionGCID(m);
+		
 		// check database for mandatory fields
-		ArrayList<String> notFilledMandatoryEntries = MissionUtils.checkIfAllMandatoryFieldsAreSatisfied(t.sop_form, m.getOrigin().id, m.db, tableName);	
+		ArrayList<String> notFilledMandatoryEntries = MissionUtils.checkIfAllMandatoryFieldsAreSatisfied(t.sop_form, originIDString, m.db, tableName);	
 		
 		if(notFilledMandatoryEntries.size() > 0){
 			String missing = fragment.getString(R.string.mandatory_fields_not_filled)+"\n\n";
@@ -223,16 +225,18 @@ public class SendAction extends AndroidAction {
 				Log.e(SendAction.class.getSimpleName(), e.getClass().getSimpleName(),e);
 			}
 			
-			FormUtils.resizeFotosToMax(fragment.getActivity().getBaseContext(), m.getOrigin().id, defaultImageSize);
+			String originIDString = MissionUtils.getMissionGCID(m);
+			
+			FormUtils.resizeFotosToMax(fragment.getActivity().getBaseContext(), originIDString, defaultImageSize);
 			
 			Bundle arguments = new Bundle();
 			arguments.putString(UploadDialog.PARAMS.DATAURL, url);
 			arguments.putString(UploadDialog.PARAMS.MEDIAURL, murl);
 			arguments.putString(UploadDialog.PARAMS.DATA, MissionUtils.generateJsonString(null,m));
-			arguments.putString(UploadDialog.PARAMS.ORIGIN_ID, m.getOrigin().id);
+			arguments.putString(UploadDialog.PARAMS.ORIGIN_ID, originIDString);
 			arguments.putString(UploadDialog.PARAMS.MISSION_ID, m.getTemplate().id);
 			arguments.putString(UploadDialog.PARAMS.BASIC_AUTH, LoginRequestInterceptor.getB64Auth(email, pass));
-			arguments.putStringArray(UploadDialog.PARAMS.MEDIA, FormUtils.getPhotoUriStrings(fragment.getActivity().getBaseContext(),m.getOrigin().id));
+			arguments.putStringArray(UploadDialog.PARAMS.MEDIA, FormUtils.getPhotoUriStrings(fragment.getActivity().getBaseContext(),originIDString));
 			arguments.putBoolean(UploadDialog.PARAMS.MISSION_FEATURE_UPLOAD, false);
 			
 			mTaskFragment.setArguments(arguments);

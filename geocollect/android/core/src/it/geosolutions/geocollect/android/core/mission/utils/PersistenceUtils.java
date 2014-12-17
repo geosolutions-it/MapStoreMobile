@@ -217,13 +217,16 @@ public class PersistenceUtils {
 					}
 				}
 				try {	
+					
+					String originIDString = MissionUtils.getMissionGCID(mission);
+					
 					if(f.xtype == XType.mapViewPoint){
 						// a geometry must be built
-						s = "UPDATE '"+tableName+"' SET "+ f.fieldId +" = "+ value +" WHERE ORIGIN_ID = '"+mission.getOrigin().id+"';";
+						s = "UPDATE '"+tableName+"' SET "+ f.fieldId +" = "+ value +" WHERE ORIGIN_ID = '"+originIDString+"';";
 					}else{
 						// Standard values
 						value = value.replace("'", "''");
-						s = "UPDATE '"+tableName+"' SET "+ f.fieldId +" = '"+ value +"' WHERE ORIGIN_ID = '"+mission.getOrigin().id+"';";
+						s = "UPDATE '"+tableName+"' SET "+ f.fieldId +" = '"+ value +"' WHERE ORIGIN_ID = '"+originIDString+"';";
 					}
 					Log.v(TAG, "Query :\n"+s);
 					if(Database.complete(s)){
@@ -280,6 +283,9 @@ public class PersistenceUtils {
     			selectFields.add(columnName);
     		}
     	}
+    	
+    	String originIDString = MissionUtils.getMissionGCID(mission);
+	
     	String selectString = TextUtils.join(",",selectFields);
     	StringWriter queryWriter = new StringWriter();
     	queryWriter.append("SELECT ")
@@ -287,7 +293,7 @@ public class PersistenceUtils {
     		.append(" FROM ")
     		.append(tableName)
     		.append(" WHERE ORIGIN_ID = '")
-    		.append(mission.getOrigin().id)
+    		.append(originIDString)
     		.append("';");
     	
     	
@@ -407,11 +413,12 @@ public class PersistenceUtils {
 				if(f == null )continue;
 				try {
 					// TODO: load all the fields in one query
+					String originIDString = MissionUtils.getMissionGCID(mission);					
 					if(f.xtype == XType.mapViewPoint){
 						// a point must be retreived
-						s = "SELECT Y(" + f.fieldId + "), X(" + f.fieldId + ") FROM '" + tableName + "' WHERE ORIGIN_ID = '" + mission.getOrigin().id+"';";
+						s = "SELECT Y(" + f.fieldId + "), X(" + f.fieldId + ") FROM '" + tableName + "' WHERE ORIGIN_ID = '" + originIDString +"';";
 					}else{
-						s = "SELECT " + f.fieldId +" FROM '" + tableName + "' WHERE ORIGIN_ID = '" + mission.getOrigin().id+"';";
+						s = "SELECT " + f.fieldId +" FROM '" + tableName + "' WHERE ORIGIN_ID = '" + originIDString +"';";
 					}
 					if(jsqlite.Database.complete(s)){
 						st = mission.db.prepare(s);
@@ -543,7 +550,7 @@ public class PersistenceUtils {
 							// no record found, creating..
 							Log.v(TAG, "No record found, creating..");
 							//This causes the write of ORIGIN_ID which will lead to "inediting" in pendingmissionlist
-							s = "INSERT INTO '"+tableName+"' ( ORIGIN_ID ) VALUES ( '"+mission.getOrigin().id+"');";
+							s = "INSERT INTO '"+tableName+"' ( ORIGIN_ID , MY_ORIG_ID ) VALUES ( '"+ originIDString +"' , '"+ originIDString +"');";
 							st = mission.db.prepare(s);
 							if(st.step()){
 								// nothing will be returned anyway

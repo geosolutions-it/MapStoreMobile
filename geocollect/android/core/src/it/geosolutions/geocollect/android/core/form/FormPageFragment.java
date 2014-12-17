@@ -312,11 +312,11 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 	    super.onActivityResult(requestCode, resultCode, data);
 	    
 	    if(requestCode == CameraAction.CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE && resultCode == Activity.RESULT_OK){
+	    	
+	    	String originIDString = MissionUtils.getMissionGCID(this.mission);
 	    	if( this.page.fields != null &&
-	    			this.mission != null &&
-	    			this.mission.getOrigin() != null &&
-	    			this.mission.getOrigin().id != null &&
-	    			!this.mission.getOrigin().id.isEmpty()){
+	    			originIDString != null &&
+	    			!originIDString.isEmpty()){
 	    		
 	    		
 				for(Field f : page.fields){

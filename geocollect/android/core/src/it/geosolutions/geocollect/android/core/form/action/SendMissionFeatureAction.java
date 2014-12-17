@@ -196,9 +196,10 @@ public class SendMissionFeatureAction extends FormAction {
 			} catch (UnsupportedEncodingException e) {
 				Log.e(TAG, "error transforming missionfeature to gson",e);
 			}
+			String featureIDString = MissionUtils.getFeatureGCID(missionFeature);
 			
 			arguments.putString(UploadDialog.PARAMS.DATA, data);
-			arguments.putString(UploadDialog.PARAMS.ORIGIN_ID, missionFeature.id);
+			arguments.putString(UploadDialog.PARAMS.ORIGIN_ID, featureIDString);
 			arguments.putBoolean(UploadDialog.PARAMS.MISSION_FEATURE_UPLOAD, true);
 			
 			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(fragment.getSherlockActivity());

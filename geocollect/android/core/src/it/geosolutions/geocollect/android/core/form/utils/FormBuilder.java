@@ -688,7 +688,7 @@ public class FormBuilder {
 		
 		//***************************
 		
-		photoView.setAdapter(new UILImageAdapter(context, mission.getOrigin().id, options));
+		photoView.setAdapter(new UILImageAdapter(context, MissionUtils.getMissionGCID(mission), options));
 		
 		// enable ContexxtMenu on LongPress
 		((FormEditActivity) context).registerForContextMenu(photoView);

@@ -389,7 +389,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 			
 			if(!editingIds.isEmpty()){
 				for(MissionFeature f : mData){
-					if ( editingIds.contains(f.id)){
+					if ( editingIds.contains(MissionUtils.getFeatureGCID(f))){
 						f.editing = true;
 					}
 				}

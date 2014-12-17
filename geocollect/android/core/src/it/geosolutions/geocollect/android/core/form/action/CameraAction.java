@@ -21,6 +21,7 @@ import java.io.File;
 import com.actionbarsherlock.app.SherlockFragment;
 
 import it.geosolutions.geocollect.android.core.mission.Mission;
+import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.model.viewmodel.FormAction;
 import it.geosolutions.geocollect.model.viewmodel.Page;
 import android.content.Intent;
@@ -78,7 +79,8 @@ public class CameraAction extends AndroidAction {
 	public void performAction(SherlockFragment fragment, FormAction action, Mission m,
 			Page p) {
 		
-		if(m == null || m.getOrigin() == null || m.getOrigin().id.isEmpty()){
+		String originIDString = MissionUtils.getMissionGCID(m);
+		if(originIDString == null || originIDString.isEmpty()){
 			
 	    	Log.w("CameraAction", "Could not start intent, feature id not found");
 			return;
@@ -86,7 +88,7 @@ public class CameraAction extends AndroidAction {
 		
 		// create Intent to take a picture and return control to the calling application
 	    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-	    Uri fileUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE, m.getOrigin().id); // create a file to save the image
+	    Uri fileUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE, originIDString); // create a file to save the image
 	    if(fileUri != null){
 		    intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri); // set the image file name
 		    // start the image capture Intent

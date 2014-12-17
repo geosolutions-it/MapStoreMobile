@@ -389,4 +389,61 @@ public class MissionUtils {
 		
 	}
 
+	
+	/**
+	 * Returns the "GCID" field of the origin feature of the given Mission
+	 * @param mMission
+	 * @return
+	 */
+	public static String getMissionGCID(Mission mission){
+		
+		if(mission == null || mission.getOrigin() == null){
+			Log.w(TAG, "WARNING: cannot find GCID");
+			return null;
+		}
+		// Default ID
+		String originIDString = mission.getOrigin().id;
+		
+		if(mission.getOrigin().properties != null){
+			if(mission.getOrigin().properties.containsKey("GCID")){
+				try {
+					originIDString = (String) mission.getOrigin().properties.get("GCID");
+				}catch(ClassCastException cce){
+					Log.w(TAG, "WARNING: Mission has a GDIC but it cannot be converted to String");
+					originIDString = null;
+				}
+			}
+		}
+		
+		return originIDString;
+	}
+	
+	/**
+	 * Returns the "GCID" field of the origin feature of the given Mission
+	 * @param mMission
+	 * @return
+	 */
+	public static String getFeatureGCID(Feature feature){
+		
+		if(feature == null){
+			Log.w(TAG, "WARNING: cannot find feature GCID (feature null)");
+			return null;
+		}
+		// Default ID
+		String originIDString = feature.id;
+		
+		if(feature.properties != null){
+			if(feature.properties.containsKey("GCID")){
+				try {
+					originIDString = (String) feature.properties.get("GCID");
+				}catch(ClassCastException cce){
+					Log.w(TAG, "WARNING: Feature has a GDIC but it cannot be converted to String");
+					originIDString = null;
+				}
+			}
+		}
+		
+		return originIDString;
+	}
+	
 }

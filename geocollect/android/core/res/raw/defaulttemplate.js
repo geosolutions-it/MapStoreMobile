@@ -3,8 +3,9 @@
 	"title": "Punti Abbandono",
 	"schema_seg":{		
    		"type":"WFS",		
-   		"URL":"http://demo.geo-solutions.it/share/comunege/geocollect/punti_abbandono.geojson",	
-   		"typeName":"geosolutions:punti_abbandono",	
+   		"_URL":"http://demo.geo-solutions.it/share/comunege/geocollect/punti_abbandono.geojson",	
+   		"URL":"http://geocollect.geo-solutions.it/geoserver/it.geosolutions/wfs?srsName=EPSG:4326&",	
+   		"typeName":"it.geosolutions:punti_abbandono",	
    		"localSourceStore":"punti_abbandono",
 		"fields":{
 			"CODICE":"string",
@@ -64,7 +65,7 @@
 			"VALORE_FAT":"integer",
 			"LATITUDINE":"integer",
 			"LONGITUDIN":"integer",
-			"ID":"integer",
+			"GCID":"integer",
 			"ID1":"integer",
 			"GRAVITA":"string",
 			"RISCHIO":"string",
@@ -183,7 +184,13 @@
 					"type":"text",
 					"xtype":"datefield",
 					"label":"Data aggiornamento scheda"
-				}]
+				},{
+				    "fieldId": "MY_ORIG_ID",
+				    "type":"text",
+				    "xtype":"label",
+				    "value":"${origin.GCID}",
+				    "label":"Original Mission ID"
+				   }]
 			},{
 				"title": "Rilevatore",
 				"iconCls":"not_supported_yet",
@@ -643,155 +650,6 @@
 					"type":"decimal",
 					"xtype":"textfield",
 					"label":"Stabilità"
-				}]
-			},{
-				"title": "Insediamento",
-				"iconCls":"not_supported_yet",
-				"fields":[{
-					"fieldId": "INSEDIAMEN",
-					"type":"text",
-					"xtype":"checkbox",
-					"label":"INSEDIAMEN"
-				},{
-					"fieldId": "INSEDIAME1",
-					"type":"text",
-					"xtype":"checkbox",
-					"label":"INSEDIAME1"
-				},{
-					"fieldId": "DISTANZA_C",
-					"type":"text",
-					"xtype":"text",
-					"label":"DISTANZA_C"
-				},{
-					"fieldId": "INSEDIAME2",
-					"type":"text",
-					"xtype":"checkbox",
-					"label":"INSEDIAME2"
-				},{
-					"fieldId": "INSEDIAME3",
-					"type":"text",
-					"xtype":"checkbox",
-					"label":"INSEDIAME3"
-				}]
-			},{	 
-				"title": "DISTANZA_P",
-				"iconCls":"not_supported_yet",
-				"fields":[{
-					"fieldId": "DISTANZA_P",
-					"type":"text",
-					"xtype":"text",
-					"label":"DISTANZA_P"
-				},{
-					"fieldId": "BOSCATE",
-					"type":"text",
-					"xtype":"checkbox",
-					"label":"BOSCATE"
-				},{
-					"fieldId": "BOSCATE_AB",
-					"type":"text",
-					"xtype":"checkbox",
-					"label":"BOSCATE_AB"
-				},{
-					"fieldId": "AGRICOLO",
-					"type":"decimal",
-					"xtype":"textfield",
-					"label":"AGRICOLO"
-				},{
-					"fieldId": "AGRICOLO_A",
-					"type":"text",
-					"xtype":"checkbox",
-					"label":"AGRICOLO_A"
-				}]
-			},{	
-				"title": "TORRENTI_R",
-				"iconCls":"not_supported_yet",
-				"fields":[{
-					"fieldId": "TORRENTI_R",
-					"type":"text",
-					"xtype":"checkbox",
-					"label":"TORRENTI_R"
-				},{
-					"fieldId": "NOME_TORRE",
-					"type":"text",
-					"xtype":"text",
-					"label":"NOME_TORRE"
-				},{
-					"fieldId": "RISCHIO_ES",
-					"type":"text",
-					"xtype":"checkbox",
-					"label":"RISCHIO_ES"
-				},{
-					"fieldId": "RIFIUTI_IN",
-					"type":"text",
-					"xtype":"checkbox",
-					"label":"RIFIUTI_IN"
-				},{
-					"fieldId": "PROBABILE_",
-					"type":"text",
-					"xtype":"checkbox",
-					"label":"PROBABILE_"
-				},{
-					"fieldId": "IMPATTO_ES",
-					"type":"text",
-					"xtype":"spinner",
-					"label":"IMPATTO_ES",
-					"options":["nullo","lievemente negativo"]
-				}]
-			},{	
-				"title": "POZZI_FALD",
-				"iconCls":"not_supported_yet",
-				"fields":[{
-					"fieldId": "POZZI_FALD",
-					"type":"text",
-					"xtype":"checkbox",
-					"label":"POZZI_FALD"
-				},{
-					"fieldId": "CRITICITA",
-					"type":"text",
-					"xtype":"text",
-					"label":"CRITICITA"
-				},{
-					"fieldId": "IMPATTO_CO",
-					"type":"decimal",
-					"xtype":"textfield",
-					"label":"IMPATTO_CO"
-				},{
-					"fieldId": "NOTE",
-					"type":"text",
-					"xtype":"text",
-					"label":"NOTE"
-				},{
-					"fieldId": "PULIZIA",
-					"type":"text",
-					"xtype":"spinner",
-					"label":"PULIZIA",
-					"options":["nessuna","parziale","completa"]
-				},{
-					"fieldId": "DISSUASION",
-					"type":"text",
-					"xtype":"spinner",
-					"label":"DISSUASION",
-					"options":["nessuna","parziale","completa"]
-				}]
-			},{	
-				"title": "VALORE_GRA",
-				"iconCls":"not_supported_yet",
-				"fields":[{
-					"fieldId": "VALORE_GRA",
-					"type":"decimal",
-					"xtype":"textfield",
-					"label":"VALORE_GRA"
-				},{
-					"fieldId": "FATTIBILIT",
-					"type":"text",
-					"xtype":"spinner",
-					"label":"FATTIBILIT",
-					"options":["bassa","media","alta"]
-				},{
-					"fieldId": "VALORE_FAT",
-					"type":"decimal",
-					"xtype":"textfield",
-					"label":"VALORE_FAT"
 				}]
 			},{	
 				"title": "Gravita",

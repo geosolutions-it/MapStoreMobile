@@ -263,7 +263,9 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 		
 		final String tableName = getTablename();
 		
-		final String s = "SELECT Y(" + f.fieldId + "), X(" + f.fieldId + ") FROM '" + tableName + "' WHERE ORIGIN_ID = '" + mission.getOrigin().id+"';";
+		// Default ID
+		String originIDString = MissionUtils.getMissionGCID(mission);
+		final String s = "SELECT Y(" + f.fieldId + "), X(" + f.fieldId + ") FROM '" + tableName + "' WHERE ORIGIN_ID = '" + originIDString +"';";
 		
 		try {
 			if(jsqlite.Database.complete(s)){
