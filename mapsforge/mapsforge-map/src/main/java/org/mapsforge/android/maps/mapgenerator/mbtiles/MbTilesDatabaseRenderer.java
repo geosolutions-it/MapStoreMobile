@@ -38,6 +38,11 @@ public class MbTilesDatabaseRenderer implements MapRenderer {
 	@Override
 	public boolean executeJob(MapGeneratorJob mapGeneratorJob, Bitmap bitmap) {
 
+		if (this.db == null) {
+			Log.w(TAG, "database is null, cannot create mbtiles tile");
+			return false;
+		}
+
 		final Tile tile = mapGeneratorJob.tile;
 
 		long localTileX = tile.tileX;

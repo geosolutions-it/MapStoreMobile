@@ -320,6 +320,7 @@ public class MapView extends ViewGroup {
 	public void setRenderer(final MapRenderer pMapRenderer, final boolean setMapWorkerRenderer) {
 
 		if (this.mapRenderer != null) {
+			this.mapRenderer.stop();
 			this.mapRenderer.destroy();
 		}
 		this.mapRenderer = pMapRenderer;
