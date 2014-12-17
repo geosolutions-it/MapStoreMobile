@@ -38,6 +38,9 @@ import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.PrecisionModel;
 /**
  * a page fragment for a created missionfeature
  * 
@@ -277,7 +280,12 @@ public class CreateMissionFeatureFormPageFragment extends MapFragment {
 						GeoPoint g = amv.getMarkerOverlay().getMarkers().get(0).getGeoPoint();
 						if(g != null){
 							value = "MakePoint("+g.longitude+","+g.latitude+", 4326)";
-						
+							
+							// TODO: remove
+							// Set the in-memory object geometry
+							GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(),4326);
+							((FormEditActivity) getSherlockActivity()).mMission.geometry = geometryFactory.createPoint(new Coordinate(g.longitude, g.latitude));
+							
 						}else{
 							Log.v(TAG, "Missing Geopoint for "+f.fieldId);
 							continue;
@@ -295,7 +303,9 @@ public class CreateMissionFeatureFormPageFragment extends MapFragment {
 			//here
 			Log.d(TAG, "saving "+value +" for "+ f.fieldId);
 			
-			((FormEditActivity) getSherlockActivity()).mMission.properties.put(f.fieldId, value);
+			if(!f.fieldId.equals("GEOMETRY")){
+				((FormEditActivity) getSherlockActivity()).mMission.properties.put(f.fieldId, value);
+			}
 			
 			Database db = ((FormEditActivity) getSherlockActivity()).spatialiteDatabase;
 			String tableName = ((FormEditActivity) getSherlockActivity()).mMissionTableName;
