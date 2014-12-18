@@ -64,6 +64,7 @@
     <string name="logout_logout">Logout</string>
     
     <string name="my_inspections">My Inspections</string>
+    <string name="my_inspections_my">My</string>
     <string name="create_a_inspection">Create an inspection</string>
     <string name="created_inspection_delete">Do you really want to delete this inspection ?</string>
     <string name="gps_not_enabled">Please enable GPS to acquire the position of the inspection</string>

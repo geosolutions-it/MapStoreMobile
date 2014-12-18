@@ -44,7 +44,7 @@ public class FilterSearchTest extends android.test.AndroidTestCase{
 		
 		final Database db = getSpatialiteDatabase();
 		
-		String tableName = t.source.localSourceStore; //"testTable"
+		String tableName = t.schema_seg.localSourceStore; //"testTable"
 		
 		WFSGeoJsonFeatureLoader wfsl = new WFSGeoJsonFeatureLoader(
 				getContext(),

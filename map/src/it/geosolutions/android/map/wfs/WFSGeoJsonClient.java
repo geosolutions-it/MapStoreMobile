@@ -189,8 +189,8 @@ public class WFSGeoJsonClient {
 				
 				// parse response.
 				responseText = EntityUtils.toString(resEntity);
-				Log.d("WFS-Geojson", "remote service response:");
-				Log.d("WFS-Geojson", responseText);
+//				Log.d("WFS-Geojson", "remote service response:");
+//				Log.d("WFS-Geojson", responseText);
 				GeoJson gson = new GeoJson();
 				FeatureCollection c = gson.fromJson(responseText, FeatureCollection.class);
 				if(c!= null) {
