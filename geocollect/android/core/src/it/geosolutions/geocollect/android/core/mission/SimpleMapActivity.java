@@ -1,6 +1,8 @@
 package it.geosolutions.geocollect.android.core.mission;
 
 import it.geosolutions.android.map.activities.MapActivityBase;
+import it.geosolutions.android.map.control.CoordinateControl;
+import it.geosolutions.android.map.control.LocationControl;
 import it.geosolutions.android.map.dto.MarkerDTO;
 import it.geosolutions.android.map.overlay.MarkerOverlay;
 import it.geosolutions.android.map.overlay.items.DescribedMarker;
@@ -8,6 +10,7 @@ import it.geosolutions.android.map.overlay.managers.MultiSourceOverlayManager;
 import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.android.map.view.AdvancedMapView;
 import it.geosolutions.geocollect.android.core.R;
+import it.geosolutions.geocollect.android.core.form.FormEditActivity;
 
 import java.io.File;
 
@@ -21,6 +24,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 
@@ -62,7 +67,13 @@ public class SimpleMapActivity extends MapActivityBase {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		mapView = new AdvancedMapView(this);
+		setContentView(R.layout.form_mapview);
+		
+		mapView = (AdvancedMapView) findViewById(R.id.advancedMapView);
+		
+		ImageButton buttonLocation = (ImageButton) findViewById(R.id.ButtonLocation);
+		 
+		//mapView = new AdvancedMapView(this);
 		
 		initMap(savedInstanceState);
 		
@@ -73,10 +84,17 @@ public class SimpleMapActivity extends MapActivityBase {
 
 		mapView.setLayoutParams(new LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
 		
-		setContentView(mapView);
 		
 		mapView.setClickable(true);
 		mapView.setBuiltInZoomControls(true);
+		
+		//add coordinates control
+		mapView.addControl(new CoordinateControl(mapView, true));
+		
+		//add "location" control connected to the button
+		LocationControl lc  =new LocationControl(mapView);
+		lc.setActivationButton(buttonLocation);
+		mapView.addControl(lc);
 		
 		centerMapFileAndAddMarkers();
 	}
@@ -232,4 +250,5 @@ public class SimpleMapActivity extends MapActivityBase {
 	public AdvancedMapView getMapView(){
 		return mapView;
 	}
+	
 }
