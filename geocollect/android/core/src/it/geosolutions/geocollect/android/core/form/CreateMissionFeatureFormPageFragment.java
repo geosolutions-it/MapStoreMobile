@@ -6,9 +6,9 @@ import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.action.AndroidAction;
 import it.geosolutions.geocollect.android.core.form.action.CameraAction;
 import it.geosolutions.geocollect.android.core.form.action.SendMissionFeatureAction;
-import it.geosolutions.geocollect.android.core.form.utils.MissionFeatureFormBuilder;
 import it.geosolutions.geocollect.android.core.form.utils.FormUtils;
 import it.geosolutions.geocollect.android.core.mission.Mission;
+import it.geosolutions.geocollect.android.core.form.utils.MissionFeatureFormBuilder;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
@@ -38,7 +38,6 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -67,12 +66,11 @@ public class CreateMissionFeatureFormPageFragment extends MapFragment {
 	/**
 	 * The argument for the page
 	 */
-	public static final String ARG_OBJECT = "Page";
     public static final String CREATED_MISSION = "createdMission";
     private ScrollView mScrollView;
     private Page page;
 	private LinearLayout mFormView;
-	private ProgressBar mProgressView;
+//	private ProgressBar mProgressView;
 	private boolean mDone;
 	private boolean visibleToUser;
 
@@ -81,10 +79,11 @@ public class CreateMissionFeatureFormPageFragment extends MapFragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		Integer pageNumber = (Integer) getArguments().get(ARG_OBJECT);
-			
+		
+		Integer pageNumber = (Integer) getArguments().get(FormPageFragment.ARG_OBJECT);
 		if(pageNumber!=null){
 			MissionTemplate t = MissionUtils.getDefaultTemplate(getActivity());
+			
 			
 			//if page number exists i suppose pages is not empty
 			page = t.seg_form.pages.get(pageNumber);	
@@ -138,7 +137,7 @@ public class CreateMissionFeatureFormPageFragment extends MapFragment {
 			// normally inflate the view hierarchy
 			mScrollView = (ScrollView) inflater.inflate(R.layout.form_page_fragment,container, false);
 			mFormView = (LinearLayout) mScrollView.findViewById(R.id.formcontent);
-			mProgressView = (ProgressBar) mScrollView.findViewById(R.id.loading);
+//			mProgressView = (ProgressBar) mScrollView.findViewById(R.id.loading);
 		} else {
 			// mScrollView is still attached to the previous view hierarchy
 			// we need to remove it and re-attach it to the current one
@@ -201,6 +200,14 @@ public class CreateMissionFeatureFormPageFragment extends MapFragment {
     		storePageData(page, mFormView);
     	}
     }
+    @Override
+    public void onPause() {
+    	super.onPause();
+    	
+    	if(page != null && mFormView != null){
+    		storePageData(page, mFormView);
+    	}
+    }
     /**
      * store this fragments page data
      * @param page
@@ -240,6 +247,7 @@ public class CreateMissionFeatureFormPageFragment extends MapFragment {
 					break;
 				case spinner:
 					if(((Spinner)v).getSelectedItem() instanceof HashMap<?, ?>){
+						@SuppressWarnings("unchecked")
 						HashMap<String, String> h = (HashMap<String, String>) ((Spinner)v).getSelectedItem();
 						if(h.get("f1") != null){
 							value = h.get("f1");

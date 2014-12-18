@@ -18,6 +18,7 @@
 package it.geosolutions.geocollect.android.core.mission.utils;
 
 
+import it.geosolutions.android.map.model.MSMMap;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import static it.geosolutions.geocollect.android.core.mission.utils.SpatialiteUtils.populateFeatureFromStmt;
 import it.geosolutions.geocollect.android.core.BuildConfig;
@@ -35,7 +36,6 @@ import com.vividsolutions.jts.io.WKBReader;
 import jsqlite.Database;
 import jsqlite.Exception;
 import jsqlite.Stmt;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.v4.content.AsyncTaskLoader;
@@ -139,7 +139,13 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 			String orderingField) {
 		this(context, pre_loader, db, localSourceStore, localFormStore, orderingField, null, null);
 	}
-
+	@Override
+	protected void onForceLoad() {
+		super.onForceLoad();
+		
+		Log.d(TAG, "onForceLoad , mSourceTable "+sourceTableName +" mId "+this.getId());
+		
+	}
 	/*
 	 * When is this called?
 	 */
@@ -180,9 +186,10 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 		
 		// Default, reload anyway
 		boolean reload = true;
-
+		
 		if (mPrefs != null){
-			long millis = mPrefs.getLong(LAST_UPDATE_PREF, 0L);
+			// this must now specify a table, otherwise it blocks loading data for other tables
+			long millis = mPrefs.getLong(LAST_UPDATE_PREF + this.sourceTableName, 0L);
 			if(millis >0){
 				Date currentDate = new Date();
 				if( currentDate.getTime() - millis < UPDATE_THRESHOLD){
@@ -265,7 +272,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 								if(mPrefs != null){
 									SharedPreferences.Editor editor = mPrefs.edit();
 									Date currentDate = new Date();
-									editor.putLong(LAST_UPDATE_PREF, currentDate.getTime());
+									editor.putLong(LAST_UPDATE_PREF + this.sourceTableName, currentDate.getTime());
 									editor.commit();
 								}
 								

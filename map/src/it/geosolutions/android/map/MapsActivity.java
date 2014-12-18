@@ -329,14 +329,20 @@ public class MapsActivity extends MapActivityBase {
 //			if(layers != null){
 //				layerManager.setLayers(layers);
 //			}else{
-			boolean dontLoadMBTileLayer = MapFilesProvider.getBackgroundSourceType() == BackgroundSourceType.MBTILES ? true : false;
-			MSMMap map = SpatialDbUtils.mapFromDb(dontLoadMBTileLayer);
-			StorageUtils.setupSources(this);
 			
-			//This adds layers also if its called loadMap but it will not order layers
-		    //layerManager.loadMap(map);
-			//so use this instead
-			addLayersOrdered(map.layers);
+			if(getIntent() != null && getIntent().getExtras() != null && getIntent().getExtras().containsKey(MSM_MAP)){
+				
+			      layerManager.loadMap((MSMMap)getIntent().getExtras().getSerializable(MSM_MAP));
+				
+			}else{
+				boolean dontLoadMBTileLayer = MapFilesProvider.getBackgroundSourceType() == BackgroundSourceType.MBTILES ? true : false;
+				MSMMap map = SpatialDbUtils.mapFromDb(dontLoadMBTileLayer);
+				StorageUtils.setupSources(this);
+				//This adds layers also if its called loadMap but it will not order layers
+				//layerManager.loadMap(map);
+				//so use this instead
+				addLayersOrdered(map.layers);
+			}
 			
 //			}
 			//setup left drawer fragments
@@ -680,7 +686,7 @@ public class MapsActivity extends MapActivityBase {
 		try {
 			//Only if not already loaded some tables
 			if (dbManager.getSpatialVectorTables(false).size() <= 0) {
-				dbManager.init(this, MAP_DIR);
+				dbManager.init(MAP_DIR);
 			} 
 		} catch (Exception e) {
 			

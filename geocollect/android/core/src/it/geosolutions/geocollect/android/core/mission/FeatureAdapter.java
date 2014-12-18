@@ -38,8 +38,6 @@ import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-
 /**
  * Adapter for a row of layers from a <ArrayList> of <FeatureInfoQueryResult>
  * The implementation show legend and name.
@@ -73,7 +71,7 @@ public FeatureAdapter(Context context, int resource) {
  * @param feature_info_layer_list_row
  * @param feature_layer_name
  */
-public FeatureAdapter(Context context, int resource,MissionTemplate template) {
+public FeatureAdapter(Context context, int resource, MissionTemplate template) {
     super(context, resource);
     this.resourceId = resource;
     this.template = template;
@@ -165,6 +163,10 @@ public View getView(int position, View convertView, ViewGroup parent) {
 
 }
 
+public void setTemplate(MissionTemplate t){
+	this.template = t;
+}
+
 
 @Override
 public Filter getFilter() {
@@ -182,32 +184,12 @@ public Filter getFilter() {
  */
 private class MissionFeatureFilter extends Filter{
 	
-	private ArrayList<MissionFeature> mSource;
-	
-	public MissionFeatureFilter(){
-		
-		copySource();
-	}
-	/**
-	 * makes a copy of the currently available missionfeatures of the collegated adapter
-	 */
-	public void copySource(){
-		mSource = new ArrayList<MissionFeature>();
-				
-		final int count = getCount();
-		int i = 0;
-		while(i < count){
-			mSource.add(getItem(i));
-			i++;
-		}
-	}
-	
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void publishResults(CharSequence constraint, FilterResults results) {
 		
 		  ArrayList<MissionFeature> filtered = (ArrayList<MissionFeature>) results.values;
-		  Log.d(FeatureAdapter.class.getSimpleName(), "results size "+ filtered.size() + " after filtering : "+constraint);
+//		  Log.d(FeatureAdapter.class.getSimpleName(), "results size "+ filtered.size() + " after filtering : "+constraint);
 		  //apply results to the adapter if necessary
           if(filtered != null){        	  
         	  clear();
@@ -234,24 +216,23 @@ private class MissionFeatureFilter extends Filter{
 		FilterResults filterResults = new FilterResults();   
 		ArrayList<MissionFeature> tempList=new ArrayList<MissionFeature>();
 		
-		//check source
-		if(mSource == null || mSource.size() == 0){
-			copySource();
-		}
 
-		for(MissionFeature item : mSource){
+		int count = getCount();
+		for(int i = 0; i < count; i++){
+
+			MissionFeature item = getItem(i);
 			if(constraint != null && constraint.length() > 0) {
 				//if constraint, filter
 				final String title = (String) item.properties.get(template.nameField);
 				final String desc =  (String) item.properties.get(template.descriptionField);
 
 				if(title != null && desc != null && constraint.length() > 0){
-					
+
 					//do filtering here however you want missions to be filtered
 					//for now it adds the item if title or desc are within the search query --> constraint
 					if(title.toLowerCase().contains(constraint.toString().toLowerCase()) ||
-					    desc.toLowerCase().contains(constraint.toString().toLowerCase())){
-						
+							desc.toLowerCase().contains(constraint.toString().toLowerCase())){
+
 						tempList.add(item);
 					}
 				}		
@@ -259,8 +240,8 @@ private class MissionFeatureFilter extends Filter{
 				//if constraint is null or empty ("") add all
 				tempList.add(item);
 			}
-		}
 
+		}
 		//convert to FilterResults objects
 		filterResults.values = tempList;
 		filterResults.count = tempList.size();

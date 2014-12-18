@@ -37,11 +37,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
@@ -57,8 +56,6 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -90,7 +87,7 @@ public class PendingMissionListFragment
 	 */
 	private static final String STATE_ACTIVATED_POSITION = "activated_position";
 
-	private static final int LOADER_INDEX = 0;
+	private static int CURRENT_LOADER_INDEX = 0;
 
 	private static final String TAG = "MISSION_LIST";
 
@@ -120,16 +117,11 @@ public class PendingMissionListFragment
 	private int mActivatedPosition = ListView.INVALID_POSITION;
 	
 	/**
-	 * The loader to load WFS data
-	 */
-	private Loader loader;
-	
-	/**
 	 * The adapter for the Feature
 	 */
 	private FeatureAdapter adapter;
 	
-	private MissionAdapter missionAdapter;
+	private CreatedMissionAdapter missionAdapter;
 	
 	/**
 	 * Callback for the Loader
@@ -202,6 +194,14 @@ public class PendingMissionListFragment
 		setRetainInstance(true);
 		// setup the listView
 		missionTemplate =  MissionUtils.getDefaultTemplate(getSherlockActivity());
+		
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+    	boolean usesDownloaded = prefs.getBoolean(PendingMissionListActivity.PREFS_USES_DOWNLOADED_TEMPLATE, false);
+    	if(usesDownloaded){
+    		int index = prefs.getInt(PendingMissionListActivity.PREFS_DOWNLOADED_TEMPLATE_INDEX, 0) + 1;
+    		CURRENT_LOADER_INDEX = index;
+    	}
+    	
 	    adapter = new FeatureAdapter(getSherlockActivity(),
 	            R.layout.mission_resource_row,missionTemplate);
 	    setListAdapter(adapter);
@@ -308,7 +308,7 @@ public class PendingMissionListFragment
 					.getInt(STATE_ACTIVATED_POSITION));
 		}
 
-		startDataLoading(missionTemplate, LOADER_INDEX);
+		startDataLoading(missionTemplate, CURRENT_LOADER_INDEX);
 
 	}
 
@@ -336,8 +336,8 @@ public class PendingMissionListFragment
 			// restart the loader if needed
 			if(needReload){
 				LoaderManager lm = getSherlockActivity().getSupportLoaderManager();
-				if(lm.getLoader(LOADER_INDEX) != null){
-				    lm.restartLoader(LOADER_INDEX, null, this); 
+				if(lm.getLoader(CURRENT_LOADER_INDEX) != null){
+				    lm.restartLoader(CURRENT_LOADER_INDEX, null, this); 
 				}
 			}
 		}else{
@@ -495,7 +495,7 @@ public class PendingMissionListFragment
 		}else if (id==R.id.order){
 
 			// Get it from the mission template
-			if(loader !=null){
+			if(getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX) !=null){
 				
 				SharedPreferences sp = getSherlockActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME, Context.MODE_PRIVATE);
 				boolean reverse = sp.getBoolean(SQLiteCascadeFeatureLoader.REVERSE_ORDER_PREF, false);
@@ -506,14 +506,14 @@ public class PendingMissionListFragment
 				editor.commit();
 
 				adapter.clear();
-				loader.forceLoad();
+				getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
 			}
 			return true;
 			
 		} else if (id==R.id.filter){
 
 			// Clear the Spatial Filter
-			if(loader !=null){
+			if(getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX) !=null){
 				
 				SharedPreferences sp = getSherlockActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME, Context.MODE_PRIVATE);
 				SharedPreferences.Editor editor = sp.edit();
@@ -526,7 +526,7 @@ public class PendingMissionListFragment
 				editor.commit();
 
 				adapter.clear();
-				loader.forceLoad();
+				getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
 				item.setVisible(false);
 			}
 			return true;
@@ -583,7 +583,7 @@ public class PendingMissionListFragment
 	    if (adapter.getCount() == 0){
 	        return ;
 	    }
-	    if(loader==null){
+	    if(getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX)==null){
 	    	return;
 	    }
 	    
@@ -603,14 +603,13 @@ public class PendingMissionListFragment
 	 * @see android.support.v4.app.LoaderManager.LoaderCallbacks#onCreateLoader(int, android.os.Bundle)
 	 */
 	@Override
-	public Loader<List<MissionFeature>> onCreateLoader(int arg0, Bundle arg1) {
+	public Loader<List<MissionFeature>> onCreateLoader(int id, Bundle arg1) {
 		getSherlockActivity().setSupportProgressBarIndeterminateVisibility(true);
 		getSherlockActivity().getSupportActionBar();
 
-		Log.v("MISSION_LIST", "onCreateLoader()");
+		Log.d("MISSION_LIST", "onCreateLoader() for id "+ id);
 		
-		loader = MissionUtils.createMissionLoader(missionTemplate,getSherlockActivity(),page,pagesize,db);
-	    return loader; 
+		return  MissionUtils.createMissionLoader(missionTemplate,getSherlockActivity(),page,pagesize,db);
 	}
 
 	/**
@@ -625,7 +624,7 @@ public class PendingMissionListFragment
 			   Toast.makeText(getSherlockActivity(), R.string.error_connectivity_problem, Toast.LENGTH_SHORT).show();
 			   setNoData();
 		   }else{
-			   
+			   Log.d(TAG, "loader returned "+results.size());
 			   //add loaded resources to the listView
 				for(MissionFeature a : results ){
 					adapter.add(a);
@@ -655,10 +654,12 @@ public class PendingMissionListFragment
 	 */
 	protected void loadMore() {
 		
-		if(loader!=null){
+		
+		
+		if(getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX) !=null){
 			
 				page++;
-				getLoaderManager().restartLoader(LOADER_INDEX, null, this);
+				getSherlockActivity().getSupportLoaderManager().restartLoader(CURRENT_LOADER_INDEX, null, this);
 			
 			
 		}
@@ -692,11 +693,12 @@ public class PendingMissionListFragment
 			if(missionAdapter != null){
 				fillCreatedMissionFeatureAdapter();
 			}
-		}else if(mMode == FragmentMode.PENDING){			
-			if(adapter != null && loader != null){
-				adapter.clear();
-				loader.forceLoad();
-			}
+		}else if(mMode == FragmentMode.PENDING){	
+			//This reloads the list when this fragment comes back "to life",  seems not to be necessary
+//			if(adapter != null && getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX) != null){
+//				adapter.clear();
+//				getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
+//			}
 		}
 			
 	}	
@@ -732,7 +734,7 @@ public class PendingMissionListFragment
 					editor.commit();
 
 					adapter.clear();
-					loader.forceLoad();
+					getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
 					// TODO: This call could need to move the onCreateMenu() code into a onPrepareOptionMenu()
 					getSherlockActivity().supportInvalidateOptionsMenu();
 					
@@ -753,9 +755,9 @@ public class PendingMissionListFragment
 				editor.remove(SQLiteCascadeFeatureLoader.FILTER_E);
 				editor.remove(SQLiteCascadeFeatureLoader.FILTER_SRID);
 				editor.commit();
-
+				
 				adapter.clear();
-				loader.forceLoad();
+				getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
 				// TODO: This call could need to move the onCreateMenu() code into a onPrepareOptionMenu()
 				getSherlockActivity().supportInvalidateOptionsMenu();
 	    	}
@@ -784,7 +786,7 @@ public class PendingMissionListFragment
 		editor.commit();
 		
 		adapter.clear();
-		loader.forceLoad();
+		getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
         if(mSwipeRefreshLayout != null)
         	mSwipeRefreshLayout.setRefreshing(true);
 
@@ -850,15 +852,16 @@ public class PendingMissionListFragment
      */
     public void switchAdapter(FragmentMode newMode){
     	
-    	if(newMode == mMode){
-    		return;
-    	}
+//    	if(newMode == mMode && MissionUtils.getDefaultTemplate(getActivity()).id.equals(missionTemplate.id)){
+//    		Log.d(TAG, "returning switch adapter");
+//    		return;
+//    	}
     	
     	mMode = newMode;
     	
     	if(mMode == FragmentMode.CREATION){
 
-    		missionAdapter = new MissionAdapter(getSherlockActivity(), R.layout.created_mission_row);
+    		missionAdapter = new CreatedMissionAdapter(getSherlockActivity(), R.layout.created_mission_row);
     		
     		//delete created items on long click listener
     		getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
@@ -875,11 +878,9 @@ public class PendingMissionListFragment
 				        	//nothing		        	
 				        	final MissionFeature f = (MissionFeature) getListView().getItemAtPosition(position);
 				        	
-				        	final MissionTemplate t = MissionUtils.getDefaultTemplate(getSherlockActivity());
-				        	
 				        	final Database db = ((PendingMissionListActivity)getSherlockActivity()).spatialiteDatabase;
 				        	
-				        	PersistenceUtils.deleteCreatedMissionFeature(db, t.schema_seg.localSourceStore+ "_new", f);
+				        	PersistenceUtils.deleteCreatedMissionFeature(db, missionTemplate.schema_seg.localSourceStore+ "_new", f);
 				        	
 				        	fillCreatedMissionFeatureAdapter();
 				        }
@@ -910,8 +911,9 @@ public class PendingMissionListFragment
     		//remove longclicklistener
     		getListView().setOnItemLongClickListener(null);
     		
+    		adapter.setTemplate(missionTemplate);
     		setListAdapter(adapter);
-    		
+    	
     	}
     	
     	//invalidate actionbar
@@ -924,11 +926,11 @@ public class PendingMissionListFragment
      */
     private void fillCreatedMissionFeatureAdapter(){
     	
-    	final MissionTemplate t = MissionUtils.getDefaultTemplate(getSherlockActivity());
+    	final MissionTemplate t = missionTemplate;
 
     	final Database db = ((PendingMissionListActivity)getSherlockActivity()).spatialiteDatabase;
 
-		Log.v(TAG, "Loading created missions");
+		Log.v(TAG, "Loading created missions for "+ t.title);
 		final ArrayList<MissionFeature> missions = MissionUtils.getCreatedMissionFeatures(t.schema_seg.localSourceStore+ "_new", db);
 		
 		final String prio = t.priorityField;
@@ -942,8 +944,13 @@ public class PendingMissionListFragment
 		}
 
 		missionAdapter.clear();
-		
-		missionAdapter.addAll(missions);
+		if(Build.VERSION.SDK_INT > 10){
+			missionAdapter.addAll(missions);
+		}else{
+			for(MissionFeature f : missions){
+				missionAdapter.add(f);
+			}
+		}
 
 		missionAdapter.notifyDataSetChanged();
 		
@@ -959,90 +966,30 @@ public class PendingMissionListFragment
 	public FragmentMode getFragmentMode(){
 		return mMode;
 	}
-    /**
-     * Adapter for MissionFeatures "created missions"
-     *
-     */
-	public class MissionAdapter extends ArrayAdapter<MissionFeature>{
+ 
+	/**
+	 * sets the current missionTemplate of this fragments list
+	 * @param pMissionTemplate the template to apply
 
-		private int resourceId;
-		
-		public MissionAdapter(Context context, int resource) {
-			super(context, resource);
-			
-			this.resourceId = resource;
-		}
-		
-		public View getView(int position, View convertView, ViewGroup parent) {
-
-		    // assign the view we are converting to a local variable
-		    View v = convertView;
-
-		    // first check to see if the view is null. if so, we have to inflate it.
-		    // to inflate it basically means to render, or show, the view.
-		    if (v == null) {
-		        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		        v = inflater.inflate(resourceId, null);
-		    }
-
-		    /*
-		     * Recall that the variable position is sent in as an argument to this
-		     * method. The variable simply refers to the position of the current object
-		     * in the list. (The ArrayAdapter iterates through the list we sent it)
-		     * Therefore, i refers to the current Item object.
-		     */
-		    MissionFeature mission = getItem(position);
-
-		    if (mission != null) {
-
-		    	// display name
-
-		    	TextView name = (TextView) v.findViewById(R.id.created_mission_resource_name);
-		    	if (name != null && mission.properties != null && mission.properties.containsKey("CODICE")) {
-		    		Object prop =mission.properties.get("CODICE");
-		    		if(prop!=null){
-		    			name.setText(prop.toString());
-		    		}else{
-		    			name.setText("");
-		    		}
-
-		    	}
-
-		    	//display rifiuti
-
-		    	TextView desc = (TextView) v.findViewById(R.id.created_mission_resource_description);
-		    	if (desc != null && mission.properties != null && mission.properties.containsKey("RIFIUTI_NO")) {
-		    		Object prop =mission.properties.get("RIFIUTI_NO");
-		    		if(prop!=null){
-		    			desc.setText(prop.toString());
-		    		}else{
-		    			desc.setText("");
-		    		}
-
-		    	}
-		    	
-				ImageView priorityIcon = (ImageView) v.findViewById(R.id.created_mission_resource_priority_icon);
-				if ( priorityIcon != null && priorityIcon.getDrawable() != null ){
-					
-					// Get the icon and tweak the color
-					Drawable d = priorityIcon.getDrawable();
-					
-					if ( mission.displayColor != null ){
-						try{
-							d.mutate().setColorFilter(Color.parseColor(mission.displayColor), PorterDuff.Mode.SRC_ATOP);
-						}catch(IllegalArgumentException iae){
-							Log.e("MissionAdapter", "A feature has an incorrect color value" );
-						}
-			    	}else{
-			    		d.mutate().clearColorFilter();
-			    	}
-
-		    	}
-
-		    }
-		    return v;
-
-		}
+	 */
+	public void setTemplate(final MissionTemplate pMissionTemplate) {
+				
+		missionTemplate = pMissionTemplate;
 		
 	}
+	/**
+	 * 
+	 * @param restarts the loader with a certain index
+	 */
+	public void restartLoader(final int index){
+		
+		startDataLoading(missionTemplate, index);
+		
+		CURRENT_LOADER_INDEX = index;
+	}
+	
+	public MissionTemplate getCurrentMissionTemplate(){
+		return missionTemplate;
+	}
+
 }

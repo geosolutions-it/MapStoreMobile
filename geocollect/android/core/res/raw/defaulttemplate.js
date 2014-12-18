@@ -854,8 +854,8 @@
 					"fieldId": "INCLINAZIO",
 					"type":"text",
 					"xtype":"text",
-					"value":"${local.user_organization}",
-					"label":"Ente di appartenenza Rilevatore"
+					"value":"",
+					"label":"Inclinazione"
 				}]
 			},{
 				"title": "Copertura",
@@ -940,8 +940,7 @@
 					"fieldId": "RIFIUTI_NO",
 					"type":"text",
 					"xtype":"text",
-					"label":"RIFIUTI_NO",
-					"mandatory":"true"
+					"label":"RIFIUTI_NO"
 				},{
 					"fieldId": "RIFIUTI_PE",
 					"type":"text",

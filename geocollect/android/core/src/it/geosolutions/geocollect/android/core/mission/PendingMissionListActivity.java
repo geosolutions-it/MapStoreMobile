@@ -18,16 +18,17 @@
 package it.geosolutions.geocollect.android.core.mission;
 
 
-import org.mapsforge.android.maps.MapActivity;
-import org.mapsforge.android.maps.MapView;
-
 import it.geosolutions.android.map.MapsActivity;
+import it.geosolutions.android.map.model.Layer;
+import it.geosolutions.android.map.model.MSMMap;
+import it.geosolutions.android.map.utils.SpatialDbUtils;
 import it.geosolutions.android.map.view.MapViewManager;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.R;
+import it.geosolutions.geocollect.android.core.form.FormEditActivity;
 import it.geosolutions.geocollect.android.core.login.LoginActivity;
 import it.geosolutions.geocollect.android.core.login.LogoutActivity;
-import it.geosolutions.geocollect.android.core.form.FormEditActivity;
+import it.geosolutions.geocollect.android.core.login.utils.NetworkUtil;
 import it.geosolutions.geocollect.android.core.mission.PendingMissionListFragment.FragmentMode;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.NavUtils;
@@ -38,12 +39,21 @@ import it.geosolutions.geocollect.android.core.navigation.NavDrawerActivityConfi
 import it.geosolutions.geocollect.android.core.navigation.NavDrawerAdapter;
 import it.geosolutions.geocollect.android.core.navigation.NavDrawerItem;
 import it.geosolutions.geocollect.android.map.ReturningMapInfoControl;
+import it.geosolutions.geocollect.android.template.TemplateDownloadTask;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import org.mapsforge.android.maps.MapActivity;
+import org.mapsforge.android.maps.MapView;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -73,6 +83,10 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 	public static int SPATIAL_QUERY = 7001;
 	
 	public static final String ARG_CREATE_MISSIONFEATURE = "CREATE_MISSIONFEATURE";
+	public static final String ARG_CREATING_TEMPLATE = "CREATING_MISSIONTEMPLATE";
+	
+	public static final String PREFS_USES_DOWNLOADED_TEMPLATE = "USES_DOWNLOADED_TEMPLATE";
+	public static final String PREFS_DOWNLOADED_TEMPLATE_INDEX = "DOWNLOADED_TEMPLATE_INDEX";
 	
 	/**
 	 * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -105,8 +119,66 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 
 			startActivityForResult(new Intent(this, LoginActivity.class), LoginActivity.REQUEST_LOGIN);
 
+		}else if(NetworkUtil.isOnline(getBaseContext())){
+			
+			//TODO --> set when to check the remote templates, for now always onCreate when authkey available && online
+			Log.d(PendingMissionDetailActivity.class.getSimpleName(), "fetching remote Templates");
+			
+			final TemplateDownloadTask task = new TemplateDownloadTask(){
+				@Override
+				public void complete(final ArrayList<MissionTemplate> downloadedTemplates){
+					
+					/**
+					  *download successful, elaborate result
+					 **/
+					//1. update database
+					ArrayList<MissionTemplate> validTemplates = new ArrayList<MissionTemplate>();
+					if(downloadedTemplates != null && downloadedTemplates.size() > 0){
+						if(spatialiteDatabase == null){
+							
+							spatialiteDatabase = SpatialiteUtils.openSpatialiteDB(PendingMissionListActivity.this, "geocollect/genova.sqlite");
+						}
+						for(MissionTemplate t : downloadedTemplates){
+							if(!PersistenceUtils.createOrUpdateTablesForTemplate(t, spatialiteDatabase)){
+								Log.w(PendingMissionListActivity.class.getSimpleName(), "error creating/updating table");
+							}else{
+								//if insert succesfull add to list of valid templates
+								validTemplates.add(t);
+							}
+						}
+					}
+					Log.d(PendingMissionListActivity.class.getSimpleName(), "database updated");
+					
+					//2. save valid templates 
+					PersistenceUtils.saveDownloadedTemplates(getBaseContext(), validTemplates);
+					
+					Log.d(PendingMissionListActivity.class.getSimpleName(), "valid templates persisted");
+					
+					//3. update navdrawer menu
+					runOnUiThread(new Runnable() {
+						
+						@Override
+						public void run() {						
+							
+							NavDrawerItem[] menu = NavUtils.getNavMenu(PendingMissionListActivity.this);
+							
+							//cannot modify items of navdraweradapter --> create a new one
+							
+							NavDrawerAdapter newNavDrawerAdapter = new NavDrawerAdapter(PendingMissionListActivity.this, R.layout.navdrawer_item, menu);
+							
+							mDrawerList.setAdapter(newNavDrawerAdapter);
+							
+							Log.d(PendingMissionListActivity.class.getSimpleName(), "navdrawer updated");
+							
+						}
+					});				
+				}
+			};
+			task.execute(authKey);
+
 		}
-		
+
+		//Default template
 		// Initialize database
 		// This should be the first thing the Activity does
 		if(spatialiteDatabase == null){
@@ -116,30 +188,11 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 			if(spatialiteDatabase != null && !spatialiteDatabase.dbversion().equals("unknown")){
 				
 				MissionTemplate t = MissionUtils.getDefaultTemplate(this);
-				
-				if(t != null && t.id != null){
-					
-					//1. "create mission" table
-					
-					if(!PersistenceUtils.createTableFromTemplate(spatialiteDatabase, t.schema_seg.localSourceStore+ "_new", t.schema_seg.fields)){
-						Log.e(PendingMissionListActivity.class.getSimpleName(), "error creating \"create_mission\" table ");
-					}
 
-					//2.  "source" table
-
-					if(!PersistenceUtils.createOrUpdateTable(spatialiteDatabase,t.schema_seg.localSourceStore, t.schema_seg.fields)){
-						Log.e(PendingMissionListActivity.class.getSimpleName(), "error creating "+t.schema_seg.localSourceStore+" table ");
-					}
-					
-					//3. "form" -> rilevamenti table
-
-					if(!PersistenceUtils.createOrUpdateTable(spatialiteDatabase,t.schema_sop.localFormStore, t.schema_sop.fields)){
-						Log.e(PendingMissionListActivity.class.getSimpleName(), "error creating "+t.schema_sop.localFormStore+" table ");
-					}
-
-				}else{
-					Log.w("MISSION_LIST", "MissionTemplate could not be found, edits will not be saved");
+				if(!PersistenceUtils.createOrUpdateTablesForTemplate(t, spatialiteDatabase)){
+						Log.e(PendingMissionListActivity.class.getSimpleName(), "error creating/updating tables for "+ t.nameField);
 				}
+
 			}
 
 		}
@@ -165,6 +218,8 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 		if(getIntent().getExtras() != null){
 			boolean createMission = getIntent().getExtras().getBoolean(ARG_CREATE_MISSIONFEATURE);
 			if(createMission){
+//				MissionTemplate t = MissionUtils.getDefaultTemplate(getBaseContext());
+//	        	((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(R.id.pendingmission_list)).setTemplate(t);
 				((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(R.id.pendingmission_list)).switchAdapter(FragmentMode.CREATION);
 
 			}
@@ -232,8 +287,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         navDrawerActivityConfiguration.setDrawerLayoutId(R.id.drawer_layout);
         navDrawerActivityConfiguration.setLeftDrawerId(R.id.left_drawer);
         navDrawerActivityConfiguration.setNavItems(menu);
-        navDrawerActivityConfiguration.setBaseAdapter(
-            new NavDrawerAdapter(this, R.layout.navdrawer_item, menu ));
+        navDrawerActivityConfiguration.setBaseAdapter(new NavDrawerAdapter(this, R.layout.navdrawer_item, menu));
         return navDrawerActivityConfiguration;
     }
     
@@ -242,22 +296,26 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         switch ((int)id) {
         //first option
         case 101:
+        case 1001:
             //only one fragment for now, the other options are indipendent activities
         	//switch to pending mode
         	        	
         	clearDetailFragment();
         	
-        	((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(R.id.pendingmission_list)).switchAdapter(FragmentMode.PENDING);
+        	final FragmentMode mode = id == 101 ? FragmentMode.PENDING : FragmentMode.CREATION;
         	
-            break;
-        //Map
-        case 1001:
-       
-        	//switch to creation mode
-        	clearDetailFragment();
+        	Editor ed = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
+        	ed.putBoolean(PREFS_USES_DOWNLOADED_TEMPLATE, false);
+        	ed.commit();
         	
-        	((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(R.id.pendingmission_list)).switchAdapter(FragmentMode.CREATION);
-					
+        	MissionTemplate mt = MissionUtils.getDefaultTemplate(getBaseContext());
+        	
+        	((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(R.id.pendingmission_list)).setTemplate(mt);
+        	if(id == 101){        		
+        		((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(R.id.pendingmission_list)).restartLoader(0);
+        	}
+        	((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(R.id.pendingmission_list)).switchAdapter(mode);
+		
      	
         	break;
         case 102:
@@ -270,7 +328,19 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
     		//ArrayList<Layer> layers =  (ArrayList<Layer>) LocalPersistence.readObjectFromFile(this, LocalPersistence.CURRENT_MAP);
         	//if(layers == null || layers.isEmpty()){
     			
-//				MSMMap m = SpatialDbUtils.mapFromDb();
+    		MissionTemplate t = ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(R.id.pendingmission_list)).getCurrentMissionTemplate();
+    		
+    		MSMMap m = SpatialDbUtils.mapFromDb();
+    		
+    		for (Iterator<Layer> it = m.layers.iterator(); it.hasNext();) {
+    		    Layer layer = it.next();
+    		    if(!(layer.getTitle().equals(t.schema_seg.localSourceStore) || layer.getTitle().equals(t.schema_sop.localFormStore) || layer.getTitle().equals(t.schema_seg.localSourceStore+ "_new"))){
+    		    	Log.d(PendingMissionListActivity.class.getSimpleName(), layer.getTitle()+ " not corresponding to current schema "+ t.schema_seg.localSourceStore);
+    		    	it.remove();
+    		    }
+    		    
+    		}
+
 //	    		if(m.layers == null || m.layers.isEmpty()){
 //	    			// retry, SpatialDataSourceManager is buggy
 //	    			SpatialDataSourceManager dbManager = SpatialDataSourceManager.getInstance();
@@ -290,7 +360,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 	    		launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL, (byte)11);
 	    		launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL_MIN, (byte)11);
 	    		launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL_MAX, (byte)19);
-//	    		launch.putExtra(MapsActivity.MSM_MAP, m);
+	    		launch.putExtra(MapsActivity.MSM_MAP, m);
 			//}
         	
         	launch.putExtra(MapsActivity.PARAMETERS.CUSTOM_MAPINFO_CONTROL, new ReturningMapInfoControl());
@@ -319,6 +389,40 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         case 204:
         	confirmExit();
         	break;
+        }
+        
+        //downloaded templates will have a dynamic id currently starting from 2000
+        if(id >= 2000){
+        	
+        	final ArrayList<MissionTemplate> downloadedTemplates = PersistenceUtils.loadSavedTemplates(getBaseContext());
+			
+        	final int index = id % 2000;
+        	
+        	final int templateIndex = index / 2; 
+        	
+        	final MissionTemplate t = downloadedTemplates.get(templateIndex);
+        	
+        	Log.d(PendingMissionListActivity.class.getSimpleName(), "downloaded template "+templateIndex+" selected : "+t.id);
+        	
+        	final FragmentMode mode = index % 2 == 0 ? FragmentMode.PENDING : FragmentMode.CREATION;
+
+        	clearDetailFragment();
+        	
+        	Editor ed = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
+        	ed.putBoolean(PREFS_USES_DOWNLOADED_TEMPLATE, true);
+        	ed.putInt(PREFS_DOWNLOADED_TEMPLATE_INDEX, templateIndex);
+        	ed.commit();
+        	
+        	((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(R.id.pendingmission_list)).setTemplate(t);
+        	
+        	if(index % 2 == 0){        		
+        		((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(R.id.pendingmission_list)).restartLoader(templateIndex + 1);
+        	}
+        	((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(R.id.pendingmission_list)).switchAdapter(mode);
+
+
+
+        	
         }
     }
     /**
