@@ -93,7 +93,7 @@ public class LoginActivity extends Activity {
 			//provide initial server access point
 			//for now static
 			mUrls = new ArrayList<String>();
-			mUrls.add("http://192.168.1.112:8083/opensdi2-manager/mvc");
+			mUrls.add("http://geocollect.geo-solutions.it/opensdi2-manager/mvc");
 		}
 		// Creating adapter for spinner
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.server_spinner_item, mUrls);
