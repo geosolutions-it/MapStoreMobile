@@ -489,13 +489,13 @@
 					"type":"text",
 					"xtype":"spinner",
 					"label":"Morfologia",
-					"options":["area pianegginate","scarpata","zona valliva"]
+					"options":["area pianeggiante","scarpata","zona valliva"]
 				},{
 				"fieldId": "MORFOLOGI1",
 					"type":"text",
 					"xtype":"spinner",
 					"label":"Morfologia1",
-					"options":["area pianegginate","scarpata","zona valliva"]
+					"options":["area pianeggiante","scarpata","zona valliva"]
 				},{
 					"fieldId": "INCLINAZIO",
 					"type":"text",

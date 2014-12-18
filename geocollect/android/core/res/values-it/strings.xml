@@ -62,12 +62,12 @@
     <string name="logout_logged_out">Logout effettuato con successo!</string>
     <string name="logout_logout">Logout</string>
     
-    <string name="my_inspections">I miei sopralluoghi</string>
-    <string name="create_a_inspection">Crea un sopralluogo</string>
-    <string name="created_inspection_delete">Vuoi veramente cancellare questo sopralluogo ?</string>
-    <string name="gps_not_enabled">Si prega di attivare la Geolocalizzazione per loccalizzare questo sopralluogo</string>
-    <string name="gps_still_not_enabled">Non hai attivato la Geolocalizzazione, non é possibilie continuare</string>
-    <string name="search_missions">Cerca missioni</string>
+    <string name="my_inspections">Le mie Segnalazioni</string>
+    <string name="create_a_inspection">Crea uns segnalazione</string>
+    <string name="created_inspection_delete">Vuoi veramente cancellare questa segnalazione?</string>
+    <string name="gps_not_enabled">Si prega di attivare la Geolocalizzazione per localizzare questa segnalazione</string>
+    <string name="gps_still_not_enabled">Non hai attivato la Geolocalizzazione, non é possibile continuare</string>
+    <string name="search_missions">Cerca Segnalazioni</string>
     <string name="location_searching">Ricerca Posizione in corso&#8230;</string>
 
     <string name="menu_center">Centrare</string>
