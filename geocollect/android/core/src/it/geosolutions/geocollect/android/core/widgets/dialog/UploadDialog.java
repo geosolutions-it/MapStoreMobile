@@ -227,19 +227,22 @@ public class UploadDialog extends RetainedDialogFragment {
 				Toast.makeText(activity, R.string.error_sending_data, Toast.LENGTH_LONG).show();
 				Activity c = activity != null ? activity : getActivity();
 				onFinish(c, result);
-			}else if (!missionFeatureUpload){
+			//}else if (!missionFeatureUpload){
+			}else {
 				//continue with media
 				setupDataControls(false);
 				setDataSendResultUI(true);
 				new MediaSenderThread().execute(result.getId());
-			}else{
+			}/*else{
 				//SUCCESS
 				setupMediaControl(false);
 				setMediaSendResultUI(true);
 				closeDialog(true);
 				Activity c = activity != null ? activity : getActivity();
 				onFinish(c,result);
+			
 			}
+			*/
 		}
 	}
 

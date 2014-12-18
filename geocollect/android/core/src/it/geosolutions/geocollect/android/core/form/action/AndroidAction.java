@@ -22,8 +22,6 @@ import com.actionbarsherlock.app.SherlockFragment;
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.model.viewmodel.FormAction;
 import it.geosolutions.geocollect.model.viewmodel.Page;
-import android.app.Activity;
-import android.support.v4.app.Fragment;
 
 /**
  * Abstraction for <Mission> action to implement the

@@ -26,13 +26,16 @@ import it.geosolutions.android.map.overlay.items.DescribedMarker;
 import it.geosolutions.android.map.overlay.managers.MultiSourceOverlayManager;
 import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.android.map.view.AdvancedMapView;
+import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.FormEditActivity;
 import it.geosolutions.geocollect.android.core.form.ViewPagerAwareMarkerControl;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
 import it.geosolutions.geocollect.android.core.mission.utils.LocationProvider;
+import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.LocationProvider.LocationResultCallback;
 import it.geosolutions.geocollect.android.core.widgets.DatePicker;
+import it.geosolutions.geocollect.android.core.widgets.UILImageAdapter;
 import it.geosolutions.geocollect.model.viewmodel.Field;
 
 import java.io.File;
@@ -49,30 +52,31 @@ import java.util.Locale;
 import org.mapsforge.android.maps.MapView;
 import org.mapsforge.core.model.GeoPoint;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.location.Location;
-import android.location.LocationManager;
 import android.text.InputType;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.vividsolutions.jts.geom.Point;
 
 /**
@@ -134,6 +138,9 @@ public class MissionFeatureFormBuilder {
 				case label:
 					addLabel(f,mFormView,context,feature);
 					break;
+				case photo:
+					addPhotoGrid(f, mFormView, context, feature);
+					break;
 				case mapViewPoint:
 					addMapViewPoint(f,mFormView,context,feature);
 					break;
@@ -144,7 +151,75 @@ public class MissionFeatureFormBuilder {
 			}
 		}
 	}
+	
+	/**
+	 * Create an Header with GridView
+	 * @param f
+	 * @param mFormView
+	 * @param context
+	 * @param mission 
+	 */
+	private static void addPhotoGrid(Field field, LinearLayout mFormView,
+			Context context, Feature feature) {
+		// TODO: enable label?
+		//TextView tvLabel = getLabelForField(field, context);
+		// TODO: Null check on this line
+		GridView photoView = (GridView) ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.ac_image_grid, mFormView, false);;
+		photoView.setLayoutParams(getTextDefaultParams(field, true));
+		//photoView.setTag(field.fieldId); // TODO: useless, the photoView must be used to fetch from a folder derived from the mission id
+		// TODO: use a non-string tag
+		photoView.setTag("__photo__");
 
+	    //String[] stringUrls = FormUtils.getPhotoUriStrings(mission.getOrigin().id);
+
+		DisplayImageOptions options = new DisplayImageOptions.Builder()
+		.showImageOnLoading(it.geosolutions.geocollect.android.core.R.drawable.ic_launcher)
+		.showImageForEmptyUri(it.geosolutions.geocollect.android.core.R.drawable.ic_empty)
+		.showImageOnFail(it.geosolutions.geocollect.android.core.R.drawable.ic_error)
+		.resetViewBeforeLoading(false)
+        
+		.cacheInMemory(false)
+		.cacheOnDisk(false)
+		.considerExifParams(true)
+		.bitmapConfig(Bitmap.Config.RGB_565)
+		.imageScaleType(ImageScaleType.EXACTLY)
+		.build();
+		
+		//***************************
+		
+		photoView.setAdapter(new UILImageAdapter(context, MissionUtils.getFeatureGCID(feature), options));
+		
+		// enable ContexxtMenu on LongPress
+		((FormEditActivity) context).registerForContextMenu(photoView);
+
+		
+		photoView.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				//startImagePagerActivity(position);
+				Log.v("ItemListener", "Clicked position "+position+" , id "+id+ ", ViewID "+view.getId());
+				// TODO: start full image show activity
+				//view.showContextMenu();
+			}
+		});
+		
+		/*		
+		photoView.setOnItemLongClickListener(new OnItemLongClickListener() {
+
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				Log.v("ItemListener", "LONG Click on position "+position+" , id "+id+ ", ViewID "+view.getId());
+				// TODO: open contextual menu for deletion
+				return true;
+			}
+		});
+		*/
+		// TODO: enable label?
+		//mFormView.addView(tvLabel);
+		mFormView.addView(photoView);
+	}
+	
 	/**
 	 * Creates a map view - when a valid geometry is available the map will be
 	 * centered on it - otherwise a location acquiring will be started which needs

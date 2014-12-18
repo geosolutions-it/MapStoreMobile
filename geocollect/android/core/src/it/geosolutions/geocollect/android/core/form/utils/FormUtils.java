@@ -36,10 +36,7 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapFactory.Options;
 import android.net.Uri;
-import android.os.Environment;
-import android.renderscript.Sampler;
 import android.util.Log;
 
 

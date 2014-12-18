@@ -950,11 +950,37 @@ public class PersistenceUtils {
 	/**
 	 * retrieves the current max id for the created missionFeature table
 	 * if none is present yet 0 is returned
+	 * 
+	 * TODO: This ID should not be sent to the server
+	 * 		 At the moment the server does not respond with an ID, so this ID must be used
+	 * 
 	 * @param db the database to use
 	 * @param tableName the table to lookup
 	 * @return max + 1 
 	 */
 	public static Long getIDforNewMissionFeatureEntry(Database db,String tableName) {
+		
+		/* 
+		 * I will now completely ignore database content and generate a new ID
+		 * trying to avoid collisions with other existing GCID.
+		 * Generated GCIDs are in milliseconds values, so the highest collision probability 
+		 * will be in the few seconds after midnight, January the 1st, of each year.
+		 */
+		
+		long millisInYear = 31622400000L;
+		long currentTime = System.currentTimeMillis();
+		
+		long generatedID = currentTime % millisInYear;
+		
+		if(BuildConfig.DEBUG){
+			Log.v(TAG, "Generated ID: "+generatedID);
+		}
+		
+		if(generatedID > 0){
+			return generatedID;
+		}
+		
+		// All the following code will not run
 		
 		if(tableName == null || tableName.isEmpty()){
 			Log.v(TAG, "No tableName, cannot create table");

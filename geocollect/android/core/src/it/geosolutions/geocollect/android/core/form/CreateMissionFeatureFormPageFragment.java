@@ -3,17 +3,23 @@ package it.geosolutions.geocollect.android.core.form;
 import it.geosolutions.android.map.fragment.MapFragment;
 import it.geosolutions.android.map.view.AdvancedMapView;
 import it.geosolutions.geocollect.android.core.R;
+import it.geosolutions.geocollect.android.core.form.action.AndroidAction;
+import it.geosolutions.geocollect.android.core.form.action.CameraAction;
 import it.geosolutions.geocollect.android.core.form.action.SendMissionFeatureAction;
 import it.geosolutions.geocollect.android.core.form.utils.MissionFeatureFormBuilder;
 import it.geosolutions.geocollect.android.core.form.utils.FormUtils;
+import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
 import it.geosolutions.geocollect.android.core.widgets.DatePicker;
+import it.geosolutions.geocollect.android.core.widgets.UILImageAdapter;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.viewmodel.Field;
 import it.geosolutions.geocollect.model.viewmodel.FormAction;
+import it.geosolutions.geocollect.model.viewmodel.FormActionType;
 import it.geosolutions.geocollect.model.viewmodel.Page;
+import it.geosolutions.geocollect.model.viewmodel.type.XType;
 
 import java.util.HashMap;
 
@@ -21,6 +27,8 @@ import jsqlite.Database;
 
 import org.mapsforge.core.model.GeoPoint;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -28,6 +36,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
@@ -38,6 +47,7 @@ import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
@@ -112,9 +122,8 @@ public class CreateMissionFeatureFormPageFragment extends MapFragment {
 					
 					storePageData(this.page, mFormView);
 					
-					MissionFeature mission = ((FormEditActivity) getSherlockActivity()).mMission;
-					SendMissionFeatureAction smfa = new SendMissionFeatureAction(action);
-					smfa.performAction(this, action, mission);
+					MissionFeature mFeature = ((FormEditActivity) getSherlockActivity()).mMission;
+					performAction(action, mFeature);
 				}
 			}
 		}
@@ -316,4 +325,64 @@ public class CreateMissionFeatureFormPageFragment extends MapFragment {
 		}
 		
 	}
+	
+	
+	/**
+	 * Performs and <Action> in the current page.
+	 * This function is call when the user tap an action
+	 * @param a
+	 */
+	private void performAction(FormAction a, MissionFeature feature) {
+		Log.v("ACTION","performing action "+a);
+		if(a.type == FormActionType.send){
+			SendMissionFeatureAction smfa = new SendMissionFeatureAction(a);
+			smfa.performAction(this, a, feature);
+		}else{
+			AndroidAction aa = FormUtils.getAndroidAction(a);
+			if(aa!=null){
+				Mission m = new Mission();
+				m.setOrigin(feature);
+				aa.performAction(this, a, m, page);
+			}
+		}
+		
+	}
+	
+	/**
+	 * Handle the results of the CameraAction
+	 */
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		Log.d(TAG, "onActivityResult(): "+requestCode);
+	    super.onActivityResult(requestCode, resultCode, data);
+	    
+	    if(requestCode == CameraAction.CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE && resultCode == Activity.RESULT_OK){
+	    	
+	    	MissionFeature mFeature = ((FormEditActivity) getSherlockActivity()).mMission;
+	    	String originIDString = MissionUtils.getFeatureGCID(mFeature);
+	    	if( this.page.fields != null &&
+	    			originIDString != null &&
+	    			!originIDString.isEmpty()){
+	    		
+	    		
+				for(Field f : page.fields){
+					if(f == null || f.xtype != XType.photo)
+						continue;
+					
+					// TODO: use a non-string tag
+					GridView grid = (GridView) this.mFormView.findViewWithTag("__photo__");
+					
+			    	if( grid != null && ImageLoader.getInstance().isInited()){
+			    		
+		    		    //((UILImageAdapter)grid.getAdapter()).setImageUrls(FormUtils.getPhotoUriStrings(this.mission.getOrigin().id));
+		    		    ((UILImageAdapter)grid.getAdapter()).notifyDataSetChanged();
+			    	}
+			    	break;
+		    	}
+	    		
+	    	}
+	    }
+	    
+	}
+	
 }

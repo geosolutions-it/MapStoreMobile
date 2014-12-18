@@ -4,7 +4,7 @@
 	"schema_seg":{		
    		"type":"WFS",		
    		"_URL":"http://demo.geo-solutions.it/share/comunege/geocollect/punti_abbandono.geojson",	
-   		"URL":"http://geocollect.geo-solutions.it/geoserver/it.geosolutions/wfs?srsName=EPSG:4326&",	
+   		"URL":"http://geocollect.geo-solutions.it/geoserver/it.geosolutions/wfs?srsName=EPSG:4326&cql_filter=GCID>0&",	
    		"typeName":"it.geosolutions:punti_abbandono",	
    		"localSourceStore":"punti_abbandono",
 		"fields":{
@@ -650,6 +650,20 @@
 					"type":"decimal",
 					"xtype":"textfield",
 					"label":"Stabilità"
+				}]
+			},{
+				"title": "Rilievi Fotografici",
+				"iconCls":"not_supported_yet",
+				"fields":[{
+					"xtype":"photo",
+					"label":"photo_has_no_label"
+				}],
+				"actions":[{
+					"id":1,
+					"text":"Scatta Foto",
+					"name":"photos",
+					"type":"photo",
+					"iconCls":"ic_camera"
 				}]
 			},{	
 				"title": "Gravita",

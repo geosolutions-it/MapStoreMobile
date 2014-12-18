@@ -258,7 +258,6 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
         		Log.d(FormEditActivity.class.getSimpleName(), "reference id for missionFeature " + String.valueOf(id));
         		mMission.id = String.valueOf(id);
 
-
         		PersistenceUtils.insertCreatedMissionFeature(spatialiteDatabase, mMissionTableName, id);
         	}
         }

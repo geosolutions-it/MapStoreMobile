@@ -3,8 +3,10 @@ package it.geosolutions.geocollect.android.core.form.action;
 import it.geosolutions.android.map.wfs.geojson.GeoJson;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.FormEditActivity;
+import it.geosolutions.geocollect.android.core.form.utils.FormUtils;
 import it.geosolutions.geocollect.android.core.login.LoginActivity;
 import it.geosolutions.geocollect.android.core.login.utils.LoginRequestInterceptor;
+import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
 import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
@@ -13,9 +15,11 @@ import it.geosolutions.geocollect.android.core.widgets.dialog.UploadDialog;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.http.CommitResponse;
 import it.geosolutions.geocollect.model.viewmodel.FormAction;
+import it.geosolutions.geocollect.model.viewmodel.Page;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import jsqlite.Database;
 import android.app.Activity;
@@ -40,7 +44,7 @@ import com.actionbarsherlock.app.SherlockFragment;
  * @author robertoehler
  *
  */
-public class SendMissionFeatureAction extends FormAction {
+public class SendMissionFeatureAction extends AndroidAction {
 	
 	private static final long serialVersionUID = 6464461286516024625L;
 
@@ -54,6 +58,7 @@ public class SendMissionFeatureAction extends FormAction {
 	private static final String FRAGMENT_UPLOAD_DIALOG="FRAGMENT_UPLOAD_DIALOG";
 	
 	public SendMissionFeatureAction(FormAction a){
+		super(a);
 		this.attributes = a.attributes;
 		this.dataModel = a.dataModel;
 		this.iconCls = a.iconCls;
@@ -188,6 +193,14 @@ public class SendMissionFeatureAction extends FormAction {
 			arguments.putString(UploadDialog.PARAMS.DATAURL, url);
 			arguments.putString(UploadDialog.PARAMS.MEDIAURL, murl);
 			
+			String featureIDString = MissionUtils.getFeatureGCID(missionFeature);
+			
+			// Set the "MY_ORIG_ID" to link this feature to its photos
+			if(missionFeature.properties == null){
+				missionFeature.properties = new HashMap<String, Object>();
+			}
+			missionFeature.properties.put("MY_ORIG_ID", featureIDString);
+			
 			GeoJson gson = new GeoJson();
 			String c = gson.toJson( missionFeature);
 			String data = null;
@@ -196,10 +209,21 @@ public class SendMissionFeatureAction extends FormAction {
 			} catch (UnsupportedEncodingException e) {
 				Log.e(TAG, "error transforming missionfeature to gson",e);
 			}
-			String featureIDString = MissionUtils.getFeatureGCID(missionFeature);
+			
+			int defaultImageSize = 1000;
+			FormUtils.resizeFotosToMax(fragment.getActivity().getBaseContext(), featureIDString, defaultImageSize);
 			
 			arguments.putString(UploadDialog.PARAMS.DATA, data);
 			arguments.putString(UploadDialog.PARAMS.ORIGIN_ID, featureIDString);
+			
+			/*
+			 *  TODO: Change this line into 
+			 *  arguments.putString(UploadDialog.PARAMS.MISSION_ID, <mission_id_here>);
+			 *  when the MapStore GetFeatureInfoMenu will handle parametric missions id
+			 */
+			arguments.putString(UploadDialog.PARAMS.MISSION_ID, "punti_abbandono");
+
+			arguments.putStringArray(UploadDialog.PARAMS.MEDIA, FormUtils.getPhotoUriStrings(fragment.getActivity().getBaseContext(),featureIDString));
 			arguments.putBoolean(UploadDialog.PARAMS.MISSION_FEATURE_UPLOAD, true);
 			
 			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(fragment.getSherlockActivity());
@@ -219,6 +243,13 @@ public class SendMissionFeatureAction extends FormAction {
 			
 		}
 		
+		
+	}
+	
+	@Override
+	public void performAction(SherlockFragment fragment, FormAction action,
+			Mission m, Page p) {
+		// TODO Auto-generated method stub
 		
 	}
 }
