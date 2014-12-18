@@ -124,7 +124,7 @@ public class LoginUtil {
 				//TODO enter real values
 				ed.putString(LoginActivity.PREFS_USER_SURNAME, username);
 				ed.putString(LoginActivity.PREFS_USER_FORENAME, "Antonio");
-				ed.putString(LoginActivity.PREFS_USER_ENTE, "Comune di Pisa");
+				ed.putString(LoginActivity.PREFS_USER_ENTE, "Comune di Genova");
 				ed.commit();
 				
 				pCallback.received();
