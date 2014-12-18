@@ -514,12 +514,6 @@
 					
 					"type":"text",
 					"xtype":"label",
-					"value":"${origin.ID}",
-					"label":"Id"
-				},{
-					
-					"type":"text",
-					"xtype":"label",
 					"value":"${origin.ID1}",
 					"label":"Id 1"
 				}]
