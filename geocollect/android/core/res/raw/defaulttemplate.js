@@ -162,6 +162,366 @@
 						"height":640,
 						"displayOriginalValue":true
 					}
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.MACROAREA}",
+					"label":"Macro Area"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.MORFOLOGIA}",
+					"label":"Morfologia"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.INCLINAZIO}",
+					"label":"Inclinazione"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.ODORE}",
+					"label":"Odore"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.VEGETAZION}",
+					"label":"Vegetazione"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.RISCHIO}",
+					"label":"Rischio"
+				},,{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.RISCHIO_ES}",
+					"label":"Rischio Es"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.PULIZIA}",
+					"label":"Pulizia"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.STABILITA}",
+					"label":"Stabilità"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.DIMENSIONI}",
+					"label":"Dimensioni"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.IMPATTO_ES}",
+					"label":"Impatto Es"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.CRITICITA}",
+					"label":"Criticità"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.DISSUASION}",
+					"label":"Dissuasion"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.NOTE}",
+					"label":"Note"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.FATTIBILIT}",
+					"label":"Fattibilità"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.AREA_PRIVA}",
+					"label":"Area Privata"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.AREA_PUBBL}",
+					"label":"Area Pubblica"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.GMROTATION}",
+					"label":"GM Rotation"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.AREA_PUBBL}",
+					"label":"Area Pubblica"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.VALORE_SOC}",
+					"label":"Valore soc"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.SOCIO_PAES}",
+					"label":"Socio Paes"
+				},,{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.VALORE_RIS}",
+					"label":"Valore Ris"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.MORFOLOGI1}",
+					"label":"Morfologi1"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.COPERTURA_}",
+					"label":"Copertura_"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.COPERTURA1}",
+					"label":"Copertura1"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.USO_AGRICO}",
+					"label":"Uso Agrico"
+				},,{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.USO_PARCHE}",
+					"label":"Uso Parche"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.USO_COMMER}",
+					"label":"Uso Commer"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.USO_STRADA}",
+					"label":"Uso Strada"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.USO_ABBAND}",
+					"label":"Uso Abband"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.PRESUNZION}",
+					"label":"Presunzion"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.ALTRE_CARA}",
+					"label":"Altre Cara"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.DISTANZA_U}",
+					"label":"Distanza U"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.DISTANZA_C}",
+					"label":"Distanza C"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.DISTANZA_P}",
+					"label":"Distanza P"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.INSEDIAMEN}",
+					"label":"Insediamen"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.INSEDIAME1}",
+					"label":"Insediame1"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.INSEDIAME2}",
+					"label":"Insediame2"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.INSEDIAME3}",
+					"label":"Insediame3"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.VALORE_GRA}",
+					"label":"Valore Gra"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.VALORE_FAT}",
+					"label":"Valore Fat"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.AGRICOLO}",
+					"label":"Agricolo"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.AGRICOLO_A}",
+					"label":"Agricolo A"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.RIFIUTI_PE}",
+					"label":"Rifiuti Pe"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.RIFIUTI_IN}",
+					"label":"Rifiuti in"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.QUANTITA_R}",
+					"label":"Quantità R"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.STATO_FISI}",
+					"label":"Stato Fisi"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.MODALITA_S}",
+					"label":"Modalità S"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.PERCOLATO}",
+					"label":"Percolato"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.BOSCATE}",
+					"label":"Boscate"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.BOSCATE_AB}",
+					"label":"Boscate Ab"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.TORRENTI_R}",
+					"label":"Torrenti R"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.NOME_TORRE}",
+					"label":"Nome Torre"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.PROBABILE_}",
+					"label":"Probabile"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.POZZI_FALD}",
+					"label":"Pozzi Fald"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.IMPATTO_CO}",
+					"label":"Impatto Co"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.LATITUDINE}",
+					"label":"Latitudine"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.LONGITUDIN}",
+					"label":"Longitudine"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.ID}",
+					"label":"Id"
+				},{
+					
+					"type":"text",
+					"xtype":"label",
+					"value":"${origin.ID1}",
+					"label":"Id 1"
 				}]
 	},
 	"sop_form": {
