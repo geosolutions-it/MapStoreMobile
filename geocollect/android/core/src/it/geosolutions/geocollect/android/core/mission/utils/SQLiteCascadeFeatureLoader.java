@@ -18,7 +18,6 @@
 package it.geosolutions.geocollect.android.core.mission.utils;
 
 
-import it.geosolutions.android.map.model.MSMMap;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import static it.geosolutions.geocollect.android.core.mission.utils.SpatialiteUtils.populateFeatureFromStmt;
 import it.geosolutions.geocollect.android.core.BuildConfig;
@@ -189,7 +188,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 		
 		if (mPrefs != null){
 			// this must now specify a table, otherwise it blocks loading data for other tables
-			long millis = mPrefs.getLong(LAST_UPDATE_PREF + this.sourceTableName, 0L);
+			long millis = mPrefs.getLong(LAST_UPDATE_PREF, 0L);
 			if(millis >0){
 				Date currentDate = new Date();
 				if( currentDate.getTime() - millis < UPDATE_THRESHOLD){
