@@ -137,8 +137,16 @@ public class MapsActivity extends MapActivityBase {
 		public static final String GEOSTORE_URL = "GEOSTORE_URL";
 		public static final String CONFIRM_ON_EXIT = "CONFIRM_ON_EXIT";
 		public static final String CUSTOM_MAPINFO_CONTROL = "CustomMapInfoControlParcel";
+		public static final String DRAWER_MODE = "DRAWER_MODE";
 	}
-
+	
+	public enum DrawerMode{
+		BOTH,
+		ONLY_LEFT,
+		NONE
+		
+	}
+	private DrawerMode mDrawerMode;
 	
 	//------------------------------------------------------
 	// PREFERENCES
@@ -230,12 +238,28 @@ public class MapsActivity extends MapActivityBase {
         setSupportProgressBarIndeterminateVisibility(false); 
 		super.onCreate(savedInstanceState);
 		
-		//
-		// LAYOUT INITIALIZATION 
-		//
-		setContentView(R.layout.main);
-		//Setup the left menu (Drawer)
-        
+		if(getIntent() != null && getIntent().hasExtra(PARAMETERS.DRAWER_MODE)){
+			mDrawerMode = DrawerMode.values()[getIntent().getIntExtra(PARAMETERS.DRAWER_MODE, 0)];
+			switch (mDrawerMode) {
+			case BOTH:
+				setContentView(R.layout.main);
+				break;
+			case ONLY_LEFT:
+				setContentView(R.layout.main_only_left_drawer);
+				break;
+			case NONE:
+				setContentView(R.layout.main_no_drawers);
+				break;
+			}
+
+		}else{
+			mDrawerMode = DrawerMode.BOTH;
+			//
+			// LAYOUT INITIALIZATION 
+			//
+			setContentView(R.layout.main);
+			//Setup the left menu (Drawer)
+		}
         //
 		// MAP INITIALIZATION 
 		//
@@ -346,15 +370,21 @@ public class MapsActivity extends MapActivityBase {
 			
 //			}
 			//setup left drawer fragments
-	        osf =  new LayerSwitcherFragment();
-	        layerManager.setLayerChangeListener(osf);
-			FragmentTransaction fragmentTransaction = fManager.beginTransaction();
-			fragmentTransaction.add(R.id.left_drawer_container,osf);
-			GenericMenuFragment other = new GenericMenuFragment();
-			//fragmentTransaction.add(R.id.right_drawer, other);
-			SourcesFragment sf = new SourcesFragment();
-			fragmentTransaction.add(R.id.right_drawer, sf);
-			fragmentTransaction.commit();
+			if(mDrawerMode != DrawerMode.NONE){
+
+				osf =  new LayerSwitcherFragment();
+				layerManager.setLayerChangeListener(osf);
+				FragmentTransaction fragmentTransaction = fManager.beginTransaction();
+				fragmentTransaction.add(R.id.left_drawer_container,osf);
+				GenericMenuFragment other = new GenericMenuFragment();
+				//fragmentTransaction.add(R.id.right_drawer, other);
+				if(mDrawerMode == DrawerMode.BOTH){
+
+					SourcesFragment sf = new SourcesFragment();
+					fragmentTransaction.add(R.id.right_drawer, sf);
+				}
+				fragmentTransaction.commit();
+			}
 		}
 	}
 	
@@ -363,44 +393,55 @@ public class MapsActivity extends MapActivityBase {
 	 */
 	private void setupDrawerLayout() {
 		
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList = (View) findViewById(R.id.left_drawer); 
-        mLayerMenu = (View) findViewById(R.id.right_drawer);
-        
-        mDrawerToggle = new ActionBarDrawerToggle(
-                this,                  /* host Activity */
-                mDrawerLayout,         /* DrawerLayout object */
-                R.drawable.ic_drawer,  /* nav drawer icon to replace 'Up' caret  */
-                R.string.drawer_open,  /* "open drawer" description */
-                R.string.drawer_close  /* "close drawer" description */
-                ) {
-
-            private CharSequence mTitle=getTitle();
-
-			/** Called when a drawer has settled in a completely closed state. */
-            public void onDrawerClosed(View view) {
-                //getSupportActionBar().setTitle(mTitle);
-                supportInvalidateOptionsMenu();
-                if (currentActionMode != null){
-                	currentActionMode.finish();
-                }
-                
-            }
-
-            /** Called when a drawer has settled in a completely open state. */
-            public void onDrawerOpened(View drawerView) {
-            	mTitle = getSupportActionBar().getTitle();
-            	getSupportActionBar().setTitle(R.string.drawer_title);
-            	supportInvalidateOptionsMenu();
-            }
-        };
-
-        // Set the drawer toggle as the DrawerListener
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
-        
-        //layerList
+		switch(mDrawerMode){
+		case BOTH:
+		case ONLY_LEFT:
+			mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+			mDrawerList = (View) findViewById(R.id.left_drawer); 
+			if(mDrawerMode == DrawerMode.BOTH){				
+				mLayerMenu = (View) findViewById(R.id.right_drawer);
+			}
+			
+			mDrawerToggle = new ActionBarDrawerToggle(
+					this,                  /* host Activity */
+					mDrawerLayout,         /* DrawerLayout object */
+					R.drawable.ic_drawer,  /* nav drawer icon to replace 'Up' caret  */
+					R.string.drawer_open,  /* "open drawer" description */
+					R.string.drawer_close  /* "close drawer" description */
+					) {
+				
+				private CharSequence mTitle=getTitle();
+				
+				/** Called when a drawer has settled in a completely closed state. */
+				public void onDrawerClosed(View view) {
+					//getSupportActionBar().setTitle(mTitle);
+					supportInvalidateOptionsMenu();
+					if (currentActionMode != null){
+						currentActionMode.finish();
+					}
+					
+				}
+				
+				/** Called when a drawer has settled in a completely open state. */
+				public void onDrawerOpened(View drawerView) {
+					mTitle = getSupportActionBar().getTitle();
+					getSupportActionBar().setTitle(R.string.drawer_title);
+					supportInvalidateOptionsMenu();
+				}
+			};
+			
+			// Set the drawer toggle as the DrawerListener
+			mDrawerLayout.setDrawerListener(mDrawerToggle);
+			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+			getSupportActionBar().setHomeButtonEnabled(true);
+			
+			//layerList
+			break;
+		case NONE:
+			break;
+	
+		}
+		
         
 	}
 	/**
@@ -604,23 +645,27 @@ public class MapsActivity extends MapActivityBase {
 		//Drawer part
         if (item.getItemId() == android.R.id.home) {
 
-            if (mDrawerLayout.isDrawerOpen(mDrawerList)) {
+            if (mDrawerList != null && mDrawerLayout.isDrawerOpen(mDrawerList)) {
             	mDrawerLayout.closeDrawer(mDrawerList);
             } else {
-            	mDrawerLayout.openDrawer(mDrawerList);
+            	if(mDrawerList != null){
+            		mDrawerLayout.openDrawer(mDrawerList);
+            	}
             	if(mLayerMenu!=null){
             		mDrawerLayout.closeDrawer(mLayerMenu);
             	}
             }
         //layer menu part
 		}else if(item.getItemId() == R.id.layer_menu_action){
-			if (mDrawerLayout.isDrawerOpen(mLayerMenu)) {
+			if (mLayerMenu!=null && mDrawerLayout.isDrawerOpen(mLayerMenu)) {
             	mDrawerLayout.closeDrawer(mLayerMenu);
             } else {
             	if(mLayerMenu!=null){
             		mDrawerLayout.openDrawer(mLayerMenu);
             	}
-            	mDrawerLayout.closeDrawer(mDrawerList);
+            	if(mDrawerList != null){
+            		mDrawerLayout.closeDrawer(mDrawerList);
+            	}
             }
 		}else if(item.getItemId() == R.id.settings){
 			Intent pref = new Intent(this,EditPreferences.class);
@@ -921,9 +966,11 @@ public class MapsActivity extends MapActivityBase {
 		if(requestCode==DATAPROPERTIES_REQUEST_CODE){
 			mapView.getOverlayController().redrawOverlays();
 			// close right drawer
-            if (mDrawerLayout.isDrawerOpen(mLayerMenu)) {
-            	mDrawerLayout.closeDrawer(mLayerMenu);
-            }
+			if(mLayerMenu!=null){
+				if (mDrawerLayout.isDrawerOpen(mLayerMenu)) {
+					mDrawerLayout.closeDrawer(mLayerMenu);
+				}
+			}
 		}
 		Resource resource = (Resource) data.getSerializableExtra(GeoStoreResourceDetailActivity.PARAMS.RESOURCE);
 		if(resource!=null){
@@ -953,8 +1000,10 @@ public class MapsActivity extends MapActivityBase {
 		layers.addAll(layersToAdd);
 		layerManager.setLayers(layers);
 		// close right drawer
-		if (mDrawerLayout.isDrawerOpen(mLayerMenu)) {
-			mDrawerLayout.closeDrawer(mLayerMenu);
+		if(mLayerMenu!=null){
+			if (mDrawerLayout.isDrawerOpen(mLayerMenu)) {
+				mDrawerLayout.closeDrawer(mLayerMenu);
+			}
 		}
 	}
 
@@ -966,8 +1015,10 @@ public class MapsActivity extends MapActivityBase {
 	private void loadGeoStoreResource(Resource resource, String geoStoreUrl) {
 		MapStoreUtils.loadMapStoreConfig(geoStoreUrl, resource, this);
 		// close right drawer
-		if (mDrawerLayout.isDrawerOpen(mLayerMenu)) {
-			mDrawerLayout.closeDrawer(mLayerMenu);
+		if(mLayerMenu!=null){
+			if (mDrawerLayout.isDrawerOpen(mLayerMenu)) {
+				mDrawerLayout.closeDrawer(mLayerMenu);
+			}
 		}
 	}
 
@@ -1064,13 +1115,17 @@ public class MapsActivity extends MapActivityBase {
     	TileCache fileSystemTileCache = this.mapView.getFileSystemTileCache();
     	
     	Log.v("PERSISTENCE","capacity"+fileSystemTileCache.getCapacity()+",persistence:"+fileSystemTileCache.isPersistent());
-        mDrawerToggle.syncState();
+        if(mDrawerToggle != null){
+        	mDrawerToggle.syncState();
+        }
     }
     
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mDrawerToggle.onConfigurationChanged(newConfig);
+        if(mDrawerToggle != null){
+        	mDrawerToggle.onConfigurationChanged(newConfig);
+        }
         // Checks the orientation of the screen for landscape and portrait and set portrait mode always
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             setRequestedOrientation (ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -1154,7 +1209,9 @@ public class MapsActivity extends MapActivityBase {
     		default:
     			break;
     		}
-    		mDrawerToggle.syncState();
+    		if(mDrawerToggle != null){
+    			mDrawerToggle.syncState();
+    		}
     		mapView.setRenderer(mapRenderer, true);
     		mapView.clearAndRedrawMapView();
     		MapFilesProvider.setBackgroundSourceType(type);
@@ -1239,6 +1296,13 @@ public class MapsActivity extends MapActivityBase {
 		}
 		
 		layerManager.setLayers(orderedLayers);
+    }
+    
+    public View getLayerMenu(){
+    	return mLayerMenu;
+    }
+    public View getDrawerList(){
+    	return mDrawerList;
     }
 
 }
