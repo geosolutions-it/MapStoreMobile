@@ -54,7 +54,7 @@
     <string name="login_success">Success, you are logged in !</string>
     <string name="login_take_advantage">To take advantage of this feature, you must be registered</string>
     <string name="login_login">Login</string>
-    <string name="login_register">If you are not registered yet, sign in on www.geocollect.it</string>
+    <string name="login_register">If you are not registered yet, sign in on geocollect.geo-solutions.it</string>
     <string name="login_password_forgotten">Password forgotten ?</string> 
     <string name="login_canceled">You did not login, cannot load data, must close</string>
     <string name="login_select_server">Select a server to connect to</string>

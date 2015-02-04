@@ -2,4 +2,7 @@
 <resources>
     <!-- Identifier of the tag_image_path -->
     <item type="id" name="tag_image_path"></item>
+    <string name="geocollect_register_link" translatable="false">http://geocollect.geo-solutions.it/mapstore/manager</string>
+    <string name="geocollect_retrieve_password_link" translatable="false">http://geocollect.geo-solutions.it/mapstore/manager</string>
+    
 </resources>

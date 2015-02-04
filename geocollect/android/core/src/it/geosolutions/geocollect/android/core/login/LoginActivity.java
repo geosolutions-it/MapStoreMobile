@@ -25,7 +25,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
-import android.text.util.Linkify;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -153,34 +152,45 @@ public class LoginActivity extends Activity {
 			}
 		});
 		
-		//TODO set links according to geocollect
-		findViewById(R.id.password_forgotten_tv).setOnClickListener(new View.OnClickListener() {
+		TextView forgotPasswordTextView = (TextView) findViewById(R.id.password_forgotten_tv);
+		if(forgotPasswordTextView != null){
+			forgotPasswordTextView.setOnClickListener(new View.OnClickListener() {
 			
-			@Override
-			public void onClick(View v) {
-				String url = "http://exactlab.safevps.it/mysnowmaps/web/app_dev.php/it/forgot-password";
-				Intent i = new Intent(Intent.ACTION_VIEW);
-				i.setData(Uri.parse(url));
-				startActivity(i);
-				
-			}
-		});
+				@Override
+				public void onClick(View v) {
+					String url = getString(R.string.geocollect_retrieve_password_link);
+					Intent i = new Intent(Intent.ACTION_VIEW);
+					i.setData(Uri.parse(url));
+					startActivity(i);
+					
+				}
+			});
 		
-		//TODO set links according to geocollect
+		}
+		
 		TextView register_tv = (TextView) findViewById(R.id.register_tv);
-		register_tv.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				String url = "http://exactlab.safevps.it/mysnowmaps/web/app_dev.php/it/register";
-				Intent i = new Intent(Intent.ACTION_VIEW);
-				i.setData(Uri.parse(url));
-				startActivity(i);
-				
-			}
-		});
 		
-		Linkify.addLinks(register_tv, Linkify.WEB_URLS);
+		if(register_tv != null){
+			
+			register_tv.setOnClickListener(new View.OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					String url = getString(R.string.geocollect_register_link);
+					Intent i = new Intent(Intent.ACTION_VIEW);
+					i.setData(Uri.parse(url));
+					startActivity(i);
+					
+				}
+			});
+			
+			// Disabled the link, the clickListener does the same job
+			// TODO: re-enable when the URL is dinamically set accordingly to the selected server
+			//Linkify.addLinks(register_tv, Linkify.WEB_URLS);
+			
+		}
+		
+		
 		
 	}
 	
