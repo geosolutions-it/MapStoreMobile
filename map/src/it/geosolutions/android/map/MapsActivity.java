@@ -627,12 +627,17 @@ public class MapsActivity extends MapActivityBase {
 			ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		MenuInflater inflater = getSupportMenuInflater();
-		inflater.inflate(R.menu.map, (Menu) menu);
-
+		inflater.inflate(R.menu.contextmenu_map, (Menu) menu);
+		
+		switch (mDrawerMode) {
+		case BOTH:
+			inflater.inflate(R.menu.actionmenu_map, (Menu) menu);
+			
+			break;
+		default:
+			break;
+		}
 	}
-
-
-	
 
 	/**
 	 * Enable and disable Overlays adding / removing from the map
@@ -743,8 +748,15 @@ public class MapsActivity extends MapActivityBase {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getSupportMenuInflater().inflate(R.menu.map, menu);
+		getSupportMenuInflater().inflate(R.menu.contextmenu_map, menu);
 		
+		switch (mDrawerMode) {
+		case BOTH:
+			getSupportMenuInflater().inflate(R.menu.actionmenu_map, menu);
+			break;
+		default:
+			break;
+		}
 
 		return true;
 	}
