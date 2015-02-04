@@ -267,6 +267,11 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 		String originIDString = MissionUtils.getMissionGCID(mission);
 		final String s = "SELECT Y(" + f.fieldId + "), X(" + f.fieldId + ") FROM '" + tableName + "' WHERE ORIGIN_ID = '" + originIDString +"';";
 		
+		if(mission == null || mission.db == null){
+			Log.w(TAG, "Cannot retrieve mission database");
+			return null;
+		}
+		
 		try {
 			if(jsqlite.Database.complete(s)){
 				Stmt st = mission.db.prepare(s);
@@ -367,7 +372,10 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 			if(getSherlockActivity() instanceof PendingMissionDetailActivity){
 				Log.d(TAG, "Loader: Connecting to Activity database");
 				m.db = ((PendingMissionDetailActivity)getSherlockActivity()).spatialiteDatabase;
-			}else{
+			}else if(getSherlockActivity() instanceof PendingMissionListActivity){
+				Log.d(TAG, "Loader: Connecting to Activity database");
+				m.db = ((PendingMissionListActivity)getSherlockActivity()).spatialiteDatabase;
+			}else {
 				Log.w(TAG, "Loader: Could not connect to Activity database");
 			}
 			mission =m;
@@ -395,6 +403,9 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 				if(activity instanceof PendingMissionDetailActivity){
 					Log.d(TAG, "Loader: Connecting to Activity database");
 					m.db = ((PendingMissionDetailActivity)activity).spatialiteDatabase;
+				}else if(activity instanceof PendingMissionListActivity){
+					Log.d(TAG, "Loader: Connecting to Activity database");
+					m.db = ((PendingMissionListActivity)activity).spatialiteDatabase;
 				}else{
 					Log.w(TAG, "Loader: Could not connect to Activity database");
 				}
