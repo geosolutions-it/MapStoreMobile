@@ -437,7 +437,12 @@ public class MissionUtils {
 		if(mission.getOrigin().properties != null){
 			if(mission.getOrigin().properties.containsKey("GCID")){
 				try {
-					originIDString = (String) mission.getOrigin().properties.get("GCID");
+					Object objID = mission.getOrigin().properties.get("GCID");
+					if(objID == null){
+						Log.w(TAG, "WARNING: Mission has a null GDIC using ORIGIN_ID");
+						return originIDString;
+					}
+					originIDString = (String) objID;
 				}catch(ClassCastException cce){
 					Log.w(TAG, "WARNING: Mission has a GDIC but it cannot be converted to String");
 					originIDString = null;
@@ -465,7 +470,12 @@ public class MissionUtils {
 		if(feature.properties != null){
 			if(feature.properties.containsKey("GCID")){
 				try {
-					originIDString = (String) feature.properties.get("GCID");
+					Object objID = feature.properties.get("GCID");
+					if(objID == null){
+						Log.w(TAG, "WARNING: Feature has a null GDIC using feature id: "+originIDString);
+						return originIDString;
+					}
+					originIDString = (String) objID;
 				}catch(ClassCastException cce){
 					Log.w(TAG, "WARNING: Feature has a GDIC but it cannot be converted to String");
 					originIDString = null;
