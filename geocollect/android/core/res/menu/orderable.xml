@@ -6,7 +6,7 @@
     <item
         android:id="@+id/create_new"
         android:icon="@drawable/ic_action_plus"
-        android:showAsAction="ifRoom"
+        android:showAsAction="always"
         android:title="@string/create_a_inspection"/>
     
     <item android:id="@+id/order"
