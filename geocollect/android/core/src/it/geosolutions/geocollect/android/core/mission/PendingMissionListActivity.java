@@ -103,7 +103,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 	/**
 	 * Spatialite Database for persistence
 	 */
-	jsqlite.Database spatialiteDatabase;
+	public jsqlite.Database spatialiteDatabase;
 	
 
 	@Override

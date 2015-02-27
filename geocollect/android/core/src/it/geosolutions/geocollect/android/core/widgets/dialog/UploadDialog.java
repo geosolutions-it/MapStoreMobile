@@ -1,15 +1,24 @@
 package it.geosolutions.geocollect.android.core.widgets.dialog;
 
+import it.geosolutions.geocollect.android.core.R;
+import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
+import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
+import it.geosolutions.geocollect.model.http.CommitResponse;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import jsqlite.Database;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.FileBody;
@@ -20,10 +29,7 @@ import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
-import com.google.gson.Gson;
 
-import it.geosolutions.geocollect.android.core.R;
-import it.geosolutions.geocollect.model.http.CommitResponse;
 import android.app.Activity;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
@@ -36,9 +42,14 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.gson.Gson;
 /**
  * Fragment that shows uplaod status
  * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
+ * 
+ * adapted for multiple uploads in one background thread by
+ * @author Robert Oehler
  *
  */
 public class UploadDialog extends RetainedDialogFragment {
@@ -54,22 +65,19 @@ public class UploadDialog extends RetainedDialogFragment {
 	private boolean skipData = false;
 	private Activity activity;
 	private static boolean sending = false;
-	private String[] photoURIs;
-	private String missionId;
 	
-	private boolean missionFeatureUpload = false;
 	
 	public static class PARAMS {
 		public static final String DATAURL="URL";
 		public static final String MEDIAURL="MEDIAURL";
-		public static final String DATA="DATA";
-		public static final String ORIGIN_ID = "ORIGIN_ID";
 		public static final String MISSION_ID="MISSION_ID";
-		public static final String MEDIA="MEDIA";
 		public static final String AUTH_KEY="AUTH_KEY";
 		public static final String BASIC_AUTH="BASIC_AUTH";
-		public static final String MISSION_FEATURE_UPLOAD="MISSION_FEATURE_UPLOAD";
+		public static final String MISSIONS= "MISSIONS";
+		public static final String MISSION_MEDIA_URLS= "MISSION_MEDIA_URLS";
+		public static final String TABLENAME = "TABLENAME";
 	}
+	
 
 	public UploadDialog() {
 		// Empty constructor required for DialogFragment
@@ -83,7 +91,6 @@ public class UploadDialog extends RetainedDialogFragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 			//TODO the retained fragment call this method.
 		
-			this.missionFeatureUpload = getArguments().getBoolean(PARAMS.MISSION_FEATURE_UPLOAD);
 			
 			if(getView()==null){;
 				View view = inflater.inflate(R.layout.progress_send, container);
@@ -161,115 +168,113 @@ public class UploadDialog extends RetainedDialogFragment {
 	 * 
 	 */
 	private class SendDataThread extends
-			AsyncTask<Void, Void, CommitResponse> {
+			AsyncTask<Void, Integer, CommitResponse> {
 		
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
 			sending = true;
 	
-				setupDataControls(true);
-			
-
+			setupDataControls(true);
 		}
 
 		@Override
+		@SuppressWarnings("unchecked")
 		protected CommitResponse doInBackground(Void... params) {
 			CommitResponse result = null ;
 
 			if (!skipData) {
 				
-				try {
-					String resultString = sendJson(getArguments().getString(PARAMS.DATAURL),getArguments().getString(PARAMS.DATA));
-					result = getCommitResponse(resultString);
-				} catch (Exception e) {
-					Log.e("SendData", "ErrorSending Data",e);
+				final HashMap<String,String> uploads = (HashMap<String, String>) getArguments().getSerializable(PARAMS.MISSIONS);
+				final HashMap<String,String[]> mediaUrls = (HashMap<String,String[]>) getArguments().getSerializable(PARAMS.MISSION_MEDIA_URLS);
+				//it these are null there is no upload necessary, break
+				if(uploads  == null || mediaUrls == null){
+					result = new CommitResponse();
+					result.setMessage("no valid arguments provided");
+					result.setStatus(it.geosolutions.geocollect.model.http.Status.ERROR);
+					return result;
 				}
-
+				
+				final int uploadAmount = uploads.size();
+				for(String id : uploads.keySet()){
+					
+					//UI update -> data upload
+					UploadDialog.this.getActivity().runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							setupMediaControl(false);
+							setupDataControls(true);
+						}
+					});
+					
+					try {
+						//1.send data
+						final String data = uploads.get(id);
+						String resultString = sendJson(getArguments().getString(PARAMS.DATAURL), data);
+						result  = getCommitResponse(resultString);
+						 
+						if(result.isSuccess()){ //data upload successful
+							//2. send media
+							//UI update -> media upload
+							UploadDialog.this.getActivity().runOnUiThread(new Runnable() {
+								
+								@Override
+								public void run() {
+									setupDataControls(false);
+									setDataSendResultUI(true);
+									setupMediaControl(true);
+								}
+							});
+							
+							final String[] photoUrls = mediaUrls.get(id);
+							CommitResponse photosSent = sendPhotos(photoUrls, result.getId(), id, uploadAmount);
+							if(photosSent.isSuccess()){
+								//both successful, can delete this entry
+								//1.delete table entry
+								final String tableName = getArguments().getString(PARAMS.TABLENAME);
+								final Database db = ((PendingMissionListActivity)getActivity()).spatialiteDatabase;
+								PersistenceUtils.deleteMissionFeature(db, tableName, id);
+									
+								//2.delete photos
+								if(photoUrls != null){
+									for(String file : photoUrls){
+										File f = new File(file);
+										if(f.exists()){
+											f.delete();
+										}
+									}
+								}
+								//3.delete this entry as "uploadable"
+								HashMap<String,ArrayList<String>> uploadables = PersistenceUtils.loadUploadables(getActivity());
+								ArrayList<String> uploadList = uploadables.get(tableName);
+								if(uploadList.contains(id)){
+									uploadList.remove(id);
+								}
+								uploadables.put(tableName, uploadList);
+								PersistenceUtils.saveUploadables(getActivity(), uploadables);
+								
+							}else{
+								//TODO data sent, photos failed, what to delete ?
+							}
+							
+						}else{
+							// data upload failed
+							//TODO report this or continue with others ?
+						}
+					} catch (Exception e) {
+						Log.e("SendData", "ErrorSending Data",e);
+					}
+				}
 			}
 
 			return result;
 		}
-
 		
-		 protected String sendJson(final String url, final String json) throws ClientProtocolException, IOException {
-			 HttpClient client = new DefaultHttpClient();
-             HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000); //Timeout Limit
-             HttpResponse response;
-            
-                 HttpPost post = new HttpPost(url);
-                
-                 StringEntity se = new StringEntity( json.toString(), "UTF-8");  
-                 se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
-                 se.setContentEncoding(new BasicHeader(HTTP.CHARSET_PARAM, "UTF-8"));
-                 post.setEntity(se);
-                 
-                 post.addHeader(new BasicHeader("Authorization", getArguments().getString(PARAMS.BASIC_AUTH)));
-                 
-                 response = client.execute(post);
+		private CommitResponse sendPhotos(String[] filePaths, String dataSentID, String featureID, final int uploadAmount){
 
-                 /*Checking response */
-                 if(response!=null){
-                     return  EntityUtils.toString(response.getEntity());
-                 }
-                 return null;
-                 
-
-                
-		    }
-
-		@Override
-		protected void onPostExecute(CommitResponse result) {
-			super.onPostExecute(result);
-			if(result == null || !result.isSuccess()){
-				setDataSendResultUI(false);
-				closeDialog(false);
-				Toast.makeText(activity, R.string.error_sending_data, Toast.LENGTH_LONG).show();
-				Activity c = activity != null ? activity : getActivity();
-				onFinish(c, result);
-			//}else if (!missionFeatureUpload){
-			}else {
-				//continue with media
-				setupDataControls(false);
-				setDataSendResultUI(true);
-				new MediaSenderThread().execute(result.getId());
-			}/*else{
-				//SUCCESS
-				setupMediaControl(false);
-				setMediaSendResultUI(true);
-				closeDialog(true);
-				Activity c = activity != null ? activity : getActivity();
-				onFinish(c,result);
-			
-			}
-			*/
-		}
-	}
-
-	/**
-	 * Send Media data dummy Thread 
-	 * 
-	 * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
-	 * 
-	 */
-	private class MediaSenderThread extends AsyncTask<String, Integer, CommitResponse> {
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-
-				setupMediaControl(true);
-			
-
-		}
-
-		@Override
-		protected CommitResponse doInBackground(String... params) {
-			//Dummy 
-			//Thread.sleep(5000)
 			CommitResponse cr =null;
 			//the output id
-			String idOut = params[0];
-			String[] filePaths = getArguments().getStringArray(PARAMS.MEDIA);
+
 			int i = 0;
 			//no media to send create a dummy commit response to return success
 			if( filePaths == null || filePaths.length == 0 ){
@@ -281,30 +286,31 @@ public class UploadDialog extends RetainedDialogFragment {
 			//<MEDIA_URL>/<MISSIONID>/ORIGINID/outID/upload
 			String mediaUrl = getArguments().getString(PARAMS.MEDIAURL) + 
 					"/" + getArguments().getString(PARAMS.MISSION_ID) +
-					"/" + getArguments().getString(PARAMS.ORIGIN_ID) +
-					"/" + idOut +
+					"/" + featureID +
+					"/" + dataSentID +
 					"/upload";
 			for(String file : filePaths){
-				String result;
+				String res;
 				
 				try {
 					File f =  new File(new URI(file)) ;
 					if(!f.exists()){
 						return cr;
 					}
-					result = sendMedia(f,mediaUrl );
+					res = sendMedia(f,mediaUrl );
 				} catch (URISyntaxException e) {
 					Log.e("SendMedia","error sending media, unable read URI:" + file,e);
 					return cr;
 				}
-				publishProgress(i);
-				 cr = getCommitResponse(result);
+				publishProgress((int) (i / (float) uploadAmount));
+				 cr = getCommitResponse(res);
 				if(cr==null || !cr.isSuccess()){
 					return cr;
 				}
 			}
 			return cr;
 		}
+		
 		private String sendMedia(File file,String mediaUrl){
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpContext localContext = new BasicHttpContext();
@@ -314,7 +320,7 @@ public class UploadDialog extends RetainedDialogFragment {
 			HttpPost httpPost = new HttpPost(url);
 			
 			Log.i("SendMedia","Sending data to:"+ mediaUrl);
-			MultipartEntity multiEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+//			MultipartEntity multiEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
 
 			
 			ContentBody cBody = new FileBody(file);
@@ -337,25 +343,55 @@ public class UploadDialog extends RetainedDialogFragment {
 			return null;
 		}
 
+
+		protected String sendJson(final String url, final String json) throws ClientProtocolException, IOException {
+			HttpClient client = new DefaultHttpClient();
+			HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000); //Timeout Limit
+			HttpResponse response;
+
+			HttpPost post = new HttpPost(url);
+
+			StringEntity se = new StringEntity( json.toString(), "UTF-8");  
+			se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+			se.setContentEncoding(new BasicHeader(HTTP.CHARSET_PARAM, "UTF-8"));
+			post.setEntity(se);
+
+			post.addHeader(new BasicHeader("Authorization", getArguments().getString(PARAMS.BASIC_AUTH)));
+
+			response = client.execute(post);
+
+			/*Checking response */
+			if(response!=null){
+				return  EntityUtils.toString(response.getEntity());
+			}
+			return null;
+
+		}
+
 		@Override
 		protected void onPostExecute(CommitResponse result) {
+			super.onPostExecute(result);
+			
 			if(result == null || !result.isSuccess()){
 				setDataSendResultUI(false);
 				setMediaSendResultUI(false);
-				closeDialog(true);
+				closeDialog(false);
+				Toast.makeText(activity, R.string.error_sending_data, Toast.LENGTH_LONG).show();
 				Activity c = activity != null ? activity : getActivity();
 				onFinish(c, result);
-			}else{
+			}else {
 				//SUCCESS
+				setupDataControls(false);
+				setDataSendResultUI(true);
 				setupMediaControl(false);
 				setMediaSendResultUI(true);
 				closeDialog(true);
 				Activity c = activity != null ? activity : getActivity();
 				onFinish(c,result);
 			}
-			
 		}
 	}
+
 	/**
 	 * Parse the result string to get a commit response
 	 * @param resultString
@@ -467,6 +503,14 @@ public class UploadDialog extends RetainedDialogFragment {
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		this.activity = activity;
+	}
+	
+	
+	public interface UploadCallback{
+		
+		public void success();
+		
+		public void error();
 	}
 	
 }

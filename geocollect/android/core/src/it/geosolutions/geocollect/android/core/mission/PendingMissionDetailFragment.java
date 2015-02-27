@@ -17,11 +17,6 @@
  */
 package it.geosolutions.geocollect.android.core.mission;
 
-import java.util.HashMap;
-import java.util.List;
-
-import jsqlite.Exception;
-import jsqlite.Stmt;
 import it.geosolutions.android.map.fragment.MapFragment;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.BuildConfig;
@@ -33,6 +28,13 @@ import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.viewmodel.Field;
 import it.geosolutions.geocollect.model.viewmodel.type.XType;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import jsqlite.Exception;
+import jsqlite.Stmt;
 
 import org.mapsforge.core.model.GeoPoint;
 
@@ -144,7 +146,23 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 		
 		int id = item.getItemId();
 		
-		if(id==R.id.accept){		
+		if(id==R.id.accept){
+			
+			//check if this mission was already marked as uploadable and is going to be altered
+			final String gcid = MissionUtils.getFeatureGCID( mission.getOrigin());
+			
+			HashMap<String,ArrayList<String>> uploadables = PersistenceUtils.loadUploadables(getActivity());
+			
+			final String table = mission.getTemplate().schema_sop.localFormStore;
+			final ArrayList<String> ids = uploadables.get(table);
+			
+			//if an entry exists, remove it and save
+			if(ids != null && ids.size() > 0 && ids.contains(gcid)){
+				ids.remove(gcid);
+				uploadables.put(table, ids);
+				PersistenceUtils.saveUploadables(getActivity(), uploadables);
+			}
+			
 			Intent i = new Intent(getSherlockActivity(),FormEditActivity.class);
 			i.putExtra("MISSION", mission);
 			startActivityForResult(i, EDIT_ACTIVITY_CODE);

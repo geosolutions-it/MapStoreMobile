@@ -520,6 +520,8 @@
 	},
 	"sop_form": {
 		"id": 1,
+	    "url":"http://geocollect.geo-solutions.it/opensdi2-manager/mvc/geocollect/action/storeSopSequence",
+		"mediaurl":"http://geocollect.geo-solutions.it/opensdi2-manager/mvc/geocollect/data",
 		"name": "FormSopralluogo",
 		"pages":[
 			{
@@ -781,14 +783,12 @@
 				   
 				"actions":[{
 					"id":2,
-					"text":"Invia",
-					"type":"send",
-					"name":"send",
-					"iconCls":"ic_send",
+					"text":"Salva",
+					"type":"save",
+					"name":"save",
+					"iconCls":"ic_save",
 					"attributes":{
-						"url":"http://geocollect.geo-solutions.it/opensdi2-manager/mvc/geocollect/action/storeSopSequence",
-						"mediaurl":"http://geocollect.geo-solutions.it/opensdi2-manager/mvc/geocollect/data",
-						"confirmMessage":"Inviare?"
+						"confirmMessage":"Salvare ?"
 					}
 				}]
 			}],
@@ -798,6 +798,8 @@
 	"seg_form": {
 		"id": 2,
 		"name": "FormSegnalazione",
+		"url":"http://geocollect.geo-solutions.it/opensdi2-manager/mvc/geocollect/action/storeSegSequence",
+		"mediaurl":"http://geocollect.geo-solutions.it/opensdi2-manager/mvc/geocollect/data",
 		"pages":[
 			{
 				"title": "Scheda",
@@ -1057,14 +1059,12 @@
 				}],				
 				"actions":[{
 					"id":2,
-					"text":"Invia",
-					"type":"send",
-					"name":"send",
-					"iconCls":"ic_send",
+					"text":"Salva",
+					"type":"save",
+					"name":"save",
+					"iconCls":"ic_save",
 					"attributes":{
-						"url":"http://geocollect.geo-solutions.it/opensdi2-manager/mvc/geocollect/action/storeSegSequence",
-						"mediaurl":"http://geocollect.geo-solutions.it/opensdi2-manager/mvc/geocollect/data",
-						"confirmMessage":"Inviare?"
+						"confirmMessage":"Salvare ?"
 					}
 				}]
 			}]
