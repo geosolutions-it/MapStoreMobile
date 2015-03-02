@@ -34,7 +34,7 @@
     <string name="mandatory">Obbligatorio</string>
     <string name="missing_data">Dati mancanti</string>
     <string name="mandatory_fields_not_filled">I seguenti campi non sono stati compilati :</string>
-    <string name="mandatory_fields_please_fill">Si prega di compilare prima di inviare.</string>
+    <string name="mandatory_fields_please_fill">Si prega di completare i campi prima di inviare i dati</string>
     <string name="selection_filtered">La tua selezione é stata filtrata</string>    
     <string name="create_rectangle">Crea un rettangolo sulla mappa per filtrare su una zona di interesse</string>
   
@@ -72,16 +72,16 @@
     <string name="location_searching">Ricerca Posizione in corso&#8230;</string>
 
     <string name="menu_center">Centrare</string>
-    <string name="entry_saved_success">%s salvato con successo</string>
+    <string name="entry_saved_success">Dati %s salvati con successo</string>
     <string name="menu_clear_survey">Cancella dati di questo sopralluogo</string>
     <string name="menu_upload">Carica</string>
-    <string name="upload_title">%s Carico</string>
+    <string name="upload_title">Caricamento %s</string>
         <plurals name="upload_intro">
-        <item quantity="one">Il seguente %s sarà caricato</item>
-        <item quantity="other">I seguenti %s saranno caricati</item>
+        <item quantity="one">Sarà caricato</item>
+        <item quantity="other">Saranno caricati</item>
     </plurals>
     <string name="upload_intro">I seguenti %s saranno caricati</string>
-    <string name="survey">Soppralluogo</string>
+    <string name="survey">Sopralluogo</string>
     <plurals name="surveys">
         <item quantity="one">sopralluogo</item>
         <item quantity="other">sopralluoghi</item>
@@ -92,7 +92,7 @@
         <item quantity="other">segnalazioni</item>
     </plurals>
     
-    <string name="saving_data_title">Salvare data</string>
-    <string name="saving_data_message">Vuoi veramente segnare questo %s come completato?</string>
+    <string name="saving_data_title">Salvataggio dati</string>
+    <string name="saving_data_message">Vuoi salvare i dati per l\'invio?</string>
     
 </resources>
