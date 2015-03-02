@@ -656,7 +656,7 @@ public class PendingMissionListFragment
 				String uploadList = null;
 				String itemList = "";
 				HashMap<String,ArrayList<String>> uploadables = PersistenceUtils.loadUploadables(getSherlockActivity());
-				ArrayList<MissionFeature> uploads = new ArrayList<>();
+				ArrayList<MissionFeature> uploads = new ArrayList<MissionFeature>();
 				final String tableName = mMode == FragmentMode.CREATION ? missionTemplate.schema_seg.localSourceStore+ "_new" : missionTemplate.schema_sop.localFormStore;
 				List<String> uploadIDs = uploadables.get(tableName);
 
@@ -765,8 +765,8 @@ public class PendingMissionListFragment
 								Log.e(UploadDialog.class.getSimpleName(), e.getClass().getSimpleName(),e);
 							}
 							
-							HashMap<String,String> id_json_map = new HashMap<>();					
-							HashMap<String,String[]> id_mediaurls_map = new HashMap<>();
+							HashMap<String,String> id_json_map = new HashMap<String, String>();					
+							HashMap<String,String[]> id_mediaurls_map = new HashMap<String, String[]>();
 							
 							//create entries <featureID,  String   data      > for each missionfeature
 							//create entries <featureID , String[] uploadUrls> for each missionfeature
