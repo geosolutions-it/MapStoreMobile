@@ -133,8 +133,12 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 	}
 	
 	@Override
-	public void onCreateOptionsMenu(
-	      Menu menu, MenuInflater inflater) {
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+	      // Remove the button to open the full map
+	            MenuItem full_map = menu.findItem(R.id.full_map);
+	            if (full_map != null) {
+	                menu.removeItem(R.id.full_map);
+	            }
 	   inflater.inflate(R.menu.nav_map_editable, menu);
 	}
 
@@ -167,7 +171,7 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 			i.putExtra("MISSION", mission);
 			startActivityForResult(i, EDIT_ACTIVITY_CODE);
 			return true;		
-		}else if(id == R.id.full_map){
+		}else if(id == R.id.single_map){
 			
 			final GeoPoint geoPoint = getOriginGeoPoint();
 			

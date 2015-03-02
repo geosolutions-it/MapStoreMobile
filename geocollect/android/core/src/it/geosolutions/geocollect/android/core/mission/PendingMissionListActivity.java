@@ -319,59 +319,13 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 		
      	
         	break;
+        // The Map button is disabled
+        /*
         case 102:
-        	//setup map options
-        	//TODO parametrize it 
-        	Intent launch = new Intent(this,MapsActivity.class);
-    		launch.setAction(Intent.ACTION_VIEW);
-    		launch.putExtra(MapsActivity.PARAMETERS.CONFIRM_ON_EXIT, false);
-        	
-    		//ArrayList<Layer> layers =  (ArrayList<Layer>) LocalPersistence.readObjectFromFile(this, LocalPersistence.CURRENT_MAP);
-        	//if(layers == null || layers.isEmpty()){
-    			
-    		MissionTemplate t = ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(R.id.pendingmission_list)).getCurrentMissionTemplate();
-    		
-    		MSMMap m = SpatialDbUtils.mapFromDb();
-    		
-    		for (Iterator<Layer> it = m.layers.iterator(); it.hasNext();) {
-    		    Layer layer = it.next();
-    		    if(!(layer.getTitle().equals(t.schema_seg.localSourceStore) || layer.getTitle().equals(t.schema_sop.localFormStore) || layer.getTitle().equals(t.schema_seg.localSourceStore+ "_new"))){
-    		    	Log.d(PendingMissionListActivity.class.getSimpleName(), layer.getTitle()+ " not corresponding to current schema "+ t.schema_seg.localSourceStore);
-    		    	it.remove();
-    		    }
-    		    
-    		}
-
-//	    		if(m.layers == null || m.layers.isEmpty()){
-//	    			// retry, SpatialDataSourceManager is buggy
-//	    			SpatialDataSourceManager dbManager = SpatialDataSourceManager.getInstance();
-//
-//	    			try {
-//	    				//Only if not already loaded some tables
-//	    				if (dbManager.getSpatialVectorTables(false).size() <= 0) {
-//	    					dbManager.init(this, MapFilesProvider.getBaseDirectoryFile());
-//	    				} 
-//	    			} catch (Exception e) {
-//	    				// ignore
-//	    			}
-//	    			m = SpatialDbUtils.mapFromDb();
-//	    		}
-	    		launch.putExtra(MapsActivity.PARAMETERS.LAT, 44.40565);
-	    		launch.putExtra(MapsActivity.PARAMETERS.LON, 8.946256);
-	    		launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL, (byte)11);
-	    		launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL_MIN, (byte)11);
-	    		launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL_MAX, (byte)19);
-	    		launch.putExtra(MapsActivity.MSM_MAP, m);
-	    		//select here a drawer mode
-	    		launch.putExtra(MapsActivity.PARAMETERS.DRAWER_MODE, DrawerMode.ONLY_LEFT.ordinal());
-			//}
-        	
-        	launch.putExtra(MapsActivity.PARAMETERS.CUSTOM_MAPINFO_CONTROL, new ReturningMapInfoControl());
-        	
-    		//launch.putExtra(MapsActivity.LAYERS_TO_ADD, m.layers) ;
-    		startActivityForResult(launch, SPATIAL_QUERY);
-    		
+            // Start the Map activity
+            launchFullMap();
             break;
+        */
         //Settings	
         case 203:
         	final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
@@ -517,7 +471,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 	@Override
     protected void onDestroy() {
         super.onDestroy();
-        // TODO: check utility of this block (it wasn't present)
+        // In the tablet layout the map can be visible within this activity
         if(this.mapViewManager!=null){
        	 this.mapViewManager.destroyMapViews();
         }
@@ -562,4 +516,65 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
             fragment.onActivityResult(requestCode, resultCode, data);
         }
 	}
+
+    /**
+     * Launches the Map activity
+     */
+    public void launchFullMap() {
+        // setup map options
+        // TODO parametrize it
+        Intent launch = new Intent(this, MapsActivity.class);
+        launch.setAction(Intent.ACTION_VIEW);
+        launch.putExtra(MapsActivity.PARAMETERS.CONFIRM_ON_EXIT, false);
+
+        // ArrayList<Layer> layers = (ArrayList<Layer>) LocalPersistence.readObjectFromFile(this, LocalPersistence.CURRENT_MAP);
+        // if(layers == null || layers.isEmpty()){
+
+        MissionTemplate t = ((PendingMissionListFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.pendingmission_list)).getCurrentMissionTemplate();
+
+        MSMMap m = SpatialDbUtils.mapFromDb();
+
+        for (Iterator<Layer> it = m.layers.iterator(); it.hasNext();) {
+            Layer layer = it.next();
+            if (!(layer.getTitle().equals(t.schema_seg.localSourceStore)
+                    || layer.getTitle().equals(t.schema_sop.localFormStore) || layer.getTitle()
+                    .equals(t.schema_seg.localSourceStore + "_new"))) {
+                Log.d(PendingMissionListActivity.class.getSimpleName(), layer.getTitle()
+                        + " not corresponding to current schema " + t.schema_seg.localSourceStore);
+                it.remove();
+            }
+
+        }
+
+        // if(m.layers == null || m.layers.isEmpty()){
+        // // retry, SpatialDataSourceManager is buggy
+        // SpatialDataSourceManager dbManager = SpatialDataSourceManager.getInstance();
+        //
+        // try {
+        // //Only if not already loaded some tables
+        // if (dbManager.getSpatialVectorTables(false).size() <= 0) {
+        // dbManager.init(this, MapFilesProvider.getBaseDirectoryFile());
+        // }
+        // } catch (Exception e) {
+        // // ignore
+        // }
+        // m = SpatialDbUtils.mapFromDb();
+        // }
+        launch.putExtra(MapsActivity.PARAMETERS.LAT, 44.40565);
+        launch.putExtra(MapsActivity.PARAMETERS.LON, 8.946256);
+        launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL, (byte) 11);
+        launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL_MIN, (byte) 11);
+        launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL_MAX, (byte) 19);
+        launch.putExtra(MapsActivity.MSM_MAP, m);
+        // select here a drawer mode
+        launch.putExtra(MapsActivity.PARAMETERS.DRAWER_MODE, DrawerMode.ONLY_LEFT.ordinal());
+        // }
+
+        launch.putExtra(MapsActivity.PARAMETERS.CUSTOM_MAPINFO_CONTROL,
+                new ReturningMapInfoControl());
+
+        // launch.putExtra(MapsActivity.LAYERS_TO_ADD, m.layers) ;
+        startActivityForResult(launch, SPATIAL_QUERY);
+    }
 }

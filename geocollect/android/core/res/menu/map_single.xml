@@ -2,23 +2,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="it.geosolutions.geocollect.android.core.MainActivity" >
-
+    
     <item android:id="@+id/single_map"
           android:icon="@drawable/ic_location_map_dark"
           android:showAsAction="always"
           android:title="@string/map"
-           />
-    
-    <item android:id="@+id/navigate"
-          android:icon="@drawable/ic_nav"
-          android:showAsAction="always"
-          android:title="@string/map"
-           /> 
-    
-    <item android:id="@+id/accept"
-          android:icon="@drawable/ic_rating_good_white"
-          android:showAsAction="always"
-          android:title="@string/accept_mission"
-           /> 
-
+          /> 
 </menu>
