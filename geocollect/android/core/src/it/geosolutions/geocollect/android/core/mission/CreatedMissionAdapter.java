@@ -1,6 +1,10 @@
 package it.geosolutions.geocollect.android.core.mission;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import it.geosolutions.geocollect.android.core.R;
+import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -21,12 +25,38 @@ public class CreatedMissionAdapter extends ArrayAdapter<MissionFeature>{
 
 	private int resourceId;
 	
-	public CreatedMissionAdapter(Context context, int resource) {
+	private String mTableName;
+	
+	private ArrayList<String> uploadableIDs;
+	
+	public CreatedMissionAdapter(Context context, int resource, final String tableName) {
 		super(context, resource);
 		
 		this.resourceId = resource;
+		
+		this.mTableName = tableName;
+		
+		updateUploadableIDs(context);
 	}
 	
+	@Override
+	public void clear() {
+		super.clear();
+		updateUploadableIDs(getContext());
+	}
+
+	
+	private void updateUploadableIDs(Context context) {
+		
+		HashMap<String,ArrayList<String>> uploadables = PersistenceUtils.loadUploadables(context);
+	    if(uploadables.containsKey(mTableName)){
+	    	uploadableIDs = uploadables.get(mTableName); 
+	    	Log.i(CreatedMissionAdapter.class.getSimpleName(), "uploadables for "+mTableName+" :\n"+uploadableIDs.toString());
+	    }
+		
+		
+	}
+
 	public View getView(int position, View convertView, ViewGroup parent) {
 
 	    // assign the view we are converting to a local variable
@@ -51,7 +81,7 @@ public class CreatedMissionAdapter extends ArrayAdapter<MissionFeature>{
 
 	    	// display name
 
-	    	TextView name = (TextView) v.findViewById(R.id.created_mission_resource_name);
+	    	TextView name = (TextView) v.findViewById(R.id.mission_resource_name);
 	    	if (name != null && mission.properties != null && mission.properties.containsKey("CODICE")) {
 	    		Object prop =mission.properties.get("CODICE");
 	    		if(prop!=null){
@@ -64,7 +94,7 @@ public class CreatedMissionAdapter extends ArrayAdapter<MissionFeature>{
 
 	    	//display rifiuti
 
-	    	TextView desc = (TextView) v.findViewById(R.id.created_mission_resource_description);
+	    	TextView desc = (TextView) v.findViewById(R.id.mission_resource_description);
 	    	if (desc != null && mission.properties != null && mission.properties.containsKey("RIFIUTI_NO")) {
 	    		Object prop =mission.properties.get("RIFIUTI_NO");
 	    		if(prop!=null){
@@ -75,7 +105,7 @@ public class CreatedMissionAdapter extends ArrayAdapter<MissionFeature>{
 
 	    	}
 	    	
-			ImageView priorityIcon = (ImageView) v.findViewById(R.id.created_mission_resource_priority_icon);
+			ImageView priorityIcon = (ImageView) v.findViewById(R.id.mission_resource_priority_icon);
 			if ( priorityIcon != null && priorityIcon.getDrawable() != null ){
 				
 				// Get the icon and tweak the color
@@ -92,6 +122,19 @@ public class CreatedMissionAdapter extends ArrayAdapter<MissionFeature>{
 		    	}
 
 	    	}
+			
+			//for created mission, this icon is only visible if a created missionfeature is "uploadable"
+			ImageView editingIcon = (ImageView) v.findViewById(R.id.mission_resource_edit_icon);
+			if(editingIcon != null){
+				if(uploadableIDs != null && uploadableIDs.contains(mission.id)){
+					editingIcon.setVisibility(View.VISIBLE);
+					//this one is uploadable, give it a hook
+					editingIcon.setImageResource(R.drawable.ic_navigation_accept_light);
+				}else{
+					editingIcon.setVisibility(View.GONE);
+				}
+			}
+			
 
 	    }
 	    return v;

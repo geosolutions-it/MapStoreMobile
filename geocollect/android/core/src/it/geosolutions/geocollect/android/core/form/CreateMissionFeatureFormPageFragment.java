@@ -5,6 +5,7 @@ import it.geosolutions.android.map.view.AdvancedMapView;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.action.AndroidAction;
 import it.geosolutions.geocollect.android.core.form.action.CameraAction;
+import it.geosolutions.geocollect.android.core.form.action.SaveMissionFeatureAction;
 import it.geosolutions.geocollect.android.core.form.action.SendMissionFeatureAction;
 import it.geosolutions.geocollect.android.core.form.utils.FormUtils;
 import it.geosolutions.geocollect.android.core.mission.Mission;
@@ -342,7 +343,10 @@ public class CreateMissionFeatureFormPageFragment extends MapFragment {
 	 */
 	private void performAction(FormAction a, MissionFeature feature) {
 		Log.v("ACTION","performing action "+a);
-		if(a.type == FormActionType.send){
+		if(a.type == FormActionType.save){
+			SaveMissionFeatureAction smfa = new SaveMissionFeatureAction(a);
+			smfa.performAction(this, a, feature);
+		}else if(a.type == FormActionType.send){
 			SendMissionFeatureAction smfa = new SendMissionFeatureAction(a);
 			smfa.performAction(this, a, feature);
 		}else{

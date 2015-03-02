@@ -4,18 +4,6 @@
 package it.geosolutions.geocollect.android.core.mission.utils;
 
 import static it.geosolutions.geocollect.android.core.mission.utils.SpatialiteUtils.populateFeatureFromStmt;
-
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-
-import org.mapsforge.core.model.GeoPoint;
-
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.io.WKBReader;
-
 import it.geosolutions.android.map.dto.MarkerDTO;
 import it.geosolutions.android.map.overlay.MarkerOverlay;
 import it.geosolutions.android.map.overlay.items.DescribedMarker;
@@ -40,9 +28,18 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.StreamCorruptedException;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import jsqlite.Database;
 import jsqlite.Exception;
 import jsqlite.Stmt;
+
+import org.mapsforge.core.model.GeoPoint;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -52,6 +49,9 @@ import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.io.WKBReader;
 
 /**
  * Utils class to store and retrieve data from SQLite database
@@ -66,6 +66,7 @@ public class PersistenceUtils {
 	public static String TAG = "PersistanceUtils";
 	
 	private static final String DOWNLOADED_TEMPLATES = "it.geosolutions.geocollect.downloaded_templates";
+	private static final String UPLOADABLE_ENTRIES   = "it.geosolutions.geocollect.uploadable_entries";
 	
 	/**
 	 * wrapper method which handles the complete database integration/update for a MissionTemplate
@@ -1102,19 +1103,20 @@ public class PersistenceUtils {
 		return true;
 	}
 	/**
-	 * deletes a "created missionFeature"
+	 * deletes a missionFeature from a table which can be a "sop" or a "new" table
+	 * 
 	 * @param db the database to delete from
 	 * @param tableName the table to delete in
-	 * @param f the feature to delete
+	 * @param the "ORIGIN-ID" of the feature to delete
 	 */
-	public static void deleteCreatedMissionFeature(final Database db, final String tableName, final MissionFeature f){
+	public static void deleteMissionFeature(final Database db, final String tableName, final String id){
 		
 		if(tableName == null || tableName.isEmpty()){
 			Log.v(TAG, "No tableName, cannot create table");
 			return;
 		}		
 		
-		String delete = "DELETE FROM '"+tableName+"' WHERE ORIGIN_ID = ('"+f.id+"');";
+		String delete = "DELETE FROM '"+tableName+"' WHERE ORIGIN_ID = ('"+id+"');";
 		
 		
 		try {
@@ -1122,7 +1124,7 @@ public class PersistenceUtils {
 			stmt.step();
 
 		} catch (Exception e) {
-			Log.e(TAG, "error deleting entry "+f.id + " from "+tableName,e);
+			Log.e(TAG, "error deleting entry "+id + " from "+tableName,e);
 		}
 	}
 	/**
@@ -1246,6 +1248,50 @@ public class PersistenceUtils {
 			Log.e(TAG, "Saved Templates load failed",e);
 		} catch (ClassNotFoundException e) {
 			Log.e(TAG, "Saved Templates load failed",e);
+		}
+		return null;
+	}
+	
+	public static void saveUploadables(final Context context, final HashMap<String,ArrayList<String>> uploadables){
+
+		try {
+			if(uploadables != null){
+
+				FileOutputStream fo = context.openFileOutput(UPLOADABLE_ENTRIES, Context.MODE_PRIVATE);
+				ObjectOutputStream out = new ObjectOutputStream(fo);
+				out.writeObject(uploadables);
+				out.flush();
+				out.close();
+				fo.close();
+			}
+		} catch (IOException e) {
+			Log.e(TAG, "Uploadables save failed",e);
+		}
+
+	}
+	
+	public static HashMap<String,ArrayList<String>> loadUploadables(final Context context){
+		
+		try {
+
+			FileInputStream fi = context.openFileInput(UPLOADABLE_ENTRIES);
+			ObjectInputStream in = new ObjectInputStream(fi);
+			@SuppressWarnings("unchecked")
+			HashMap<String,ArrayList<String>> uploadables = (HashMap<String,ArrayList<String>>) in.readObject();
+			in.close();
+			fi.close();
+
+			return uploadables;
+
+		} catch (FileNotFoundException e) {
+			Log.d(TAG, "No uploadables saved yet");
+			return new HashMap<String,ArrayList<String>>();
+		} catch (StreamCorruptedException e) {
+			Log.e(TAG, "Uploadables load failed",e);
+		} catch (IOException e) {
+			Log.e(TAG, "Uploadables load failed",e);
+		} catch (ClassNotFoundException e) {
+			Log.e(TAG, "Uploadables load failed",e);
 		}
 		return null;
 	}

@@ -72,5 +72,27 @@
     <string name="location_searching">Ricerca Posizione in corso&#8230;</string>
 
     <string name="menu_center">Centrare</string>
+    <string name="entry_saved_success">%s salvato con successo</string>
+    <string name="menu_clear_survey">Cancella dati di questo sopralluogo</string>
+    <string name="menu_upload">Carica</string>
+    <string name="upload_title">%s Carico</string>
+        <plurals name="upload_intro">
+        <item quantity="one">Il seguente %s sarà caricato</item>
+        <item quantity="other">I seguenti %s saranno caricati</item>
+    </plurals>
+    <string name="upload_intro">I seguenti %s saranno caricati</string>
+    <string name="survey">Soppralluogo</string>
+    <plurals name="surveys">
+        <item quantity="one">sopralluogo</item>
+        <item quantity="other">sopralluoghi</item>
+    </plurals>
+    <string name="new_entry">Segnalazione</string>
+    <plurals name="new_entries">
+        <item quantity="one">segnalazione</item>
+        <item quantity="other">segnalazioni</item>
+    </plurals>
+    
+    <string name="saving_data_title">Salvare data</string>
+    <string name="saving_data_message">Vuoi veramente segnare questo %s come completato?</string>
     
 </resources>

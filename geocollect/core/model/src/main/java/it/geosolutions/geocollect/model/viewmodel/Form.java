@@ -49,4 +49,12 @@ public class Form implements Serializable{
 	 * The URL of the service that gets this form 
 	 */
 	public String submitURL;
+	/**
+	 * the upload url of this form
+	 */
+	public String url;
+	/**
+	 * the media upload url of this form
+	 */
+	public String mediaurl;
 }

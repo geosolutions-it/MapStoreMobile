@@ -169,7 +169,7 @@ public class PersTest extends android.test.AndroidTestCase {
 			}
 		}
 		
-		PersistenceUtils.deleteCreatedMissionFeature(spatialiteDatabase, tableName, inserted);
+		PersistenceUtils.deleteMissionFeature(spatialiteDatabase, tableName, inserted.id);
 		
 		ArrayList<MissionFeature> newFeatures = MissionUtils.getCreatedMissionFeatures(tableName, spatialiteDatabase);
 		

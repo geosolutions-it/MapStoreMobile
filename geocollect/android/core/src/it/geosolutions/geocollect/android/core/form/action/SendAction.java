@@ -230,14 +230,14 @@ public class SendAction extends AndroidAction {
 			FormUtils.resizeFotosToMax(fragment.getActivity().getBaseContext(), originIDString, defaultImageSize);
 			
 			Bundle arguments = new Bundle();
-			arguments.putString(UploadDialog.PARAMS.DATAURL, url);
-			arguments.putString(UploadDialog.PARAMS.MEDIAURL, murl);
-			arguments.putString(UploadDialog.PARAMS.DATA, MissionUtils.generateJsonString(null,m));
-			arguments.putString(UploadDialog.PARAMS.ORIGIN_ID, originIDString);
-			arguments.putString(UploadDialog.PARAMS.MISSION_ID, m.getTemplate().id);
-			arguments.putString(UploadDialog.PARAMS.BASIC_AUTH, LoginRequestInterceptor.getB64Auth(email, pass));
-			arguments.putStringArray(UploadDialog.PARAMS.MEDIA, FormUtils.getPhotoUriStrings(fragment.getActivity().getBaseContext(),originIDString));
-			arguments.putBoolean(UploadDialog.PARAMS.MISSION_FEATURE_UPLOAD, false);
+//			arguments.putString(UploadDialog.PARAMS.DATAURL, url);
+//			arguments.putString(UploadDialog.PARAMS.MEDIAURL, murl);
+//			arguments.putString(UploadDialog.PARAMS.DATA, MissionUtils.generateJsonString(null,m));
+//			arguments.putString(UploadDialog.PARAMS.ORIGIN_ID, originIDString);
+//			arguments.putString(UploadDialog.PARAMS.MISSION_ID, m.getTemplate().id);
+//			arguments.putString(UploadDialog.PARAMS.BASIC_AUTH, LoginRequestInterceptor.getB64Auth(email, pass));
+//			arguments.putStringArray(UploadDialog.PARAMS.MEDIA, FormUtils.getPhotoUriStrings(fragment.getActivity().getBaseContext(),originIDString));
+//			arguments.putBoolean(UploadDialog.PARAMS.MISSION_FEATURE_UPLOAD, false);
 			
 			mTaskFragment.setArguments(arguments);
 			
