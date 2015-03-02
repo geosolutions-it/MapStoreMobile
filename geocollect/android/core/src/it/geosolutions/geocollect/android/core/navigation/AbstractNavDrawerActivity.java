@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
@@ -65,8 +66,13 @@ public abstract class AbstractNavDrawerActivity extends SherlockFragmentActivity
             }
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+        
+        try{//necessary for activity unit test
+        	getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        	getSupportActionBar().setHomeButtonEnabled(true);
+        }catch(NullPointerException e){
+        	Log.e(AbstractNavDrawerActivity.class.getSimpleName(), "error setting up support actionbar",e);
+        }
     }
     
    

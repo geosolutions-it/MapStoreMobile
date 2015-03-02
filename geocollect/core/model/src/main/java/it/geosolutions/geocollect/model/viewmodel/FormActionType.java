@@ -29,6 +29,7 @@ public enum FormActionType {
 	 * url
 	 */
 	send,
+	save,
 	confirm,
 	localize,
 	center

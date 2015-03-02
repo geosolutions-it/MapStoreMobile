@@ -74,4 +74,30 @@
 
     <string name="menu_center">Center</string>
     
+    <string name="entry_saved_success">%s successfully saved</string>
+    <string name="menu_clear_survey">Clear data of this survey</string>
+    <string name="menu_upload">Upload</string>
+    <string name="upload_title">%s Upload</string>
+    
+    <plurals name="upload_intro">
+        <item quantity="one">The following %s will be uploaded</item>
+        <item quantity="other">The following %s will be uploaded</item>
+    </plurals>
+
+    <string name="survey">Survey</string>
+
+    <plurals name="surveys">
+        <item quantity="one">survey</item>
+        <item quantity="other">surveys</item>
+    </plurals>
+
+    <string name="new_entry">New Notice</string>
+    <plurals name="new_entries">
+        <item quantity="one">new notice</item>
+        <item quantity="other">new notices</item>
+    </plurals>
+    
+    <string name="saving_data_title">Sava data</string>
+    <string name="saving_data_message">Do you really want to mark this %s as complete ?</string>
+    
 </resources>

@@ -19,9 +19,12 @@ package it.geosolutions.geocollect.android.core.mission;
 
 
 import it.geosolutions.geocollect.android.core.R;
+import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
+import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -53,6 +56,8 @@ private MissionTemplate template;
 
 private MissionFeatureFilter filter;
 
+private ArrayList<String> uploadableIDs;
+
 /**
  * The constructor gets the resource (id of the layout for the element)
  * 
@@ -75,6 +80,8 @@ public FeatureAdapter(Context context, int resource, MissionTemplate template) {
     super(context, resource);
     this.resourceId = resource;
     this.template = template;
+    
+    updateUploadableIDs(context);
 }
 
 public View getView(int position, View convertView, ViewGroup parent) {
@@ -131,12 +138,19 @@ public View getView(int position, View convertView, ViewGroup parent) {
     	
 		ImageView editingIcon = (ImageView) v.findViewById(R.id.mission_resource_edit_icon);
 		if(editingIcon != null){
+
 			if(result.editing){
 				editingIcon.setVisibility(View.VISIBLE);
+				//it was edited, uploadble is a subset of it, look if it is "done"
+				if(uploadableIDs != null && uploadableIDs.contains(MissionUtils.getFeatureGCID(result))){
+					//this one is uploadable, give it a hook
+					editingIcon.setImageResource(R.drawable.ic_navigation_accept_light);
+				}
 			}else{
 				editingIcon.setVisibility(View.GONE);
 			}
-    	}
+
+		}
 		
 		ImageView priorityIcon = (ImageView) v.findViewById(R.id.mission_resource_priority_icon);
 		if ( priorityIcon != null && priorityIcon.getDrawable() != null ){
@@ -164,7 +178,25 @@ public View getView(int position, View convertView, ViewGroup parent) {
 }
 
 public void setTemplate(MissionTemplate t){
+	
 	this.template = t;
+	
+	updateUploadableIDs(getContext());
+}
+
+private void updateUploadableIDs(Context context) {
+	
+	HashMap<String,ArrayList<String>> uploadables = PersistenceUtils.loadUploadables(context);
+    
+    if(uploadables.containsKey(this.template.schema_sop.localFormStore)){
+    	uploadableIDs = uploadables.get(this.template.schema_sop.localFormStore); 
+    }
+	
+}
+@Override
+public void clear() {
+	super.clear();
+	updateUploadableIDs(getContext());
 }
 
 

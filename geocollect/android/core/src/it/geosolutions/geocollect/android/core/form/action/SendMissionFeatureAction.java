@@ -173,7 +173,7 @@ public class SendMissionFeatureAction extends AndroidAction {
 							//delete this mission							
 							final MissionTemplate t = MissionUtils.getDefaultTemplate(fragment.getSherlockActivity());
 				        	final Database db = ((FormEditActivity)fragment.getSherlockActivity()).spatialiteDatabase;				        	
-				        	PersistenceUtils.deleteCreatedMissionFeature(db, t.schema_seg.localSourceStore+ "_new", missionFeature);
+				        	PersistenceUtils.deleteMissionFeature(db, t.schema_seg.localSourceStore+ "_new", missionFeature.id);
 				        	
 				        	//back to list
 				        	Intent i = new Intent(ctx,PendingMissionListActivity.class);
@@ -212,19 +212,19 @@ public class SendMissionFeatureAction extends AndroidAction {
 			
 			int defaultImageSize = 1000;
 			FormUtils.resizeFotosToMax(fragment.getActivity().getBaseContext(), featureIDString, defaultImageSize);
-			
-			arguments.putString(UploadDialog.PARAMS.DATA, data);
-			arguments.putString(UploadDialog.PARAMS.ORIGIN_ID, featureIDString);
-			
-			/*
-			 *  TODO: Change this line into 
-			 *  arguments.putString(UploadDialog.PARAMS.MISSION_ID, <mission_id_here>);
-			 *  when the MapStore GetFeatureInfoMenu will handle parametric missions id
-			 */
-			arguments.putString(UploadDialog.PARAMS.MISSION_ID, "punti_abbandono");
-
-			arguments.putStringArray(UploadDialog.PARAMS.MEDIA, FormUtils.getPhotoUriStrings(fragment.getActivity().getBaseContext(),featureIDString));
-			arguments.putBoolean(UploadDialog.PARAMS.MISSION_FEATURE_UPLOAD, true);
+//			
+//			arguments.putString(UploadDialog.PARAMS.DATA, data);
+//			arguments.putString(UploadDialog.PARAMS.ORIGIN_ID, featureIDString);
+//			
+//			/*
+//			 *  TODO: Change this line into 
+//			 *  arguments.putString(UploadDialog.PARAMS.MISSION_ID, <mission_id_here>);
+//			 *  when the MapStore GetFeatureInfoMenu will handle parametric missions id
+//			 */
+//			arguments.putString(UploadDialog.PARAMS.MISSION_ID, "punti_abbandono");
+//
+//			arguments.putStringArray(UploadDialog.PARAMS.MEDIA, FormUtils.getPhotoUriStrings(fragment.getActivity().getBaseContext(),featureIDString));
+//			arguments.putBoolean(UploadDialog.PARAMS.MISSION_FEATURE_UPLOAD, true);
 			
 			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(fragment.getSherlockActivity());
 			

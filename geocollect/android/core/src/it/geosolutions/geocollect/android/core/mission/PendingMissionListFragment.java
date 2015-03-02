@@ -19,13 +19,21 @@ package it.geosolutions.geocollect.android.core.mission;
 
 import it.geosolutions.android.map.model.query.BBoxQuery;
 import it.geosolutions.android.map.model.query.BaseFeatureInfoQuery;
+import it.geosolutions.android.map.wfs.geojson.GeoJson;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.FormEditActivity;
+import it.geosolutions.geocollect.android.core.form.utils.FormUtils;
+import it.geosolutions.geocollect.android.core.login.LoginActivity;
+import it.geosolutions.geocollect.android.core.login.utils.LoginRequestInterceptor;
+import it.geosolutions.geocollect.android.core.login.utils.NetworkUtil;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.SQLiteCascadeFeatureLoader;
+import it.geosolutions.geocollect.android.core.widgets.dialog.UploadDialog;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
+import it.geosolutions.geocollect.model.http.CommitResponse;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +49,9 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
@@ -48,6 +59,8 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
@@ -86,6 +99,12 @@ public class PendingMissionListFragment
 	 * activated item position. Only used on tablets.
 	 */
 	private static final String STATE_ACTIVATED_POSITION = "activated_position";
+	
+	/**
+	 * Fragment upload
+	 */
+	private static final String FRAGMENT_UPLOAD_DIALOG="FRAGMENT_UPLOAD_DIALOG";
+	
 
 	private static int CURRENT_LOADER_INDEX = 0;
 
@@ -94,6 +113,7 @@ public class PendingMissionListFragment
 	public static final String INFINITE_SCROLL = "INFINITE_SCROLL";
 
 	public static int ARG_ENABLE_GPS = 43231;
+	public static int RESET_MISSION_FEATURE_ID = 12345;
 
 	/**
 	 * mode of this fragment
@@ -309,6 +329,8 @@ public class PendingMissionListFragment
 		}
 
 		startDataLoading(missionTemplate, CURRENT_LOADER_INDEX);
+		
+		registerForContextMenu(getListView());
 
 	}
 
@@ -345,6 +367,72 @@ public class PendingMissionListFragment
 		}
 		
 		listSelectionCallbacks = (Callbacks) activity;
+		
+	}
+	
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,ContextMenuInfo menuInfo) {
+		
+		//this context menu is only valid for "segnalazioni", for "new segnalazioni"  "missionadapter"s longlicklistener is used
+		//TODO unify both adapters and use either one method for long clicks
+		
+		//if this item is editable or uploadable, offer the possibility to "reset" the state -> delete its "sop" entry
+		if (v.getId() == getListView().getId()) {
+			ListView lv = (ListView) v;
+		
+			final MissionTemplate template = MissionUtils.getDefaultTemplate(getActivity());
+			AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
+			MissionFeature feature = (MissionFeature) lv.getItemAtPosition(info.position);
+			
+			// identify edited/uploadable
+			if(feature.editing){
+				//create a dialog to let the user clear this surveys data
+				String title = getString(R.string.survey);
+				if(feature.properties != null && feature.properties.get(template.nameField) != null){
+					title = (String) feature.properties.get(template.nameField);
+				}
+				if(title != null){
+					menu.setHeaderTitle(title);
+				}
+				menu.add(0,RESET_MISSION_FEATURE_ID,0, getString(R.string.menu_clear_survey));
+			}
+		}
+	}
+	@Override
+	public boolean onContextItemSelected(android.view.MenuItem item) {
+		
+		//user selected the option to reset, delete the edited item
+		if(item.getItemId() == RESET_MISSION_FEATURE_ID){
+			AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
+
+			MissionFeature feature = (MissionFeature) getListView().getItemAtPosition(info.position);
+			final MissionTemplate template = MissionUtils.getDefaultTemplate(getActivity());
+
+			String title = (String) feature.properties.get(template.nameField);
+
+			Log.d(TAG, "missionfeature "+title +" selected to reset");
+			
+			String tableName = template.schema_sop.localFormStore;
+			//delete db entry
+			PersistenceUtils.deleteMissionFeature(db, tableName, MissionUtils.getFeatureGCID(feature));
+			
+			//if this entry was uploadable, remove it from the list of uploadables
+			HashMap<String,ArrayList<String>> uploadables = PersistenceUtils.loadUploadables(getSherlockActivity());
+			final String id = MissionUtils.getFeatureGCID(feature);
+			if(uploadables.containsKey(tableName) && uploadables.get(tableName).contains(id)){
+				uploadables.get(tableName).remove(id);
+				PersistenceUtils.saveUploadables(getSherlockActivity(), uploadables);
+			}
+			
+			//reload list
+			adapter.clear();
+			getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
+			getSherlockActivity().supportInvalidateOptionsMenu();
+			
+			return true;
+		}
+		return super.onContextItemSelected(item);
+		
 	}
 
 	@Override
@@ -403,6 +491,17 @@ public class PendingMissionListFragment
 	public void onCreateOptionsMenu(
 	      final Menu menu, MenuInflater inflater) {
 		
+		//upload
+		if(missionTemplate != null && missionTemplate.schema_sop != null && missionTemplate.schema_sop.localFormStore != null){
+			
+			String tableName = mMode == FragmentMode.CREATION ? missionTemplate.schema_seg.localSourceStore+ "_new" : missionTemplate.schema_sop.localFormStore;
+			HashMap<String,ArrayList<String>> uploadables = PersistenceUtils.loadUploadables(getSherlockActivity());
+			if(uploadables.containsKey(tableName) && uploadables.get(tableName).size() > 0){
+				//there are uploadable entries, add a menu item
+				inflater.inflate(R.menu.uploadable, menu);
+			}
+		}
+		
 		if(mMode == FragmentMode.CREATION){
 			inflater.inflate(R.menu.creating, menu);
 			return;
@@ -413,6 +512,7 @@ public class PendingMissionListFragment
 		if(sp.contains(SQLiteCascadeFeatureLoader.FILTER_SRID)){
 			inflater.inflate(R.menu.filterable, menu);
 		}
+		
 
 		inflater.inflate(R.menu.searchable, menu);
 		
@@ -530,11 +630,204 @@ public class PendingMissionListFragment
 				item.setVisible(false);
 			}
 			return true;
+		}else if(id == R.id.upload){
+			
+			if(!NetworkUtil.isOnline(getSherlockActivity())){
+				Toast.makeText(getSherlockActivity(), getString(R.string.login_not_online), Toast.LENGTH_LONG).show();
+				return true;
+			}
+			//upload
+			if(missionTemplate != null && missionTemplate != null){
+
+				String title = null;
+				String uploadList = null;
+				String itemList = "";
+				HashMap<String,ArrayList<String>> uploadables = PersistenceUtils.loadUploadables(getSherlockActivity());
+				ArrayList<MissionFeature> uploads = new ArrayList<>();
+				final String tableName = mMode == FragmentMode.CREATION ? missionTemplate.schema_seg.localSourceStore+ "_new" : missionTemplate.schema_sop.localFormStore;
+				List<String> uploadIDs = uploadables.get(tableName);
+
+				//from here we need to differentiate between "surveys" and "new entries"
+				if(mMode == FragmentMode.CREATION){
+					//->new entries
+					
+					ArrayList<MissionFeature> features = MissionUtils.getCreatedMissionFeatures(tableName, db);
+					for(MissionFeature f :features){
+						if(uploadIDs.contains(f.id)){
+							//this new entry is "uploadable" , add it
+							uploads.add(f);
+							if (f.properties != null && f.properties.containsKey("CODICE")) {
+								itemList += (String) f.properties.get("CODICE") + "\n";
+							}
+						}
+					}
+					//create a string "il(i) item(s) will be uploaded + list"
+					String entity =  getResources().getQuantityString(R.plurals.new_entries, uploads.size());
+					uploadList = getResources().getQuantityString(R.plurals.upload_intro,uploads.size(),entity)+ ":\n"+itemList;
+					title = getString(R.string.upload_title, getString(R.string.new_entry));					
+				}else{
+					//-> surveys
+
+					for(int i = 0; i < adapter.getCount(); i++){
+						MissionFeature f = adapter.getItem(i);
+						if (f.properties != null && f.properties.containsKey("GCID")){
+							if(uploadIDs.contains(f.properties.get("GCID"))){
+								uploads.add(f);
+								if (f.properties.containsKey("CODICE")) {
+									itemList += (String) f.properties.get("CODICE") + "\n";
+								}
+							}
+						}
+					}
+					//create a string "il(i) survey(s) will be uploaded + list"
+					String entity =  getResources().getQuantityString(R.plurals.surveys, uploads.size());
+					uploadList = getResources().getQuantityString(R.plurals.upload_intro,uploads.size(), entity)+ ":\n"+itemList;
+					title = getString(R.string.upload_title, getString(R.string.survey));
+				}	
+				final ArrayList<MissionFeature> finalUploads = uploads;
+				//show the dialog to confirm the upload
+				new AlertDialog.Builder(getSherlockActivity())
+				.setTitle(title)
+				.setMessage(uploadList)
+				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which){ 
+						// do the upload	
+						
+						//get urls
+						final String url = mMode == FragmentMode.CREATION ? missionTemplate.seg_form.url : missionTemplate.sop_form.url;
+						final String mediaUrl = mMode == FragmentMode.CREATION ? missionTemplate.seg_form.mediaurl : missionTemplate.sop_form.mediaurl;
+						
+						//check urls
+						if(url == null || mediaUrl == null){
+							Log.e(UploadDialog.class.getSimpleName(), "no url or mediaurl available for upload, cannot continue");
+							Toast.makeText(getSherlockActivity(), R.string.error_sending_data, Toast.LENGTH_LONG).show();
+							return;
+						}
+						
+						//as done before in "SendAction" ....
+						android.support.v4.app.FragmentManager fm = getSherlockActivity().getSupportFragmentManager();
+						Fragment mTaskFragment = fm.findFragmentByTag(FRAGMENT_UPLOAD_DIALOG);
+						if(mTaskFragment==null){
+							FragmentTransaction ft = fm.beginTransaction();
+
+							mTaskFragment = new UploadDialog(){
+								@Override
+								public void onFinish(Activity ctx, CommitResponse result) {
+									if(result !=null && result.isSuccess()){
+										
+										Toast.makeText(getSherlockActivity(), getResources().getString(R.string.data_send_success), Toast.LENGTH_LONG).show();
+
+										//update adapter and menu
+										if(mMode == FragmentMode.CREATION){
+											fillCreatedMissionFeatureAdapter();
+										}else{
+											adapter.clear();
+											getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
+										}
+										getSherlockActivity().supportInvalidateOptionsMenu();
+
+										super.onFinish(ctx,result);
+									}else{
+										
+										Toast.makeText(getSherlockActivity(), R.string.error_sending_data, Toast.LENGTH_LONG).show();
+									
+										super.onFinish(ctx,result);
+									}			
+								}
+							};
+
+							// fill up the args for the upload dialog
+							Bundle arguments = new Bundle();
+							arguments.putString(UploadDialog.PARAMS.DATAURL, url);
+							arguments.putString(UploadDialog.PARAMS.MEDIAURL, mediaUrl);
+							arguments.putString(UploadDialog.PARAMS.TABLENAME, tableName);
+
+							//parse the max imagesize
+							int defaultImageSize = 1000;
+							try{
+								defaultImageSize = Integer.parseInt((String) missionTemplate.config.get("maxImageSize"));	
+							}catch( NumberFormatException e ){
+								Log.e(UploadDialog.class.getSimpleName(), e.getClass().getSimpleName(),e);
+							}catch( NullPointerException e){
+								Log.e(UploadDialog.class.getSimpleName(), e.getClass().getSimpleName(),e);
+							}
+							
+							HashMap<String,String> id_json_map = new HashMap<>();					
+							HashMap<String,String[]> id_mediaurls_map = new HashMap<>();
+							
+							//create entries <featureID,  String   data      > for each missionfeature
+							//create entries <featureID , String[] uploadUrls> for each missionfeature
+							for(MissionFeature missionFeature : finalUploads){
+								
+								if(mMode == FragmentMode.CREATION){//new entry
+									// Edit the MissionFeature for a better JSON compliance
+									MissionUtils.alignPropertiesTypes(missionFeature, missionTemplate.schema_seg.fields );
+								}
+
+								String featureIDString = MissionUtils.getFeatureGCID(missionFeature);
+								
+								// Set the "MY_ORIG_ID" to link this feature to its photos
+								if(missionFeature.properties == null){
+									missionFeature.properties = new HashMap<String, Object>();
+								}
+								missionFeature.properties.put("MY_ORIG_ID", featureIDString);
+
+								GeoJson gson = new GeoJson();
+								String c = gson.toJson( missionFeature);
+								String data = null;
+								try {
+									data = new String(c.getBytes("UTF-8"));
+								} catch (UnsupportedEncodingException e) {
+									Log.e(UploadDialog.class.getSimpleName(), "error transforming missionfeature to gson",e);
+								}
+								id_json_map.put(featureIDString, data);
+
+								//photos
+								FormUtils.resizeFotosToMax(getActivity().getBaseContext(), featureIDString, defaultImageSize);
+								String[] urls = FormUtils.getPhotoUriStrings(getActivity().getBaseContext(),featureIDString);						
+								id_mediaurls_map.put(featureIDString, urls);
+
+							}
+							//add the populated maps
+							arguments.putSerializable(UploadDialog.PARAMS.MISSIONS, id_json_map);
+							arguments.putSerializable(UploadDialog.PARAMS.MISSION_MEDIA_URLS, id_mediaurls_map);
+							
+							/*
+							 *  TODO: Change this line into 
+							 *  arguments.putString(UploadDialog.PARAMS.MISSION_ID, <mission_id_here>);
+							 *  when the MapStore GetFeatureInfoMenu will handle parametric missions id
+							 */
+							arguments.putString(UploadDialog.PARAMS.MISSION_ID, "punti_abbandono");
+							
+							SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getSherlockActivity());
+							
+							String email = prefs.getString(LoginActivity.PREFS_USER_EMAIL, null);
+							String pass = prefs.getString(LoginActivity.PREFS_PASSWORD, null);
+										
+							arguments.putString(UploadDialog.PARAMS.BASIC_AUTH, LoginRequestInterceptor.getB64Auth(email, pass));
+							
+							mTaskFragment.setArguments(arguments);
+							
+							((DialogFragment)mTaskFragment).setCancelable(false);
+						    ft.add(mTaskFragment, FRAGMENT_UPLOAD_DIALOG);
+							ft.commit();
+							
+						}
+					}
+				})
+				.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener(){
+					public void onClick(DialogInterface dialog, int which) { 
+						//nothing, close dialog        	
+					} 
+				})
+				.show();
+			}
 		}
 
 		
 		return super.onOptionsItemSelected(item);
 	}
+
 	/**
 	 * checks if location services are available
 	 */
@@ -861,7 +1154,7 @@ public class PendingMissionListFragment
     	
     	if(mMode == FragmentMode.CREATION){
 
-    		missionAdapter = new CreatedMissionAdapter(getSherlockActivity(), R.layout.created_mission_row);
+    		missionAdapter = new CreatedMissionAdapter(getSherlockActivity(), R.layout.mission_resource_row, missionTemplate.schema_seg.localSourceStore+ "_new");
     		
     		//delete created items on long click listener
     		getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
@@ -880,7 +1173,17 @@ public class PendingMissionListFragment
 				        	
 				        	final Database db = ((PendingMissionListActivity)getSherlockActivity()).spatialiteDatabase;
 				        	
-				        	PersistenceUtils.deleteCreatedMissionFeature(db, missionTemplate.schema_seg.localSourceStore+ "_new", f);
+				        	final String tableName = missionTemplate.schema_seg.localSourceStore+ "_new";
+				        	//delete this new entry
+				        	PersistenceUtils.deleteMissionFeature(db, tableName, f.id);
+				        	
+				    		//if this entry was uploadable remove it from the list of uploadables
+							HashMap<String,ArrayList<String>> uploadables = PersistenceUtils.loadUploadables(getSherlockActivity());
+							if(uploadables.containsKey(tableName) && uploadables.get(tableName).contains(f.id)){									
+								uploadables.get(tableName).remove(f.id);
+								PersistenceUtils.saveUploadables(getSherlockActivity(), uploadables);
+							}
+							
 				        	
 				        	fillCreatedMissionFeatureAdapter();
 				        }

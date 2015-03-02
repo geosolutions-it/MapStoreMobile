@@ -23,6 +23,7 @@ import it.geosolutions.geocollect.android.core.form.action.AndroidAction;
 import it.geosolutions.geocollect.android.core.form.action.CameraAction;
 import it.geosolutions.geocollect.android.core.form.action.CenterOnMarkerAction;
 import it.geosolutions.geocollect.android.core.form.action.LocalizeAction;
+import it.geosolutions.geocollect.android.core.form.action.SaveAction;
 import it.geosolutions.geocollect.android.core.form.action.SendAction;
 import it.geosolutions.geocollect.model.viewmodel.FormAction;
 
@@ -46,6 +47,7 @@ import android.util.Log;
  *
  */
 public class FormUtils {
+	private static String ICON_SAVE ="ic_save";
 	private static String ICON_SEND ="ic_send";
 	private static String ICON_ACCEPT="ic_accept";
 	private static String ICON_CAMERA="ic_camera";
@@ -63,7 +65,9 @@ public class FormUtils {
 		if(iconCls == null){
 			return null;
 		}
-		if(ICON_SEND.equals(iconCls)){
+		if(ICON_SAVE.equals(iconCls)){			
+			return R.drawable.ic_navigation_accept;
+		}else if(ICON_SEND.equals(iconCls)){
 			return R.drawable.ic_social_send_now;
 		}else if(ICON_ACCEPT.equals(iconCls)){
 			return R.drawable.ic_rating_good;
@@ -88,6 +92,8 @@ public class FormUtils {
 		case confirm:
 		case send:
 			return new SendAction(a);
+		case save:
+			return new SaveAction(a);
 		case photo:
 			return new CameraAction(a);
 		case video:
