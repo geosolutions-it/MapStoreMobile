@@ -448,7 +448,18 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 	 */
     @Override
     public void onBackPressed() {
-    	confirmExit();
+    	if(mTwoPane){    		
+    		final PendingMissionDetailFragment fragment = (PendingMissionDetailFragment) getSupportFragmentManager().findFragmentById(R.id.pendingmission_detail_container);
+    		if(fragment != null){	
+    			getSupportFragmentManager().beginTransaction()
+    			.remove(fragment)
+    			.commit();
+    		}else{
+    			confirmExit();
+    		}
+    	}else{
+    		confirmExit();
+    	}
     }
     
     public void confirmExit(){
