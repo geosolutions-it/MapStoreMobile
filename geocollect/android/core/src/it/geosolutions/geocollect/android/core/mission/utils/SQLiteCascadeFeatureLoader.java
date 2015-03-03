@@ -152,7 +152,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 	protected void onStartLoading() {
 	    if (mData != null) {
 	        // Deliver any previously loaded data immediately.
-	        deliverResult(mData);
+	        //deliverResult(mData);
 	    }
 
 	    // Begin monitoring the underlying data source.
@@ -271,7 +271,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 								if(mPrefs != null){
 									SharedPreferences.Editor editor = mPrefs.edit();
 									Date currentDate = new Date();
-									editor.putLong(LAST_UPDATE_PREF + this.sourceTableName, currentDate.getTime());
+									editor.putLong(LAST_UPDATE_PREF, currentDate.getTime());
 									editor.commit();
 								}
 								
