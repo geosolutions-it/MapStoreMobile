@@ -157,7 +157,7 @@ public class PersTest extends android.test.AndroidTestCase {
 				
 		PersistenceUtils.updateCreatedMissionFeatureRow(spatialiteDatabase, tableName, field, value, id_);
 		
-		ArrayList<MissionFeature> features = MissionUtils.getCreatedMissionFeatures(tableName, spatialiteDatabase);
+		ArrayList<MissionFeature> features = MissionUtils.getMissionFeatures(tableName, spatialiteDatabase);
 		
 		MissionFeature inserted = null;
 		
@@ -171,7 +171,7 @@ public class PersTest extends android.test.AndroidTestCase {
 		
 		PersistenceUtils.deleteMissionFeature(spatialiteDatabase, tableName, inserted.id);
 		
-		ArrayList<MissionFeature> newFeatures = MissionUtils.getCreatedMissionFeatures(tableName, spatialiteDatabase);
+		ArrayList<MissionFeature> newFeatures = MissionUtils.getMissionFeatures(tableName, spatialiteDatabase);
 		
 		assertFalse(newFeatures.contains(inserted));
 		

@@ -270,7 +270,7 @@ public class MissionUtils {
 	 * @param db
 	 * @return a list of created {@link MissionFeature}
 	 */
-	public static ArrayList<MissionFeature> getCreatedMissionFeatures(final String tableName,final Database db){
+	public static ArrayList<MissionFeature> getMissionFeatures(final String tableName,final Database db){
 
 		ArrayList<MissionFeature> missions = new ArrayList<MissionFeature>();
 
