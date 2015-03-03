@@ -42,7 +42,7 @@
     <string name="login_email">E-mail</string>
     <string name="login_password">Password</string>
     <string name="login_check_to_save">Attivare per salvare la password</string>
-    <string name="login_not_online">Connessione Internet necessario, si prega di connettersi!</string>
+    <string name="login_not_online">Connessione assente, si prega di connettersi!</string>
     <string name="login_could_not_retrieve_cookies">Impossibile recuperare i cookie per effettuare il login, si prega di controllare i dati di login</string>
     <string name="login_progress_signing_in">Accesso in corso</string>
     <string name="login_error_invalid_email">Questo email non é valido</string>
@@ -75,10 +75,10 @@
     <string name="entry_saved_success">Dati %s salvati con successo</string>
     <string name="menu_clear_survey">Cancella dati di questo sopralluogo</string>
     <string name="menu_upload">Carica</string>
-    <string name="upload_title">Caricamento %s</string>
+    <string name="upload_title">Caricamento dati di tipo %s</string>
         <plurals name="upload_intro">
-        <item quantity="one">Sarà caricato</item>
-        <item quantity="other">Saranno caricati</item>
+        <item quantity="one">Caricamento %s</item>
+        <item quantity="other">Caricamento %s</item>
     </plurals>
     <string name="upload_intro">I seguenti %s saranno caricati</string>
     <string name="survey">Sopralluogo</string>
@@ -93,6 +93,6 @@
     </plurals>
     
     <string name="saving_data_title">Salvataggio dati</string>
-    <string name="saving_data_message">Vuoi salvare i dati per l\'invio?</string>
+    <string name="saving_data_message">Vuoi salvare i dati per l\'invio successivo?</string>
     
 </resources>

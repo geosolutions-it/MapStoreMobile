@@ -757,7 +757,7 @@
 					"iconCls":"ic_camera"
 				}]
 			},{
-				"title": "Invio",
+				"title": "Pagina Di Riepilogo",
 				"iconCls":"not_supported_yet",
 				"fields":[{
 					
@@ -788,7 +788,7 @@
 					"name":"save",
 					"iconCls":"ic_save",
 					"attributes":{
-						"confirmMessage":"Salvare ?"
+						"confirmMessage":"Salvare per l\' invio successivo?"
 					}
 				}]
 			}],
@@ -1064,7 +1064,7 @@
 					"name":"save",
 					"iconCls":"ic_save",
 					"attributes":{
-						"confirmMessage":"Salvare ?"
+						"confirmMessage":"Salvare per l\'invio successivo?"
 					}
 				}]
 			}]
