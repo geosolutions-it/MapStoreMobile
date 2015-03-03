@@ -631,44 +631,42 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                         + "_new" : missionTemplate.schema_sop.localFormStore;
                 List<String> uploadIDs = uploadables.get(tableName);
 
+
+                ArrayList<MissionFeature> features = MissionUtils.getMissionFeatures(tableName, db);
+                for (MissionFeature f : features) {
+                	String missionID = mMode == FragmentMode.CREATION ? f.id : MissionUtils.getFeatureGCID(f);
+                	if (uploadIDs.contains(missionID)) {
+                		// this new entry is "uploadable" , add it
+                		uploads.add(f);
+                		if (f.properties != null && f.properties.containsKey(missionTemplate.nameField)) {
+                			itemList += (String) f.properties.get(missionTemplate.nameField) + "\n";
+                		}else{//sopralluoghi do not contain the "codice", get it from the according mission
+                			for (int i = 0; i < adapter.getCount(); i++) {
+                				MissionFeature mf = adapter.getItem(i);
+                				if(MissionUtils.getFeatureGCID(mf).equals(missionID)){
+                					if (mf.properties != null && mf.properties.containsKey(missionTemplate.nameField)) {
+                						itemList += (String) mf.properties.get(missionTemplate.nameField) + "\n";
+                						break;
+                					}
+                				}
+                			}
+                		}
+                	}
+                }
+            
                 // from here we need to differentiate between "surveys" and "new entries"
                 if (mMode == FragmentMode.CREATION) {
-                    // ->new entries
-
-                    ArrayList<MissionFeature> features = MissionUtils.getCreatedMissionFeatures(tableName, db);
-                    for (MissionFeature f : features) {
-                        if (uploadIDs.contains(f.id)) {
-                            // this new entry is "uploadable" , add it
-                            uploads.add(f);
-                            if (f.properties != null && f.properties.containsKey("CODICE")) {
-                                itemList += (String) f.properties.get("CODICE") + "\n";
-                            }
-                        }
-                    }
-                    // create a string "il(i) item(s) will be uploaded + list"
-                    String entity = getResources().getQuantityString(R.plurals.new_entries, uploads.size());
-                    uploadList = getResources().getQuantityString(R.plurals.upload_intro, uploads.size(), entity)
-                            + ":\n" + itemList;
-                    title = getString(R.string.upload_title, getString(R.string.new_entry));
+                	// ->new entries create a string "il(i) item(s) will be uploaded + list"
+                	String entity = getResources().getQuantityString(R.plurals.new_entries, uploads.size());
+                	uploadList = getResources().getQuantityString(R.plurals.upload_intro, uploads.size(), entity)
+                			+ ":\n" + itemList;
+                	title = getString(R.string.upload_title, getString(R.string.new_entry));
                 } else {
-                    // -> surveys
-
-                    for (int i = 0; i < adapter.getCount(); i++) {
-                        MissionFeature f = adapter.getItem(i);
-                        if (f.properties != null && f.properties.containsKey("GCID")) {
-                            if (uploadIDs.contains(f.properties.get("GCID"))) {
-                                uploads.add(f);
-                                if (f.properties.containsKey("CODICE")) {
-                                    itemList += (String) f.properties.get("CODICE") + "\n";
-                                }
-                            }
-                        }
-                    }
-                    // create a string "il(i) survey(s) will be uploaded + list"
-                    String entity = getResources().getQuantityString(R.plurals.surveys, uploads.size());
-                    uploadList = getResources().getQuantityString(R.plurals.upload_intro, uploads.size(), entity)
-                            + ":\n" + itemList;
-                    title = getString(R.string.upload_title, getString(R.string.survey));
+                	// -> surveys create a string "il(i) survey(s) will be uploaded + list"
+                	String entity = getResources().getQuantityString(R.plurals.surveys, uploads.size());
+                	uploadList = getResources().getQuantityString(R.plurals.upload_intro, uploads.size(), entity)
+                			+ ":\n" + itemList;
+                	title = getString(R.string.upload_title, getString(R.string.survey));
                 }
                 final ArrayList<MissionFeature> finalUploads = uploads;
                 // show the dialog to confirm the upload
@@ -1247,8 +1245,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         final Database db = ((PendingMissionListActivity) getSherlockActivity()).spatialiteDatabase;
 
         Log.v(TAG, "Loading created missions for " + t.title);
-        final ArrayList<MissionFeature> missions = MissionUtils.getCreatedMissionFeatures(t.schema_seg.localSourceStore
-                + "_new", db);
+        final ArrayList<MissionFeature> missions = MissionUtils.getMissionFeatures(t.schema_seg.localSourceStore + "_new", db);
 
         final String prio = t.priorityField;
         final HashMap<String, String> colors = t.priorityValuesColors;
