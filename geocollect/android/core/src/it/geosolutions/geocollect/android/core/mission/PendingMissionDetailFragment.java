@@ -17,9 +17,14 @@
  */
 package it.geosolutions.geocollect.android.core.mission;
 
+import it.geosolutions.android.map.MapsActivity;
 import it.geosolutions.android.map.fragment.MapFragment;
+import it.geosolutions.android.map.model.Layer;
+import it.geosolutions.android.map.model.MSMMap;
+import it.geosolutions.android.map.utils.SpatialDbUtils;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.BuildConfig;
+import it.geosolutions.geocollect.android.core.GeoCollectApplication;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.FormEditActivity;
 import it.geosolutions.geocollect.android.core.form.utils.FormBuilder;
@@ -31,6 +36,7 @@ import it.geosolutions.geocollect.model.viewmodel.type.XType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import jsqlite.Exception;
@@ -191,7 +197,24 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 					mapIntent.putExtra(SimpleMapActivity.ARG_SECOND_POINT_LAT, updatedPoint.latitude);
 					mapIntent.putExtra(SimpleMapActivity.ARG_SECOND_POINT_LON, updatedPoint.longitude);
 				}
+				
+		        MissionTemplate t = ((GeoCollectApplication) getActivity().getApplication()).getTemplate();
 
+		        MSMMap m = SpatialDbUtils.mapFromDb();
+
+		        for (Iterator<Layer> it = m.layers.iterator(); it.hasNext();) {
+		            Layer layer = it.next();
+		            if (!(layer.getTitle().equals(t.schema_seg.localSourceStore)
+		                    || layer.getTitle().equals(t.schema_sop.localFormStore) || layer.getTitle()
+		                    .equals(t.schema_seg.localSourceStore + "_new"))) {
+		                Log.d(this.getClass().getSimpleName(), layer.getTitle()
+		                        + " not corresponding to current schema " + t.schema_seg.localSourceStore);
+		                it.remove();
+		            }
+
+		        }
+		        mapIntent.putExtra(MapsActivity.MSM_MAP, m);
+		        
 				startActivity(mapIntent);
 
 			}else{

@@ -72,7 +72,7 @@ public class FormUtils {
         if (ICON_SAVE.equals(iconCls)) {
             return R.drawable.ic_navigation_accept;
         } else if (ICON_SEND.equals(iconCls)) {
-            return R.drawable.ic_social_send_now;
+            return R.drawable.ic_action_upload;
         } else if (ICON_ACCEPT.equals(iconCls)) {
             return R.drawable.ic_rating_good;
         } else if (ICON_CAMERA.equals(iconCls)) {

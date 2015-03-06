@@ -20,6 +20,7 @@ package it.geosolutions.geocollect.android.core.mission;
 import it.geosolutions.android.map.model.query.BBoxQuery;
 import it.geosolutions.android.map.model.query.BaseFeatureInfoQuery;
 import it.geosolutions.android.map.wfs.geojson.GeoJson;
+import it.geosolutions.geocollect.android.core.GeoCollectApplication;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.FormEditActivity;
 import it.geosolutions.geocollect.android.core.form.utils.FormUtils;
@@ -207,6 +208,8 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         // setup the listView
         missionTemplate = MissionUtils.getDefaultTemplate(getSherlockActivity());
 
+        ((GeoCollectApplication) getActivity().getApplication()).setTemplate(missionTemplate);
+        
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         boolean usesDownloaded = prefs.getBoolean(PendingMissionListActivity.PREFS_USES_DOWNLOADED_TEMPLATE, false);
         if (usesDownloaded) {

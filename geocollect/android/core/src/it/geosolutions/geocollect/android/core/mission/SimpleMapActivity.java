@@ -1,17 +1,17 @@
 package it.geosolutions.geocollect.android.core.mission;
 
+import it.geosolutions.android.map.MapsActivity;
 import it.geosolutions.android.map.activities.MapActivityBase;
 import it.geosolutions.android.map.control.CoordinateControl;
 import it.geosolutions.android.map.control.LocationControl;
 import it.geosolutions.android.map.dto.MarkerDTO;
+import it.geosolutions.android.map.model.MSMMap;
 import it.geosolutions.android.map.overlay.MarkerOverlay;
 import it.geosolutions.android.map.overlay.items.DescribedMarker;
 import it.geosolutions.android.map.overlay.managers.MultiSourceOverlayManager;
 import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.android.map.view.AdvancedMapView;
 import it.geosolutions.geocollect.android.core.R;
-import it.geosolutions.geocollect.android.core.form.FormEditActivity;
-
 import java.io.File;
 
 import org.mapsforge.android.maps.MapView;
@@ -42,7 +42,6 @@ import com.actionbarsherlock.view.MenuItem;
  * @author Robert Oehler
  *
  */
-
 public class SimpleMapActivity extends MapActivityBase {
 	
 	private AdvancedMapView mapView;
@@ -81,7 +80,11 @@ public class SimpleMapActivity extends MapActivityBase {
 		o.setMarkerOverlay(new MarkerOverlay());
 		o.setMarkerVisible();
 		mapView.setOverlayManger(o);
-
+        
+		if(getIntent() != null && getIntent().getExtras() != null && getIntent().getExtras().containsKey(MapsActivity.MSM_MAP)){
+		    o.loadMap((MSMMap)getIntent().getExtras().getSerializable(MapsActivity.MSM_MAP));
+		}
+		
 		mapView.setLayoutParams(new LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
 		
 		

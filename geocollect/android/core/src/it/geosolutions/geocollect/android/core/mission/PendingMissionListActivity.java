@@ -24,6 +24,7 @@ import it.geosolutions.android.map.utils.SpatialDbUtils;
 import it.geosolutions.android.map.MapsActivity.DrawerMode;
 import it.geosolutions.android.map.view.MapViewManager;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
+import it.geosolutions.geocollect.android.core.GeoCollectApplication;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.FormEditActivity;
 import it.geosolutions.geocollect.android.core.login.LoginActivity;
@@ -319,6 +320,9 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 
             ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
                     R.id.pendingmission_list)).setTemplate(mt);
+            
+            ((GeoCollectApplication)getApplication()).setTemplate(mt);
+            
             if (id == 101) {
                 ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
                         R.id.pendingmission_list)).restartLoader(0);
@@ -381,7 +385,9 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 
             ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
                     R.id.pendingmission_list)).setTemplate(t);
-
+            
+            ((GeoCollectApplication)getApplication()).setTemplate(t);
+            
             if (index % 2 == 0) {
                 ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
                         R.id.pendingmission_list)).restartLoader(templateIndex + 1);
