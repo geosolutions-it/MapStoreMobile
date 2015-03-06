@@ -1071,7 +1071,10 @@
 	},
 	"config":{
 		"myAllowedValues1":["value1","value2","value3"],
-		"maxImageSize" : "1000"
+		"maxImageSize" : "1000",
+		"mapStartLat": "44.43140",
+		"mapStartLon": "8.88446",
+		"mapStartZoom": "12"
 	},
 	"priorityField":"GRAVITA",
 	"priorityValuesColors":{
@@ -1080,5 +1083,4 @@
 				"scarsa":"#FDF600",
 				"area pulita":"#00FF00"
 			}
-	
 }
