@@ -17,6 +17,7 @@
  */
 package it.geosolutions.geocollect.android.core.mission.utils;
 
+import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.android.map.wfs.WFSGeoJsonFeatureLoader;
 import it.geosolutions.android.map.wfs.geojson.GeoJson;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
@@ -34,6 +35,10 @@ import it.geosolutions.geocollect.model.viewmodel.Page;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
@@ -50,6 +55,7 @@ import jsqlite.Exception;
 import jsqlite.Stmt;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.support.v4.content.Loader;
 import android.text.TextUtils;
@@ -79,6 +85,14 @@ public class MissionUtils {
 	 */
 	private static final String TAG_REGEX ="\\$\\{(.*?)\\}";
 	private static final Pattern pattern = Pattern.compile(TAG_REGEX);
+	
+	/**
+	 * Patterns to replace in various templates
+	 */
+	public static String HEX_COLOR_PATTERN = "#XXXXXX";
+	public static String TABLE_NAME_PATTERN = "XXNAMEXX";
+    
+	
 	/**
 	 * Create a loader getting the source of the mission
 	 * @param missionTemplate
@@ -486,4 +500,97 @@ public class MissionUtils {
 		return originIDString;
 	}
 	
+    /**
+     * Check the existence of map styles relative to the given {@link MissionTemplate}
+     * If they don't exist, it create them
+     * @param missionTemplate
+     */
+    public static void checkMapStyles(Resources resources, MissionTemplate missionTemplate) {
+        if(resources == null || missionTemplate == null){
+            return;
+        }
+
+        File styleDir = new File(MapFilesProvider.getStyleDirIn());
+        if(!styleDir.exists() || !styleDir.isDirectory()){
+            Log.w(TAG, "Cannot find style directory");
+            return;
+        }
+        
+        String baseString;
+        try {
+            baseString = PersistenceUtils.loadBaseStyleFile(resources);
+        } catch (IOException e1) {
+            Log.e(TAG, e1.getLocalizedMessage(), e1);
+            return;
+        }
+        
+        if(baseString == null){
+            return;
+        }
+        
+        if(missionTemplate.schema_seg != null && missionTemplate.schema_seg.localSourceStore != null){
+            
+            // Check for the main style
+            File mainStyleFile = new File(styleDir, missionTemplate.schema_seg.localSourceStore+".style");
+            if(!mainStyleFile.exists()){
+    
+                String noticeStyleString = baseString.replace(HEX_COLOR_PATTERN, resources.getString(R.color.default_notice_color));
+                noticeStyleString = noticeStyleString.replace(TABLE_NAME_PATTERN, missionTemplate.schema_seg.localSourceStore);
+                writeStyleFile(noticeStyleString, mainStyleFile);
+                
+            }
+            
+            // Check for the new notices style
+            File newStyleFile = new File(styleDir, missionTemplate.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX+ ".style");
+            if(!newStyleFile.exists()){
+    
+                String newStyleString = baseString.replace(HEX_COLOR_PATTERN, resources.getString(R.color.default_new_notice_color));
+                newStyleString = newStyleString.replace(TABLE_NAME_PATTERN, missionTemplate.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX);
+                writeStyleFile(newStyleString, newStyleFile);
+                
+            }
+        }
+        
+        if(missionTemplate.schema_sop != null && missionTemplate.schema_sop.localFormStore != null){
+                
+            // Check for the Surveys style
+            File surveyStyleFile = new File(styleDir, missionTemplate.schema_sop.localFormStore+".style");
+            if(!surveyStyleFile.exists()){
+    
+                String surveyStyleString = baseString.replace(HEX_COLOR_PATTERN, resources.getString(R.color.default_survey_color));
+                surveyStyleString = surveyStyleString.replace(TABLE_NAME_PATTERN, missionTemplate.schema_sop.localFormStore);
+                writeStyleFile(surveyStyleString, surveyStyleFile);
+                
+            }
+            
+        }
+        
+        
+    }
+
+    /**
+     * Write the String into the given File
+     * @param baseString
+     * @param mainStyleFile
+     */
+    public static void writeStyleFile(String baseString, File mainStyleFile) {
+        FileWriter fw = null;
+        try{
+            fw= new FileWriter(mainStyleFile);
+            fw.write(baseString);
+            Log.i("STYLE","Style File updated:"+ mainStyleFile.getPath()); 
+        } catch (FileNotFoundException e) {
+            Log.e("STYLE", "unable to write open file:" + mainStyleFile.getPath());
+        } catch (IOException e) {
+            Log.e("STYLE", "error writing the file: " + mainStyleFile.getPath());
+        }finally{
+            try {
+                if(fw != null){
+                    fw.close();
+                }
+            } catch (IOException e) {
+                // ignored
+            }
+        }
+    }
 }

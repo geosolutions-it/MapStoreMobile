@@ -9,4 +9,8 @@
     <color name="geosol_3">#44bb88</color>
     <color name="geosol_4">#ddddee</color>
     
+    <color name="default_notice_color">#5E95FF</color>
+    <color name="default_new_notice_color">#18f37b</color>
+    <color name="default_survey_color">#FF0000</color>
+  
 </resources>

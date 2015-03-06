@@ -82,7 +82,7 @@ public class SendMissionFeatureAction extends AndroidAction {
 		Database db = ((FormEditActivity) fragment.getSherlockActivity()).spatialiteDatabase;
 		
 		// check database for mandatory fields
-		ArrayList<String> notFilledMandatoryEntries = MissionUtils.checkIfAllMandatoryFieldsAreSatisfied(t.seg_form,"ORIGIN_ID",db,t.schema_seg.localSourceStore+ "_new");
+		ArrayList<String> notFilledMandatoryEntries = MissionUtils.checkIfAllMandatoryFieldsAreSatisfied(t.seg_form,"ORIGIN_ID",db,t.schema_seg.localSourceStore+ MissionTemplate.NEW_NOTICE_SUFFIX);
 		
 		if(notFilledMandatoryEntries.size() > 0){
 			String missing = fragment.getString(R.string.mandatory_fields_not_filled)+"\n\n";
@@ -173,7 +173,7 @@ public class SendMissionFeatureAction extends AndroidAction {
 							//delete this mission							
 							final MissionTemplate t = MissionUtils.getDefaultTemplate(fragment.getSherlockActivity());
 				        	final Database db = ((FormEditActivity)fragment.getSherlockActivity()).spatialiteDatabase;				        	
-				        	PersistenceUtils.deleteMissionFeature(db, t.schema_seg.localSourceStore+ "_new", missionFeature.id);
+				        	PersistenceUtils.deleteMissionFeature(db, t.schema_seg.localSourceStore+ MissionTemplate.NEW_NOTICE_SUFFIX, missionFeature.id);
 				        	
 				        	//back to list
 				        	Intent i = new Intent(ctx,PendingMissionListActivity.class);

@@ -10,6 +10,7 @@ import it.geosolutions.android.map.overlay.items.DescribedMarker;
 import it.geosolutions.android.map.view.AdvancedMapView;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.BuildConfig;
+import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.utils.FormBuilder;
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
@@ -21,10 +22,12 @@ import it.geosolutions.geocollect.model.viewmodel.Form;
 import it.geosolutions.geocollect.model.viewmodel.Page;
 import it.geosolutions.geocollect.model.viewmodel.type.XType;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.StreamCorruptedException;
@@ -32,7 +35,6 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import jsqlite.Database;
@@ -42,6 +44,7 @@ import jsqlite.Stmt;
 import org.mapsforge.core.model.GeoPoint;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -88,7 +91,7 @@ public class PersistenceUtils {
 			
 			//1. "create mission" table
 			
-			if(!PersistenceUtils.createTableFromTemplate(spatialiteDatabase, t.schema_seg.localSourceStore+ "_new", t.schema_seg.fields)){
+			if(!PersistenceUtils.createTableFromTemplate(spatialiteDatabase, t.schema_seg.localSourceStore+ MissionTemplate.NEW_NOTICE_SUFFIX, t.schema_seg.fields)){
 				Log.e(TAG, "error creating \"create_mission\" table ");
 				success = false;
 			}
@@ -1295,5 +1298,78 @@ public class PersistenceUtils {
 		}
 		return null;
 	}
+
+    /**
+     * Load file from res/raw folder or Assets folder into a String 
+     * 
+     * @param resources
+     * @param fileName
+     * @param loadFromRawFolder
+     * @return
+     * @throws IOException
+     */
+    public static String loadFile(Resources resources, String fileName, boolean loadFromRawFolder) throws IOException  
+    {  
+        //Create a InputStream to read the file into  
+        InputStream iS;  
+  
+        if (loadFromRawFolder)  
+        {  
+            //get the resource id from the file name  
+            int rID = resources.getIdentifier("it.geosolutions.geocollect.android.core:raw/"+fileName, null, null);  
+            //get the file as a stream  
+            iS = resources.openRawResource(rID);  
+        }  
+        else  
+        {  
+            //get the file as a stream  
+            iS = resources.getAssets().open(fileName);  
+        }  
+  
+        //create a buffer that has the same size as the InputStream  
+        byte[] buffer = new byte[iS.available()];  
+        //read the text file as a stream, into the buffer  
+        iS.read(buffer);  
+        //create a output stream to write the buffer into  
+        ByteArrayOutputStream oS = new ByteArrayOutputStream();  
+        //write this buffer to the output stream  
+        oS.write(buffer);  
+        //Close the Input and Output streams  
+        oS.close();  
+        iS.close();  
+  
+        //return the output stream as a String  
+        return oS.toString();  
+    }
+    
+    /**
+     * Load file from res/raw folder or Assets folder into a String 
+     * 
+     * @param resources
+     * @param fileName
+     * @param loadFromRawFolder
+     * @return
+     * @throws IOException
+     */
+    public static String loadBaseStyleFile(Resources resources) throws IOException  
+    {  
+        //Create a InputStream to read the file into  
+        InputStream iS = resources.openRawResource(R.raw.base);    
+        
+        //create a buffer that has the same size as the InputStream  
+        byte[] buffer = new byte[iS.available()];  
+        //read the text file as a stream, into the buffer  
+        iS.read(buffer);  
+        //create a output stream to write the buffer into  
+        ByteArrayOutputStream oS = new ByteArrayOutputStream();  
+        //write this buffer to the output stream  
+        oS.write(buffer);  
+        //Close the Input and Output streams  
+        oS.close();  
+        iS.close();  
+  
+        //return the output stream as a String  
+        return oS.toString();  
+    } 
 
 }

@@ -34,6 +34,12 @@ public class MissionTemplate implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	/**
+	 * Suffix for the new notices tables
+	 */
+	public static String NEW_NOTICE_SUFFIX = "_new";
+	
 	/**
 	 * Identifier of this template
 	 */

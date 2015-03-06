@@ -206,7 +206,7 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 		            Layer layer = it.next();
 		            if (!(layer.getTitle().equals(t.schema_seg.localSourceStore)
 		                    || layer.getTitle().equals(t.schema_sop.localFormStore) || layer.getTitle()
-		                    .equals(t.schema_seg.localSourceStore + "_new"))) {
+		                    .equals(t.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX))) {
 		                Log.d(this.getClass().getSimpleName(), layer.getTitle()
 		                        + " not corresponding to current schema " + t.schema_seg.localSourceStore);
 		                it.remove();

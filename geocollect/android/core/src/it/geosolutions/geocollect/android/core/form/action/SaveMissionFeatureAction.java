@@ -57,7 +57,7 @@ public class SaveMissionFeatureAction extends AndroidAction {
 		
 		Database db = ((FormEditActivity) fragment.getSherlockActivity()).spatialiteDatabase;
 		
-		final String tableName = t.schema_seg.localSourceStore+ "_new";
+		final String tableName = t.schema_seg.localSourceStore+ MissionTemplate.NEW_NOTICE_SUFFIX;
 		
 		// check database for mandatory fields
 		ArrayList<String> notFilledMandatoryEntries = MissionUtils.checkIfAllMandatoryFieldsAreSatisfied(t.seg_form,"ORIGIN_ID",db,tableName);

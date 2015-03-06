@@ -237,7 +237,7 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
         if(mCreateMissionFeature){
         	
         	MissionTemplate t = MissionUtils.getDefaultTemplate(mViewPager.getContext());
-        	mMissionTableName= t.schema_seg.localSourceStore+ "_new";
+        	mMissionTableName= t.schema_seg.localSourceStore+ MissionTemplate.NEW_NOTICE_SUFFIX;
         	
         	//when intent has missionFeature, edit it
         	if(getIntent().getExtras().containsKey(PendingMissionDetailFragment.ARG_ITEM_FEATURE)){

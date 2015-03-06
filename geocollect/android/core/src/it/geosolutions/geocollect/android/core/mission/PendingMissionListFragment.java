@@ -308,6 +308,8 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
             setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
         }
 
+        MissionUtils.checkMapStyles(getResources(), missionTemplate);
+        
         startDataLoading(missionTemplate, CURRENT_LOADER_INDEX);
 
         registerForContextMenu(getListView());
@@ -470,7 +472,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         if (missionTemplate != null && missionTemplate.schema_sop != null
                 && missionTemplate.schema_sop.localFormStore != null) {
 
-            String tableName = mMode == FragmentMode.CREATION ? missionTemplate.schema_seg.localSourceStore + "_new"
+            String tableName = mMode == FragmentMode.CREATION ? missionTemplate.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX
                     : missionTemplate.schema_sop.localFormStore;
             HashMap<String, ArrayList<String>> uploadables = PersistenceUtils.loadUploadables(getSherlockActivity());
             if (uploadables.containsKey(tableName) && uploadables.get(tableName).size() > 0) {
@@ -631,7 +633,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                         .loadUploadables(getSherlockActivity());
                 ArrayList<MissionFeature> uploads = new ArrayList<MissionFeature>();
                 final String tableName = mMode == FragmentMode.CREATION ? missionTemplate.schema_seg.localSourceStore
-                        + "_new" : missionTemplate.schema_sop.localFormStore;
+                        + MissionTemplate.NEW_NOTICE_SUFFIX : missionTemplate.schema_sop.localFormStore;
                 List<String> uploadIDs = uploadables.get(tableName);
 
 
@@ -1172,7 +1174,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         if (mMode == FragmentMode.CREATION) {
 
             missionAdapter = new CreatedMissionAdapter(getSherlockActivity(), R.layout.mission_resource_row,
-                    missionTemplate.schema_seg.localSourceStore + "_new");
+                    missionTemplate.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX);
 
             // delete created items on long click listener
             getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
@@ -1190,7 +1192,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
 
                                     final Database db = ((PendingMissionListActivity) getSherlockActivity()).spatialiteDatabase;
 
-                                    final String tableName = missionTemplate.schema_seg.localSourceStore + "_new";
+                                    final String tableName = missionTemplate.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX;
                                     // delete this new entry
                                     PersistenceUtils.deleteMissionFeature(db, tableName, f.id);
 
@@ -1248,7 +1250,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         final Database db = ((PendingMissionListActivity) getSherlockActivity()).spatialiteDatabase;
 
         Log.v(TAG, "Loading created missions for " + t.title);
-        final ArrayList<MissionFeature> missions = MissionUtils.getMissionFeatures(t.schema_seg.localSourceStore + "_new", db);
+        final ArrayList<MissionFeature> missions = MissionUtils.getMissionFeatures(t.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX, db);
 
         final String prio = t.priorityField;
         final HashMap<String, String> colors = t.priorityValuesColors;
