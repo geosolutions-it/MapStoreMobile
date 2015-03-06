@@ -44,7 +44,7 @@ public class NavUtils {
 		
 		final ArrayList<MissionTemplate> persistedTemplates = PersistenceUtils.loadSavedTemplates(app);
 		
-		int size = 6;
+		int size = 4;
 		
 		if(persistedTemplates != null && persistedTemplates.size() > 0){
 			size += (persistedTemplates.size() * 2);
@@ -53,16 +53,24 @@ public class NavUtils {
 		
 		NavDrawerItem[] items = new NavDrawerItem[size];
 		
-		items[0] = NavMenuSection.create( 100, app.getString(R.string.action_mission));//TODO translate
-		items[1] = NavMenuItem.create(101,app.getString(R.string.reporting), "ic_collections_view_as_list", false, app);
-		items[2] = NavMenuItem.create(1001,app.getString(R.string.my_inspections_my)+ " "+app.getString(R.string.reporting), "ic_collections_view_as_list", false, app);
+		int i = 0;
 		
-		if(persistedTemplates != null){
+		// 0
+		items[i++] = NavMenuSection.create( 100, app.getString(R.string.action_mission));
+		
+		if(persistedTemplates == null){
+    		
+		    // 1
+            items[i++] = NavMenuItem.create(101,app.getString(R.string.reporting), "ic_collections_view_as_list", false, app);
+            // 2
+            items[i++] = NavMenuItem.create(1001,app.getString(R.string.my_inspections_my)+ " "+app.getString(R.string.reporting), "ic_collections_view_as_list", false, app);
+		
+		}else{
 			
-			for(int i = 0, k = 0; i < persistedTemplates.size(); i++, k+=2 ){
-				MissionTemplate t = persistedTemplates.get(i);
-				items[3 + k]     =  NavMenuItem.create(DOWNLOADED_TEMPLATE_ID + k    ,t.title, "ic_collections_view_as_list", false, app);
-				items[3 + k + 1] =  NavMenuItem.create(DOWNLOADED_TEMPLATE_ID + k + 1,app.getString(R.string.my_inspections_my)+ " " +t.title, "ic_collections_view_as_list", false, app);
+			for(int j = 0, k = 0; j < persistedTemplates.size(); i++, j++, k+=2 ){
+				MissionTemplate t = persistedTemplates.get(j);
+				items[i + k]     =  NavMenuItem.create(DOWNLOADED_TEMPLATE_ID + k    ,t.title, "ic_collections_view_as_list", false, app);
+				items[i + k + 1] =  NavMenuItem.create(DOWNLOADED_TEMPLATE_ID + k + 1,app.getString(R.string.my_inspections_my)+ " " +t.title, "ic_collections_view_as_list", false, app);
 			}
 		}
 		
