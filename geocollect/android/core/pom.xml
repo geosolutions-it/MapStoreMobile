@@ -100,6 +100,7 @@
 					<sdk>
 						<platform>19</platform>
 					</sdk>
+                    <failOnConflictingLayouts>false</failOnConflictingLayouts>
 				</configuration>
 				<extensions>true</extensions>
 			</plugin>

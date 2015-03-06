@@ -58,6 +58,7 @@
 					<genDirectory>${project.basedir}/gen</genDirectory>
 					<deleteConflictingFiles>true</deleteConflictingFiles>
 					<undeployBeforeDeploy>true</undeployBeforeDeploy>
+                    <failOnConflictingLayouts>false</failOnConflictingLayouts>
 				</configuration>
 				<extensions>true</extensions>
 				<executions>
