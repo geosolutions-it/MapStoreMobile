@@ -36,9 +36,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="it.geosolutions.geocollect.android.core.PendingMissionListActivity" />
         </activity>
-         <activity
-		    android:name="it.geosolutions.geocollect.android.core.preferences.GeoCollectPreferences"
-		    />
+        <activity
+            android:name="it.geosolutions.geocollect.android.core.preferences.GeoCollectPreferences"
+            />
+         
     </application>
 
 </manifest>

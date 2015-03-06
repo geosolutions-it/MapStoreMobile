@@ -39,6 +39,7 @@ import it.geosolutions.geocollect.android.core.navigation.AbstractNavDrawerActiv
 import it.geosolutions.geocollect.android.core.navigation.NavDrawerActivityConfiguration;
 import it.geosolutions.geocollect.android.core.navigation.NavDrawerAdapter;
 import it.geosolutions.geocollect.android.core.navigation.NavDrawerItem;
+import it.geosolutions.geocollect.android.map.GeoCollectMapActivity;
 import it.geosolutions.geocollect.android.map.ReturningMapInfoControl;
 import it.geosolutions.geocollect.android.template.TemplateDownloadTask;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
@@ -537,7 +538,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
     public void launchFullMap() {
         // setup map options
         // TODO parametrize it
-        Intent launch = new Intent(this, MapsActivity.class);
+        Intent launch = new Intent(this, GeoCollectMapActivity.class);
         launch.setAction(Intent.ACTION_VIEW);
         launch.putExtra(MapsActivity.PARAMETERS.CONFIRM_ON_EXIT, false);
 
@@ -575,9 +576,9 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         // }
         // m = SpatialDbUtils.mapFromDb();
         // }
-        launch.putExtra(MapsActivity.PARAMETERS.LAT, 44.40565);
-        launch.putExtra(MapsActivity.PARAMETERS.LON, 8.946256);
-        launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL, (byte) 11);
+        launch.putExtra(MapsActivity.PARAMETERS.LAT, 44.43140);
+        launch.putExtra(MapsActivity.PARAMETERS.LON, 8.88446);
+        launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL, (byte) 12);
         launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL_MIN, (byte) 11);
         launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL_MAX, (byte) 19);
         launch.putExtra(MapsActivity.MSM_MAP, m);

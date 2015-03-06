@@ -47,10 +47,10 @@
         <activity android:name="it.geosolutions.geocollect.android.core.mission.SimpleMapActivity" />
         <!--  PREFERENCES  -->
         <activity
-	     android:name="it.geosolutions.geocollect.android.core.preferences.GeoCollectPreferences"
-	    android:theme="@android:style/Theme.Black.NoTitleBar" >
-	  </activity>
-            <!-- Login/Logout -->
+            android:name="it.geosolutions.geocollect.android.core.preferences.GeoCollectPreferences"
+		    android:theme="@android:style/Theme.Black.NoTitleBar" >
+		</activity>
+        <!-- Login/Logout -->
         <activity
             android:name="it.geosolutions.geocollect.android.core.login.LoginActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
@@ -62,7 +62,9 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.NoTitleBar" />
-
+        <activity
+		    android:name="it.geosolutions.geocollect.android.map.GeoCollectMapActivity"
+		    />
         <!-- *************** -->
         <!-- MAPSTORE_MOBILE -->
         <!-- *************** -->
