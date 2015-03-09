@@ -4,7 +4,7 @@
 
   <groupId>it.geosolutions.android.map</groupId>
   <artifactId>MapActivity</artifactId>
-  <version>1.3.1-SNAPSHOT</version>
+  <version>1.3.2-SNAPSHOT</version>
   <packaging>apklib</packaging>
 
   <name>MapActivity</name>
@@ -55,7 +55,7 @@
 	<dependency>
 		<groupId>org.mapsforge</groupId>
 		<artifactId>mapsforge-map</artifactId>
-		<version>0.3.1-MSM-0.3</version>
+		<version>0.3.1-MSM-0.4</version>
 	</dependency>
 	<dependency>
 		<groupId>com.google.code.gson</groupId>
