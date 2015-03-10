@@ -24,6 +24,7 @@ import it.geosolutions.android.map.utils.SpatialDbUtils;
 import it.geosolutions.android.map.MapsActivity.DrawerMode;
 import it.geosolutions.android.map.view.MapViewManager;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
+import it.geosolutions.geocollect.android.core.BuildConfig;
 import it.geosolutions.geocollect.android.core.GeoCollectApplication;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.FormEditActivity;
@@ -76,6 +77,11 @@ import android.widget.Toast;
 public class PendingMissionListActivity extends AbstractNavDrawerActivity implements
         PendingMissionListFragment.Callbacks, MapActivity {
 
+    /**
+     * TAG for logging
+     */
+    public static String TAG = "PendingMissionListActivity";
+    
     public static int SPATIAL_QUERY = 7001;
 
     public static final String ARG_CREATE_MISSIONFEATURE = "CREATE_MISSIONFEATURE";
@@ -85,6 +91,13 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
     public static final String PREFS_USES_DOWNLOADED_TEMPLATE = "USES_DOWNLOADED_TEMPLATE";
 
     public static final String PREFS_DOWNLOADED_TEMPLATE_INDEX = "DOWNLOADED_TEMPLATE_INDEX";
+    
+    /**
+     * Contract key for map configuration
+     */
+    public static String KEY_MAPSTARTLAT = "mapStartLat";
+    public static String KEY_MAPSTARTLON = "mapStartLon";
+    public static String KEY_MAPSTARTZOOM = "mapStartZoom";
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet device.
@@ -104,7 +117,9 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.v("MISSION_LIST", "onCreate()");
+        if(BuildConfig.DEBUG){
+            Log.v(TAG, "onCreate()");
+        }
 
         // TODO when is the login data necessary to load mission data ?
         final SharedPreferences prefs = PreferenceManager
@@ -120,7 +135,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         } else if (NetworkUtil.isOnline(getBaseContext())) {
 
             // TODO --> set when to check the remote templates, for now always onCreate when authkey available && online
-            Log.d(PendingMissionDetailActivity.class.getSimpleName(), "fetching remote Templates");
+            Log.d(TAG, "fetching remote Templates");
 
             final TemplateDownloadTask task = new TemplateDownloadTask() {
                 @Override
@@ -140,21 +155,21 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
                         for (MissionTemplate t : downloadedTemplates) {
                             if (!PersistenceUtils.createOrUpdateTablesForTemplate(t,
                                     spatialiteDatabase)) {
-                                Log.w(PendingMissionListActivity.class.getSimpleName(),
-                                        "error creating/updating table");
+                                Log.w(TAG, "error creating/updating table");
                             } else {
                                 // if insert succesfull add to list of valid templates
                                 validTemplates.add(t);
                             }
                         }
                     }
-                    Log.d(PendingMissionListActivity.class.getSimpleName(), "database updated");
+                    Log.d(TAG, "database updated");
 
                     // 2. save valid templates
                     PersistenceUtils.saveDownloadedTemplates(getBaseContext(), validTemplates);
 
-                    Log.d(PendingMissionListActivity.class.getSimpleName(),
-                            "valid templates persisted");
+                    if(BuildConfig.DEBUG){
+                        Log.d(TAG, "valid templates persisted");
+                    }
 
                     // 3. update navdrawer menu
                     runOnUiThread(new Runnable() {
@@ -172,8 +187,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 
                             mDrawerList.setAdapter(newNavDrawerAdapter);
 
-                            Log.d(PendingMissionListActivity.class.getSimpleName(),
-                                    "navdrawer updated");
+                            Log.d(TAG, "navdrawer updated");
 
                         }
                     });
@@ -195,8 +209,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
                 MissionTemplate t = MissionUtils.getDefaultTemplate(this);
 
                 if (!PersistenceUtils.createOrUpdateTablesForTemplate(t, spatialiteDatabase)) {
-                    Log.e(PendingMissionListActivity.class.getSimpleName(),
-                            "error creating/updating tables for " + t.nameField);
+                    Log.e(TAG, "error creating/updating tables for " + t.nameField);
                 }
 
             }
@@ -273,8 +286,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 
             Intent editIntent = new Intent(this, FormEditActivity.class);
             editIntent.putExtra(ARG_CREATE_MISSIONFEATURE, true);
-            editIntent
-                    .putExtra(PendingMissionDetailFragment.ARG_ITEM_FEATURE, (MissionFeature) obj);
+            editIntent.putExtra(PendingMissionDetailFragment.ARG_ITEM_FEATURE, (MissionFeature) obj);
             startActivity(editIntent);
 
         }
@@ -372,8 +384,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 
             final MissionTemplate t = downloadedTemplates.get(templateIndex);
 
-            Log.d(PendingMissionListActivity.class.getSimpleName(), "downloaded template "
-                    + templateIndex + " selected : " + t.id);
+            Log.d(TAG, "downloaded template "+ templateIndex + " selected : " + t.id);
 
             final FragmentMode mode = index % 2 == 0 ? FragmentMode.PENDING : FragmentMode.CREATION;
 
@@ -458,7 +469,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
             this.mapViewManager = new MapViewManager();
         }
         int i = this.mapViewManager.getMapViewId();
-        Log.v("MAPVIEW", "created mapview with id:" + i);
+        Log.v(TAG, "created mapview with id:" + i);
         return i;
     }
 
@@ -489,9 +500,9 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         if (this.spatialiteDatabase != null) {
             try {
                 this.spatialiteDatabase.close();
-                Log.v("MISSION_LIST", "Spatialite Database Closed");
+                Log.v(TAG, "Spatialite Database Closed");
             } catch (jsqlite.Exception e) {
-                Log.e("MISSION_LIST", Log.getStackTraceString(e));
+                Log.e(TAG, Log.getStackTraceString(e));
             }
         }
     }
@@ -527,7 +538,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
                 fragment.onActivityResult(requestCode, resultCode, data);
             }catch (NullPointerException npe){
                 // TODO This is ABS bug, need to switch to ActionBarCompat
-                Log.e("PMLA", npe.getLocalizedMessage(), npe);
+                Log.e(TAG, npe.getLocalizedMessage(), npe);
             }
         }
     }
@@ -549,18 +560,45 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
                 .findFragmentById(R.id.pendingmission_list)).getCurrentMissionTemplate();
 
         MSMMap m = SpatialDbUtils.mapFromDb();
-
-        for (Iterator<Layer> it = m.layers.iterator(); it.hasNext();) {
-            Layer layer = it.next();
-            if (!(layer.getTitle().equals(t.schema_seg.localSourceStore)
-                    || layer.getTitle().equals(t.schema_sop.localFormStore) || layer.getTitle()
-                    .equals(t.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX))) {
-                Log.d(PendingMissionListActivity.class.getSimpleName(), layer.getTitle()
-                        + " not corresponding to current schema " + t.schema_seg.localSourceStore);
-                it.remove();
+        ArrayList<String> bg_layers = null;
+        
+        try{
+            if(t.config != null && t.config.get("backgroundLayers") != null){
+                if(t.config.get("backgroundLayers") instanceof ArrayList<?>){
+                    bg_layers = (ArrayList<String>) t.config.get("backgroundLayers");
+                }
             }
-
+        }catch (ClassCastException cce){
+            if(BuildConfig.DEBUG){
+                Log.w(TAG, "backgroundLayers tag is not an ArrayList, ignoring");
+            }
+            bg_layers = null;
         }
+        
+        // Use only the layers that are related to this Mission
+        ArrayList<Layer> layersList = new ArrayList<Layer>();
+        Layer layer = null;
+        
+        for (Iterator<Layer> it = m.layers.iterator(); it.hasNext();) {
+            layer = it.next();
+            if (layer.getTitle().equals(t.schema_seg.localSourceStore)
+               || layer.getTitle().equals(t.schema_sop.localFormStore) 
+               || layer.getTitle().equals(t.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX)
+            ) {
+
+                layersList.add(layer);
+                
+            }else if (bg_layers != null && bg_layers.contains(layer.getTitle())){
+                
+                // Adding in the head position, so the layer will
+                // be on the last in the LayerSwitcher order 
+                layersList.add(0, layer);
+            }
+        }
+        
+        // Set the correct layers
+        m.layers = layersList;
+        
 
         // if(m.layers == null || m.layers.isEmpty()){
         // // retry, SpatialDataSourceManager is buggy
@@ -576,9 +614,38 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         // }
         // m = SpatialDbUtils.mapFromDb();
         // }
-        launch.putExtra(MapsActivity.PARAMETERS.LAT, 44.43140);
-        launch.putExtra(MapsActivity.PARAMETERS.LON, 8.88446);
-        launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL, (byte) 12);
+        
+        // Set map configurations, if available
+        if(t.config != null){
+            if(t.config.get(KEY_MAPSTARTLAT) != null){
+                try {
+                    double mapStartLat = Double.parseDouble((String) t.config.get(KEY_MAPSTARTLAT));
+                    launch.putExtra(MapsActivity.PARAMETERS.LAT, mapStartLat);
+                } catch (NumberFormatException e) {
+                    Log.e(TAG, Log.getStackTraceString(e));
+                } 
+            }
+            
+            if(t.config.get(KEY_MAPSTARTLON) != null){
+                try {
+                    double mapStartLon = Double.parseDouble((String) t.config.get(KEY_MAPSTARTLON));
+                    launch.putExtra(MapsActivity.PARAMETERS.LON, mapStartLon);
+                } catch (NumberFormatException e) {
+                    Log.e(TAG, Log.getStackTraceString(e));
+                } 
+            }
+            
+            if(t.config.get(KEY_MAPSTARTZOOM) != null){
+                try {
+                    int mapStartZoom = Integer.parseInt((String) t.config.get(KEY_MAPSTARTZOOM));
+                    launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL, (byte) mapStartZoom);
+                } catch (NumberFormatException e) {
+                    Log.e(TAG, Log.getStackTraceString(e));
+                } 
+            }
+
+        }
+        
         launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL_MIN, (byte) 11);
         launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL_MAX, (byte) 19);
         launch.putExtra(MapsActivity.MSM_MAP, m);
