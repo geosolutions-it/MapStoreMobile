@@ -1,5 +1,7 @@
 package it.geosolutions.geocollect.android.core.login;
 
+import it.geosolutions.android.map.geostore.model.ResourceList;
+import it.geosolutions.geocollect.android.core.BuildConfig;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.login.utils.InstantAutoComplete;
 import it.geosolutions.geocollect.android.core.login.utils.LoginUtil;
@@ -7,6 +9,18 @@ import it.geosolutions.geocollect.android.core.login.utils.LoginUtil.LoginStatus
 import it.geosolutions.geocollect.android.core.login.utils.LoginUtil.UserDataStatusCallback;
 import it.geosolutions.geocollect.android.core.login.utils.NetworkUtil;
 import it.geosolutions.geocollect.android.core.login.utils.URLListPersistanceUtil;
+import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
+import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
+import it.geosolutions.geocollect.android.core.mission.utils.NavUtils;
+import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
+import it.geosolutions.geocollect.android.core.mission.utils.SpatialiteUtils;
+import it.geosolutions.geocollect.android.core.navigation.NavDrawerAdapter;
+import it.geosolutions.geocollect.android.core.navigation.NavDrawerItem;
+import it.geosolutions.geocollect.android.template.Resource;
+import it.geosolutions.geocollect.android.template.TemplateDownloadTask;
+import it.geosolutions.geocollect.android.template.TemplateDownloadTask.RemoteTemplatesFetchCallback;
+import it.geosolutions.geocollect.android.template.TemplateDownloadTask.SingleRemoteTemplateFetchCallback;
+import it.geosolutions.geocollect.model.config.MissionTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,6 +79,13 @@ public class LoginActivity extends Activity {
 	
 	private List<String> mUrls;
 	
+	private int arrived = 0;
+    private ArrayList<MissionTemplate> downloads = new ArrayList<MissionTemplate>();
+    /**
+     * Spatialite Database for persistence
+     */
+    public jsqlite.Database spatialiteDatabase;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -309,12 +330,74 @@ public class LoginActivity extends Activity {
 							
 							Toast.makeText(getBaseContext(), getString(R.string.login_success), Toast.LENGTH_LONG).show(); 
 
+							/////////////
+						    TemplateDownloadTask.getRemoteTemplates(new RemoteTemplatesFetchCallback() {
+
+						            @Override
+						            public void templatesReceived(ResourceList list) {
+
+						                if(list != null && list.list.size() > 0){
+
+						                    final int awaiting = list.list.size();
+						                    //list worked using a "geostore" resource
+						                    for(final it.geosolutions.android.map.geostore.model.Resource resource : list.list){
+
+						                        TemplateDownloadTask.downloadRemoteTemplate(authKey, resource.id, new SingleRemoteTemplateFetchCallback (){
+
+						                            @Override
+						                            public void received(Resource res) {
+						                                
+						                                //to download a single template, a slightly different Resource was needed
+						                                //TODO use geostore resource when server side has applied the according schema
+						                                
+						                                String templateString = res.getData().getData();
+
+						                                downloads.add(MissionUtils.getTemplateFromJSON(templateString));
+						                                
+						                                arrived++;
+						                                
+						                                if(arrived == awaiting){
+						                                    complete(downloads);
+						                                }
+						                            }
+
+						                            @Override
+						                            public void error(RetrofitError error) {
+
+						                                Log.e(TAG, "error getting template "+resource.id+" : "+ error.getMessage());
+
+						                                arrived++;
+						                                
+						                                if(arrived == awaiting){
+						                                    complete(downloads);
+						                                }
+						                            }
+
+						                        }); 
+						                    }
+						                }else{
+						                    Log.e(TAG, "none or empty list received, cannot download templates");
+
+				                            showProgress(false,false);
+				                            
+				                            Toast.makeText(getBaseContext(), "none or empty list received, cannot download templates", Toast.LENGTH_SHORT).show();
+				                            
+						                }
+						            }
+
+						            @Override
+						            public void error(RetrofitError error) {
+
+			                            showProgress(false,false);
+			                            
+			                            Toast.makeText(getBaseContext(), getString(R.string.login_error_generic) + " "+error.getMessage(), Toast.LENGTH_SHORT).show();
+			                            
+						                Log.e(TAG, "error getting template list : "+ error.getMessage());
+
+						            }
+						        });
+							/////////////
 							
-							Intent returnIntent = new Intent();
-							setResult(RESULT_OK,returnIntent);
-									
-									
-							finish();
 							
 						}
 						
@@ -375,5 +458,44 @@ public class LoginActivity extends Activity {
 			mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
 		}
 	}
+	
+	
+	public void complete(final ArrayList<MissionTemplate> downloadedTemplates) {
 
+        /**
+         * download successful, elaborate result
+         **/
+        // 1. update database
+        ArrayList<MissionTemplate> validTemplates = new ArrayList<MissionTemplate>();
+        if (downloadedTemplates != null && downloadedTemplates.size() > 0) {
+            if (spatialiteDatabase == null) {
+
+                spatialiteDatabase = SpatialiteUtils.openSpatialiteDB(getApplicationContext(), "geocollect/genova.sqlite");
+            }
+            for (MissionTemplate t : downloadedTemplates) {
+                if (!PersistenceUtils.createOrUpdateTablesForTemplate(t,
+                        spatialiteDatabase)) {
+                    Log.w(TAG, "error creating/updating table");
+                } else {
+                    // if insert succesfull add to list of valid templates
+                    validTemplates.add(t);
+                }
+            }
+        }
+        Log.d(TAG, "database updated");
+
+        // 2. save valid templates
+        PersistenceUtils.saveDownloadedTemplates(getBaseContext(), validTemplates);
+
+        if(BuildConfig.DEBUG){
+            Log.d(TAG, "valid templates persisted");
+        }
+
+
+        Intent returnIntent = new Intent();
+        setResult(RESULT_OK,returnIntent);
+                
+                
+        finish();
+    }
 }

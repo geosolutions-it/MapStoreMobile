@@ -113,7 +113,7 @@ public abstract class TemplateDownloadTask  extends AsyncTask<String, Void, Void
 	 * downloads the list of available remote templates
 	 * @param callback giving feedback of the result of the operation
 	 */
-	public void getRemoteTemplates(final RemoteTemplatesFetchCallback callback){
+	public static void getRemoteTemplates(final RemoteTemplatesFetchCallback callback){
 
 		Gson gson = GsonUtil.createFeatureGson();
 		RestAdapter restAdapter = new RestAdapter.Builder()
@@ -155,7 +155,7 @@ public abstract class TemplateDownloadTask  extends AsyncTask<String, Void, Void
 	 * @param id the id to identify the remote
 	 * @param callback giving feedback of the result of the operation
 	 */
-	public void downloadRemoteTemplate(final String authKey, final Long id, final SingleRemoteTemplateFetchCallback callback){
+	public static void downloadRemoteTemplate(final String authKey, final Long id, final SingleRemoteTemplateFetchCallback callback){
 
 
 		RestAdapter restAdapter = new RestAdapter.Builder()
