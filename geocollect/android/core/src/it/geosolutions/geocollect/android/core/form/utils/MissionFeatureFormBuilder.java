@@ -87,7 +87,12 @@ import com.vividsolutions.jts.geom.Point;
 * Utility Class to build forms adapted for MissionFeatures
 */
 public class MissionFeatureFormBuilder {
-
+	
+	/**
+	 * Tag for logging
+	 */
+	public static String TAG = "MissionFeatureFormBuilder";
+	
 	// set a static id
 	private static int sId = 0;
 
@@ -675,7 +680,15 @@ public class MissionFeatureFormBuilder {
 	    String selected = (String) feature.properties.get(field.fieldId);
 	    
 	    if(selected != null){
-	    	int selection = Integer.parseInt(selected);
+	    	// Default is false
+	    	int selection = 0;
+	    	try {
+	    		selection = Integer.parseInt(selected);
+	    	}catch(NumberFormatException nfe){
+	    		Log.e(TAG, "Wrong format for: "+field.fieldId+" field");
+	    		Log.e(TAG, nfe.getLocalizedMessage(), nfe);
+	    		selection = 0;
+	    	}
 	    	cb.setChecked(selection > 0);
 	    }
 	    
