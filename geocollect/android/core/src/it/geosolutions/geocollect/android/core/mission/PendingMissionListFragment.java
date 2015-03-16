@@ -258,13 +258,14 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
             getSherlockActivity().setSupportProgressBarIndeterminateVisibility(false);
             getSherlockActivity().setSupportProgressBarVisibility(false);
             // getListView().removeFooterView(footer);
-            Log.v(TAG, "task terminated");
+            //Log.v(TAG, "task terminated");
 
         }
         adapter.notifyDataSetChanged();
         isLoading = false;
-        if (mSwipeRefreshLayout != null)
+        if (mSwipeRefreshLayout != null){
             mSwipeRefreshLayout.setRefreshing(false);
+        }
 
     }
 
@@ -1003,11 +1004,10 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                 fillCreatedMissionFeatureAdapter();
             }
         } else if (mMode == FragmentMode.PENDING) {
-            // This reloads the list when this fragment comes back "to life", seems not to be necessary
-            // if(adapter != null && getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX) != null){
-            // adapter.clear();
-            // getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
-            // }
+            // Start data loading
+            if(getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX) != null){
+                getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
+            }
         }
         
         getSherlockActivity().supportInvalidateOptionsMenu();
