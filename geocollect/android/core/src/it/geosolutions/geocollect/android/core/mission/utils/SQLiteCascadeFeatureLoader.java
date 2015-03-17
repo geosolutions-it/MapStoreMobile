@@ -225,9 +225,14 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 
 						Stmt stmt;
 						String converted ;
+						
+						long startTime = System.nanoTime();
+ 
+						
 						for(Feature f : fromPreLoader){
 							
-							String columnNames = " ( ";
+						    long featureStartTime = System.nanoTime();
+						    String columnNames = " ( ";
 							String columnValues = " ( ";
 							columnNames = columnNames + "ORIGIN_ID";
 							columnValues = columnValues + "'"+f.id+ "'";
@@ -257,30 +262,50 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 							}
 							
 							// add the geometry
-							
 							columnNames = columnNames + " )";
 							columnValues = columnValues + " )";
 							
-							// TODO: group all the insert queries into a transaction for insertion speedup
+							// TODO: Use prepared statements and group all the insert queries into a transaction for insertion speedup
+							//       This will need to get the schema beforehand, based on the JSON features
 							String insertQuery = "INSERT INTO '"+sourceTableName+"' "+columnNames+" VALUES "+columnValues+";";
-							try {
+							long queryTime = System.nanoTime();
+                            if(BuildConfig.DEBUG){
+                                Log.d(TAG, "Query prepared in: " + (queryTime - featureStartTime)/1000000 + "ms");
+                            }
+							
+                            try {
 								stmt = db.prepare(insertQuery);
 								stmt.step();
 								stmt.close();
 								
-								if(mPrefs != null){
-									SharedPreferences.Editor editor = mPrefs.edit();
-									Date currentDate = new Date();
-									editor.putLong(LAST_UPDATE_PREF, currentDate.getTime());
-									editor.commit();
+								long featureStopTime = System.nanoTime();
+								if(BuildConfig.DEBUG){
+                                    Log.d(TAG, "Feature inserted in: " + (featureStopTime - queryTime)/1000000 + "ms");
 								}
 								
 							} catch (Exception e1) {
-								Log.e(TAG, Log.getStackTraceString(e1));
+							    if(BuildConfig.DEBUG){
+                                    Log.e(TAG, Log.getStackTraceString(e1));
+							    }
 							}
-							
-							
 						}
+						
+                        long prefStartTime = System.nanoTime();
+
+                        // Update the "last update" time to prevent unnecessary downloads
+                        if(mPrefs != null){
+                            SharedPreferences.Editor editor = mPrefs.edit();
+                            Date currentDate = new Date();
+                            editor.putLong(LAST_UPDATE_PREF, currentDate.getTime());
+                            editor.commit();
+                        }
+                        
+						long stopTime = System.nanoTime();
+						if(BuildConfig.DEBUG){
+                            Log.d(TAG, "Pref updated in: " + (stopTime - prefStartTime)/1000000 + "ms");
+                            Log.d(TAG, "Database updated in: " + (stopTime - startTime)/1000000 + "ms");
+						}
+
 					}
 				}
 
