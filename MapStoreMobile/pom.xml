@@ -89,10 +89,10 @@
 									<includes>
 										<include>target/*.apk</include>
 									</includes>
-									<keystore>${sign_keystore}</keystore>
-									<storepass>${sign_storepass}</storepass>
-									<keypass>${sign_keypass}</keypass>
-									<alias>${sign_alias}</alias>
+									<keystore>${msm_keystore}</keystore>
+									<storepass>${msm_storepass}</storepass>
+									<keypass>${msm_keypass}</keypass>
+									<alias>${msm_alias}</alias>
 									<arguments>
 									  <argument>-sigalg</argument><argument>MD5withRSA</argument>
 									  <argument>-digestalg</argument><argument>SHA1</argument>
