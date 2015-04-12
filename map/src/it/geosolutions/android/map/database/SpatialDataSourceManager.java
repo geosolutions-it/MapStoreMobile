@@ -73,30 +73,38 @@ public class SpatialDataSourceManager {
     		sdbHandlers.clear();
     	}
     }
-    //legacy --> update calling applications (Snowmaps)
+    //legacy --> update calling applications
     @Deprecated
     public void init(Context context, File mapsDir ) {
     	init(mapsDir);
     }
+    
     public void init( File mapsDir ) {
     
     	sdbHandlers = new ArrayList<ISpatialDatabaseHandler>();
     	
-        File[] sqliteFiles = mapsDir.listFiles(new FilenameFilter(){
-            public boolean accept( File dir, String filename ) {
-                return filename.endsWith(".sqlite") || filename.endsWith(".mbtiles");
-            }
-        });
-
-        for( File sqliteFile : sqliteFiles ) {
-            ISpatialDatabaseHandler sdb = null;
-            if (sqliteFile.getName().endsWith("mbtiles")) {
-                sdb = new MbtilesDatabaseHandler(sqliteFile.getAbsolutePath());
-            } else {
-                sdb = new SpatialiteDataSourceHandler(sqliteFile.getAbsolutePath());
-            }
-            sdbHandlers.add(sdb);
-        }
+    	if(mapsDir != null){
+	        File[] sqliteFiles = mapsDir.listFiles(new FilenameFilter(){
+	            public boolean accept( File dir, String filename ) {
+	                return filename.endsWith(".sqlite") || filename.endsWith(".mbtiles");
+	            }
+	        });
+	        
+	        if(sqliteFiles == null){
+	        	// No acceptable file found
+	        	return;
+	        }
+	        
+	        for( File sqliteFile : sqliteFiles ) {
+	            ISpatialDatabaseHandler sdb = null;
+	            if (sqliteFile.getName().endsWith("mbtiles")) {
+	                sdb = new MbtilesDatabaseHandler(sqliteFile.getAbsolutePath());
+	            } else {
+	                sdb = new SpatialiteDataSourceHandler(sqliteFile.getAbsolutePath());
+	            }
+	            sdbHandlers.add(sdb);
+	        }
+    	}
         
     }
     /**
