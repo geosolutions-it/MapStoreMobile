@@ -155,10 +155,10 @@
 									<includes>
 										<include>target/*.apk</include>
 									</includes>
-									<keystore>${sign_keystore}</keystore>
-									<storepass>${sign_storepass}</storepass>
-									<keypass>${sign_keypass}</keypass>
-									<alias>${sign_alias}</alias>
+									<keystore>${gc_keystore}</keystore>
+									<storepass>${gc_storepass}</storepass>
+									<keypass>${gc_keypass}</keypass>
+									<alias>${gc_alias}</alias>
 									<arguments>
 									  <argument>-sigalg</argument><argument>MD5withRSA</argument>
 									  <argument>-digestalg</argument><argument>SHA1</argument>
