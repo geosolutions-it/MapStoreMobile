@@ -17,14 +17,19 @@
  *******************************************************************************/
 package it.geosolutions.geocollect.android.map;
 
+import java.util.List;
+
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
+import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
 import it.geosolutions.android.map.MapsActivity;
+import it.geosolutions.android.map.control.MapControl;
+import it.geosolutions.android.map.control.MapInfoControl;
 import it.geosolutions.geocollect.android.core.R;
 /**
  * Custom Map to use with GeoCollect application
@@ -36,6 +41,8 @@ import it.geosolutions.geocollect.android.core.R;
  * @author Lorenzo Pini (lorenzo.pini@geo-solutions.it)
  */
 public class GeoCollectMapActivity extends MapsActivity {
+
+    protected MapInfoControl mic;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -64,7 +71,45 @@ public class GeoCollectMapActivity extends MapsActivity {
             
         }
         
+        // Activate the filter control
+        if(item.getItemId() == R.id.filter){
+
+            if(mic != null && mic.getActivationListener() != null){
+                mic.getActivationListener().onClick(item.getActionView());
+            }
+            
+        }
+        
         return super.onOptionsItemSelected(item);
     }
     
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        mic = new ReturningMapInfoControl();
+        mic.activity = this;
+        mic.mapView = mapView;
+        
+        // if the mapView had some controls, get the group of them
+        // this check is needed until the map library will have named groups
+        List<MapControl> mcList = mapView.getControls();
+        if(mcList != null && !mcList.isEmpty()){
+            MapControl mc;
+            boolean found = false;
+            for(int i = 0; i < mcList.size() && !found; i++){
+                mc = mcList.get(i);
+                if(mc.getGroup() != null){
+                    mic.setGroup(mc.getGroup());
+                    mic.getGroup().add(mic);
+                    found = true;
+                }
+            }
+            
+        }
+        
+        mapView.addControl(mic);
+        mic.instantiateListener();
+        
+    }
 }

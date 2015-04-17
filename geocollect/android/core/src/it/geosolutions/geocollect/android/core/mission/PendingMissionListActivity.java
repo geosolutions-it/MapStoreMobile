@@ -1,6 +1,5 @@
-/*
- * GeoSolutions - MapstoreMobile - GeoSpatial Framework on Android based devices
- * Copyright (C) 2014  GeoSolutions (www.geo-solutions.it)
+/*******************************************************************************
+ * Copyright 2014-2015 GeoSolutions
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +13,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+ * 
+ *******************************************************************************/
 package it.geosolutions.geocollect.android.core.mission;
 
 import it.geosolutions.android.map.MapsActivity;
@@ -666,8 +666,10 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         launch.putExtra(MapsActivity.PARAMETERS.DRAWER_MODE, DrawerMode.ONLY_LEFT.ordinal());
         // }
 
+        /*
         launch.putExtra(MapsActivity.PARAMETERS.CUSTOM_MAPINFO_CONTROL,
                 new ReturningMapInfoControl());
+                */
 
         // launch.putExtra(MapsActivity.LAYERS_TO_ADD, m.layers) ;
         startActivityForResult(launch, SPATIAL_QUERY);

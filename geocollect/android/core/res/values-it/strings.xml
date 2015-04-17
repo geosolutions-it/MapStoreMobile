@@ -71,7 +71,8 @@
     <string name="search_missions">Cerca Segnalazioni</string>
     <string name="location_searching">Ricerca Posizione in corso&#8230;</string>
 
-    <string name="menu_center">Centrare</string>
+    <string name="menu_center">Centra</string>
+    <string name="menu_filter">Filtra</string>
     <string name="entry_saved_success">Dati %s salvati con successo</string>
     <string name="menu_clear_survey">Cancella dati di questo sopralluogo</string>
     <string name="menu_upload">Carica</string>

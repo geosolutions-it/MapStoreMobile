@@ -73,7 +73,7 @@
     <string name="location_searching">Acquiring position&#8230;</string>
 
     <string name="menu_center">Center</string>
-    
+    <string name="menu_filter">Filter</string>
     <string name="entry_saved_success">%s successfully saved</string>
     <string name="menu_clear_survey">Clear data of this survey</string>
     <string name="menu_upload">Upload</string>

@@ -71,10 +71,12 @@ public abstract class MapControl {
 	            disable();	            
 			} else {
 	            if(group != null){
-	            	for(MapControl c:group){
-	            			c.disable();
-	            			c.getActivationButton().setSelected(false);
-	            	}
+                    for (MapControl c : group) {
+                        c.disable();
+                        if (c.getActivationButton() != null) {
+                            c.getActivationButton().setSelected(false);
+                        }
+                    }
 	            }
 	            button.setSelected(true);
 	            enable();				
