@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">GeoCollect</string>
     <string name="action_settings">Settings</string>
+    <string name="action_account">Account</string>
     <string name="action_mission">Mission</string>
     <string name="title_pendingmission_list">Pending Missions</string>
     <string name="title_pendingmission_detail">Pending Mission Detail</string>
@@ -17,7 +18,7 @@
 	<string name="error_sending_data">Error Sending Data</string>
 	<string name="no_media_to_send">No media to send</string>
 	
-	 <plurals name="reporting">
+	<plurals name="reporting">
         <item quantity="one">One reporting</item>
         <item quantity="other">%d reportings.</item>
     </plurals>

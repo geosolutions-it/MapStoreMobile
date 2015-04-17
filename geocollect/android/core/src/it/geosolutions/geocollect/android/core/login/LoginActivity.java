@@ -9,13 +9,9 @@ import it.geosolutions.geocollect.android.core.login.utils.LoginUtil.LoginStatus
 import it.geosolutions.geocollect.android.core.login.utils.LoginUtil.UserDataStatusCallback;
 import it.geosolutions.geocollect.android.core.login.utils.NetworkUtil;
 import it.geosolutions.geocollect.android.core.login.utils.URLListPersistanceUtil;
-import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
-import it.geosolutions.geocollect.android.core.mission.utils.NavUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.SpatialiteUtils;
-import it.geosolutions.geocollect.android.core.navigation.NavDrawerAdapter;
-import it.geosolutions.geocollect.android.core.navigation.NavDrawerItem;
 import it.geosolutions.geocollect.android.template.Resource;
 import it.geosolutions.geocollect.android.template.TemplateDownloadTask;
 import it.geosolutions.geocollect.android.template.TemplateDownloadTask.RemoteTemplatesFetchCallback;
@@ -450,7 +446,9 @@ public class LoginActivity extends Activity {
 								: View.VISIBLE);
 					}
 				});
-			}
+			}else{
+			    mLoginFormView.setVisibility(View.GONE);
+            }
 		} else {
 			// The ViewPropertyAnimator APIs are not available, so simply show
 			// and hide the relevant UI components.

@@ -185,6 +185,8 @@ public class LogoutActivity extends Activity {
 						mLogoutFormView.setVisibility(show ? View.GONE: View.VISIBLE);
 					}
 				});
+			}else{
+			    mLogoutFormView.setVisibility(View.GONE);
 			}
 		} else {
 			// The ViewPropertyAnimator APIs are not available, so simply show

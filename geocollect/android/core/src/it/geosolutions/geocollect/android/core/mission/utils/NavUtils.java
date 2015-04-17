@@ -76,7 +76,7 @@ public class NavUtils {
 		
 		//items[size - 4] = NavMenuItem.create(102, app.getString(R.string.map), "ic_location_map", false, app);
 		items[size - 3] = NavMenuSection.create(200,app.getString(R.string.general));
-		items[size - 2] = NavMenuItem.create(203, app.getString(R.string.action_settings), "ic_action_settings", false, app);
+		items[size - 2] = NavMenuItem.create(203, app.getString(R.string.action_account), "ic_action_settings", false, app);
 	    items[size - 1] = NavMenuItem.create(204, app.getString(R.string.action_quit), "ic_navigation_quit_light", false, app);
 	    
 	    return items;

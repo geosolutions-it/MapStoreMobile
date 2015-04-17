@@ -2,7 +2,8 @@
 <resources>
     <string name="app_name">GeoCollect</string>
     <string name="action_settings">Impostazioni</string>
-        <string name="action_mission">Missione</string>
+    <string name="action_account">Account</string>
+    <string name="action_mission">Missione</string>
     <string name="title_pendingmission_list">Missioni in sospeso</string>
     <string name="title_pendingmission_detail">Dettaglio missione</string>
     <string name="general">Generale</string>

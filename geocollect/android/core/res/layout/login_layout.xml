@@ -49,7 +49,8 @@
             android:layout_centerHorizontal="true"
             android:fontFamily="sans-serif"
             android:paddingTop="10dp"
-            android:src="@drawable/geocollect_header" />
+            android:src="@drawable/geocollect_header"
+            android:contentDescription="@string/login_login" />
 
         <TextView
             android:id="@+id/login_title_do"
@@ -125,7 +126,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/password_tv"
             android:background="@android:color/white"
-             android:paddingLeft="3dp"
+            android:paddingLeft="3dp"
             android:imeActionId="@+id/login"
             android:imeActionLabel="@string/login_password"
             android:imeOptions="actionUnspecified"
@@ -145,7 +146,8 @@
             android:paddingTop="3dp"
             android:text="@string/login_password_forgotten"
             android:textColor="@android:color/white"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            android:visibility="invisible" />
 
         <LinearLayout
             android:id="@+id/button_layout"
