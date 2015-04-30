@@ -18,10 +18,10 @@
 package it.geosolutions.geocollect.android.core.mission;
 
 import it.geosolutions.android.map.MapsActivity;
+import it.geosolutions.android.map.MapsActivity.DrawerMode;
 import it.geosolutions.android.map.model.Layer;
 import it.geosolutions.android.map.model.MSMMap;
 import it.geosolutions.android.map.utils.SpatialDbUtils;
-import it.geosolutions.android.map.MapsActivity.DrawerMode;
 import it.geosolutions.android.map.view.MapViewManager;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.BuildConfig;
@@ -30,6 +30,8 @@ import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.FormEditActivity;
 import it.geosolutions.geocollect.android.core.login.LoginActivity;
 import it.geosolutions.geocollect.android.core.login.LogoutActivity;
+import it.geosolutions.geocollect.android.core.login.utils.LoginRequestInterceptor;
+import it.geosolutions.geocollect.android.core.login.utils.LoginUtil;
 import it.geosolutions.geocollect.android.core.login.utils.NetworkUtil;
 import it.geosolutions.geocollect.android.core.mission.PendingMissionListFragment.FragmentMode;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
@@ -41,7 +43,6 @@ import it.geosolutions.geocollect.android.core.navigation.NavDrawerActivityConfi
 import it.geosolutions.geocollect.android.core.navigation.NavDrawerAdapter;
 import it.geosolutions.geocollect.android.core.navigation.NavDrawerItem;
 import it.geosolutions.geocollect.android.map.GeoCollectMapActivity;
-import it.geosolutions.geocollect.android.map.ReturningMapInfoControl;
 import it.geosolutions.geocollect.android.template.TemplateDownloadTask;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 
@@ -193,7 +194,13 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
                     });
                 }
             };
-            task.execute(authKey);
+            
+            String username = prefs.getString(LoginActivity.PREFS_USER_EMAIL, null);
+            String password = prefs.getString(LoginActivity.PREFS_PASSWORD, null);
+
+            String authorizationString = LoginRequestInterceptor.getB64Auth(username, password);
+            
+            task.execute(authKey, authorizationString);
 
         }
 

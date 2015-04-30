@@ -92,12 +92,18 @@ public class NavDrawerAdapter extends ArrayAdapter<NavDrawerItem> {
     
     @Override
     public int getItemViewType(int position) {
-        return this.getItem(position).getType();
+        if(this.getItem(position) != null){
+            return this.getItem(position).getType();
+        }
+        return android.widget.Adapter.IGNORE_ITEM_VIEW_TYPE;
     }
     
     @Override
     public boolean isEnabled(int position) {
-        return getItem(position).isEnabled();
+        if(getItem(position) != null){
+            return getItem(position).isEnabled();
+        }
+        return false;
     }
     
     

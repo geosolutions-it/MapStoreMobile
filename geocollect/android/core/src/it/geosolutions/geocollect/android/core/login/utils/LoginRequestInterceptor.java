@@ -20,6 +20,8 @@ public class LoginRequestInterceptor implements RequestInterceptor {
 	@Override
 	public void intercept(RequestFacade requestFacade) {
 
+	    requestFacade.addHeader("Accept", "application/json;");
+	    
 		if (mUser != null && mPass != null) {
 			final String authorizationValue = getB64Auth(mUser, mPass);
 			requestFacade.addHeader("Authorization", authorizationValue);

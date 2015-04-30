@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import retrofit.Callback;
 import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
+import retrofit.RestAdapter.LogLevel;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 import retrofit.converter.GsonConverter;
@@ -50,10 +51,15 @@ public abstract class TemplateDownloadTask  extends AsyncTask<String, Void, Void
 	@Override
 	protected Void doInBackground(final String... params) {
 
-		getRemoteTemplates(new RemoteTemplatesFetchCallback() {
+	    String authorizationString = "";
+	    if(params.length > 1){
+	        authorizationString = params[1];
+	    }
+	    
+		getRemoteTemplates(authorizationString, new RemoteTemplatesFetchCallback() {
 
 			@Override
-			public void templatesReceived(ResourceList list) {
+			public void templatesReceived(String authorizationString, ResourceList list) {
 
 				if(list != null && list.list.size() > 0){
 
@@ -61,7 +67,7 @@ public abstract class TemplateDownloadTask  extends AsyncTask<String, Void, Void
 					//list worked using a "geostore" resource
 					for(final it.geosolutions.android.map.geostore.model.Resource resource : list.list){
 
-						downloadRemoteTemplate(params[0], resource.id, new SingleRemoteTemplateFetchCallback (){
+						downloadRemoteTemplate(authorizationString, resource.id, new SingleRemoteTemplateFetchCallback (){
 
 							@Override
 							public void received(Resource res) {
@@ -113,7 +119,7 @@ public abstract class TemplateDownloadTask  extends AsyncTask<String, Void, Void
 	 * downloads the list of available remote templates
 	 * @param callback giving feedback of the result of the operation
 	 */
-	public static void getRemoteTemplates(final RemoteTemplatesFetchCallback callback){
+	public static void getRemoteTemplates(final String authorizationString, final RemoteTemplatesFetchCallback callback){
 
 		Gson gson = GsonUtil.createFeatureGson();
 		RestAdapter restAdapter = new RestAdapter.Builder()
@@ -123,7 +129,7 @@ public abstract class TemplateDownloadTask  extends AsyncTask<String, Void, Void
 			@Override
 			public void intercept(RequestFacade request) {
 				request.addHeader("Accept", "application/json;");
-
+				request.addHeader("Authorization", authorizationString);
 			}
 		})
 		//.setLogLevel(LogLevel.FULL)
@@ -135,7 +141,7 @@ public abstract class TemplateDownloadTask  extends AsyncTask<String, Void, Void
 			@Override
 			public void success(RemoteTemplateListResponse rl, Response response) {
 
-				callback.templatesReceived(rl.ResourceList);	
+				callback.templatesReceived(authorizationString, rl.ResourceList);	
 			}
 
 			@Override
@@ -151,11 +157,11 @@ public abstract class TemplateDownloadTask  extends AsyncTask<String, Void, Void
 
 	/**
 	 * downloads a remote template
-	 * @param authKey the key to authorize the operation
+	 * @param authorizationString the key to authorize the operation
 	 * @param id the id to identify the remote
 	 * @param callback giving feedback of the result of the operation
 	 */
-	public static void downloadRemoteTemplate(final String authKey, final Long id, final SingleRemoteTemplateFetchCallback callback){
+	public static void downloadRemoteTemplate(final String authorizationString, final Long id, final SingleRemoteTemplateFetchCallback callback){
 
 
 		RestAdapter restAdapter = new RestAdapter.Builder()
@@ -165,11 +171,11 @@ public abstract class TemplateDownloadTask  extends AsyncTask<String, Void, Void
 			@Override
 			public void intercept(RequestFacade request) {
 				request.addHeader("Accept", "application/json;");
-				request.addHeader("Authorization", authKey);
+				request.addHeader("Authorization", authorizationString);
 
 			}
 		})
-//		.setLogLevel(LogLevel.FULL)
+		.setLogLevel(LogLevel.FULL)
 		.build();
 
 		GeoCollectTemplateDownloadServices services = restAdapter.create(GeoCollectTemplateDownloadServices.class);
@@ -192,7 +198,7 @@ public abstract class TemplateDownloadTask  extends AsyncTask<String, Void, Void
 
 	public interface RemoteTemplatesFetchCallback
 	{
-		public void templatesReceived(ResourceList list);
+		public void templatesReceived(String authorizationString, ResourceList list);
 
 		public void error(RetrofitError error);
 	}

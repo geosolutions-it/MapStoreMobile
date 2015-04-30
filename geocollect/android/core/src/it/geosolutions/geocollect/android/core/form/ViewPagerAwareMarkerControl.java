@@ -1,10 +1,10 @@
 package it.geosolutions.geocollect.android.core.form;
 
-import android.view.MotionEvent;
-import android.view.View;
 import it.geosolutions.android.map.control.MarkerControl;
 import it.geosolutions.android.map.view.AdvancedMapView;
 import it.geosolutions.geocollect.android.core.widgets.EnableSwipeViewPager;
+import android.view.MotionEvent;
+import android.view.View;
 /**
  * Custom Marker Control to disable the swipePager when the User is dragging the marker
  * This will stop the page to move and will enable a correct dragging of the marker.

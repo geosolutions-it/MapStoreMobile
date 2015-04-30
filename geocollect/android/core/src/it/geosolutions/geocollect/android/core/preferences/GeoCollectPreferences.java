@@ -16,10 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package it.geosolutions.geocollect.android.core.preferences;
-import com.actionbarsherlock.app.SherlockPreferenceActivity;
-
 import it.geosolutions.geocollect.android.core.R;
 import android.os.Bundle;
+
+import com.actionbarsherlock.app.SherlockPreferenceActivity;
 
 /**
  * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)

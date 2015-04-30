@@ -12,7 +12,6 @@ import java.io.InputStreamReader;
 
 import retrofit.Callback;
 import retrofit.RestAdapter;
-import retrofit.RestAdapter.LogLevel;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 import retrofit.converter.GsonConverter;
@@ -96,7 +95,7 @@ public class LoginUtil {
 		});
 	}
 	
-	public static void user(final Context pContext, final String pUrl, final String pAuthKey, final UserDataStatusCallback pCallback){
+	public static void user(final Context pContext, final String pUrl, final String pAuthKey, final String authorizationString, final UserDataStatusCallback pCallback){
 		
 		Gson gson = GsonUtil.createFeatureGson();
 		RestAdapter restAdapter = new RestAdapter.Builder()
@@ -116,7 +115,6 @@ public class LoginUtil {
 		        }
 				
 				//example properties of the UserDataResponse
-				final String password = udr.password;
 				final String username = udr.username;
 				
 				final Editor ed = PreferenceManager.getDefaultSharedPreferences(pContext).edit();
@@ -127,7 +125,7 @@ public class LoginUtil {
 				ed.putString(LoginActivity.PREFS_USER_ENTE, "Comune di Genova");
 				ed.commit();
 				
-				pCallback.received();
+				pCallback.received(authorizationString);
 				
 			}
 			
@@ -151,7 +149,7 @@ public class LoginUtil {
 	}
 	public interface UserDataStatusCallback{
 		
-		public void received();
+		public void received(String authorizationString);
 		
 		public void failed(final RetrofitError error);
 	}

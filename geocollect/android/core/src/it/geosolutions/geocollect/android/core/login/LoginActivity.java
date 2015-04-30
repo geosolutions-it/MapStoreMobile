@@ -4,6 +4,7 @@ import it.geosolutions.android.map.geostore.model.ResourceList;
 import it.geosolutions.geocollect.android.core.BuildConfig;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.login.utils.InstantAutoComplete;
+import it.geosolutions.geocollect.android.core.login.utils.LoginRequestInterceptor;
 import it.geosolutions.geocollect.android.core.login.utils.LoginUtil;
 import it.geosolutions.geocollect.android.core.login.utils.LoginUtil.LoginStatusCallback;
 import it.geosolutions.geocollect.android.core.login.utils.LoginUtil.UserDataStatusCallback;
@@ -301,6 +302,7 @@ public class LoginActivity extends Activity {
 					
 					ed.commit();
 					
+					String authorizationString = LoginRequestInterceptor.getB64Auth(mEmail, mPassword);
 					
 					//save urls
 					ArrayList<String> urls = new ArrayList<String>();
@@ -317,20 +319,20 @@ public class LoginActivity extends Activity {
 					URLListPersistanceUtil.save(getBaseContext(), urls);
 					
 					//auth key received, get userdata
-					LoginUtil.user(getBaseContext(), mSelectedUrl, authKey, new UserDataStatusCallback() {
+					LoginUtil.user(getBaseContext(), mSelectedUrl, authKey, authorizationString, new UserDataStatusCallback() {
 						
 						@Override
-						public void received() {
+						public void received(String authorizationString) {
 						
 							showProgress(false,false);
 							
 							Toast.makeText(getBaseContext(), getString(R.string.login_success), Toast.LENGTH_LONG).show(); 
 
 							/////////////
-						    TemplateDownloadTask.getRemoteTemplates(new RemoteTemplatesFetchCallback() {
+						    TemplateDownloadTask.getRemoteTemplates(authorizationString, new RemoteTemplatesFetchCallback() {
 
 						            @Override
-						            public void templatesReceived(ResourceList list) {
+						            public void templatesReceived(String authorizationString, ResourceList list) {
 
 						                if(list != null && list.list.size() > 0){
 
@@ -338,7 +340,7 @@ public class LoginActivity extends Activity {
 						                    //list worked using a "geostore" resource
 						                    for(final it.geosolutions.android.map.geostore.model.Resource resource : list.list){
 
-						                        TemplateDownloadTask.downloadRemoteTemplate(authKey, resource.id, new SingleRemoteTemplateFetchCallback (){
+						                        TemplateDownloadTask.downloadRemoteTemplate(authorizationString, resource.id, new SingleRemoteTemplateFetchCallback (){
 
 						                            @Override
 						                            public void received(Resource res) {

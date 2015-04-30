@@ -67,7 +67,7 @@ public class NavUtils {
 		
 		}else{
 			
-			for(int j = 0, k = 0; j < persistedTemplates.size(); i++, j++, k+=2 ){
+			for(int j = 0, k = 0; j < persistedTemplates.size(); j++, k+=2 ){
 				MissionTemplate t = persistedTemplates.get(j);
 				items[i + k]     =  NavMenuItem.create(DOWNLOADED_TEMPLATE_ID + k    ,t.title, "ic_collections_view_as_list", false, app);
 				items[i + k + 1] =  NavMenuItem.create(DOWNLOADED_TEMPLATE_ID + k + 1,app.getString(R.string.my_inspections_my)+ " " +t.title, "ic_collections_view_as_list", false, app);
