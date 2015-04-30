@@ -28,6 +28,7 @@
             android:layout_marginBottom="16dp"
             android:fontFamily="sans-serif-light"
             android:text="@string/login_progress_signing_in"
+            android:textColor="@android:color/white"
             android:textAppearance="?android:attr/textAppearanceMedium" />
     </LinearLayout>
 
@@ -39,7 +40,7 @@
         android:layout_height="match_parent"
         android:background="#ff0463B5"
         android:orientation="vertical"
-         android:visibility="gone" >
+        android:visibility="gone" >
 
         <RelativeLayout
             android:id="@+id/logout_upper_spacer"
@@ -60,7 +61,7 @@
             android:id="@+id/logout_content"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight=".4" >
+            android:layout_weight=".6" >
 
             <TextView
                 android:id="@+id/logout_logged_in_as"
@@ -111,14 +112,67 @@
                 android:textColor="@android:color/white"
                 android:textStyle="italic" />
 
+            <RelativeLayout
+                android:id="@+id/mission_load_layout"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/logout_ente_tv"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:gravity="center_horizontal"
+                android:paddingTop="5dp" >
 
+                <TextView
+                    android:id="@+id/update_missions_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginLeft="5dp"
+                    android:fontFamily="sans-serif"
+                    android:text="@string/available_missions"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold" />
+
+                <FrameLayout 
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="5dp">
+                <ImageView
+                    android:id="@+id/update_missions_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_navigation_refresh" />
+               <ProgressBar 
+                   android:id="@+id/update_missions_progress"
+                   android:layout_width="32dp"
+                   android:layout_height="32dp"
+                   android:layout_gravity="center"
+                   android:visibility="gone"/>
+                </FrameLayout>
+                
+            </RelativeLayout>
+
+            <ListView
+                android:id="@+id/mission_list"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_below="@+id/mission_load_layout"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:divider="#FFFFFF"
+                android:dividerHeight="1dp"
+                android:paddingBottom="5dp"
+                android:paddingTop="10dp" >
+            </ListView>
         </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/logout_lower_spacer"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight=".4" >
+            android:layout_weight=".2" >
 
             <Button
                 android:id="@+id/logout_button"
@@ -131,9 +185,9 @@
                 android:layout_marginRight="20dp"
                 android:background="@drawable/red_button"
                 android:fontFamily="sans-serif"
-                android:textSize="20sp"
                 android:text="@string/logout_logout"
-                android:textColor="@android:color/white" />
+                android:textColor="@android:color/white"
+                android:textSize="20sp" />
         </RelativeLayout>
     </LinearLayout>
 

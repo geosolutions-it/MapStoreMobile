@@ -101,4 +101,9 @@
     <string name="saving_data_title">Sava data</string>
     <string name="saving_data_message">Do you really want to mark this %s as complete ?</string>
     
+    
+    <string name="available_missions">Available Missions</string>
+    <string name="dialog_message_with_amount">Do you want to download the background data for this mission ? %d files need to be downloaded.</string>
+    <string name="download_successfull">Download successful</string>
+    
 </resources>

@@ -28,6 +28,7 @@
             android:layout_marginBottom="16dp"
             android:fontFamily="sans-serif-light"
             android:text="@string/login_progress_signing_in"
+            android:textColor="@android:color/white"
             android:textAppearance="?android:attr/textAppearanceMedium" />
     </LinearLayout>
 
@@ -82,7 +83,7 @@
             android:fontFamily="sans-serif"
             android:paddingBottom="10dp"
             android:paddingTop="10dp"
-            android:textColor="@android:color/black" />
+            android:textColor="@android:color/white" />
 
         <TextView
             android:id="@+id/email_tv"

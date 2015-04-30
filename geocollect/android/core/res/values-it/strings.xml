@@ -97,4 +97,8 @@
     <string name="saving_data_title">Salvataggio dati</string>
     <string name="saving_data_message">Vuoi salvare i dati per l\'invio successivo?</string>
     
+    <string name="available_missions">Missioni Disponibili</string>
+    <string name="dialog_message_with_amount">Vuoi scaricare i dati di background per questa missione ? Saranno scaricati %d file, continuare?</string>
+    <string name="download_successfull">Scaricato con successo!</string>
+    
 </resources>

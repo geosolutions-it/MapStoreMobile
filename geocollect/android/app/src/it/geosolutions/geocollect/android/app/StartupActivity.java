@@ -79,7 +79,7 @@ public class StartupActivity extends Activity {
         ZipFileManager zfm = new ZipFileManager(this, dir_path, MapFilesProvider.getBaseDir(), getResources()
                 .getString(R.string.url_data_test_archive)) {
             @Override
-            public void launchMainActivity() {
+            public void launchMainActivity(final boolean success) {
 
                 if (getApplication() instanceof GeoCollectApplication) {
                     ((GeoCollectApplication) getApplication()).setupMBTilesBackgroundConfiguration();

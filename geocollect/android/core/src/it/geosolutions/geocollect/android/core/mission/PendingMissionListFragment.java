@@ -19,7 +19,10 @@ package it.geosolutions.geocollect.android.core.mission;
 
 import it.geosolutions.android.map.model.query.BBoxQuery;
 import it.geosolutions.android.map.model.query.BaseFeatureInfoQuery;
+import it.geosolutions.android.map.utils.MapFilesProvider;
+import it.geosolutions.android.map.utils.ZipFileManager;
 import it.geosolutions.android.map.wfs.geojson.GeoJson;
+import it.geosolutions.geocollect.android.core.BuildConfig;
 import it.geosolutions.geocollect.android.core.GeoCollectApplication;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.form.FormEditActivity;
@@ -947,9 +950,58 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
             }
         }
         stopLoadingGUI();
+        
+        //if this fragment is visible to the user, check if the background data for the current template is available
+        if(getUserVisibleHint()){
+        	checkIfBackgroundIsAvailableForTemplate();
+        }
     }
 
-    /*
+    /**
+     * checks if background data for the current template is available
+     * if not, the user is asked to download
+     */
+    private void checkIfBackgroundIsAvailableForTemplate() {
+		
+    	boolean exists = MissionUtils.checkTemplateForBackgroundData(getActivity(), missionTemplate);
+    	
+    	if(!exists){
+			
+			final HashMap<String,Integer> urls = MissionUtils.getContentUrlsAndFileAmountForTemplate(missionTemplate);
+			
+			if(BuildConfig.DEBUG){
+				
+				Log.i(TAG, "downloading "+ urls.toString());
+			}
+			
+			for(String url : urls.keySet()){
+				
+				final String mount  = MapFilesProvider.getEnvironmentDirPath(getActivity());
+				
+				new ZipFileManager(getActivity(), mount, MapFilesProvider.getBaseDir(), url, null, getString(R.string.dialog_message_with_amount,urls.get(url))) {
+					@Override
+					public void launchMainActivity(final boolean success) {
+						
+						// TODO apply ? this was earlier in StartupActivity
+//						if (getActivity().getApplication() instanceof GeoCollectApplication) {
+//							((GeoCollectApplication) getActivity().getApplication()).setupMBTilesBackgroundConfiguration();
+//						}
+						//launch.putExtra(PendingMissionListFragment.INFINITE_SCROLL, false);
+						if(success){
+							
+							Toast.makeText(getActivity(), getString(R.string.download_successfull), Toast.LENGTH_SHORT).show();						
+						}
+						
+					}
+				};
+			}
+			
+			
+		}
+		
+	}
+
+	/*
      * (non-Javadoc)
      * 
      * @see android.support.v4.app.LoaderManager.LoaderCallbacks#onLoaderReset(android.support.v4.content.Loader)
