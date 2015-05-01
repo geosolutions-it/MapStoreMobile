@@ -91,6 +91,7 @@
     <string name="decimation">Decimation</string>
     <string name="decimation_factor_default">0.000001</string>
     <string name="dash">Stroke dashed</string>
+    <string name="download_not_enough_space">You don\'t seem to have enough space available, cannot download this file</string>
         
 
 </resources>

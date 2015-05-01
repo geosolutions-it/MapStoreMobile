@@ -90,5 +90,6 @@
     <string name="decimation">Schwächung</string>
     <string name="decimation_factor_default">0.000001</string>
     <string name="dash">Strichelung</string>
+     <string name="download_not_enough_space">Es ist nicht genug Speicherplatz für diesen Download vorhanden</string>
 
 </resources>

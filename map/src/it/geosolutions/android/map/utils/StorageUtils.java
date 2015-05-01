@@ -20,10 +20,13 @@ package it.geosolutions.android.map.utils;
 import it.geosolutions.android.map.model.stores.LayerStore;
 import it.geosolutions.android.map.model.stores.MapStoreLayerStore;
 import it.geosolutions.android.map.model.stores.SpatialiteStore;
-
+import java.io.File;
 import java.util.ArrayList;
-
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Build;
+import android.os.Environment;
+import android.os.StatFs;
 import android.util.Log;
 
 /**
@@ -57,5 +60,33 @@ public class StorageUtils {
 		LocalPersistence.writeObjectToFile(context, sources, LocalPersistence.SOURCES);
 		Log.v("Storage","saved sources to local file");
 	}
+	
+	
+    /**
+     * @return the available memory for an external mount
+     */
+    @SuppressLint("NewApi")
+	@SuppressWarnings("deprecation")
+    public static long getAvailableMemoryInBytesForPath(final String path) {
+
+    	final StatFs stat = new StatFs(path);
+    	
+    	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2){
+
+    		return stat.getAvailableBlocksLong() * stat.getBlockSizeLong();
+    		
+    	} else{
+
+    		return (long) stat.getBlockSize() * (long) stat.getAvailableBlocks(); 
+    	}
+    }
+    /**
+     * 
+     * @return the available memory on the default SD-Card
+     */
+    public static long getAvailableInternalMemoryInBytes() {
+    	
+    	return getAvailableMemoryInBytesForPath(Environment.getExternalStorageDirectory().getAbsolutePath());
+    }
 	
 }

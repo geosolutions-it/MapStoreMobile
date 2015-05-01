@@ -78,5 +78,6 @@
     <string name="button_confirm_exit">Vuoi uscire dall\'applicazione?</string>
     <string name="button_confirm_exit_title">Uscita</string>
     <string name="error_parsing_request">Errore nella lettura della richiesta.</string>
+     <string name="download_not_enough_space">Non c\'é abbastanza spazio a disposizione, impossibile scaricare questo file</string>
    
 </resources>

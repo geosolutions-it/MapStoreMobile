@@ -17,6 +17,10 @@
  */
 package it.geosolutions.android.map.utils;
 
+import it.geosolutions.android.map.BuildConfig;
+import it.geosolutions.android.map.MapsActivity;
+import it.geosolutions.android.map.R;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,11 +30,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.zip.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
-import it.geosolutions.android.map.BuildConfig;
-import it.geosolutions.android.map.MapsActivity;
-import it.geosolutions.android.map.R;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -39,6 +41,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 /** Class to manage download and decompression of a sample data test archive from web.
  * This class manager uses two class that extend AsyncTask to perform computations in background.
@@ -234,6 +237,23 @@ public class ZipFileManager {
 				conexion.connect();
 		
 				int file_length = conexion.getContentLength();
+				//check if enough space is available 
+				//TODO for unzipping, a multiple of the file length is necessary, how much ?
+				//for now 2.5 * file_length
+				if(file_length * 2.5f  > StorageUtils.getAvailableMemoryInBytesForPath(dir_path)){
+					if(activity != null && !activity.isFinishing()){
+						activity.runOnUiThread(new Runnable() {
+							
+							@Override
+							public void run() {
+
+								Toast.makeText(activity.getBaseContext(),activity.getString(R.string.download_not_enough_space), Toast.LENGTH_SHORT).show();
+								
+							}
+						});
+					}
+					 return false;
+				 }
 		
 				input = new BufferedInputStream(url.openStream());
 				path_file = dir_path + "/" + file_name;
