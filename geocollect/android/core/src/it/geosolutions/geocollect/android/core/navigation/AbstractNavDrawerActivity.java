@@ -4,7 +4,6 @@ import it.geosolutions.geocollect.android.core.R;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -26,7 +25,7 @@ public abstract class AbstractNavDrawerActivity extends SherlockFragmentActivity
     private CharSequence mDrawerTitle;
     private CharSequence mTitle;
     
-    private NavDrawerActivityConfiguration navConf ;
+    protected NavDrawerActivityConfiguration navConf ;
     
     protected abstract NavDrawerActivityConfiguration getNavDrawerConfiguration();
     

@@ -31,7 +31,6 @@ import it.geosolutions.geocollect.android.core.form.FormEditActivity;
 import it.geosolutions.geocollect.android.core.login.LoginActivity;
 import it.geosolutions.geocollect.android.core.login.LogoutActivity;
 import it.geosolutions.geocollect.android.core.login.utils.LoginRequestInterceptor;
-import it.geosolutions.geocollect.android.core.login.utils.LoginUtil;
 import it.geosolutions.geocollect.android.core.login.utils.NetworkUtil;
 import it.geosolutions.geocollect.android.core.mission.PendingMissionListFragment.FragmentMode;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
@@ -178,16 +177,17 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
                         @Override
                         public void run() {
 
+                            navConf = getNavDrawerConfiguration();
+
                             NavDrawerItem[] menu = NavUtils
                                     .getNavMenu(PendingMissionListActivity.this);
 
                             // cannot modify items of navdraweradapter --> create a new one
-
                             NavDrawerAdapter newNavDrawerAdapter = new NavDrawerAdapter(
                                     PendingMissionListActivity.this, R.layout.navdrawer_item, menu);
 
                             mDrawerList.setAdapter(newNavDrawerAdapter);
-
+                            
                             Log.d(TAG, "navdrawer updated");
 
                         }
@@ -539,12 +539,13 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
                 return;
             }
         }
+        
+        navConf = getNavDrawerConfiguration();
 
         NavDrawerItem[] menu = NavUtils
                 .getNavMenu(PendingMissionListActivity.this);
 
         // cannot modify items of navdraweradapter --> create a new one
-
         NavDrawerAdapter newNavDrawerAdapter = new NavDrawerAdapter(
                 PendingMissionListActivity.this, R.layout.navdrawer_item, menu);
 
@@ -552,6 +553,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 
         Log.d(TAG, "navdrawer updated");
         newNavDrawerAdapter.notifyDataSetChanged();
+        
         // We need to explicitly call the child Fragments onActivityResult()
         for (Fragment fragment : getSupportFragmentManager().getFragments()) {
             try {
@@ -681,4 +683,5 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         // launch.putExtra(MapsActivity.LAYERS_TO_ADD, m.layers) ;
         startActivityForResult(launch, SPATIAL_QUERY);
     }
+
 }
