@@ -1,6 +1,7 @@
 package it.geosolutions.geocollect.android.template;
 
 import it.geosolutions.android.map.geostore.model.ResourceList;
+import it.geosolutions.geocollect.android.core.BuildConfig;
 import it.geosolutions.geocollect.android.core.login.utils.GsonUtil;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
@@ -79,6 +80,10 @@ public abstract class TemplateDownloadTask  extends AsyncTask<String, Void, Void
 
 								downloads.add(MissionUtils.getTemplateFromJSON(templateString));
 								
+                                if(BuildConfig.DEBUG){
+                                    Log.v(TAG, "Received resource with id: "+res.getId());
+                                }
+								
 								arrived++;
 								
 								if(arrived == awaiting){
@@ -89,7 +94,9 @@ public abstract class TemplateDownloadTask  extends AsyncTask<String, Void, Void
 							@Override
 							public void error(RetrofitError error) {
 
-								Log.e(TAG, "error getting template "+resource.id+" : "+ error.getMessage());
+                                if(BuildConfig.DEBUG){
+                                    Log.e(TAG, "error getting template "+resource.id+" : "+ error.getMessage());
+                                }
 
 								arrived++;
 								

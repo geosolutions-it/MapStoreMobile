@@ -2,6 +2,8 @@ package it.geosolutions.geocollect.android.template;
 
 import java.io.Serializable;
 
+import com.google.gson.JsonElement;
+
 /**
  * Resource "Pojo" class according to the current server side Resource implementation
  * 
@@ -13,7 +15,7 @@ public class Resource implements Serializable {
 
 
 	private static final long serialVersionUID = -2654634049062234108L;
-	private String Attributes;
+	private JsonElement Attributes;
 	private Category category;
 	private String creation;
 	private Data data;
@@ -26,7 +28,7 @@ public class Resource implements Serializable {
 	 * @return
 	 * The Attributes
 	 */
-	public String getAttributes() {
+	public JsonElement getAttributes() {
 		return Attributes;
 	}
 
@@ -35,7 +37,7 @@ public class Resource implements Serializable {
 	 * @param Attributes
 	 * The Attributes
 	 */
-	public void setAttributes(String Attributes) {
+	public void setAttributes(JsonElement Attributes) {
 		this.Attributes = Attributes;
 	}
 
