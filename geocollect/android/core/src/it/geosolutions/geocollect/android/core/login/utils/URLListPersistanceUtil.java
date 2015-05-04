@@ -1,5 +1,8 @@
 package it.geosolutions.geocollect.android.core.login.utils;
 
+import it.geosolutions.geocollect.android.core.BuildConfig;
+
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -35,7 +38,9 @@ public class URLListPersistanceUtil {
 			fo.close();
 
 		} catch (IOException e) {
-			Log.e(URLListPersistanceUtil.class.getSimpleName(), "save failed",e);
+            if(BuildConfig.DEBUG){
+                Log.e(URLListPersistanceUtil.class.getSimpleName(), "save failed",e);
+            }
 		}
 	}
 
@@ -48,17 +53,28 @@ public class URLListPersistanceUtil {
 		ObjectInputStream in = null;
 		ArrayList<String> urls = null;
 		try {
+            
+            File file = pContext.getFileStreamPath(URLS_FILE);
+            if(file == null || !file.exists()) {
+                // File does not exists yet
+                return null;
+            }
+		    
 			fi = pContext.openFileInput(URLS_FILE);
 			in = new ObjectInputStream(fi);		
 			
 			urls = (ArrayList<String>) in.readObject();
 
-			Log.e(URLListPersistanceUtil.class.getSimpleName(), "urls loaded");
+            if(BuildConfig.DEBUG){
+                Log.e(URLListPersistanceUtil.class.getSimpleName(), "urls loaded");
+            }
 			in.close();
 			fi.close();
 
 		}catch (Exception e) {
-			Log.e(URLListPersistanceUtil.class.getSimpleName(), "load failed",e);
+            if(BuildConfig.DEBUG){
+                Log.e(URLListPersistanceUtil.class.getSimpleName(), "load failed",e);
+            }
 			return null;
 		}
 		return urls;
