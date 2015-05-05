@@ -259,8 +259,12 @@ public class FormBuilder {
 		//zoomable
 		mapView.setBuiltInZoomControls(!disableZoom);
 		
-		//set center and zoom level limits
-		Integer b = (Integer)getAttributeWithDefault(field,"zoom",18);
+        //set center and zoom level limits
+        Integer b = 18;
+        Object zoomObj = getAttributeWithDefault(field,"zoom",18);
+        if(zoomObj instanceof Integer){
+            b = (Integer)zoomObj;
+        }
 		
 		mapView.getMapViewPosition().setZoomLevel(b.byteValue());
 		mapView.getMapZoomControls().setZoomLevelMax((byte) 30);
