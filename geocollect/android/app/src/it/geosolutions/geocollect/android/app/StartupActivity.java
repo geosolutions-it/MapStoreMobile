@@ -74,7 +74,6 @@ public class StartupActivity extends Activity {
             NewRelic.withApplicationToken(newRelicToken).start(this.getApplication());
         }
         
-        // MapFilesProvider.setBaseDir("/geocollect");
         String dir_path = Environment.getExternalStorageDirectory().getPath();
         ZipFileManager zfm = new ZipFileManager(this, dir_path, MapFilesProvider.getBaseDir(), getResources()
                 .getString(R.string.url_data_test_archive)) {

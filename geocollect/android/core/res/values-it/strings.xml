@@ -98,7 +98,11 @@
     <string name="saving_data_message">Vuoi salvare i dati per l\'invio successivo?</string>
     
     <string name="available_missions">Missioni Disponibili</string>
-    <string name="dialog_message_with_amount">Vuoi scaricare i dati di background per questa missione ? Saranno scaricati %d file, continuare?</string>
+    <!-- string name="dialog_message_with_amount">Vuoi scaricare i dati di background per questa missione ? Saranno scaricati %d file, continuare?</string-->
+    <plurals name="dialog_message_with_amount">
+        <item quantity="one">Vuoi scaricare i dati di background per questa missione ? Sarà scaricato %d file, continuare?</item>
+        <item quantity="other">Vuoi scaricare i dati di background per questa missione ? Saranno scaricati %d file, continuare?</item>
+    </plurals>
     <string name="download_successfull">Scaricato con successo!</string>
     
 </resources>

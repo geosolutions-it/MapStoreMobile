@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -356,9 +357,11 @@ public class LogoutActivity extends Activity {
 
 						final String mount   = MapFilesProvider.getEnvironmentDirPath(getBaseContext());
 						final HashMap<String,Integer> urls = MissionUtils.getContentUrlsAndFileAmountForTemplate(t);
+						Resources res = getResources();
 						for(String url : urls.keySet()){
 
-							new ZipFileManager(LogoutActivity.this, mount, MapFilesProvider.getBaseDir(), url, null, getString(R.string.dialog_message_with_amount,urls.get(url))) {
+						    String dialogMessage = res.getQuantityString(R.plurals.dialog_message_with_amount, urls.get(url), urls.get(url));
+							new ZipFileManager(LogoutActivity.this, mount, MapFilesProvider.getBaseDir(), url, null, dialogMessage ) {
 								@Override
 								public void launchMainActivity(final boolean success) {
 

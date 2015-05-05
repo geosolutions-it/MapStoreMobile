@@ -92,6 +92,10 @@ public class MissionUtils {
 	public static String HEX_COLOR_PATTERN = "#XXXXXX";
 	public static String TABLE_NAME_PATTERN = "XXNAMEXX";
     
+	/**
+	 * Feature GCID string name 
+	 */
+	public static final String GCID_STRING = "GCID";
 	
 	/**
 	 * Create a loader getting the source of the mission
@@ -145,6 +149,9 @@ public class MissionUtils {
     		
     		ArrayList<MissionTemplate> templates = PersistenceUtils.loadSavedTemplates(c);
     		
+    		if(index >= templates.size()){
+    		    index = templates.size()-1;
+    		}
     		return templates.get(index);
     	}else{
     		
@@ -449,9 +456,9 @@ public class MissionUtils {
 		String originIDString = mission.getOrigin().id;
 		
 		if(mission.getOrigin().properties != null){
-			if(mission.getOrigin().properties.containsKey("GCID")){
+			if(mission.getOrigin().properties.containsKey(GCID_STRING)){
 				try {
-					Object objID = mission.getOrigin().properties.get("GCID");
+					Object objID = mission.getOrigin().properties.get(GCID_STRING);
 					if(objID == null){
 						Log.w(TAG, "WARNING: Mission has a null GDIC using ORIGIN_ID");
 						return originIDString;
@@ -482,9 +489,9 @@ public class MissionUtils {
 		String originIDString = feature.id;
 		
 		if(feature.properties != null){
-			if(feature.properties.containsKey("GCID")){
+			if(feature.properties.containsKey(GCID_STRING)){
 				try {
-					Object objID = feature.properties.get("GCID");
+					Object objID = feature.properties.get(GCID_STRING);
 					if(objID == null){
 						Log.w(TAG, "WARNING: Feature has a null GDIC using feature id: "+originIDString);
 						return originIDString;

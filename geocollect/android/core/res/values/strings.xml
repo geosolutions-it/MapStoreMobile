@@ -103,7 +103,11 @@
     
     
     <string name="available_missions">Available Missions</string>
-    <string name="dialog_message_with_amount">Do you want to download the background data for this mission ? %d files need to be downloaded.</string>
+    <!-- string name="dialog_message_with_amount">Do you want to download the background data for this mission ? %d files need to be downloaded.</string> -->
+    <plurals name="dialog_message_with_amount">
+        <item quantity="one">Do you want to download the background data for this mission ? %d file needs to be downloaded.</item>
+        <item quantity="other">Do you want to download the background data for this mission ? %d files need to be downloaded.</item>
+    </plurals>
     <string name="download_successfull">Download successful</string>
     
 </resources>

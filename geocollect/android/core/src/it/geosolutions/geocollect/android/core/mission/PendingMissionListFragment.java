@@ -49,6 +49,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -167,7 +168,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
     /**
      * page size for remote queries
      */
-    private int pagesize = 100;
+    private int pagesize = 250;
 
     private View footer;
 
@@ -973,12 +974,13 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
 				
 				Log.i(TAG, "downloading "+ urls.toString());
 			}
-			
+			Resources res = getResources();
 			for(String url : urls.keySet()){
 				
 				final String mount  = MapFilesProvider.getEnvironmentDirPath(getActivity());
 				
-				new ZipFileManager(getActivity(), mount, MapFilesProvider.getBaseDir(), url, null, getString(R.string.dialog_message_with_amount,urls.get(url))) {
+				String dialogMessage = res.getQuantityString(R.plurals.dialog_message_with_amount, urls.get(url), urls.get(url));
+                new ZipFileManager(getActivity(), mount, MapFilesProvider.getBaseDir(), url, null, dialogMessage) {
 					@Override
 					public void launchMainActivity(final boolean success) {
 						

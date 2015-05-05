@@ -2,6 +2,7 @@ package it.geosolutions.geocollect.android.template;
 
 import it.geosolutions.android.map.geostore.model.ResourceList;
 import it.geosolutions.geocollect.android.core.BuildConfig;
+import it.geosolutions.geocollect.android.core.Config;
 import it.geosolutions.geocollect.android.core.login.utils.GsonUtil;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
@@ -40,8 +41,7 @@ public abstract class TemplateDownloadTask  extends AsyncTask<String, Void, Void
 
 	final static String TAG = TemplateDownloadTask.class.getSimpleName();
 
-	//TODO use real endpoint
-	private final static String endPoint = "http://geocollect.geo-solutions.it/geostore/rest/";
+	private final static String endPoint = Config.MAIN_SERVER_BASE_URL + Config.GEOSTORE_PATH;
 	
 	private int arrived = 0;
 	
