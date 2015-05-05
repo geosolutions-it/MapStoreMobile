@@ -17,21 +17,26 @@
  */
 package it.geosolutions.geocollect.android.core.mission.utils;
 
+import it.geosolutions.geocollect.android.core.BuildConfig;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Locale;
+
+import jsqlite.Database;
+import jsqlite.Exception;
+import jsqlite.Stmt;
+import android.content.Context;
+import android.util.Log;
 
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 
 import eu.geopaparazzi.library.util.ResourcesManager;
-import android.content.Context;
-import android.util.Log;
-import jsqlite.Database;
-import jsqlite.Exception;
-import jsqlite.Stmt;
 
 /**
  * Utils for Spatialite database
@@ -137,6 +142,73 @@ public class SpatialiteUtils {
 	 * Open the given database and returns a reference to it or null if invalid context or databasePath are passed
 	 * If given filePath does not exists, it will be created
 	 */
+	public static Database importSpatialiteDBFromAssets(Context c, String sdcardFolder, String databaseFile){
+		
+		if(	c == null 
+			|| databaseFile == null){
+        	Log.v(TAG, "Cannot open Database, invalid parameters.");
+        	return null;
+			
+		}
+		
+		Database spatialiteDatabase = null;
+		
+		
+		try {
+            
+            final InputStream input = c.getAssets().open(databaseFile);
+
+            File sdcardDir = ResourcesManager.getInstance(c).getSdcardDir();
+            File spatialDbFile = new File(sdcardDir, sdcardFolder + "/" + databaseFile);
+            
+            final File geocollectDir = new File(sdcardDir, sdcardFolder);
+            if(!geocollectDir.exists()){
+            	if(!geocollectDir.mkdir()){
+            		throw new  RuntimeException();
+            	}
+            }
+
+			OutputStream myOutput = new FileOutputStream(spatialDbFile);
+
+			//transfer bytes from the inputfile to the outputfile
+			byte[] buffer = new byte[1024];
+			int length;
+			while ((length = input.read(buffer)) > 0){
+				myOutput.write(buffer, 0, length);
+			}
+
+			myOutput.flush();
+			myOutput.close();
+			input.close();
+            
+			if (!spatialDbFile.getParentFile().exists()) {
+				throw new RuntimeException();
+			}
+            spatialiteDatabase = new jsqlite.Database();           
+            spatialiteDatabase.open(spatialDbFile.getAbsolutePath(), jsqlite.Constants.SQLITE_OPEN_READWRITE
+                    | jsqlite.Constants.SQLITE_OPEN_CREATE);
+            
+            //Log.v("MISSION_DETAIL", SpatialiteUtils.queryVersions(spatialiteDatabase));
+            Log.v(TAG, spatialiteDatabase.dbversion());
+            
+            if(BuildConfig.DEBUG){
+            	Log.i(TAG, "Database imported from assets");
+            }
+            
+        } catch (Exception e) {
+            Log.v(TAG, Log.getStackTraceString(e));
+        } catch (java.lang.Exception e) {
+        	// Cannot find Android ResourceManager
+            Log.e(TAG, Log.getStackTraceString(e));
+		}
+		
+		return spatialiteDatabase;
+	}
+	
+	/**
+	 * Open the given database and returns a reference to it or null if invalid context or databasePath are passed
+	 * If given filePath does not exists, it will be created
+	 */
 	public static Database openSpatialiteDB(Context c, String databasePath){
 		
 		if(	c == null 
@@ -155,7 +227,7 @@ public class SpatialiteUtils {
             File spatialDbFile = new File(sdcardDir, databasePath);
 
             if (!spatialDbFile.getParentFile().exists()) {
-                throw new RuntimeException();
+                return importSpatialiteDBFromAssets(c, "geocollect", "genova.sqlite");
             }
             
             spatialiteDatabase = new jsqlite.Database();

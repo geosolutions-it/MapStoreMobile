@@ -135,7 +135,13 @@ public class MapFilesProvider {
 	private static String getBackgroundFilePath() {
 		return baseDir + "/" + backgroundFileName;
 	}
-	public static BackgroundSourceType getBackgroundSourceType() {
+	public static String getBackgroundFileName() {
+        return backgroundFileName;
+    }
+    public static void setBackgroundFileName(String backgroundFileName) {
+        MapFilesProvider.backgroundFileName = backgroundFileName;
+    }
+    public static BackgroundSourceType getBackgroundSourceType() {
 		return backgroundSourceType;
 	}
 	public static void setBackgroundSourceType(BackgroundSourceType backgroundSourceType) {

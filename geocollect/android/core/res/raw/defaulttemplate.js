@@ -1074,7 +1074,13 @@
 		"maxImageSize" : "1000",
 		"mapStartLat": "44.43140",
 		"mapStartLon": "8.88446",
-		"mapStartZoom": "12"
+		"mapStartZoom": "12",
+	    "bgFiles": [{
+	                    "url": "http://demo.geo-solutions.it/share/comunege/geocollect/geocollect_no_ctr.zip",
+	                    "content": [{
+	                            "file": "bg.map"
+	                        }]
+	               }]
 	},
 	"priorityField":"GRAVITA",
 	"priorityValuesColors":{

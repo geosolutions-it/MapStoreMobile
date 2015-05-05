@@ -2,6 +2,7 @@ package it.geosolutions.geocollect.android.core.login;
 
 import it.geosolutions.android.map.geostore.model.ResourceList;
 import it.geosolutions.geocollect.android.core.BuildConfig;
+import it.geosolutions.geocollect.android.core.Config;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.login.utils.InstantAutoComplete;
 import it.geosolutions.geocollect.android.core.login.utils.LoginRequestInterceptor;
@@ -97,27 +98,31 @@ public class LoginActivity extends Activity {
 		
 		mEmailView = (EditText) findViewById(R.id.email);
 		
-		if(mEmail != null){		
+		if(mEmail != null && mEmailView != null){		
 			mEmailView.setText(mEmail);
 		}
 		
 		mAutoCompleteTextView = (InstantAutoComplete) findViewById(R.id.login_act);
 		
 		mUrls = URLListPersistanceUtil.load(getBaseContext());
-				
+		
 		if(mUrls == null || mUrls.size() == 0){
-			//TODO first app use
 			//provide initial server access point
-			//for now static
 			mUrls = new ArrayList<String>();
-			mUrls.add("http://geocollect.geo-solutions.it/opensdi2-manager/mvc");
+			mUrls.add(Config.MAIN_SERVER_BASE_URL+Config.OPENSDI_PATH);
 		}
+		
 		// Creating adapter for spinner
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.server_spinner_item, mUrls);
 		
 		// Drop down layout style - list view with radio button
 		adapter.setDropDownViewResource( R.layout.server_spinner_item);
 		mAutoCompleteTextView.setAdapter(adapter);
+		
+        // Auto-set first value
+        if(mUrls != null && mUrls.size() > 0){
+            mAutoCompleteTextView.setText(mUrls.get(0));
+        }
 
 		mPasswordView = (EditText) findViewById(R.id.password);
 		
@@ -159,6 +164,7 @@ public class LoginActivity extends Activity {
 						attemptLogin();
 					}
 				});
+		
 		findViewById(R.id.login_cancel).setOnClickListener(new View.OnClickListener() {
 			
 			@Override
@@ -202,19 +208,16 @@ public class LoginActivity extends Activity {
 				}
 			});
 			
-			// Disabled the link, the clickListener does the same job
-			// TODO: re-enable when the URL is dinamically set accordingly to the selected server
-			//Linkify.addLinks(register_tv, Linkify.WEB_URLS);
-			
 		}
-		
-		
+
 		
 	}
 	
+	/**
+	 * Attempt Login
+	 */
 	private void attemptLogin() {
 		
-
 		// Reset errors.
 		mEmailView.setError(null);
 		mPasswordView.setError(null);
@@ -259,9 +262,6 @@ public class LoginActivity extends Activity {
 			Toast.makeText(getBaseContext(), getString(R.string.login_not_online), Toast.LENGTH_LONG).show();
 			cancel = true;
 		}
-		
-		
-		
 
 		if (cancel) {
 			// There was an error; don't attempt login and focus the first
@@ -497,5 +497,14 @@ public class LoginActivity extends Activity {
                 
                 
         finish();
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        
+        if(mEmailView != null){
+            mEmailView.requestFocus();
+        }
     }
 }

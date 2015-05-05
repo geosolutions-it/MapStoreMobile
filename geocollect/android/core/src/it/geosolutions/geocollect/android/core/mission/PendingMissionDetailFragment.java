@@ -264,6 +264,10 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 		
 		Field colorField = getField(XType.separatorWithIcon);
 		
+		if(colorField == null){
+		    return Color.RED;
+		}
+		
 		HashMap <String,String> colors  = mission.getTemplate().priorityValuesColors;
 
  		final String key = mission.getValueAsString(getActivity(), colorField);
@@ -281,6 +285,9 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 	public GeoPoint getOriginGeoPoint(){
 				
 		final Field mapField = getField(XType.mapViewPoint);
+		if(mapField == null){
+		    return null;
+		}
 		//extract the point
 		GeoPoint geoPoint = null;
 		List<String> tags = MissionUtils.getTags(mapField.value);

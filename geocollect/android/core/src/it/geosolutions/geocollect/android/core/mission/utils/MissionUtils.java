@@ -92,6 +92,10 @@ public class MissionUtils {
 	public static String HEX_COLOR_PATTERN = "#XXXXXX";
 	public static String TABLE_NAME_PATTERN = "XXNAMEXX";
     
+	/**
+	 * Feature GCID string name 
+	 */
+	public static final String GCID_STRING = "GCID";
 	
 	/**
 	 * Create a loader getting the source of the mission
@@ -145,6 +149,9 @@ public class MissionUtils {
     		
     		ArrayList<MissionTemplate> templates = PersistenceUtils.loadSavedTemplates(c);
     		
+    		if(index >= templates.size()){
+    		    index = templates.size()-1;
+    		}
     		return templates.get(index);
     	}else{
     		
@@ -449,9 +456,9 @@ public class MissionUtils {
 		String originIDString = mission.getOrigin().id;
 		
 		if(mission.getOrigin().properties != null){
-			if(mission.getOrigin().properties.containsKey("GCID")){
+			if(mission.getOrigin().properties.containsKey(GCID_STRING)){
 				try {
-					Object objID = mission.getOrigin().properties.get("GCID");
+					Object objID = mission.getOrigin().properties.get(GCID_STRING);
 					if(objID == null){
 						Log.w(TAG, "WARNING: Mission has a null GDIC using ORIGIN_ID");
 						return originIDString;
@@ -482,9 +489,9 @@ public class MissionUtils {
 		String originIDString = feature.id;
 		
 		if(feature.properties != null){
-			if(feature.properties.containsKey("GCID")){
+			if(feature.properties.containsKey(GCID_STRING)){
 				try {
-					Object objID = feature.properties.get("GCID");
+					Object objID = feature.properties.get(GCID_STRING);
 					if(objID == null){
 						Log.w(TAG, "WARNING: Feature has a null GDIC using feature id: "+originIDString);
 						return originIDString;
@@ -592,5 +599,76 @@ public class MissionUtils {
                 // ignored
             }
         }
+    }
+    
+    /**
+     * checks if all files which are defined in the config section of
+     * the template are present in the applications sdcard folder
+     * @param t the template to check
+     * @return true if all files are present - false otherwise
+     */
+    @SuppressWarnings("rawtypes")
+	public static boolean checkTemplateForBackgroundData(final Context context, final MissionTemplate t) {
+		
+    	final String mount   = MapFilesProvider.getEnvironmentDirPath(context);
+    	final String baseDir = MapFilesProvider.getBaseDir();
+    	
+    	final String appDir = mount + baseDir;
+    	
+    	final HashMap<String,Object> config = t.config;
+    	
+    	if(config.containsKey("bgFiles")){
+    		ArrayList<Map> urls = (ArrayList<Map>) config.get("bgFiles");
+    		if(urls != null){
+    			for(int i = 0; i < urls.size(); i++){
+					Map ltm = urls.get(i);
+    				//String url = (String) ltm.get("url");
+    				ArrayList<Map> content = (ArrayList<Map>) ltm.get("content");
+    				
+    				for(Map item : content){
+    					
+    					final String fileName = (String) item.get("file");
+    					final File file = new File( appDir + "/" + fileName);
+    					
+    					if(!file.exists()){
+    						return false;
+    					}
+    				}
+    			}
+    		}
+    	}
+    	
+    	
+		return true;
+	}
+    /**
+     * creates and returns a HashMap containing entries consisting of url to zip files and the amount of files
+     * these zips contain
+     * @param t the template to parse
+     * @return HashMap containing map of urls to fileAmounts
+     */
+    @SuppressWarnings("rawtypes")
+    public static HashMap<String,Integer> getContentUrlsAndFileAmountForTemplate(final MissionTemplate t){
+    	
+    	final HashMap<String,Integer> urls = new HashMap<String,Integer>();
+	
+    	final HashMap<String,Object> config = t.config;
+
+    	if(config.containsKey("bgFiles")){
+			ArrayList<Map> files = (ArrayList<Map>) config.get("bgFiles");
+    		if(files != null){
+    			for(int i = 0; i < files.size(); i++){
+					Map ltm = files.get(i);
+    				String url = (String) ltm.get("url");
+
+    				ArrayList<Map> content = (ArrayList<Map>) ltm.get("content");
+
+    				urls.put(url, content.size());
+
+    			}
+    		}
+			
+    	}
+    	return urls;
     }
 }

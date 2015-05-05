@@ -81,17 +81,21 @@ public class ZipFileManager {
 	 */
 	public ZipFileManager(Activity activity, String dir_path, String dest_dir, String url, String dialogTitle, String dialogMessage){
 		
-		this.activity = activity;
-		
-		//Check if folder of data already exists, otherwise it will be downloaded and unzipped.
+		this.activity = activity;		
+	
 		File f = new File(dir_path + dest_dir);
-		if(!f.isDirectory()){
+		
+		if(!f.exists()){
+			f.mkdir();
+		}
+		
+		if(f.isDirectory()){
 
 			askForDownload(activity, dir_path, url, dialogTitle, dialogMessage);
 			
 		}else{
 			
-			launchMainActivity();
+			Log.e(TAG, "could not create directory "+ f.getAbsolutePath());
 		}
 		
 	}
@@ -155,7 +159,7 @@ public class ZipFileManager {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				download_dialog.dismiss();
-				launchMainActivity();
+				launchMainActivity(false);
 			}
 		});
 		
@@ -170,7 +174,7 @@ public class ZipFileManager {
 	 * This method launch the main activity of MapStore Mobile(In View mode) once that archive is available,
 	 * and center the map around the coordinate passed by intent.
 	 */
-	public void launchMainActivity(){
+	public void launchMainActivity(final boolean success){
 		Intent launch = new Intent(activity,MapsActivity.class);
 		launch.setAction(Intent.ACTION_VIEW);
 		launch.putExtra(MapsActivity.PARAMETERS.LAT, 43.68411);
@@ -368,7 +372,11 @@ public class ZipFileManager {
 	        		if(ze.isDirectory())
 	        			dirChecker(path[1]+ "/" + ze.getName());
 	        		else{
-	        			
+	        			//do not overwrite the local sqlite db
+	        			//TODO parametrize ?
+	        			if(ze.getName().contains("genova.sqlite")){
+	        				continue;
+	        			}
 		                fout = new FileOutputStream(path[1] + "/" + ze.getName(),true);
 		                byte[] buffer = new byte[1024];
 		                for (int lenght = zis.read(buffer); lenght != -1; lenght = zis.read(buffer)){
@@ -438,7 +446,7 @@ public class ZipFileManager {
 			}
 			
 			zipDialog.dismiss();
-			launchMainActivity();
+			launchMainActivity(true);
 		}	
 	}
 }

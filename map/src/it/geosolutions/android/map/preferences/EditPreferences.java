@@ -119,6 +119,7 @@ public class EditPreferences extends SherlockPreferenceActivity {
 		            			ed.putBoolean(MapView.MAPSFORGE_BACKGROUND_FILEPATH_CHANGED, true);
 		            			ed.putString(MapView.MAPSFORGE_BACKGROUND_FILEPATH, file.getAbsolutePath());
 		            			ed.commit();
+		            			MapFilesProvider.setBackgroundFileName(file.getName());
 		            			preference.setSummary(file.getName());
 		            		}
 
