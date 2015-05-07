@@ -54,7 +54,7 @@ public class StartupActivity extends Activity {
 				){
 			
 			@Override
-			public void launchMainActivity(final boolean success){
+			public void launchMainActivity(){
 				Intent launch = new Intent(activity,MapsActivity.class);
 				launch.setAction(Intent.ACTION_VIEW);
 				launch.putExtra(MapsActivity.PARAMETERS.LAT, 43.68411);
