@@ -47,7 +47,6 @@ import it.geosolutions.android.map.overlay.managers.OverlayManager;
 import it.geosolutions.android.map.overlay.switcher.LayerSwitcherFragment;
 import it.geosolutions.android.map.preferences.EditPreferences;
 import it.geosolutions.android.map.style.StyleManager;
-import it.geosolutions.android.map.utils.LocalPersistence;
 import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.android.map.utils.MarkerUtils;
 import it.geosolutions.android.map.utils.SpatialDbUtils;
@@ -785,10 +784,15 @@ public class MapsActivity extends MapActivityBase {
 
     	final String filePath = PreferenceManager.getDefaultSharedPreferences(this).getString(MapView.MAPSFORGE_BACKGROUND_FILEPATH, null);
     	final int type = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString(MapView.MAPSFORGE_BACKGROUND_RENDERER_TYPE, "0"));
+    	File mapfile = null;
     	
     	//if the map file was edited in the preferences
-		if(filePath != null && type == 0){
-			//use it
+        if(filePath != null && type == 0){
+            mapfile = new File(filePath);
+        }
+        
+        if(mapfile != null && mapfile.exists()){
+    		//use it
 			mapView.setMapFile(new File(filePath));
 			
 		}else if (MAP_FILE!=null) {
@@ -1180,13 +1184,20 @@ public class MapsActivity extends MapActivityBase {
     	
     	final BackgroundSourceType currentMapRendererType = this.mapView.getMapRendererType();
 
-    	final String filePath = prefs.getString(MapView.MAPSFORGE_BACKGROUND_FILEPATH, null);
+    	String filePath = prefs.getString(MapView.MAPSFORGE_BACKGROUND_FILEPATH, null);
     	final String defaultType = getApplicationContext().getPackageName().equals("it.geosolutions.geocollect.android.app") ? "1" : "0";
-    	final BackgroundSourceType type = BackgroundSourceType.values()[Integer.parseInt(prefs.getString(MapView.MAPSFORGE_BACKGROUND_RENDERER_TYPE, defaultType))];
+    	BackgroundSourceType type = BackgroundSourceType.values()[Integer.parseInt(prefs.getString(MapView.MAPSFORGE_BACKGROUND_RENDERER_TYPE, defaultType))];
 
     	final Editor ed = prefs.edit();
     	ed.putBoolean(MapView.MAPSFORGE_BACKGROUND_FILEPATH_CHANGED, false);
     	ed.commit();
+    	
+    	File mapFile = new File(filePath);
+        if(mapFile == null || !mapFile.exists()){
+            mapFile = MapFilesProvider.getBackgroundMapFile();
+            filePath = mapFile.getPath();
+            type = BackgroundSourceType.MAPSFORGE;
+        }
     	
     	//1. renderer changed
     	if(type != currentMapRendererType){
