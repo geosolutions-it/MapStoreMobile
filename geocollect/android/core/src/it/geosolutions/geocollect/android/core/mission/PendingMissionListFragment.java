@@ -629,7 +629,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                 return true;
             }
             // upload
-            if (missionTemplate != null && missionTemplate != null) {
+            if (missionTemplate != null) {
 
                 String title = null;
                 String uploadList = null;
@@ -799,10 +799,9 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                                     arguments.putSerializable(UploadDialog.PARAMS.MISSION_MEDIA_URLS, id_mediaurls_map);
 
                                     /*
-                                     * TODO: Change this line into arguments.putString(UploadDialog.PARAMS.MISSION_ID, <mission_id_here>); when the
-                                     * MapStore GetFeatureInfoMenu will handle parametric missions id
+                                     * Set the destination folder
                                      */
-                                    arguments.putString(UploadDialog.PARAMS.MISSION_ID, "punti_abbandono");
+                                    arguments.putString(UploadDialog.PARAMS.MISSION_ID, missionTemplate.schema_seg.localSourceStore);
 
                                     SharedPreferences prefs = PreferenceManager
                                             .getDefaultSharedPreferences(getSherlockActivity());
