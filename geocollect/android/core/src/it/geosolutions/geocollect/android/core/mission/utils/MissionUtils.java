@@ -46,6 +46,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -155,6 +156,8 @@ public class MissionUtils {
     		return templates.get(index);
     	}else{
     		
+    	    
+    	    
     		InputStream inputStream = c.getResources().openRawResource(R.raw.defaulttemplate);
     		if (inputStream != null) {
     			final Gson gson = new Gson();
@@ -440,65 +443,66 @@ public class MissionUtils {
 		
 	}
 
-	
+    
+    /**
+     * Returns the "GCID" field of the origin feature of the given Mission
+     * @param mMission
+     * @return
+     */
+    public static String getMissionGCID(Mission mission){
+
+        if(mission == null || mission.getOrigin() == null){
+            if(BuildConfig.DEBUG){
+                Log.w(TAG, "WARNING: cannot find origin Feature");
+            }
+            return null;
+        }
+        
+        return getFeatureGCID(mission.getOrigin());
+    }
+
 	/**
-	 * Returns the "GCID" field of the origin feature of the given Mission
-	 * @param mMission
-	 * @return
-	 */
-	public static String getMissionGCID(Mission mission){
-		
-		if(mission == null || mission.getOrigin() == null){
-			Log.w(TAG, "WARNING: cannot find GCID");
-			return null;
-		}
-		// Default ID
-		String originIDString = mission.getOrigin().id;
-		
-		if(mission.getOrigin().properties != null){
-			if(mission.getOrigin().properties.containsKey(GCID_STRING)){
-				try {
-					Object objID = mission.getOrigin().properties.get(GCID_STRING);
-					if(objID == null){
-						Log.w(TAG, "WARNING: Mission has a null GDIC using ORIGIN_ID");
-						return originIDString;
-					}
-					originIDString = (String) objID;
-				}catch(ClassCastException cce){
-					Log.w(TAG, "WARNING: Mission has a GDIC but it cannot be converted to String");
-					originIDString = null;
-				}
-			}
-		}
-		
-		return originIDString;
-	}
-	
-	/**
-	 * Returns the "GCID" field of the origin feature of the given Mission
-	 * @param mMission
+	 * Returns the "GCID" or "gcid" field of the given Feature
+	 * Returns null otherwise
+	 * @param feature
 	 * @return
 	 */
 	public static String getFeatureGCID(Feature feature){
 		
 		if(feature == null){
-			Log.w(TAG, "WARNING: cannot find feature GCID (feature null)");
+		    if(BuildConfig.DEBUG){
+		        Log.w(TAG, "WARNING: cannot find feature GCID (feature null)");
+		    }
 			return null;
 		}
+		
 		// Default ID
 		String originIDString = feature.id;
 		
 		if(feature.properties != null){
-			if(feature.properties.containsKey(GCID_STRING)){
+		    
+		    String localGCID = null;
+		    if(feature.properties.containsKey(GCID_STRING)){
+		        localGCID = GCID_STRING;
+		    }else if(feature.properties.containsKey(GCID_STRING.toLowerCase(Locale.US))){
+                localGCID = GCID_STRING.toLowerCase(Locale.US);
+            }
+
+			if(localGCID != null){
 				try {
-					Object objID = feature.properties.get(GCID_STRING);
+					Object objID = feature.properties.get(localGCID);
 					if(objID == null){
-						Log.w(TAG, "WARNING: Feature has a null GDIC using feature id: "+originIDString);
+					    if(BuildConfig.DEBUG){
+					        Log.w(TAG, "WARNING: Feature has a null GCID using feature id: "+originIDString);
+					    }  
 						return originIDString;
 					}
 					originIDString = (String) objID;
+					
 				}catch(ClassCastException cce){
-					Log.w(TAG, "WARNING: Feature has a GDIC but it cannot be converted to String");
+				    if(BuildConfig.DEBUG){
+                        Log.w(TAG, "WARNING: Feature has a GCID but it cannot be converted to String");
+				    }
 					originIDString = null;
 				}
 			}
