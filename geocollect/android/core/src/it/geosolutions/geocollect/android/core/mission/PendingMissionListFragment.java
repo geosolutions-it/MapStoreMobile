@@ -1227,7 +1227,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         if (mMode == FragmentMode.CREATION) {
 
             missionAdapter = new CreatedMissionAdapter(getSherlockActivity(), R.layout.mission_resource_row,
-                    missionTemplate.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX);
+                    missionTemplate.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX, missionTemplate);
 
             // delete created items on long click listener
             getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
