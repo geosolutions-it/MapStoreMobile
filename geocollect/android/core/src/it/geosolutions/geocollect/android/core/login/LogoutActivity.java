@@ -137,15 +137,18 @@ public class LogoutActivity extends Activity {
 		
 		final HashMap <MissionTemplate,Boolean> downloads = new HashMap<MissionTemplate,Boolean>();
 		
-		for(MissionTemplate t : templates){
-			
-			boolean exists = MissionUtils.checkTemplateForBackgroundData(getBaseContext(), t);
-			
-			downloads.put(t, exists);
-			
-			Log.i(TAG,"adding to downloads "+t.title+" , id "+t.id +" exists "+Boolean.toString(exists));
-			
-		}
+        if(templates != null){
+            for(MissionTemplate t : templates){
+                
+                boolean exists = MissionUtils.checkTemplateForBackgroundData(getBaseContext(), t);
+                
+                downloads.put(t, exists);
+                
+                if(BuildConfig.DEBUG){
+                    Log.i(TAG,"adding to downloads "+t.title+" , id "+t.id +" exists "+Boolean.toString(exists));
+                }
+            }
+        }
 		
 		final ListView missionListview = (ListView) findViewById(R.id.mission_list);
 		
