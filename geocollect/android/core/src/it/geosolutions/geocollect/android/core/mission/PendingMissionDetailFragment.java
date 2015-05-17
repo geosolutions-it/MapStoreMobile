@@ -83,6 +83,7 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 	 */
 	public static final String ARG_ITEM_ID = "item_id";
 	public static final String ARG_ITEM_FEATURE = "item_FEATURE";
+	
 	/**
 	 * The <ScrollView> that display fragment content
 	 */
@@ -99,6 +100,8 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 	private boolean mDone;
 	protected Mission mission;
 
+	public static int DEFAULT_COLOR = Color.GRAY;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -260,12 +263,17 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 		return super.onOptionsItemSelected(item);
 	}
 	
+	/**
+	 * Return the color code of the priority field of the mission
+	 * Default is Color.GRAY
+	 * @return
+	 */
 	public int getPriorityColor(){
 		
 		Field colorField = getField(XType.separatorWithIcon);
 		
 		if(colorField == null){
-		    return Color.RED;
+		    return DEFAULT_COLOR;
 		}
 		
 		HashMap <String,String> colors  = mission.getTemplate().priorityValuesColors;
@@ -274,7 +282,20 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
  		
  		final String color = colors.get(key);	
 
- 		return Color.parseColor(color);
+ 		if(color == null){
+ 			return DEFAULT_COLOR;
+ 		}
+ 		
+ 		try {
+ 			
+ 			return Color.parseColor(color);
+ 			
+ 		}catch(IllegalArgumentException iae){
+ 			if(BuildConfig.DEBUG){
+ 				Log.w(TAG, "Could not parse color: "+color);
+ 			}
+			return DEFAULT_COLOR;
+ 		}
 
 	}
 	/**
