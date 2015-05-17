@@ -377,7 +377,7 @@ public class ZipFileManager {
 	        			if(ze.getName().contains("genova.sqlite")){
 	        				continue;
 	        			}
-		                fout = new FileOutputStream(path[1] + "/" + ze.getName(),true);
+		                fout = new FileOutputStream(path[1] + "/" + ze.getName(),false);
 		                byte[] buffer = new byte[1024];
 		                for (int lenght = zis.read(buffer); lenght != -1; lenght = zis.read(buffer)){
 		                    fout.write(buffer,0,lenght);
