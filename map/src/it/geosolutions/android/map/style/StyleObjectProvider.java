@@ -17,6 +17,7 @@
  */
 package it.geosolutions.android.map.style;
 
+import it.geosolutions.android.map.BuildConfig;
 import it.geosolutions.android.map.utils.MapFilesProvider;
 
 import java.io.File;
@@ -25,10 +26,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import android.os.Environment;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
 
 /**
  * Provides Style from a source (Json files in a directory)
@@ -86,12 +87,17 @@ public class StyleObjectProvider {
 		}catch(FileNotFoundException e){
 			Log.v("STYLE","file not found:"+path);
 			throw e;
+		}catch (JsonParseException jpe) {
+			if(BuildConfig.DEBUG){
+				Log.e("STYLE","Parsing failed:"+path);
+			}
 		}
 		finally{
 			if(fr!=null){
 				fr.close();
 			}
 		}
+		return null;
 		
 		
 	}
