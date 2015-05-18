@@ -1,6 +1,6 @@
 /*
  * GeoSolutions - MapstoreMobile - GeoSpatial Framework on Android based devices
- * Copyright (C) 2014  GeoSolutions (www.geo-solutions.it)
+ * Copyright (C) 2014 - 2015  GeoSolutions (www.geo-solutions.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +45,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import org.mapsforge.android.maps.MapView;
 import org.mapsforge.core.model.GeoPoint;
 
 import android.content.Context;
@@ -53,6 +54,7 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.preference.PreferenceManager;
 import android.text.InputType;
 import android.util.Log;
 import android.view.Gravity;
@@ -84,6 +86,11 @@ import com.vividsolutions.jts.geom.Point;
  *         Utility Class to build forms
  */
 public class FormBuilder {
+    
+    /**
+     * Tag for logging
+     */
+    public static String TAG = "FormBuilder";
 
 	// set a static id
 	private static int sId = 0;
@@ -244,15 +251,28 @@ public class FormBuilder {
 		
 		if(editable){
 			 mc.setMode(MarkerControl.MODE_EDIT);
-			 //TODO make infobutton work
-			 //infoButton.setVisibility(ImageButton.VISIBLE);
-
 		}
 
         File mapFile = MapFilesProvider.getBackgroundMapFile();
-		if(mapFile!=null){
-			mapView.setMapFile(mapFile);
-		}
+        
+        String filePath = PreferenceManager.getDefaultSharedPreferences(context).getString(MapView.MAPSFORGE_BACKGROUND_FILEPATH, null);
+        int type = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context).getString(MapView.MAPSFORGE_BACKGROUND_RENDERER_TYPE, "0"));
+        
+        //if the map file was edited in the preferences
+        if(filePath != null && type == 0){
+            //use it
+            mapView.setMapFile(new File(filePath));
+            
+        }else if (mapFile!=null) {
+            
+            Log.i(TAG,"setting background file");
+            mapView.setMapFile(mapFile);
+            
+        } else {
+            Log.i(TAG,"unable to set background file");
+        }
+        
+       
 		//pannable
 		mapView.setClickable(!disablePan);
 		
