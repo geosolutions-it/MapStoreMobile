@@ -3,11 +3,13 @@ package it.geosolutions.geocollect.android.core.login;
 import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.android.map.utils.ZipFileManager;
 import it.geosolutions.geocollect.android.core.BuildConfig;
+import it.geosolutions.geocollect.android.core.GeoCollectApplication;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.login.utils.LoginRequestInterceptor;
 import it.geosolutions.geocollect.android.core.login.utils.LoginUtil;
 import it.geosolutions.geocollect.android.core.login.utils.LoginUtil.LoginStatusCallback;
 import it.geosolutions.geocollect.android.core.login.utils.NetworkUtil;
+import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.SpatialiteUtils;
@@ -203,6 +205,26 @@ public class LogoutActivity extends Activity {
 		                    if(BuildConfig.DEBUG){
 		                        Log.d(TAG, "valid templates persisted");
 		                    }
+		                    
+		                    // 3. Update the currently selected template
+		                    Editor ed = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
+		                    
+		                    ArrayList<MissionTemplate> loadedTemplates = PersistenceUtils.loadSavedTemplates(getBaseContext());
+		                    int templateIndex = 0;
+		                    String selectedTemplateId = prefs.getString(PendingMissionListActivity.PREFS_SELECTED_TEMPLATE_ID, null);
+		                    if(selectedTemplateId != null && !selectedTemplateId.isEmpty()){
+    		                    for(MissionTemplate t : loadedTemplates){
+    		                        if(t.id != null && t.id.equalsIgnoreCase(selectedTemplateId)){
+    		                            
+    		                            ((GeoCollectApplication) getApplication()).setTemplate(t);
+    		                            ed.putInt(PendingMissionListActivity.PREFS_DOWNLOADED_TEMPLATE_INDEX, templateIndex);
+    		                            
+    		                        }
+    		                        templateIndex++;
+    		                    }
+		                    }
+		                    
+		                    ed.commit();
 		                }
 		            };
 		            

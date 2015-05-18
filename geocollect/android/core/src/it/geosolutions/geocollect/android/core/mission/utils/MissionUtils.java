@@ -22,6 +22,7 @@ import it.geosolutions.android.map.wfs.WFSGeoJsonFeatureLoader;
 import it.geosolutions.android.map.wfs.geojson.GeoJson;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.BuildConfig;
+import it.geosolutions.geocollect.android.core.GeoCollectApplication;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.login.LoginActivity;
 import it.geosolutions.geocollect.android.core.mission.Mission;
@@ -150,14 +151,22 @@ public class MissionUtils {
     		
     		ArrayList<MissionTemplate> templates = PersistenceUtils.loadSavedTemplates(c);
     		
+            String selectedTemplateId = prefs.getString(PendingMissionListActivity.PREFS_SELECTED_TEMPLATE_ID, null);
+            if(selectedTemplateId != null && !selectedTemplateId.isEmpty()){
+                for(MissionTemplate t : templates){
+                    if(t.id != null && t.id.equalsIgnoreCase(selectedTemplateId)){
+                        return t;
+                    }
+                }
+            }
+
     		if(index >= templates.size()){
     		    index = templates.size()-1;
     		}
     		return templates.get(index);
+    		
     	}else{
     		
-    	    
-    	    
     		InputStream inputStream = c.getResources().openRawResource(R.raw.defaulttemplate);
     		if (inputStream != null) {
     			final Gson gson = new Gson();

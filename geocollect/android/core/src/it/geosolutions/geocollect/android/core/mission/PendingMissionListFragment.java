@@ -218,7 +218,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         boolean usesDownloaded = prefs.getBoolean(PendingMissionListActivity.PREFS_USES_DOWNLOADED_TEMPLATE, false);
         if (usesDownloaded) {
             int index = prefs.getInt(PendingMissionListActivity.PREFS_DOWNLOADED_TEMPLATE_INDEX, 0) + 1;
-            CURRENT_LOADER_INDEX = index;
+            CURRENT_LOADER_INDEX = missionTemplate.getLoaderIndex();
         }
 
         adapter = new FeatureAdapter(getSherlockActivity(), R.layout.mission_resource_row, missionTemplate);
@@ -1101,8 +1101,6 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
 
                     adapter.clear();
                     getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
-                    // TODO: This call could need to move the onCreateMenu() code into a onPrepareOptionMenu()
-                    //getSherlockActivity().supportInvalidateOptionsMenu();
 
                     Toast.makeText(getActivity(), getString(R.string.selection_filtered), Toast.LENGTH_SHORT).show();
                 }
@@ -1124,8 +1122,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
 
                 adapter.clear();
                 getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
-                // TODO: This call could need to move the onCreateMenu() code into a onPrepareOptionMenu()
-                //getSherlockActivity().supportInvalidateOptionsMenu();
+                
             }
 
         } else if (requestCode == ARG_ENABLE_GPS) {
@@ -1136,6 +1133,13 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
             } else {
                 startMissionFeatureCreation();
             }
+        }else {
+        
+            missionTemplate = ((GeoCollectApplication) getActivity().getApplication()).getTemplate();
+            CURRENT_LOADER_INDEX = missionTemplate.getLoaderIndex();
+            adapter.setTemplate(missionTemplate);
+            adapter.clear();
+            getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
         }
     }
     

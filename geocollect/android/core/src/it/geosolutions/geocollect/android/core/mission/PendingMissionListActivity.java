@@ -92,6 +92,8 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 
     public static final String PREFS_DOWNLOADED_TEMPLATE_INDEX = "DOWNLOADED_TEMPLATE_INDEX";
     
+    public static final String PREFS_SELECTED_TEMPLATE_ID = "SELECTED_TEMPLATE_ID";
+    
     /**
      * Contract key for map configuration
      */
@@ -345,7 +347,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
             
             if (id == 101) {
                 ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
-                        R.id.pendingmission_list)).restartLoader(0);
+                        R.id.pendingmission_list)).restartLoader(mt.getLoaderIndex());
             }
             ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
                     R.id.pendingmission_list)).switchAdapter(mode);
@@ -400,6 +402,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
             Editor ed = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
             ed.putBoolean(PREFS_USES_DOWNLOADED_TEMPLATE, true);
             ed.putInt(PREFS_DOWNLOADED_TEMPLATE_INDEX, templateIndex);
+            ed.putString(PREFS_SELECTED_TEMPLATE_ID, t.id);
             ed.commit();
 
             ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
@@ -409,7 +412,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
             
             if (index % 2 == 0) {
                 ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
-                        R.id.pendingmission_list)).restartLoader(templateIndex + 1);
+                        R.id.pendingmission_list)).restartLoader(t.getLoaderIndex());
             }
             ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
                     R.id.pendingmission_list)).switchAdapter(mode);

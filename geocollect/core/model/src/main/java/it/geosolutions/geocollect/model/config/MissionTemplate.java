@@ -95,5 +95,27 @@ public class MissionTemplate implements Serializable{
 	 * 
 	 */
 	public HashMap<String,String> priorityValuesColors = new HashMap<String,String>();
+	
+	/**
+	 * Returns an appropriate loader index
+	 * @return
+	 */
+	public int getLoaderIndex(){
+	    
+	    if(this.id != null){
+	        try {
+	            return Integer.parseInt(this.id);
+	        }catch(NumberFormatException nfe){
+	            return this.id.hashCode();
+	        } 
+	    }
+	    
+	    if(this.title != null){
+	        return this.title.hashCode();
+	    }
+	    
+        return 0;
+	    
+	}
 
 }
