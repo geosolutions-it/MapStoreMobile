@@ -9,6 +9,8 @@ import it.geosolutions.geocollect.model.config.MissionTemplate;
 
 import java.util.ArrayList;
 
+import org.apache.http.HttpHeaders;
+
 import retrofit.Callback;
 import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
@@ -135,13 +137,13 @@ public abstract class TemplateDownloadTask  extends AsyncTask<String, Void, Void
 		.setRequestInterceptor(new RequestInterceptor() {
 			@Override
 			public void intercept(RequestFacade request) {
-				request.addHeader("Accept", "application/json;");
-				request.addHeader("Authorization", authorizationString);
+				request.addHeader(HttpHeaders.ACCEPT, "application/json;");
+				request.addHeader(HttpHeaders.AUTHORIZATION, authorizationString);
 			}
 		})
 		//.setLogLevel(LogLevel.FULL)
 		.build();
-
+		
 		GeoCollectTemplateDownloadServices services = restAdapter.create(GeoCollectTemplateDownloadServices.class);
 		services.getTemplates(new Callback<RemoteTemplateListResponse>() {
 
@@ -177,8 +179,8 @@ public abstract class TemplateDownloadTask  extends AsyncTask<String, Void, Void
 		.setRequestInterceptor(new RequestInterceptor() {
 			@Override
 			public void intercept(RequestFacade request) {
-				request.addHeader("Accept", "application/json;");
-				request.addHeader("Authorization", authorizationString);
+				request.addHeader(HttpHeaders.ACCEPT, "application/json;");
+				request.addHeader(HttpHeaders.AUTHORIZATION, authorizationString);
 
 			}
 		})

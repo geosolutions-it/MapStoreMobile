@@ -12,6 +12,7 @@ import java.util.HashMap;
 
 import jsqlite.Database;
 
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -229,7 +230,7 @@ public abstract class UploadTask  extends AsyncTask<Void, Integer, CommitRespons
 			multipartContent.addPart("file", cBody);
 			httpPost.setEntity(multipartContent); 
 
-			httpPost.addHeader(new BasicHeader("Authorization", this.auth));
+			httpPost.addHeader(new BasicHeader(HttpHeaders.AUTHORIZATION, this.auth));
 
 			HttpResponse response = httpClient.execute(httpPost, localContext);
 			return EntityUtils.toString(response.getEntity());
@@ -257,7 +258,7 @@ public abstract class UploadTask  extends AsyncTask<Void, Integer, CommitRespons
 		se.setContentEncoding(new BasicHeader(HTTP.CHARSET_PARAM, "UTF-8"));
 		post.setEntity(se);
 
-		post.addHeader(new BasicHeader("Authorization", this.auth));
+		post.addHeader(new BasicHeader(HttpHeaders.AUTHORIZATION, this.auth));
 
 		response = client.execute(post);
 

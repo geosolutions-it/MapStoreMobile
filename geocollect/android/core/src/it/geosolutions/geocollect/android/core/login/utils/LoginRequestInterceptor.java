@@ -1,5 +1,7 @@
 package it.geosolutions.geocollect.android.core.login.utils;
 
+import org.apache.http.HttpHeaders;
+
 import retrofit.RequestInterceptor;
 import android.util.Base64;
 /**
@@ -20,11 +22,11 @@ public class LoginRequestInterceptor implements RequestInterceptor {
 	@Override
 	public void intercept(RequestFacade requestFacade) {
 
-	    requestFacade.addHeader("Accept", "application/json;");
+	    requestFacade.addHeader(HttpHeaders.ACCEPT, "application/json;");
 	    
 		if (mUser != null && mPass != null) {
 			final String authorizationValue = getB64Auth(mUser, mPass);
-			requestFacade.addHeader("Authorization", authorizationValue);
+			requestFacade.addHeader(HttpHeaders.AUTHORIZATION, authorizationValue);
 		}else{
 			throw new IllegalArgumentException("no password or user available to intercept");	
 		}
