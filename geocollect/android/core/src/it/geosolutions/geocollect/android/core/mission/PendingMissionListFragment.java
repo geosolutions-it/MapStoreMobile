@@ -413,7 +413,10 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
 
             // reload list
             adapter.clear();
-            getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
+            Loader<Object> l = getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX);
+            if(l != null){
+                l.forceLoad();
+            }
             getSherlockActivity().supportInvalidateOptionsMenu();
 
             return true;
@@ -721,8 +724,10 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                                                     fillCreatedMissionFeatureAdapter();
                                                 } else {
                                                     adapter.clear();
-                                                    getSherlockActivity().getSupportLoaderManager()
-                                                            .getLoader(CURRENT_LOADER_INDEX).forceLoad();
+                                                    Loader<Object> l = getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX);
+                                                    if(l != null){
+                                                        l.forceLoad();
+                                                    }
                                                 }
                                                 getSherlockActivity().supportInvalidateOptionsMenu();
 
@@ -1100,8 +1105,10 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                     editor.commit();
 
                     adapter.clear();
-                    getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
-
+                    Loader<Object> l = getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX);
+                    if(l != null){
+                        l.forceLoad();
+                    }
                     Toast.makeText(getActivity(), getString(R.string.selection_filtered), Toast.LENGTH_SHORT).show();
                 }
 
@@ -1157,7 +1164,10 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         editor.commit();
 
         adapter.clear();
-        getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
+        Loader<Object> l = getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX);
+        if(l != null){
+            l.forceLoad();
+        }
         if (mSwipeRefreshLayout != null)
             mSwipeRefreshLayout.setRefreshing(true);
 
