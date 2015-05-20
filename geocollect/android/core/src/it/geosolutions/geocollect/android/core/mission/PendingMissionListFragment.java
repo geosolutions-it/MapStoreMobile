@@ -648,9 +648,9 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                 	if (uploadIDs.contains(missionID)) {
                 		// this new entry is "uploadable" , add it
                 		uploads.add(f);
-                		if (f.properties != null && f.properties.containsKey(missionTemplate.nameField)) {
+                		if (f.properties != null && f.properties.containsKey(missionTemplate.nameField) && f.properties.get(missionTemplate.nameField) != null) {
                 			itemList += (String) f.properties.get(missionTemplate.nameField) + "\n";
-                		}else{//sopralluoghi do not contain the "codice", get it from the according mission
+                		}else{//survey feature do not contain the "nameField", get it from the according mission
                 			for (int i = 0; i < adapter.getCount(); i++) {
                 				MissionFeature mf = adapter.getItem(i);
                 				if(MissionUtils.getFeatureGCID(mf).equals(missionID)){
