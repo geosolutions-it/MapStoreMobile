@@ -964,9 +964,23 @@ public class PersistenceUtils {
 				}
 				
 				Log.v(TAG, "Found "+newschema.size()+" fields to be added");
+				boolean canAddColumn = false;
         		for(Entry<String, XDataType> e : newschema.entrySet()){
-        			if(e.getKey()!=null && e.getValue()!= null)
-        				queriesToBeRun.add("ALTER TABLE '"+tableName+"' ADD COLUMN '"+e.getKey()+"' "+SpatialiteUtils.getSQLiteTypeFromString(e.getValue().toString())+";");
+        			if(e.getKey()!=null && e.getValue()!= null){
+        			    
+        			    canAddColumn = true;
+        			    
+        			    for(String oldFieldName : old){
+                            if(oldFieldName!= null && oldFieldName.equalsIgnoreCase(e.getKey())){
+                                // Only the casing is changed, do not try to add the column
+                                canAddColumn = false;
+                            }
+                        }
+        			    
+        			    if(canAddColumn){
+        			        queriesToBeRun.add("ALTER TABLE '"+tableName+"' ADD COLUMN '"+e.getKey()+"' "+SpatialiteUtils.getSQLiteTypeFromString(e.getValue().toString())+";");
+        			    }
+        			}
         		}
 
         		// Log out
