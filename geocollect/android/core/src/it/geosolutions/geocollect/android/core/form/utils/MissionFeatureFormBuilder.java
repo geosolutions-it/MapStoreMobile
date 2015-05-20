@@ -94,6 +94,11 @@ public class MissionFeatureFormBuilder {
 	 */
 	public static String TAG = "MissionFeatureFormBuilder";
 	
+	/**
+	 * Default zoom value
+	 */
+	public static int DEFAULT_ZOOM_VALUE = 18;
+	
 	// set a static id
 	private static int sId = 0;
 
@@ -339,7 +344,11 @@ public class MissionFeatureFormBuilder {
 		mapView.setClickable(!disablePan);
 		mapView.setBuiltInZoomControls(true);
 		//set center and zoom level limits
-		Integer b = (Integer)getAttributeWithDefault(field,"zoom",18);
+		Integer b = DEFAULT_ZOOM_VALUE;
+		Object zoomValue = getAttributeWithDefault( field, "zoom", DEFAULT_ZOOM_VALUE);
+		if(zoomValue instanceof Integer){
+		    b = (Integer) b;
+		}
 		
 		mapView.getMapViewPosition().setZoomLevel(b.byteValue());
 		mapView.getMapZoomControls().setZoomLevelMax((byte) 30);
