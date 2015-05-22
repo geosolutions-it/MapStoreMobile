@@ -1128,7 +1128,10 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                 editor.commit();
 
                 adapter.clear();
-                getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
+                Loader<Object> l = getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX);
+                if(l != null){
+                    l.forceLoad();
+                }
                 
             }
 
@@ -1146,7 +1149,10 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
             CURRENT_LOADER_INDEX = missionTemplate.getLoaderIndex();
             adapter.setTemplate(missionTemplate);
             adapter.clear();
-            getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
+            Loader<Object> l = getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX);
+            if(l != null){
+                l.forceLoad();
+            }
         }
     }
     
