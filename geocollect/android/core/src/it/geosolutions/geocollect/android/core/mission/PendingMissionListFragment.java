@@ -781,7 +781,15 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                                         missionFeature.properties.put("MY_ORIG_ID", featureIDString);
 
                                         GeoJson gson = new GeoJson();
-                                        String c = gson.toJson(missionFeature);
+                                        
+                                        MissionFeature toUpload;
+                                        if(mMode == FragmentMode.CREATION){
+                                            toUpload= MissionUtils.alignMissionFeatureProperties(missionFeature, missionTemplate.schema_seg.fields);
+                                        }else{
+                                            toUpload= MissionUtils.alignMissionFeatureProperties(missionFeature, missionTemplate.schema_sop.fields);
+                                        }
+                                        
+                                        String c = gson.toJson( toUpload );
                                         String data = null;
                                         try {
                                             data = new String(c.getBytes("UTF-8"));

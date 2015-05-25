@@ -1,6 +1,6 @@
 /*
- * GeoSolutions - MapstoreMobile - GeoSpatial Framework on Android based devices
- * Copyright (C) 2014  GeoSolutions (www.geo-solutions.it)
+ * GeoSolutions - GeoCollect
+ * Copyright (C) 2014 - 2015  GeoSolutions (www.geo-solutions.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,6 @@ import it.geosolutions.android.map.wfs.WFSGeoJsonFeatureLoader;
 import it.geosolutions.android.map.wfs.geojson.GeoJson;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.core.BuildConfig;
-import it.geosolutions.geocollect.android.core.GeoCollectApplication;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.login.LoginActivity;
 import it.geosolutions.geocollect.android.core.mission.Mission;
@@ -67,6 +66,7 @@ import android.util.Pair;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.google.gson.Gson;
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.io.WKBReader;
@@ -531,8 +531,15 @@ public class MissionUtils {
         }
 
         File styleDir = new File(MapFilesProvider.getStyleDirIn());
-        if(!styleDir.exists() || !styleDir.isDirectory()){
-            Log.w(TAG, "Cannot find style directory");
+        if(!styleDir.exists()){
+            
+            // Create the directory if not exists
+            styleDir.mkdirs();
+            
+        }else if(!styleDir.isDirectory()){
+            if(BuildConfig.DEBUG){
+                Log.w(TAG, "Style directory is not a directory!");
+            }
             return;
         }
         
@@ -683,5 +690,45 @@ public class MissionUtils {
 			
     	}
     	return urls;
+    }
+    
+    /**
+     * Generates a new {@link MissionFeature} with the correct properties casing suitable for the upload.
+     * Removes unnecessary properties
+     * Takes feature schema as input
+     */
+    public static MissionFeature alignMissionFeatureProperties(MissionFeature inputMissionFeature, HashMap<String,XDataType> schema){
+        
+        if(inputMissionFeature == null || schema == null){
+            if(BuildConfig.DEBUG){
+                Log.w(TAG, "NULL MissionFeature or schema, cannot convert.");
+            }
+            return null;
+        }
+        
+        MissionFeature output = new MissionFeature();
+        
+        output.id = inputMissionFeature.id;
+        output.displayColor = inputMissionFeature.displayColor;
+        output.editing = inputMissionFeature.editing;
+        if(inputMissionFeature.geometry != null){
+            output.geometry = (Geometry) inputMissionFeature.geometry.clone();
+        }
+        output.geometry_name = inputMissionFeature.geometry_name;
+        output.type = inputMissionFeature.type;
+        
+        output.properties = new HashMap<String, Object>();
+        
+        if(inputMissionFeature.properties != null){
+            for(String inputKey: inputMissionFeature.properties.keySet()){
+                for(String schemaKey: schema.keySet()){
+                    if(schemaKey != null && schemaKey.equalsIgnoreCase(inputKey)){
+                        output.properties.put(schemaKey, inputMissionFeature.properties.get(inputKey));
+                    }
+                }
+            }
+        }
+        
+        return output;
     }
 }

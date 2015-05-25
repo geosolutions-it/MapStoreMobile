@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package it.geosolutions.geocollect.android.core.login.utils;
+package it.geosolutions.geocollect.android.core.utils;
 
 import java.lang.reflect.Type;
 import java.util.List;

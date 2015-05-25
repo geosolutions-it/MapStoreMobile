@@ -1,9 +1,27 @@
+/*
+ * GeoSolutions - GeoCollect
+ * Copyright (C) 2014 - 2015  GeoSolutions (www.geo-solutions.it)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package it.geosolutions.geocollect.android.template;
 
 import it.geosolutions.android.map.geostore.model.ResourceList;
 import it.geosolutions.geocollect.android.core.BuildConfig;
 import it.geosolutions.geocollect.android.core.Config;
-import it.geosolutions.geocollect.android.core.login.utils.GsonUtil;
+import it.geosolutions.geocollect.android.core.utils.GsonUtil;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 
@@ -22,6 +40,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.gson.Gson;
+
 /**
  * Class which extends Asynctask to download remote MissionTemplates
  * 

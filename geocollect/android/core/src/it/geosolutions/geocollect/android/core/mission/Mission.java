@@ -18,7 +18,6 @@
 package it.geosolutions.geocollect.android.core.mission;
 
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
-import it.geosolutions.geocollect.android.core.GeoCollectApplication;
 import it.geosolutions.geocollect.android.core.login.LoginActivity;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.model.config.MissionTemplate;

@@ -77,7 +77,7 @@ public class SendMissionFeatureAction extends AndroidAction {
 		
 		Log.d(SendMissionFeatureAction.class.getSimpleName(), "perform sendaction");
 		
-		MissionTemplate t = MissionUtils.getDefaultTemplate(fragment.getActivity());
+		final MissionTemplate t = MissionUtils.getDefaultTemplate(fragment.getActivity());
 		
 		Database db = ((FormEditActivity) fragment.getSherlockActivity()).spatialiteDatabase;
 		
@@ -120,7 +120,7 @@ public class SendMissionFeatureAction extends AndroidAction {
 			.setMessage(confirm)
 			.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) { 
-					sendData( fragment,  action,  missionFeature);
+					sendData( fragment,  action, MissionUtils.alignMissionFeatureProperties(missionFeature, t.schema_seg.fields) );
 
 				}
 			})
@@ -134,7 +134,7 @@ public class SendMissionFeatureAction extends AndroidAction {
 
 		}else{
 			//missing confirm message will send without any confirmation
-			sendData( fragment,  action,  missionFeature);
+			sendData( fragment,  action,  MissionUtils.alignMissionFeatureProperties(missionFeature, t.schema_seg.fields));
 		}
 
 	}
