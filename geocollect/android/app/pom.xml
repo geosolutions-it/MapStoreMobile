@@ -75,6 +75,7 @@
 					<deleteConflictingFiles>true</deleteConflictingFiles>
 					<undeployBeforeDeploy>true</undeployBeforeDeploy>
                     <failOnConflictingLayouts>false</failOnConflictingLayouts>
+                    <failOnNonStandardStructure>false</failOnNonStandardStructure>
 				</configuration>
 				<extensions>true</extensions>
 				<executions>

@@ -53,9 +53,39 @@
 					</sdk>
 					<ndkArchitecture>armeabi armeabi-v7a x86</ndkArchitecture>
 				</configuration>
+                <executions>
+                    <execution>
+                        <id>create-all-formats</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>aar</goal>
+                            <goal>apklib</goal>
+                        </goals>
+                    </execution>
+                </executions>
 				<extensions>true</extensions>
 			</plugin>
-			<plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>attach-artifact</goal>
+                </goals>
+                <configuration>
+                  <artifacts>
+                    <artifact>
+                      <type>aar</type>
+                      <file>${project.build.directory}/${project.build.finalName}.aar</file>
+                    </artifact>
+                  </artifacts>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.5.1</version>
