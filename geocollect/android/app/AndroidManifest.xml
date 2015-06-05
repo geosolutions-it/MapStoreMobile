@@ -1,7 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="it.geosolutions.geocollect.android.app"
     android:versionCode="8"
-    android:versionName="1.07" >
+    android:versionName="1.07">
 	<uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -13,34 +14,35 @@
     <!-- end of Map Specific permission -->
    
     <uses-sdk
-        android:minSdkVersion="9"
+        android:minSdkVersion="10"
         android:targetSdkVersion="19" />
 
     <application
-        android:debuggable="false"
+        tools:replace = "android:theme, android:label"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:name="it.geosolutions.geocollect.android.core.GeoCollectApplication"
-        android:theme="@style/Theme.Sherlock.Light.DarkActionBar" >
+        android:theme="@style/Theme.Sherlock.Light.DarkActionBar">
 
          <activity
             android:name="it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity">
             android:label="@string/app_name"
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity android:name="it.geosolutions.geocollect.android.core.form.FormEditActivity" />
 
         <activity
+            tools:replace = "android:parentActivityName"
             android:name="it.geosolutions.geocollect.android.core.mission.PendingMissionDetailActivity"
             android:parentActivityName="it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="it.geosolutions.geocollect.android.core.PendingMissionListActivity" />
+                android:value="it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity"
+                tools:replace = "android:value"/>
         </activity>
         <activity android:name="it.geosolutions.geocollect.android.core.mission.SimpleMapActivity" />
         <!--  PREFERENCES  -->

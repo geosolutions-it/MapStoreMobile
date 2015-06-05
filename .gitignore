@@ -36,3 +36,9 @@ Thumbs.db
 
 # Mac
 .DS_Store
+
+/.gradle/
+build/
+/gradle-app.setting 
+.idea/workspace.xml
+/local.properties

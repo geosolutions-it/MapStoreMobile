@@ -1,9 +1,12 @@
-apply plugin: 'android-library'
-
+apply plugin: 'com.android.library'
 dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
+    compile project(':AmbilWarna')
+    compile project(':actionbarsherlock')
+    compile project(':geopaparazzi:geopaparazzilibrary')
+    compile project(':geopaparazzi:geopaparazzispatialitelibrary')
+    compile 'org.mapsforge:mapsforge-map:0.3.1-MSM-0.4'
 }
-
 android {
     compileSdkVersion 18
     buildToolsVersion "19.1"
@@ -31,4 +34,8 @@ android {
         debug.setRoot('build-types/debug')
         release.setRoot('build-types/release')
     }
+}
+
+repositories {
+    mavenLocal()
 }
