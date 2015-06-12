@@ -68,12 +68,14 @@ import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -177,6 +179,8 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
      */
     private Database db;
 
+    private Button clearFilterBtn;
+
     /**
      * A callback interface that all activities containing this fragment must implement. This mechanism allows activities to be notified of item
      * selections.
@@ -234,6 +238,21 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         // Get the list fragment's content view
         final View listFragmentView = inflater.inflate(R.layout.mission_resource_list, container, false);
 
+        clearFilterBtn = (Button) listFragmentView.findViewById(R.id.clearFilterBtn);
+        if(clearFilterBtn != null){
+            clearFilterBtn.setOnClickListener(new OnClickListener() {
+                
+                @Override
+                public void onClick(View v) {
+                    if(adapter != null){
+                        adapter.getFilter().filter("");
+                        v.setVisibility(View.GONE);
+                    }
+                }
+            });
+        }
+        
+        
         // Now create a SwipeRefreshLayout to wrap the fragment's content view
         mSwipeRefreshLayout = new ListFragmentSwipeRefreshLayout(getSherlockActivity());
 
@@ -512,7 +531,6 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
 
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-
                 if (!hasFocus) {
                     // keyboard was closed, collapse search action view
                     menu.findItem(R.id.search).collapseActionView();
@@ -553,6 +571,16 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         if (adapter != null) {
             // filters the adapters entries using its overridden filter
             adapter.getFilter().filter(newText);
+        }
+        if(adapter.isEmpty()){
+            setNoData();
+            if(clearFilterBtn!=null){
+                clearFilterBtn.setVisibility(View.VISIBLE);
+            }
+        }else{
+            if(clearFilterBtn!=null){
+                clearFilterBtn.setVisibility(View.GONE);
+            }
         }
         return true;
     }
@@ -954,12 +982,14 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         } else {
             Log.d(TAG, "loader returned " + results.size());
             // add loaded resources to the listView
-            for (MissionFeature a : results) {
-                adapter.add(a);
-            }
+            adapter = new FeatureAdapter(getSherlockActivity(), R.layout.mission_resource_row, missionTemplate);
+            adapter.setItems(results);
+            setListAdapter(adapter);
+            
             if (adapter.isEmpty()) {
                 setNoData();
             } else {
+                
             }
         }
         stopLoadingGUI();

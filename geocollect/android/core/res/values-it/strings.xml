@@ -104,5 +104,5 @@
         <item quantity="other">Vuoi scaricare i dati di background per questa missione ? Saranno scaricati %d file, continuare?</item>
     </plurals>
     <string name="download_successfull">Scaricato con successo!</string>
-    
+    <string name="reset_search_filter">Mostra tutto</string>
 </resources>

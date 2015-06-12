@@ -25,6 +25,7 @@ import it.geosolutions.geocollect.model.config.MissionTemplate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -56,6 +57,8 @@ public class FeatureAdapter extends ArrayAdapter<MissionFeature> {
     private MissionFeatureFilter filter;
     
     private ArrayList<String> uploadableIDs;
+
+    private ArrayList<MissionFeature> originalList = new ArrayList<MissionFeature>();
     
     /**
      * The constructor gets the resource (id of the layout for the element)
@@ -248,10 +251,10 @@ public class FeatureAdapter extends ArrayAdapter<MissionFeature> {
             ArrayList<MissionFeature> tempList=new ArrayList<MissionFeature>();
             
     
-            int count = getCount();
+            int count = originalList.size();
             for(int i = 0; i < count; i++){
     
-                MissionFeature item = getItem(i);
+                MissionFeature item = originalList.get(i);
                 if(constraint != null && constraint.length() > 0) {
                     //if constraint, filter
                     final String title = (String) item.properties.get(template.nameField);
@@ -279,5 +282,14 @@ public class FeatureAdapter extends ArrayAdapter<MissionFeature> {
             return filterResults;
         }
     };
+    
+    public void setItems(List<MissionFeature> inputList){
+        clear();
+        this.originalList.clear();
+        for(MissionFeature f : inputList){
+            this.originalList.add(f);
+            add(f);
+        }
+    }
 }
 
