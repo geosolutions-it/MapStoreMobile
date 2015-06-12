@@ -387,6 +387,10 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
             final ArrayList<MissionTemplate> downloadedTemplates = PersistenceUtils
                     .loadSavedTemplates(getBaseContext());
 
+            if(downloadedTemplates == null){
+                return;
+            }
+            
             final int index = id % 2000;
 
             final int templateIndex = index / 2;
@@ -416,6 +420,8 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
             }
             ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
                     R.id.pendingmission_list)).switchAdapter(mode);
+            
+            MissionUtils.checkMapStyles(getResources(), t);
 
         }
     }
@@ -444,11 +450,11 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
                     .findFragmentById(R.id.pendingmission_detail_container);
             if (fragment != null) {
                 getSupportFragmentManager().beginTransaction().remove(fragment).commit();
-            } else {
-                confirmExit();
+//            } else {
+//                confirmExit();
             }
-        } else {
-            confirmExit();
+//        } else {
+//            confirmExit();
         }
     }
 
