@@ -18,6 +18,7 @@
 package it.geosolutions.geocollect.android.core.mission;
 
 
+import it.geosolutions.geocollect.android.core.BuildConfig;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
@@ -49,6 +50,11 @@ import android.widget.TextView;
  * @author Lorenzo Natali (www.geo-solutions.it)
  */
 public class FeatureAdapter extends ArrayAdapter<MissionFeature> {
+    
+    /**
+     * Tag for logging
+     */
+    private static String TAG = "FeatureAdapter";
     
     int resourceId = R.layout.mission_resource_row;
     
@@ -224,7 +230,7 @@ public class FeatureAdapter extends ArrayAdapter<MissionFeature> {
             
               ArrayList<MissionFeature> filtered = (ArrayList<MissionFeature>) results.values;
               //apply results to the adapter if necessary
-              if(filtered != null){              
+              if(filtered != null){
                   clear();
                   if(Build.VERSION.SDK_INT > 10){
                       addAll(filtered);
@@ -233,7 +239,6 @@ public class FeatureAdapter extends ArrayAdapter<MissionFeature> {
                           add(f);
                       }
                   }
-    
                   notifyDataSetChanged();
               }
             
@@ -263,7 +268,11 @@ public class FeatureAdapter extends ArrayAdapter<MissionFeature> {
 
                             if(converted.toLowerCase(Locale.ENGLISH)
                                     .contains(target.toLowerCase(Locale.ENGLISH))){
+                                if(BuildConfig.DEBUG){
+                                    Log.d(TAG, "Adding item "+i+" matching "+converted+" : "+target);
+                                }
                                 tempList.add(item);
+                                break;
                             }
                             
                         }
@@ -271,6 +280,9 @@ public class FeatureAdapter extends ArrayAdapter<MissionFeature> {
                     
                 }else{
                     //if constraint is null or empty ("") add all
+                    if(BuildConfig.DEBUG){
+                        Log.d(TAG, "Adding item "+i+", no contraint");
+                    }
                     tempList.add(item);
                 }
     
