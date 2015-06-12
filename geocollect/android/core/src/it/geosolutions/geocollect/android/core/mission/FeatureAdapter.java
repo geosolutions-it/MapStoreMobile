@@ -26,8 +26,8 @@ import it.geosolutions.geocollect.model.config.MissionTemplate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -223,7 +223,6 @@ public class FeatureAdapter extends ArrayAdapter<MissionFeature> {
         protected void publishResults(CharSequence constraint, FilterResults results) {
             
               ArrayList<MissionFeature> filtered = (ArrayList<MissionFeature>) results.values;
-    //          Log.d(FeatureAdapter.class.getSimpleName(), "results size "+ filtered.size() + " after filtering : "+constraint);
               //apply results to the adapter if necessary
               if(filtered != null){              
                   clear();
@@ -243,7 +242,6 @@ public class FeatureAdapter extends ArrayAdapter<MissionFeature> {
          * performs the filtering
          * @param constraint to constraint to apply
          */
-        @SuppressLint("DefaultLocale")
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
     
@@ -256,20 +254,21 @@ public class FeatureAdapter extends ArrayAdapter<MissionFeature> {
     
                 MissionFeature item = originalList.get(i);
                 if(constraint != null && constraint.length() > 0) {
-                    //if constraint, filter
-                    final String title = (String) item.properties.get(template.nameField);
-                    final String desc =  (String) item.properties.get(template.descriptionField);
-    
-                    if(title != null && desc != null && constraint.length() > 0){
-    
-                        //do filtering here however you want missions to be filtered
-                        //for now it adds the item if title or desc are within the search query --> constraint
-                        if(title.toLowerCase().contains(constraint.toString().toLowerCase()) ||
-                                desc.toLowerCase().contains(constraint.toString().toLowerCase())){
-    
-                            tempList.add(item);
+                    String converted;
+                    String target = constraint.toString();
+                    for(Object prop : item.properties.values()){
+                        if(prop != null && prop instanceof String){
+                            
+                            converted = (String) prop;
+
+                            if(converted.toLowerCase(Locale.ENGLISH)
+                                    .contains(target.toLowerCase(Locale.ENGLISH))){
+                                tempList.add(item);
+                            }
+                            
                         }
-                    }        
+                    }
+                    
                 }else{
                     //if constraint is null or empty ("") add all
                     tempList.add(item);

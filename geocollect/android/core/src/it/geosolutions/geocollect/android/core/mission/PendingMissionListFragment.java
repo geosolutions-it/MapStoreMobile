@@ -181,6 +181,8 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
 
     private Button clearFilterBtn;
 
+    private SearchView searchView;
+
     /**
      * A callback interface that all activities containing this fragment must implement. This mechanism allows activities to be notified of item
      * selections.
@@ -247,6 +249,10 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                     if(adapter != null){
                         adapter.getFilter().filter("");
                         v.setVisibility(View.GONE);
+                        
+                    }
+                    if(searchView != null){
+                        searchView.setQuery("", false);
                     }
                 }
             });
@@ -524,7 +530,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
 
         // get searchview and add querylistener
 
-        SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        searchView = (SearchView) menu.findItem(R.id.search).getActionView();
         searchView.setQueryHint(getString(R.string.search_missions));
         searchView.setOnQueryTextListener(this);
         searchView.setOnQueryTextFocusChangeListener(new OnFocusChangeListener() {
