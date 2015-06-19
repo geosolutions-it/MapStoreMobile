@@ -168,7 +168,8 @@
                 android:fontFamily="sans-serif"
                 android:text="@string/button_undownload"
                 android:textColor="@android:color/white"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                android:visibility="gone" />
 
             <Button
                 android:id="@+id/login_confirm"

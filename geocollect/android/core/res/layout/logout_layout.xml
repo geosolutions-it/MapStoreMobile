@@ -187,7 +187,8 @@
                 android:fontFamily="sans-serif"
                 android:text="@string/logout_logout"
                 android:textColor="@android:color/white"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                android:visibility="gone" />
         </RelativeLayout>
     </LinearLayout>
 

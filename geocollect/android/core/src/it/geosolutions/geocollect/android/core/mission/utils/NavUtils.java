@@ -44,7 +44,7 @@ public class NavUtils {
 		
 		final ArrayList<MissionTemplate> persistedTemplates = PersistenceUtils.loadSavedTemplates(app);
 		
-		int size = 4;
+		int size = 5;
 		
 		if(persistedTemplates != null && persistedTemplates.size() > 0){
 			size += (persistedTemplates.size() * 2);
@@ -75,9 +75,10 @@ public class NavUtils {
 		}
 		
 		//items[size - 4] = NavMenuItem.create(102, app.getString(R.string.map), "ic_location_map", false, app);
-		items[size - 3] = NavMenuSection.create(200,app.getString(R.string.general));
-		items[size - 2] = NavMenuItem.create(203, app.getString(R.string.action_account), "ic_action_settings", false, app);
-	    items[size - 1] = NavMenuItem.create(204, app.getString(R.string.action_quit), "ic_navigation_quit_light", false, app);
+		items[size - 4] = NavMenuSection.create(200,app.getString(R.string.general));
+		items[size - 3] = NavMenuItem.create(203, app.getString(R.string.action_account), "ic_action_settings", false, app);
+        items[size - 2] = NavMenuItem.create(205, app.getString(R.string.action_logout), "ic_navigation_quit_light", false, app);
+        items[size - 1] = NavMenuItem.create(204, app.getString(R.string.action_close), "ic_action_cancel_dark", false, app);
 	    
 	    return items;
 		

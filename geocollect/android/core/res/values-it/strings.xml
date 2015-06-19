@@ -11,8 +11,9 @@
 	<string name="no_reporting_found">Nessuna segnalazione trovata</string>
 	<string name="map">Mappa</string>
 	<string name="accept_mission">Accetta</string>
-	<string name="action_quit">Esci</string>
-	<string name="loading_footer">Loading&#8230;</string>
+	<string name="action_close">Chiudi</string>
+	<string name="action_logout">Logout</string>
+    <string name="loading_footer">Loading&#8230;</string>
 	<string name="sending_data">Invio dati</string>
 	<string name="sending_media">Invio contenuti multimediali</string>
 	<string name="error_sending_data">Errore durante l\'invio dei dati</string>
@@ -105,4 +106,7 @@
     </plurals>
     <string name="download_successfull">Scaricato con successo!</string>
     <string name="reset_search_filter">Mostra tutto</string>
+    
+    <string name="button_confirm_logout">Confermi il logout?</string>
+    
 </resources>

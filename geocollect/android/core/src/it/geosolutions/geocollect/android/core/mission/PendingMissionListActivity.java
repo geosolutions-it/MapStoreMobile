@@ -379,6 +379,11 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         case 204:
             confirmExit();
             break;
+        
+        // logout
+        case 205:
+            confirmLogout();
+            break;
         }
 
         // downloaded templates will have a dynamic id currently starting from 2000
@@ -473,6 +478,41 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
                 }).show();
     }
 
+    /**
+     * Display a confirm prompt before logging out the user
+     */
+    public void confirmLogout() {
+        new AlertDialog.Builder(this).setTitle(R.string.action_logout)
+                .setMessage(R.string.button_confirm_logout)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        //clear user data
+                        final Editor ed = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
+
+                        ed.putString(LoginActivity.PREFS_USER_EMAIL, null);
+                        ed.putString(LoginActivity.PREFS_USER_FORENAME, null);
+                        ed.putString(LoginActivity.PREFS_USER_SURNAME, null);
+                        ed.putString(LoginActivity.PREFS_PASSWORD, null);
+                        ed.putString(LoginActivity.PREFS_AUTH_KEY, null);
+                        ed.putString(LoginActivity.PREFS_USER_ENTE, null);
+
+                        ed.commit();
+
+                        Toast.makeText(getBaseContext(), getString(R.string.logout_logged_out),Toast.LENGTH_LONG).show();
+                        
+                        startActivityForResult(
+                                new Intent(getBaseContext(), LoginActivity.class),
+                                LoginActivity.REQUEST_LOGIN);
+
+                    }
+                }).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // do nothing
+                    }
+                }).show();
+    }
+
     // **********************************************
     // *********MAP VIEWS MANAGEMENT ***********
     // **********************************************
@@ -544,7 +584,9 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         if (requestCode == LogoutActivity.REQUEST_LOGOUT) {
             if (resultCode == LogoutActivity.LOGGED_OUT) {
                 // there is a notification in LogoutActivity already
-                finish();
+                startActivityForResult(
+                        new Intent(this, LoginActivity.class),
+                        LoginActivity.REQUEST_LOGIN);
                 return;
             }
         }

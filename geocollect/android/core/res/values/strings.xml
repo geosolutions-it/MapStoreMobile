@@ -11,8 +11,9 @@
 	<string name="no_reporting_found">no reports found</string>
 	<string name="map">Map</string>
 	<string name="accept_mission">Accept</string>
-	<string name="action_quit">Quit</string>
-	<string name="loading_footer">Loading&#8230;</string>
+	<string name="action_close">Close</string>
+    <string name="action_logout">Logout</string>
+    <string name="loading_footer">Loading&#8230;</string>
 	<string name="sending_data">Sending data</string>
 	<string name="sending_media">Sending media content</string>
 	<string name="error_sending_data">Error Sending Data</string>
@@ -110,4 +111,7 @@
     </plurals>
     <string name="download_successfull">Download successful</string>
     <string name="reset_search_filter">Reset Search Filter</string>
+    
+    <string name="button_confirm_logout">Do you really want to logout?</string>
+    
 </resources>
