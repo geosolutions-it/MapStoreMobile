@@ -3,11 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="it.geosolutions.geocollect.android.core.MainActivity" >
 
-    <item android:id="@+id/single_map"
+    <!--  item android:id="@+id/single_map"
           android:icon="@drawable/ic_location_map_dark"
           android:showAsAction="always"
           android:title="@string/map"
-           />
+           /-->
     
     <item android:id="@+id/navigate"
           android:icon="@drawable/ic_nav"
