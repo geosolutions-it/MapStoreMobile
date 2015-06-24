@@ -50,7 +50,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -215,10 +214,13 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         Log.v("MISSION_LIST_FRAGMENT", "onCreate()");
 
         setRetainInstance(true);
+        
+        PendingMissionListActivity activity = (PendingMissionListActivity) getSherlockActivity();
+        
         // setup the listView
-        missionTemplate = MissionUtils.getDefaultTemplate(getSherlockActivity());
+        missionTemplate = MissionUtils.getDefaultTemplate(activity);
 
-        ((GeoCollectApplication) getActivity().getApplication()).setTemplate(missionTemplate);
+        ((GeoCollectApplication) activity.getApplication()).setTemplate(missionTemplate);
         
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         boolean usesDownloaded = prefs.getBoolean(PendingMissionListActivity.PREFS_USES_DOWNLOADED_TEMPLATE, false);
@@ -227,7 +229,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
             CURRENT_LOADER_INDEX = missionTemplate.getLoaderIndex();
         }
 
-        adapter = new FeatureAdapter(getSherlockActivity(), R.layout.mission_resource_row, missionTemplate);
+        adapter = new FeatureAdapter(activity, R.layout.mission_resource_row, missionTemplate);
         setListAdapter(adapter);
         // option menu
         setHasOptionsMenu(true);
@@ -249,11 +251,11 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                     if(adapter != null){
                         adapter.getFilter().filter("");
                         v.setVisibility(View.GONE);
-                        
                     }
                     if(searchView != null){
                         searchView.setQuery("", false);
                     }
+
                 }
             });
         }
@@ -501,13 +503,17 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
     @Override
     public void onCreateOptionsMenu(final Menu menu, MenuInflater inflater) {
 
+        PendingMissionListActivity activity = (PendingMissionListActivity) getSherlockActivity();
+        // Are we on a tablet?
+        boolean mTwoPane = activity.findViewById(R.id.pendingmission_detail_container) != null;
+
         // upload
         if (missionTemplate != null && missionTemplate.schema_sop != null
                 && missionTemplate.schema_sop.localFormStore != null) {
 
             String tableName = mMode == FragmentMode.CREATION ? missionTemplate.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX
                     : missionTemplate.schema_sop.localFormStore;
-            HashMap<String, ArrayList<String>> uploadables = PersistenceUtils.loadUploadables(getSherlockActivity());
+            HashMap<String, ArrayList<String>> uploadables = PersistenceUtils.loadUploadables(activity);
             if (uploadables.containsKey(tableName) && uploadables.get(tableName).size() > 0) {
                 // there are uploadable entries, add a menu item
                 inflater.inflate(R.menu.uploadable, menu);
@@ -515,21 +521,16 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         }
 
         if (mMode == FragmentMode.CREATION) {
-            inflater.inflate(R.menu.creating, menu);
+            if(mTwoPane){
+                inflater.inflate(R.menu.creating, menu);
+            }
             return;
         }
 
-        // If SRID is set, a filter exists
-        SharedPreferences sp = getSherlockActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME,
-                Context.MODE_PRIVATE);
-        if (sp.contains(SQLiteCascadeFeatureLoader.FILTER_SRID)) {
-            inflater.inflate(R.menu.filterable, menu);
-        }
-
+        // Display the Search only if it is not already filtered
         inflater.inflate(R.menu.searchable, menu);
 
         // get searchview and add querylistener
-
         searchView = (SearchView) menu.findItem(R.id.search).getActionView();
         searchView.setQueryHint(getString(R.string.search_missions));
         searchView.setOnQueryTextListener(this);
@@ -543,8 +544,15 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                 }
             }
         });
-
-        if (missionTemplate != null) {
+        
+        // If SRID is set, a filter exists
+        SharedPreferences sp = activity.getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME,
+                Context.MODE_PRIVATE);
+        if (sp.contains(SQLiteCascadeFeatureLoader.FILTER_SRID)) {
+            inflater.inflate(R.menu.filterable, menu);
+        }
+        
+        if (mTwoPane && missionTemplate != null) {
             if (missionTemplate.schema_seg != null) {
                 inflater.inflate(R.menu.creating, menu);
             }
@@ -602,20 +610,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         int id = item.getItemId();
         if (id == R.id.create_new) {
 
-            if (!isGPSAvailable()) {
-
-                new AlertDialog.Builder(getActivity()).setTitle(R.string.app_name).setMessage(R.string.gps_not_enabled)
-                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-
-                                startActivityForResult(new Intent(
-                                        android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS), ARG_ENABLE_GPS);
-                            }
-                        }).show();
-            } else {
-
-                startMissionFeatureCreation();
-            }
+            PendingMissionListActivity.checkGPSandStartCreation(getSherlockActivity());
 
             return true;
 
@@ -886,26 +881,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * checks if location services are available
-     */
-    private boolean isGPSAvailable() {
-        LocationManager manager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        return manager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-                || manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
-    }
-
-    /**
-     * starts the missionfeature creation
-     */
-    private void startMissionFeatureCreation() {
-
-        Intent i = new Intent(getSherlockActivity(), FormEditActivity.class);
-        i.putExtra(PendingMissionListActivity.ARG_CREATE_MISSIONFEATURE, true);
-        startActivityForResult(i, FormEditActivity.FORM_CREATE_NEW_MISSIONFEATURE);
-
-    }
 
     /*
      * (non-Javadoc)
@@ -1182,10 +1158,10 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         } else if (requestCode == ARG_ENABLE_GPS) {
             Log.d(FormEditActivity.class.getSimpleName(), "back from GPS settings");
 
-            if (!isGPSAvailable()) {
+            if (!PendingMissionListActivity.isGPSAvailable(getSherlockActivity())) {
                 Toast.makeText(getActivity(), R.string.gps_still_not_enabled, Toast.LENGTH_LONG).show();
             } else {
-                startMissionFeatureCreation();
+                PendingMissionListActivity.startMissionFeatureCreation(getSherlockActivity());
             }
         }else {
         

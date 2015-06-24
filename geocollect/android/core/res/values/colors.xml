@@ -13,4 +13,11 @@
     <color name="default_new_notice_color">#18f37b</color>
     <color name="default_survey_color">#FF0000</color>
   
+    <color name="primary">#3f51b5</color>
+    <color name="primary_dark">#00796b</color>
+    <color name="ripple">#F06292</color>
+    <color name="accent">#E91E63</color>
+    <color name="accent_pressed">#C2185B</color>
+    
+    <color name="material_blue_500">#5677fc</color>
 </resources>

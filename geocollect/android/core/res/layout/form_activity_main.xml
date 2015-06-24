@@ -10,7 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
         <include layout="@layout/main_pending_form_list" />
-        </FrameLayout>
+        
+    </FrameLayout>
     
     <!-- The navigation drawer -->
     <RelativeLayout android:id="@+id/left_form_list"
@@ -21,7 +22,7 @@
         android:background="#CFFF">
         
        <include layout="@layout/form_list"/>
-        
+
      </RelativeLayout>
 
     <!--  <LinearLayout android:id="@+id/right_form_menu"

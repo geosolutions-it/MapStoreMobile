@@ -51,16 +51,20 @@ import java.util.Iterator;
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -733,6 +737,51 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 
         // launch.putExtra(MapsActivity.LAYERS_TO_ADD, m.layers) ;
         startActivityForResult(launch, SPATIAL_QUERY);
+    }
+    
+    public void checkGPSandStartCreation(View v){
+        checkGPSandStartCreation(this);
+    }
+    
+    public static void checkGPSandStartCreation(final SherlockFragmentActivity abs_activity) {
+        if (!isGPSAvailable(abs_activity)) {
+
+            new AlertDialog.Builder(abs_activity).setTitle(R.string.app_name).setMessage(R.string.gps_not_enabled)
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            abs_activity.startActivityForResult(new Intent(
+                                    android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS), PendingMissionListFragment.ARG_ENABLE_GPS);
+                        }
+                    }).show();
+        } else {
+
+            startMissionFeatureCreation(abs_activity);
+        }
+    }
+
+    /**
+     * checks if location services are available
+     */
+    public static boolean isGPSAvailable(Context context) {
+        if(context==null){
+            return false;
+        }
+        LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        return manager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+                || manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+
+    }
+
+    /**
+     * starts the {@link MissionFeature} creation
+     */
+    public static void startMissionFeatureCreation(SherlockFragmentActivity abs_activity) {
+
+        Intent i = new Intent(abs_activity, FormEditActivity.class);
+        i.putExtra(PendingMissionListActivity.ARG_CREATE_MISSIONFEATURE, true);
+        abs_activity.startActivityForResult(i, FormEditActivity.FORM_CREATE_NEW_MISSIONFEATURE);
+
     }
 
 }
