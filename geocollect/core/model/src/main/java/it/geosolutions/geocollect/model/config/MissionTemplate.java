@@ -89,6 +89,7 @@ public class MissionTemplate implements Serializable{
 	 * priority Field 
 	 */
 	public String priorityField;
+	
 	/**
 	 * Association between {priorityField} values and a color value String
 	 * to be shown on the main missions list
@@ -96,6 +97,11 @@ public class MissionTemplate implements Serializable{
 	 */
 	public HashMap<String,String> priorityValuesColors = new HashMap<String,String>();
 	
+	/**
+     * Optional column name for ordering
+     */
+    public String orderingField;
+    
 	/**
 	 * Returns an appropriate loader index
 	 * @return

@@ -124,15 +124,17 @@ public class MissionUtils {
 				username,
 				password);
 	
-		return new SQLiteCascadeFeatureLoader(
-				activity, 
-				wfsl, 
-				db, 
-				missionTemplate.schema_seg.localSourceStore, 
-				missionTemplate.schema_sop.localFormStore, 
-				missionTemplate.schema_seg.orderingField,
-				missionTemplate.priorityField,
-				missionTemplate.priorityValuesColors);
+        return new SQLiteCascadeFeatureLoader(
+            activity, 
+            wfsl, 
+            db, 
+            missionTemplate.schema_seg.localSourceStore, 
+            missionTemplate.schema_sop.localFormStore, 
+            missionTemplate.schema_seg.orderingField != null ? 
+                    missionTemplate.schema_seg.orderingField : 
+                    missionTemplate.orderingField,
+            missionTemplate.priorityField,
+            missionTemplate.priorityValuesColors);
 	}
 	
 	/**

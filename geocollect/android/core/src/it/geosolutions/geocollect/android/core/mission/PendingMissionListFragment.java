@@ -561,12 +561,19 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         inflater.inflate(R.menu.map_full, menu);
 
         if (missionTemplate != null) {
-            if (missionTemplate.schema_sop != null && missionTemplate.schema_sop.orderingField != null) {
+            if (missionTemplate.schema_sop != null 
+                    && ( missionTemplate.schema_sop.orderingField != null || 
+                         missionTemplate.orderingField != null)) {
                 inflater.inflate(R.menu.orderable, menu);
                 MenuItem orderButton = menu.findItem(R.id.order);
                 if (orderButton != null) {
                     String stringFormat = getResources().getString(R.string.order_by);
-                    String formattedTitle = String.format(stringFormat, missionTemplate.schema_sop.orderingField);
+                    String formattedTitle = String.format(
+                            stringFormat,
+                            missionTemplate.schema_sop.orderingField != null ? 
+                                    missionTemplate.schema_sop.orderingField : 
+                                    missionTemplate.orderingField
+                                );
                     orderButton.setTitle(formattedTitle);
                 }
             }
