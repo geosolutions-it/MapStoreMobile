@@ -491,12 +491,14 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 		loader.forceLoad();
 		return loader;
 	}
+    
     @Override 
     public void onSaveInstanceState(Bundle outState) {
-    	//save the origin
-    	outState.putSerializable(ARG_ITEM_FEATURE, mission.getOrigin());
-    	
-    	
+        if(mission != null){
+        	//save the origin
+        	outState.putSerializable(ARG_ITEM_FEATURE, mission.getOrigin());
+        }
+
     }
     
    
