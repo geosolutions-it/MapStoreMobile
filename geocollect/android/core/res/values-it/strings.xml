@@ -23,6 +23,7 @@
         <item quantity="other">%d Segnalazioni.</item>
     </plurals>
     <string name="order_by">Ordina Per %1$s</string>
+    <string name="order_by_ellipsis">Ordina Per&#8230;</string>
 	<string name="reload">Ricarica</string>
     <string name="swipe_left_to_continue">Scorri a sinistra per continuare</string>
 
@@ -108,5 +109,8 @@
     <string name="reset_search_filter">Mostra tutto</string>
     
     <string name="button_confirm_logout">Confermi il logout?</string>
+    
+    <string name="ordering_az">A-Z</string>
+    <string name="ordering_distance">Distanza</string>
     
 </resources>

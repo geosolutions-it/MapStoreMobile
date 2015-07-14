@@ -39,7 +39,7 @@
 		    android:maxLines="1"
 		    android:layout_centerHorizontal="true"
 		    android:ellipsize="end"/> 
-    <!-- Pencil visible when record is beeing edited -->
+    <!-- Pencil visible when record is being edited -->
 	<ImageView 
 	    android:id="@+id/mission_resource_edit_icon"
    	    android:contentDescription="@string/edit"
@@ -49,5 +49,19 @@
     	android:layout_alignParentRight="true"
     	android:layout_centerVertical="true"
     	android:visibility="gone"/> 
+    	
+	 <TextView 
+        android:id="@+id/mission_resource_distance_txt" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:paddingTop="14dip"
+        android:paddingRight="32dip"
+        android:textSize="15sp"
+        android:maxLines="1"
+        android:layout_centerHorizontal="true"
+        android:ellipsize="end"/> 
+	
  
 </RelativeLayout>

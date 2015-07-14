@@ -13,6 +13,8 @@ import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 public class MissionFeature extends Feature {
 	
 	private static final long serialVersionUID = -2001258280624797792L;
+	
+	public static String DISTANCE_VALUE_ALIAS = "gc_dist_ord";
 
 	/**
 	 * Set to true if the Feature must be shown as "in editing"

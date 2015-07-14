@@ -83,6 +83,7 @@ import com.actionbarsherlock.app.SherlockListFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.SubMenu;
 import com.actionbarsherlock.widget.SearchView;
 import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
 
@@ -438,12 +439,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                 PersistenceUtils.saveUploadables(getSherlockActivity(), uploadables);
             }
 
-            // reload list
-            adapter.clear();
-            Loader<Object> l = getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX);
-            if(l != null){
-                l.forceLoad();
-            }
+            forceLoad();
             getSherlockActivity().supportInvalidateOptionsMenu();
 
             return true;
@@ -531,6 +527,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         inflater.inflate(R.menu.searchable, menu);
 
         // get searchview and add querylistener
+        //menu.findItem(R.id.search).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         searchView = (SearchView) menu.findItem(R.id.search).getActionView();
         searchView.setQueryHint(getString(R.string.search_missions));
         searchView.setOnQueryTextListener(this);
@@ -559,7 +556,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         }
 
         inflater.inflate(R.menu.map_full, menu);
-
+        
         if (missionTemplate != null) {
             if (missionTemplate.schema_sop != null 
                     && ( missionTemplate.schema_sop.orderingField != null || 
@@ -575,10 +572,25 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                                     missionTemplate.orderingField
                                 );
                     orderButton.setTitle(formattedTitle);
+                    
                 }
             }
 
         }
+
+        // Creating the Overflow Menu
+        SubMenu subMenu1 = menu.addSubMenu("Overflow Menu");
+        SubMenu subMenu2 = subMenu1.addSubMenu(0, R.id.overflow_order, Menu.NONE,  R.string.order_by_ellipsis);
+        
+        subMenu2.add(1, R.id.overflow_order_az, Menu.NONE,  R.string.ordering_az);
+        subMenu2.add(1, R.id.overflow_order_distance, Menu.NONE,  R.string.ordering_distance);
+        
+        subMenu1.add(0, R.id.overflow_refresh, Menu.NONE, R.string.reload);
+
+        MenuItem subMenu1Item = subMenu1.getItem();
+        subMenu1Item.setIcon(R.drawable.ic_action_overflow);
+        subMenu1Item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        
     }
 
     @Override
@@ -623,21 +635,17 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
 
         } else if (id == R.id.order) {
 
-            // Get it from the mission template
-            if (getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX) != null) {
+            orderButtonCallback();
+            return true;
 
-                SharedPreferences sp = getSherlockActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME,
-                        Context.MODE_PRIVATE);
-                boolean reverse = sp.getBoolean(SQLiteCascadeFeatureLoader.REVERSE_ORDER_PREF, false);
-                SharedPreferences.Editor editor = sp.edit();
-                // Change the ordering
-                Log.v(TAG, "Changing to " + reverse);
-                editor.putBoolean(SQLiteCascadeFeatureLoader.REVERSE_ORDER_PREF, !reverse);
-                editor.commit();
+        } else if (id == R.id.overflow_order_az) {
 
-                adapter.clear();
-                getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
-            }
+            setOrdering(false);
+            return true;
+
+        } else if (id == R.id.overflow_order_distance) {
+
+            setOrdering(true);
             return true;
 
         } else if (id == R.id.filter) {
@@ -759,11 +767,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                                                 if (mMode == FragmentMode.CREATION) {
                                                     fillCreatedMissionFeatureAdapter();
                                                 } else {
-                                                    adapter.clear();
-                                                    Loader<Object> l = getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX);
-                                                    if(l != null){
-                                                        l.forceLoad();
-                                                    }
+                                                    forceLoad();
                                                 }
                                                 getSherlockActivity().supportInvalidateOptionsMenu();
 
@@ -883,11 +887,55 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
             }
 
             return true;
+            
+        } else if (id == R.id.overflow_refresh) {
+
+            onRefresh();
+            return true;
+
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * 
+     */
+    private void orderButtonCallback() {
+        // Get it from the mission template
+       
+        SharedPreferences sp = getSherlockActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME, Context.MODE_PRIVATE);
+        boolean reverse = sp.getBoolean(SQLiteCascadeFeatureLoader.REVERSE_ORDER_PREF, false);
+        SharedPreferences.Editor editor = sp.edit();
+        
+        // Change the ordering
+        Log.v(TAG, "Changing to " + reverse);
+        editor.putBoolean(SQLiteCascadeFeatureLoader.REVERSE_ORDER_PREF, !reverse);
+        editor.commit();
+
+        forceLoad();
+    }
+
+    /**
+     * 
+     */
+    private void setOrdering(boolean useDistance) {
+        
+        SharedPreferences sp = getSherlockActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME,Context.MODE_PRIVATE);
+        
+        // This check pass only if the value is not already set to the right value.
+        if(sp.getBoolean(SQLiteCascadeFeatureLoader.ORDER_BY_DISTANCE, !useDistance) != useDistance){
+            
+            SharedPreferences.Editor editor = sp.edit();
+
+            // Set the ordering
+            Log.v(TAG, "useDistance: " + useDistance);
+            editor.putBoolean(SQLiteCascadeFeatureLoader.ORDER_BY_DISTANCE, useDistance);
+            editor.commit();
+    
+            forceLoad();
+        }
+    }
 
 
     /*
@@ -1131,11 +1179,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                     editor.putInt(SQLiteCascadeFeatureLoader.FILTER_SRID, Integer.parseInt(bbox.getSrid()));
                     editor.commit();
 
-                    adapter.clear();
-                    Loader<Object> l = getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX);
-                    if(l != null){
-                        l.forceLoad();
-                    }
+                    forceLoad();
                     Toast.makeText(getActivity(), getString(R.string.selection_filtered), Toast.LENGTH_SHORT).show();
                 }
 
@@ -1154,11 +1198,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                 editor.remove(SQLiteCascadeFeatureLoader.FILTER_SRID);
                 editor.commit();
 
-                adapter.clear();
-                Loader<Object> l = getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX);
-                if(l != null){
-                    l.forceLoad();
-                }
+                forceLoad();
                 
             }
 
@@ -1175,11 +1215,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
             missionTemplate = ((GeoCollectApplication) getActivity().getApplication()).getTemplate();
             CURRENT_LOADER_INDEX = missionTemplate.getLoaderIndex();
             adapter.setTemplate(missionTemplate);
-            adapter.clear();
-            Loader<Object> l = getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX);
-            if(l != null){
-                l.forceLoad();
-            }
+            forceLoad();
         }
     }
     
@@ -1196,14 +1232,21 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         editor.putLong(SQLiteCascadeFeatureLoader.LAST_UPDATE_PREF, 0);
         editor.commit();
 
+        forceLoad();
+        if (mSwipeRefreshLayout != null)
+            mSwipeRefreshLayout.setRefreshing(true);
+
+    }
+
+    /**
+     * Trigger a reload of the current loader
+     */
+    private void forceLoad() {
         adapter.clear();
         Loader<Object> l = getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX);
         if(l != null){
             l.forceLoad();
         }
-        if (mSwipeRefreshLayout != null)
-            mSwipeRefreshLayout.setRefreshing(true);
-
     }
 
     /**

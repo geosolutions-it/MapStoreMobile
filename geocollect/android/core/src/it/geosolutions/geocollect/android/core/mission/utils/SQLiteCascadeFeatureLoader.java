@@ -52,7 +52,8 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 	public static String TAG = "SQLiteCascadeFeatureLoader";
 	public static String PREF_NAME = "SQLiteCascadeFeatureLoader";
 	public static String LAST_UPDATE_PREF = "LastUpdate";
-	public static String REVERSE_ORDER_PREF = "OrderByDesc";
+	public static String REVERSE_ORDER_PREF = "ReverseOrdering";
+	public static String ORDER_BY_DISTANCE = "OrderByDistance";
 	
 	/**
 	 * Preferences Strings for the Spatial Filter
@@ -62,6 +63,10 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 	public static String FILTER_E = "FilterE";
 	public static String FILTER_W = "FilterW";
 	public static String FILTER_SRID = "FilterSRID";
+	
+	public static String LOCATION_X = "LocationX";
+    public static String LOCATION_Y = "LocationY";
+    
 	
 	// 1 Hour between automatic reloading
 	public long UPDATE_THRESHOLD = (3600)*1000;
@@ -323,7 +328,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 		
 		mData = new ArrayList<MissionFeature>();
 		
-		// Reade for the Geometry field
+		// Reader for the Geometry field
         WKBReader wkbReader = new WKBReader();
         
 		if(dbFieldValues!=null){
@@ -350,19 +355,11 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 						columnNames = columnNames + ", " + e.getKey() ;
 					}
 					
-					/* TODO: escape values, is it necessary? they are columnames
-					if(converted.equals("text")||converted.equals("blob")){
-						columnValues = columnValues + ", '" + e.getValue()+"' " ;
-					}else{
-						columnValues = columnValues + ", " + e.getValue() ;
-					}
-					*/
 				}
 				
 			}
-
 			
-			//Add Sspatial filtering
+			//Add Spatial filtering
 			if(hasGeometry){
 				int filterSrid = mPrefs.getInt(FILTER_SRID, -1);
 				// If the SRID is not defined, skip the filter
@@ -377,15 +374,22 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 				//WHERE MbrIntersects(GEOMETRY, BuildMbr(8.75269101373853, 44.505790969141614, 9.039467060007173, 44.35415617743291))
 			}
 			
-
+			// TODO: Should the orderingField be mandatory to have the ordering?
 			if(orderingField != null && !orderingField.isEmpty()){
-				boolean reverse = mPrefs.getBoolean(REVERSE_ORDER_PREF, false);
-				if(reverse){
-					orderString = "ORDER BY "+orderingField+" DESC";
-					//columnNames = columnNames + " FROM '"+sourceTableName+"' ORDER BY "+orderingField+" DESC;";
+			    boolean reverse = mPrefs.getBoolean(REVERSE_ORDER_PREF, false);
+			    boolean useDistance = mPrefs.getBoolean(ORDER_BY_DISTANCE, false);
+			    double posX = Double.longBitsToDouble( mPrefs.getLong(LOCATION_X, Double.doubleToLongBits(0)));
+                double posY = Double.longBitsToDouble( mPrefs.getLong(LOCATION_Y, Double.doubleToLongBits(0)));
+                
+			    if(useDistance){
+				    columnNames = columnNames + ", Distance(ST_Transform(GEOMETRY,3857), MakePoint(1144026.738,5446630.980, 3857)) AS '"+MissionFeature.DISTANCE_VALUE_ALIAS+"'" ;
+				    orderString = "ORDER BY "+MissionFeature.DISTANCE_VALUE_ALIAS;
 				}else{
 					orderString = "ORDER BY "+orderingField;
-					//columnNames = columnNames + " FROM '"+sourceTableName+"' ORDER BY "+orderingField+";";
+				}
+				
+				if(reverse){
+				    orderString = orderString + " DESC";
 				}
 			}
 			

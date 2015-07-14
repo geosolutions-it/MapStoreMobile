@@ -115,32 +115,46 @@ public class FeatureAdapter extends ArrayAdapter<MissionFeature> {
     
         if (result != null) {
     
-            // This is how you obtain a reference to the TextViews.
-            // These TextViews are created in the XML files we defined.
             // TODO use ViewHolder
-            // display name
-            if(this.template !=null && this.template.nameField != null){
-                TextView name = (TextView) v.findViewById(R.id.mission_resource_name);
-                if (name != null && result.properties != null && result.properties.containsKey(this.template.nameField)) {
-                    Object prop =result.properties.get(this.template.nameField);
-                    if(prop!=null){
-                        name.setText(prop.toString());
-                    }else{
-                        name.setText("");
+            if(result.properties != null){
+                if(this.template !=null){
+                    // display name
+                    if(this.template.nameField != null){
+                        TextView name = (TextView) v.findViewById(R.id.mission_resource_name);
+                        if (name != null && result.properties.containsKey(this.template.nameField)) {
+                            Object prop = result.properties.get(this.template.nameField);
+                            if(prop!=null){
+                                name.setText(prop.toString());
+                            }else{
+                                name.setText("");
+                            }
+                            
+                        }
                     }
-                    
+                    // display description
+                    if(this.template.descriptionField != null){
+                        TextView desc = (TextView) v.findViewById(R.id.mission_resource_description);
+                        if (desc != null && result.properties.containsKey(this.template.descriptionField)) {
+                            Object prop = result.properties.get(this.template.descriptionField);
+                            if(prop!=null){
+                                desc.setText(prop.toString());
+                            }else{
+                                desc.setText("");
+                            }
+                            
+                        }
+                    }
                 }
-            }
-            if(this.template !=null && this.template.descriptionField != null){
-                TextView desc = (TextView) v.findViewById(R.id.mission_resource_description);
-                if (desc != null && result.properties != null && result.properties.containsKey(this.template.descriptionField)) {
-                    Object prop =result.properties.get(this.template.descriptionField);
-                    if(prop!=null){
-                        desc.setText(prop.toString());
-                    }else{
-                        desc.setText("");
+                
+                // display distance if present
+                if(result.properties.containsKey(MissionFeature.DISTANCE_VALUE_ALIAS)){
+                    Object dist_prop = result.properties.get(MissionFeature.DISTANCE_VALUE_ALIAS);
+                    if(dist_prop!=null){
+                        TextView dText = (TextView) v.findViewById(R.id.mission_resource_distance_txt);
+                        if(dText != null){
+                            dText.setText(Math.round(Double.parseDouble(dist_prop.toString()))+ "m");
+                        }
                     }
-                    
                 }
             }
             
@@ -149,7 +163,7 @@ public class FeatureAdapter extends ArrayAdapter<MissionFeature> {
     
                 if(result.editing){
                     editingIcon.setVisibility(View.VISIBLE);
-                    //it was edited, uploadble is a subset of it, look if it is "done"
+                    //it was edited, uploadable is a subset of it, look if it is "done"
                     if(uploadableIDs != null && uploadableIDs.contains(MissionUtils.getFeatureGCID(result))){
                         //this one is uploadable, give it a hook
                         editingIcon.setImageResource(R.drawable.ic_navigation_accept_light);
@@ -281,7 +295,7 @@ public class FeatureAdapter extends ArrayAdapter<MissionFeature> {
                 }else{
                     //if constraint is null or empty ("") add all
                     if(BuildConfig.DEBUG){
-                        Log.d(TAG, "Adding item "+i+", no contraint");
+                        Log.d(TAG, "Adding item "+i+", no constraint");
                     }
                     tempList.add(item);
                 }

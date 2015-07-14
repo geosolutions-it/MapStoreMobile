@@ -59,6 +59,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -79,7 +82,7 @@ import android.widget.Toast;
  * This activity also implements the required {@link PendingMissionListFragment.Callbacks} interface to listen for item selections.
  */
 public class PendingMissionListActivity extends AbstractNavDrawerActivity implements
-        PendingMissionListFragment.Callbacks, MapActivity {
+        PendingMissionListFragment.Callbacks, MapActivity, LocationListener {
 
     /**
      * TAG for logging
@@ -89,13 +92,9 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
     public static int SPATIAL_QUERY = 7001;
 
     public static final String ARG_CREATE_MISSIONFEATURE = "CREATE_MISSIONFEATURE";
-
     public static final String ARG_CREATING_TEMPLATE = "CREATING_MISSIONTEMPLATE";
-
     public static final String PREFS_USES_DOWNLOADED_TEMPLATE = "USES_DOWNLOADED_TEMPLATE";
-
     public static final String PREFS_DOWNLOADED_TEMPLATE_INDEX = "DOWNLOADED_TEMPLATE_INDEX";
-    
     public static final String PREFS_SELECTED_TEMPLATE_ID = "SELECTED_TEMPLATE_ID";
     
     /**
@@ -120,6 +119,9 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
      */
     public jsqlite.Database spatialiteDatabase;
 
+    private static long LOCATION_MINTIME = 7 * 1000; // Minimum time interval for update in seconds, i.e. 5 seconds.
+    private static long LOCATION_MINDISTANCE = 10; // Minimum distance change for update in meters, i.e. 10 meters.
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -255,6 +257,12 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
                         R.id.pendingmission_list)).switchAdapter(FragmentMode.CREATION);
 
             }
+        }
+        
+        
+        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        if(locationManager != null){
+            locationManager.requestLocationUpdates(getProviderName(), LOCATION_MINTIME, LOCATION_MINDISTANCE, this);
         }
     }
 
@@ -565,6 +573,11 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
                 Log.e(TAG, Log.getStackTraceString(e));
             }
         }
+        
+        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        if(locationManager != null){
+            locationManager.removeUpdates(this);
+        }
     }
 
     /**
@@ -784,4 +797,47 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 
     }
 
+    @Override
+    public void onLocationChanged(Location location) {
+        Log.v(TAG, "Location: \n lat  "+location.getLatitude()+"\n lon  "+location.getLongitude());
+        
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+        // TODO Auto-generated method stub
+        
+    }
+    
+    /**
+     * Get provider name.
+     * @return Name of best suiting provider.
+     * */
+    String getProviderName() {
+        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+     
+        Criteria criteria = new Criteria();
+        criteria.setPowerRequirement(Criteria.POWER_LOW); // Chose your desired power consumption level.
+        criteria.setAccuracy(Criteria.ACCURACY_FINE); // Choose your accuracy requirement.
+        criteria.setSpeedRequired(false); // Chose if speed for first location fix is required.
+        criteria.setAltitudeRequired(false); // Choose if you use altitude.
+        criteria.setBearingRequired(false); // Choose if you use bearing.
+        criteria.setCostAllowed(false); // Choose if this provider can waste money :-)
+     
+        // Provide your criteria and flag enabledOnly that tells
+        // LocationManager only to return active providers.
+        return locationManager.getBestProvider(criteria, true);
+    }
 }
