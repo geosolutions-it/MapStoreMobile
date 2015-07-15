@@ -22,6 +22,7 @@
         <item quantity="one">Una Segnalazione.</item>
         <item quantity="other">%d Segnalazioni.</item>
     </plurals>
+    <string name="order">Ordina</string>
     <string name="order_by">Ordina Per %1$s</string>
     <string name="order_by_ellipsis">Ordina Per&#8230;</string>
 	<string name="reload">Ricarica</string>

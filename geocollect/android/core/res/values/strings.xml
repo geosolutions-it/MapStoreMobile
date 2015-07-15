@@ -23,6 +23,7 @@
         <item quantity="one">One reporting</item>
         <item quantity="other">%d reportings.</item>
     </plurals>
+    <string name="order">Order</string>
     <string name="order_by">Order By %1$s</string>
     <string name="order_by_ellipsis">Order By&#8230;</string>
     <string name="reload">Reload</string>

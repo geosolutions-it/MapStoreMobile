@@ -562,17 +562,9 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                     && ( missionTemplate.schema_sop.orderingField != null || 
                          missionTemplate.orderingField != null)) {
                 inflater.inflate(R.menu.orderable, menu);
-                MenuItem orderButton = menu.findItem(R.id.order);
-                if (orderButton != null) {
-                    String stringFormat = getResources().getString(R.string.order_by);
-                    String formattedTitle = String.format(
-                            stringFormat,
-                            missionTemplate.schema_sop.orderingField != null ? 
-                                    missionTemplate.schema_sop.orderingField : 
-                                    missionTemplate.orderingField
-                                );
-                    orderButton.setTitle(formattedTitle);
-                    
+                if(sp.getBoolean(SQLiteCascadeFeatureLoader.REVERSE_ORDER_PREF, false)){
+                    MenuItem orderButton = menu.findItem(R.id.order);
+                    orderButton.setIcon(R.drawable.ic_action_sort_by_size);
                 }
             }
 
@@ -636,6 +628,12 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         } else if (id == R.id.order) {
 
             orderButtonCallback();
+            SharedPreferences sp = getActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME, Context.MODE_PRIVATE);
+            if(sp.getBoolean(SQLiteCascadeFeatureLoader.REVERSE_ORDER_PREF, false)){
+                item.setIcon(R.drawable.ic_action_sort_by_size);
+            }else{
+                item.setIcon(R.drawable.ic_action_reverse_sort);
+            }
             return true;
 
         } else if (id == R.id.overflow_order_az) {

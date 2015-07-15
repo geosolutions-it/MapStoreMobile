@@ -4,9 +4,9 @@
     tools:context="it.geosolutions.geocollect.android.core.MainActivity" >
     
     <item android:id="@+id/order"
-          android:icon="@drawable/ic_action_sort_by_size"
+          android:icon="@drawable/ic_action_reverse_sort"
           android:showAsAction="always"
-          android:title="@string/order_by"
+          android:title="@string/order"
           android:orderInCategory="60" /> 
 
 </menu>
