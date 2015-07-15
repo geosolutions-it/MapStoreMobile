@@ -36,6 +36,7 @@ import it.geosolutions.geocollect.android.core.mission.PendingMissionListFragmen
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.NavUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
+import it.geosolutions.geocollect.android.core.mission.utils.SQLiteCascadeFeatureLoader;
 import it.geosolutions.geocollect.android.core.mission.utils.SpatialiteUtils;
 import it.geosolutions.geocollect.android.core.navigation.AbstractNavDrawerActivity;
 import it.geosolutions.geocollect.android.core.navigation.NavDrawerActivityConfiguration;
@@ -258,12 +259,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 
             }
         }
-        
-        
-        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        if(locationManager != null){
-            locationManager.requestLocationUpdates(getProviderName(), LOCATION_MINTIME, LOCATION_MINDISTANCE, this);
-        }
+
     }
 
     /**
@@ -573,11 +569,6 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
                 Log.e(TAG, Log.getStackTraceString(e));
             }
         }
-        
-        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        if(locationManager != null){
-            locationManager.removeUpdates(this);
-        }
     }
 
     /**
@@ -801,6 +792,13 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
     public void onLocationChanged(Location location) {
         Log.v(TAG, "Location: \n lat  "+location.getLatitude()+"\n lon  "+location.getLongitude());
         
+        SharedPreferences sp = getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME,Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+
+        // Set position
+        editor.putLong(SQLiteCascadeFeatureLoader.LOCATION_X, Double.doubleToRawLongBits(location.getLongitude()));
+        editor.putLong(SQLiteCascadeFeatureLoader.LOCATION_Y, Double.doubleToRawLongBits(location.getLatitude()));
+        editor.apply();        
     }
 
     @Override
@@ -839,5 +837,25 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         // Provide your criteria and flag enabledOnly that tells
         // LocationManager only to return active providers.
         return locationManager.getBestProvider(criteria, true);
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        
+        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        if(locationManager != null){
+            locationManager.requestLocationUpdates(getProviderName(), LOCATION_MINTIME, LOCATION_MINDISTANCE, this);
+        }
+    }
+    
+    @Override
+    protected void onPause() {
+        super.onPause();
+        
+        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        if(locationManager != null){
+            locationManager.removeUpdates(this);
+        }
     }
 }

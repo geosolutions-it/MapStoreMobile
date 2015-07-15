@@ -152,7 +152,7 @@ public class FeatureAdapter extends ArrayAdapter<MissionFeature> {
                     if(dist_prop!=null){
                         TextView dText = (TextView) v.findViewById(R.id.mission_resource_distance_txt);
                         if(dText != null){
-                            dText.setText(Math.round(Double.parseDouble(dist_prop.toString()))+ "m");
+                            dText.setText(getDistanceText(dist_prop));
                         }
                     }
                 }
@@ -197,6 +197,32 @@ public class FeatureAdapter extends ArrayAdapter<MissionFeature> {
         // the view must be returned to our activity
         return v;
     
+    }
+
+    /**
+     * Format the given distance value in meters or kilometers String
+     * @param dist_prop
+     * @return
+     */
+    private static String getDistanceText(Object dist_prop) {
+        
+        if(dist_prop == null){
+            return "";
+        }
+        
+        try{
+            long distance = Math.round(Double.parseDouble(dist_prop.toString()));
+            
+            if(distance < 1000){
+                return distance + " m";
+            }else{
+                long truncated = distance / 100; 
+                boolean hasDecimal = truncated < 100 && (truncated / 10d) != (truncated / 10);
+                return hasDecimal ? (truncated / 10d) + " km" : (truncated / 10) + " km";
+            }
+        }catch (NumberFormatException nfe){
+            return "";
+        }
     }
     
     public void setTemplate(MissionTemplate t){

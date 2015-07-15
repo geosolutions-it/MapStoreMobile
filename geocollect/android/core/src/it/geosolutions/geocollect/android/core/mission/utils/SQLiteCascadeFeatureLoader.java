@@ -233,69 +233,94 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 						
 						long startTime = System.nanoTime();
  
-						
+						StringBuilder columnNames = new StringBuilder(300);
+						StringBuilder columnValues = new StringBuilder(300);
+                        
+                        columnNames.append(" ( ").append( "ORIGIN_ID");
+                        columnValues.append(" ( ").append( "'");
+                        
+                        int namesToTruncate = columnNames.length();
+                        int valuesToTruncate = columnValues.length();
+                        long featureStartTime;
+                        long queryTime;
+                        long prefStartTime;
+                        long stopTime;
+                        
+                        StringBuilder loggerBuilder = new StringBuilder(300);
+                        
 						for(Feature f : fromPreLoader){
 							
-						    long featureStartTime = System.nanoTime();
-						    String columnNames = " ( ";
-							String columnValues = " ( ";
-							columnNames = columnNames + "ORIGIN_ID";
-							columnValues = columnValues + "'"+f.id+ "'";
-							
-							for(Entry<String, String> e : dbFieldValues.entrySet()){
-								//Log.v(TAG, "Got -> "+e.getKey()+" : "+e.getValue());
-								
-								converted = SpatialiteUtils.getSQLiteTypeFromString(e.getValue());
-								if (converted.equals("point") && f.geometry != null){
-								
-									columnNames = columnNames + ", GEOMETRY";
-									// In JTS Point getX = longitude, getY = latitude
-									columnValues = columnValues + ", MakePoint("+((Point)f.geometry).getX()+","+((Point)f.geometry).getY()+", 4326)";
-									
-								}else if(f.properties.containsKey(e.getKey()) && converted != null && f.properties.get(e.getKey())!= null ){
-									
-									columnNames = columnNames + ", " + e.getKey() ;
-									
-									if(converted.equals("text")||converted.equals("blob")){
-										columnValues = columnValues + ", '" + SpatialiteUtils.escape((String) f.properties.get(e.getKey())) +"' " ;
-									}else{
-										columnValues = columnValues + ", " + f.properties.get(e.getKey()) ;
-									}
-									
-								}
-								
-							}
-							
-							// add the geometry
-							columnNames = columnNames + " )";
-							columnValues = columnValues + " )";
-							
+						  featureStartTime = System.nanoTime();
+
+						  columnValues.append(f.id).append( "'");
+                          
+                          for(Entry<String, String> e : dbFieldValues.entrySet()){
+                              //Log.v(TAG, "Got -> "+e.getKey()+" : "+e.getValue());
+                              
+                              converted = SpatialiteUtils.getSQLiteTypeFromString(e.getValue());
+                              if (converted.equals("point") && f.geometry != null){
+                              
+                                  columnNames .append( ", GEOMETRY");
+                                  // In JTS Point getX = longitude, getY = latitude
+                                  columnValues .append( ", MakePoint(").append(((Point)f.geometry).getX()).append(",").append(((Point)f.geometry).getY()).append(", 4326)");
+                                  
+                              }else if(f.properties.containsKey(e.getKey()) && converted != null && f.properties.get(e.getKey())!= null ){
+                                  
+                                  columnNames .append( ", " ).append( e.getKey() );
+                                  
+                                  if(converted.equals("text")||converted.equals("blob")){
+                                      columnValues .append( ", '" ).append( SpatialiteUtils.escape((String) f.properties.get(e.getKey())) ).append("' " );
+                                  }else{
+                                      columnValues .append( ", " ).append( f.properties.get(e.getKey())) ;
+                                  }
+                                  
+                              }
+                              
+                          }
+                          
+                          // add the geometry
+                          columnNames .append( " )");
+                          columnValues .append( " )");
+						    
 							// TODO: Use prepared statements and group all the insert queries into a transaction for insertion speedup
 							//       This will need to get the schema beforehand, based on the JSON features
-							String insertQuery = "INSERT INTO '"+sourceTableName+"' "+columnNames+" VALUES "+columnValues+";";
-							long queryTime = System.nanoTime();
+							String insertQuery = "INSERT INTO '"+sourceTableName+"' "+columnNames.toString()+" VALUES "+columnValues.toString()+";";
+							queryTime = System.nanoTime();
                             if(BuildConfig.DEBUG){
-                                Log.d(TAG, "Query prepared in: " + (queryTime - featureStartTime)/1000000 + "ms");
+                                loggerBuilder.append("Query created in: " ).append( (queryTime - featureStartTime)/1000000 ).append( "ms\n");
                             }
 							
+                            columnNames .setLength(namesToTruncate);
+                            columnValues .setLength(valuesToTruncate);
+                            
                             try {
 								stmt = db.prepare(insertQuery);
+								long prepareTime = System.nanoTime();
+                                if(BuildConfig.DEBUG){
+	                                loggerBuilder.append("Query prepared in: " ).append( (prepareTime - queryTime)/1000000 ).append( "ms\n");
+	                            }
+								
 								stmt.step();
 								stmt.close();
 								
 								long featureStopTime = System.nanoTime();
 								if(BuildConfig.DEBUG){
-                                    Log.d(TAG, "Feature inserted in: " + (featureStopTime - queryTime)/1000000 + "ms");
+								    loggerBuilder.append("Feature inserted in: " ).append( (featureStopTime - prepareTime)/1000000 ).append( "ms\n");
 								}
 								
 							} catch (Exception e1) {
 							    if(BuildConfig.DEBUG){
                                     Log.e(TAG, Log.getStackTraceString(e1));
 							    }
+							} finally {
+							    if(BuildConfig.DEBUG){
+                                    Log.d(TAG, loggerBuilder.toString());
+                                    loggerBuilder.setLength(0);
+                                }
 							}
 						}
 						
-                        long prefStartTime = System.nanoTime();
+                        prefStartTime = System.nanoTime();
 
                         // Update the "last update" time to prevent unnecessary downloads
                         if(mPrefs != null){
@@ -305,7 +330,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
                             editor.commit();
                         }
                         
-						long stopTime = System.nanoTime();
+						stopTime = System.nanoTime();
 						if(BuildConfig.DEBUG){
                             Log.d(TAG, "Pref updated in: " + (stopTime - prefStartTime)/1000000 + "ms");
                             Log.d(TAG, "Database updated in: " + (stopTime - startTime)/1000000 + "ms");
@@ -382,7 +407,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
                 double posY = Double.longBitsToDouble( mPrefs.getLong(LOCATION_Y, Double.doubleToLongBits(0)));
                 
 			    if(useDistance){
-				    columnNames = columnNames + ", Distance(ST_Transform(GEOMETRY,3857), MakePoint(1144026.738,5446630.980, 3857)) AS '"+MissionFeature.DISTANCE_VALUE_ALIAS+"'" ;
+				    columnNames = columnNames + ", Distance(ST_Transform(GEOMETRY,4326), MakePoint("+posX+","+posY+", 4326)) * 111195 AS '"+MissionFeature.DISTANCE_VALUE_ALIAS+"'" ;
 				    orderString = "ORDER BY "+MissionFeature.DISTANCE_VALUE_ALIAS;
 				}else{
 					orderString = "ORDER BY "+orderingField;
