@@ -579,7 +579,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         }
 
         // Creating the Overflow Menu
-        SubMenu subMenu1 = menu.addSubMenu("Overflow Menu");
+        SubMenu subMenu1 = menu.addSubMenu(0, R.id.overflow_menu, 90, "Overflow Menu");
         SubMenu subMenu2 = subMenu1.addSubMenu(0, R.id.overflow_order, Menu.NONE,  R.string.order_by_ellipsis);
         
         subMenu2.add(1, R.id.overflow_order_az, Menu.NONE,  R.string.ordering_az);

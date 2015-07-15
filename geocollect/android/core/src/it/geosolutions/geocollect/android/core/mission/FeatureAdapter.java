@@ -217,7 +217,7 @@ public class FeatureAdapter extends ArrayAdapter<MissionFeature> {
                 return distance + " m";
             }else{
                 long truncated = distance / 100; 
-                boolean hasDecimal = truncated < 100 && (truncated / 10d) != (truncated / 10);
+                boolean hasDecimal = truncated < 100;
                 return hasDecimal ? (truncated / 10d) + " km" : (truncated / 10) + " km";
             }
         }catch (NumberFormatException nfe){

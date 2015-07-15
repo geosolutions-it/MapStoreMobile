@@ -7,5 +7,5 @@
           android:icon="@drawable/ic_location_map_dark"
           android:showAsAction="always"
           android:title="@string/map"
-          /> 
+          android:orderInCategory="50"/> 
 </menu>

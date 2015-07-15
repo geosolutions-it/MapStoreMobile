@@ -13,12 +13,14 @@
           android:icon="@drawable/ic_nav"
           android:showAsAction="always"
           android:title="@string/map"
+          android:orderInCategory="70"
            /> 
     
     <item android:id="@+id/accept"
           android:icon="@drawable/ic_rating_good_white"
           android:showAsAction="always"
           android:title="@string/accept_mission"
+          android:orderInCategory="80"
            /> 
 
 </menu>

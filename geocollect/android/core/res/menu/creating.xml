@@ -7,6 +7,6 @@
           android:icon="@drawable/ic_action_plus"
           android:showAsAction="always"
           android:title="@string/create_a_inspection"
-           /> 
+          android:orderInCategory="40" /> 
 
 </menu>

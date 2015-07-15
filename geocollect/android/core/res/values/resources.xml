@@ -6,6 +6,7 @@
     <string name="geocollect_retrieve_password_link" translatable="false">http://geocollect.geo-solutions.it/mapstore/manager</string>
     
     <!-- Unique IDs -->
+    <item type="id" name="overflow_menu" />
     <item type="id" name="overflow_order" />
     <item type="id" name="overflow_order_az" />
     <item type="id" name="overflow_order_distance" />
