@@ -55,9 +55,11 @@ import org.mapsforge.android.maps.MapView;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.location.Criteria;
@@ -119,6 +121,10 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
      * Spatialite Database for persistence
      */
     public jsqlite.Database spatialiteDatabase;
+
+    private IntentFilter mIntentFilter;
+
+    private BroadcastReceiver mReceiver;
 
     private static long LOCATION_MINTIME = 7 * 1000; // Minimum time interval for update in seconds, i.e. 5 seconds.
     private static long LOCATION_MINDISTANCE = 10; // Minimum distance change for update in meters, i.e. 10 meters.
@@ -793,29 +799,41 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         Log.v(TAG, "Location: \n lat  "+location.getLatitude()+"\n lon  "+location.getLongitude());
         
         SharedPreferences sp = getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME,Context.MODE_PRIVATE);
+        // If it is the first time we get a Location, and the list is ordered by distance, refresh the list automatically 
+        boolean needRefresh = sp.getBoolean(SQLiteCascadeFeatureLoader.ORDER_BY_DISTANCE, false)
+                && ( !sp.contains(SQLiteCascadeFeatureLoader.LOCATION_X)
+                   || sp.getLong(SQLiteCascadeFeatureLoader.LOCATION_X, 0) == 0);
+        
         SharedPreferences.Editor editor = sp.edit();
-
         // Set position
         editor.putLong(SQLiteCascadeFeatureLoader.LOCATION_X, Double.doubleToRawLongBits(location.getLongitude()));
         editor.putLong(SQLiteCascadeFeatureLoader.LOCATION_Y, Double.doubleToRawLongBits(location.getLatitude()));
-        editor.apply();        
+        editor.apply();
+        
+        if(needRefresh){
+            PendingMissionListFragment listFragment = ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
+                    R.id.pendingmission_list));
+            if(listFragment != null){
+                listFragment.onRefresh();
+            }
+        }
     }
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-        // TODO Auto-generated method stub
+        //Log.d("PMLA", "Status Changed - Provider: " + provider +" Status: "+status);
         
     }
 
     @Override
     public void onProviderEnabled(String provider) {
-        // TODO Auto-generated method stub
+        //Log.d("PMLA", "Provider Enabled: " + provider );
         
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-        // TODO Auto-generated method stub
+        //Log.d("PMLA", "Provider Enabled: " + provider );
         
     }
     
@@ -843,6 +861,24 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
     protected void onResume() {
         super.onResume();
         
+        if(mIntentFilter == null){
+            mIntentFilter=new IntentFilter("android.location.PROVIDERS_CHANGED");
+        }
+        
+        if(mReceiver == null){
+            mReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    LocationManager locationManager = (LocationManager) PendingMissionListActivity.this.getSystemService(Context.LOCATION_SERVICE);
+                    if(locationManager != null){
+                        locationManager.requestLocationUpdates(getProviderName(), LOCATION_MINTIME, LOCATION_MINDISTANCE, PendingMissionListActivity.this);
+                    }
+                  }
+                };
+        }
+        
+        registerReceiver(mReceiver, mIntentFilter);
+        
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         if(locationManager != null){
             locationManager.requestLocationUpdates(getProviderName(), LOCATION_MINTIME, LOCATION_MINDISTANCE, this);
@@ -852,6 +888,10 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
     @Override
     protected void onPause() {
         super.onPause();
+        
+        if(mReceiver == null){
+            unregisterReceiver(mReceiver);
+        }
         
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         if(locationManager != null){
