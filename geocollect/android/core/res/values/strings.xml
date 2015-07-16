@@ -120,4 +120,6 @@
     <string name="ordering_az">A-Z</string>
     <string name="ordering_distance">Distance</string>
     
+    <string name="version">Version</string>
+    
 </resources>

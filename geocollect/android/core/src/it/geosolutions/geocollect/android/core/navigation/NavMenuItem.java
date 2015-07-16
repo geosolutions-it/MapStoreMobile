@@ -18,7 +18,9 @@ public class NavMenuItem implements NavDrawerItem {
         NavMenuItem item = new NavMenuItem();
         item.setId(id);
         item.setLabel(label);
-        item.setIcon(context.getResources().getIdentifier( icon, "drawable", context.getPackageName()));
+        if(icon != null){
+            item.setIcon(context.getResources().getIdentifier( icon, "drawable", context.getPackageName()));
+        }
         item.setUpdateActionBarTitle(updateActionBarTitle);
         return item;
     }

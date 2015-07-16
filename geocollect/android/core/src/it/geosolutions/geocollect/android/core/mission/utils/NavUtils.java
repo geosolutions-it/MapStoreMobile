@@ -17,6 +17,7 @@
  */
 package it.geosolutions.geocollect.android.core.mission.utils;
 
+import it.geosolutions.geocollect.android.core.BuildConfig;
 import it.geosolutions.geocollect.android.core.R;
 import it.geosolutions.geocollect.android.core.navigation.NavDrawerItem;
 import it.geosolutions.geocollect.android.core.navigation.NavMenuItem;
@@ -26,6 +27,8 @@ import it.geosolutions.geocollect.model.config.MissionTemplate;
 import java.util.ArrayList;
 
 import android.app.Activity;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.util.Log;
 
 /**
  * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
@@ -44,7 +47,7 @@ public class NavUtils {
 		
 		final ArrayList<MissionTemplate> persistedTemplates = PersistenceUtils.loadSavedTemplates(app);
 		
-		int size = 5;
+		int size = 6;
 		
 		if(persistedTemplates != null && persistedTemplates.size() > 0){
 			size += (persistedTemplates.size() * 2);
@@ -75,11 +78,20 @@ public class NavUtils {
 		}
 		
 		//items[size - 4] = NavMenuItem.create(102, app.getString(R.string.map), "ic_location_map", false, app);
-		items[size - 4] = NavMenuSection.create(200,app.getString(R.string.general));
-		items[size - 3] = NavMenuItem.create(203, app.getString(R.string.action_account), "ic_action_settings", false, app);
-        items[size - 2] = NavMenuItem.create(205, app.getString(R.string.action_logout), "ic_navigation_quit_light", false, app);
-        items[size - 1] = NavMenuItem.create(204, app.getString(R.string.action_close), "ic_action_cancel_dark", false, app);
-	    
+		items[size - 5] = NavMenuSection.create(200,app.getString(R.string.general));
+		items[size - 4] = NavMenuItem.create(203, app.getString(R.string.action_account), "ic_action_settings", false, app);
+        items[size - 3] = NavMenuItem.create(205, app.getString(R.string.action_logout), "ic_navigation_quit_light", false, app);
+        items[size - 2] = NavMenuItem.create(204, app.getString(R.string.action_close), "ic_action_cancel_dark", false, app);
+        String versionName = "";
+        try {
+            versionName= app.getPackageManager().getPackageInfo(app.getPackageName(), 0).versionName;
+        } catch (NameNotFoundException e) {
+            if(BuildConfig.DEBUG){
+                Log.e("NavUtils", "Cannot retrieve Version");
+            }
+        }
+        items[size - 1] = NavMenuItem.create(900, app.getString(R.string.version) + " " + versionName , null, false, app);
+        
 	    return items;
 		
 	}
