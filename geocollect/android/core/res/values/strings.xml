@@ -27,6 +27,7 @@
     <string name="order_by">Order By %1$s</string>
     <string name="order_by_ellipsis">Order By&#8230;</string>
     <string name="reload">Reload</string>
+    <string name="update">Update</string>
     <string name="uil_descr_image">Image</string>
     <string name="swipe_left_to_continue">Swipe left to continue</string>
     <string name="gallery_context_menu_title">Image Options</string>

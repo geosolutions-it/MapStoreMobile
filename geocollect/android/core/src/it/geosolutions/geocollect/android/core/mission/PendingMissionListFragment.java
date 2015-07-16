@@ -570,14 +570,20 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
 
         }
 
+        
         // Creating the Overflow Menu
         SubMenu subMenu1 = menu.addSubMenu(0, R.id.overflow_menu, 90, "Overflow Menu");
         SubMenu subMenu2 = subMenu1.addSubMenu(0, R.id.overflow_order, Menu.NONE,  R.string.order_by_ellipsis);
+        subMenu2.setGroupCheckable(1, true, true);
+
+        subMenu2.add(1, R.id.overflow_order_az, Menu.NONE,  R.string.ordering_az)
+            .setChecked(!sp.getBoolean(SQLiteCascadeFeatureLoader.ORDER_BY_DISTANCE, false));
+        subMenu2.add(1, R.id.overflow_order_distance, Menu.NONE,  R.string.ordering_distance)
+            .setChecked(sp.getBoolean(SQLiteCascadeFeatureLoader.ORDER_BY_DISTANCE, false));;
         
-        subMenu2.add(1, R.id.overflow_order_az, Menu.NONE,  R.string.ordering_az);
-        subMenu2.add(1, R.id.overflow_order_distance, Menu.NONE,  R.string.ordering_distance);
-        
-        subMenu1.add(0, R.id.overflow_refresh, Menu.NONE, R.string.reload);
+        subMenu2.setGroupCheckable(1, true, true);
+
+        subMenu1.add(0, R.id.overflow_refresh, Menu.NONE, R.string.update);
 
         MenuItem subMenu1Item = subMenu1.getItem();
         subMenu1Item.setIcon(R.drawable.ic_action_overflow);
@@ -639,11 +645,13 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         } else if (id == R.id.overflow_order_az) {
 
             setOrdering(false);
+            item.setChecked(true);
             return true;
 
         } else if (id == R.id.overflow_order_distance) {
 
             setOrdering(true);
+            item.setChecked(true);
             return true;
 
         } else if (id == R.id.filter) {
