@@ -37,7 +37,7 @@ public class FilterSearchTest extends android.test.AndroidTestCase{
 		
 		final MissionTemplate t = MissionUtils.getDefaultTemplate(getContext());
 		
-		final FeatureAdapter df = new FeatureAdapter(getContext(),R.layout.mission_resource_row,t);
+		final FeatureAdapter df = new FeatureAdapter(getContext(), R.layout.mission_resource_row,t);
 		
 		int page = 0;
 		int pagesize = 100;
