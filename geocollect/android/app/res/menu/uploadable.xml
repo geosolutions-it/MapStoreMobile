@@ -5,7 +5,7 @@
     
     <item android:id="@+id/upload"
           android:icon="@drawable/ic_action_upload"
-          android:showAsAction="ifRoom"
+          android:showAsAction="always"
           android:title="@string/menu_upload"
            /> 
 </menu>
