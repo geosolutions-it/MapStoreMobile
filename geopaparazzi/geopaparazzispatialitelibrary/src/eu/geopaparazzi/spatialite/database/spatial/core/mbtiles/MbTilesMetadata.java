@@ -1,6 +1,6 @@
 package eu.geopaparazzi.spatialite.database.spatial.core.mbtiles;
 
-/** @author Simon Thépot aka djcoin <simon.thepot@gmail.com, simon.thepot@makina-corpus.com> */
+/** @author Simon Thepot aka djcoin <simon.thepot@gmail.com, simon.thepot@makina-corpus.com> */
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;

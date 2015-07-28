@@ -5,7 +5,7 @@
   <groupId>it.geosolutions.android</groupId>
   <artifactId>GeopaparazziSpatialiteLibrary</artifactId>
   <packaging>apklib</packaging>
-  <version>3.6.2.1</version>
+  <version>3.6.2.2</version>
   <name>GeopaparazziSpatialiteLibrary</name>
 
   <dependencies>
