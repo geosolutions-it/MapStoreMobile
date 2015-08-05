@@ -249,7 +249,8 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
 
         		mMission = new MissionFeature();
         		mMission.properties = new HashMap<String, Object>();
-
+        		mMission.typeName = mMissionTableName;
+        		
         		//insert empty row
         		Long id = PersistenceUtils.getIDforNewMissionFeatureEntry(spatialiteDatabase, mMissionTableName);
         		if(id == null){

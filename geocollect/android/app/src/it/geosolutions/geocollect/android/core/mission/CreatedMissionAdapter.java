@@ -49,19 +49,15 @@ public class CreatedMissionAdapter extends ArrayAdapter<MissionFeature>{
 
     private int resourceId;
     
-    private String mTableName;
-    
     private MissionTemplate template;
     
     private ArrayList<String> uploadableIDs;
     
-    public CreatedMissionAdapter(Context context, int resource, String tableName,  MissionTemplate template) {
+    public CreatedMissionAdapter(Context context, int resource, MissionTemplate template) {
         super(context, resource);
         
         this.resourceId = resource;
-        
-        this.mTableName = tableName;
-        
+
         this.template = template;
         
         updateUploadableIDs(context);
@@ -77,10 +73,10 @@ public class CreatedMissionAdapter extends ArrayAdapter<MissionFeature>{
     private void updateUploadableIDs(Context context) {
         
         HashMap<String,ArrayList<String>> uploadables = PersistenceUtils.loadUploadables(context);
-        if(uploadables.containsKey(mTableName)){
-            uploadableIDs = uploadables.get(mTableName); 
+        if(uploadables.containsKey(template.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX)){
+            uploadableIDs = uploadables.get(template.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX); 
             if(BuildConfig.DEBUG){
-                Log.i(TAG, "uploadables for "+mTableName+" :\n"+uploadableIDs.toString());
+                Log.i(TAG, "uploadables for "+template.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX+" :\n"+uploadableIDs.toString());
             }
         }
         

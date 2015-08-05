@@ -368,7 +368,7 @@ public class MissionUtils {
 		        			f.geometry = geometryFactory.createPoint(new Coordinate(xy[0], xy[1]));
 		        		}
 		        	}
-		        	
+		        	f.typeName = tableName;
 					missions.add(f);
 				}
 				stmt.close();
@@ -710,6 +710,7 @@ public class MissionUtils {
         
         MissionFeature output = new MissionFeature();
         
+        output.typeName = inputMissionFeature.typeName;
         output.id = inputMissionFeature.id;
         output.displayColor = inputMissionFeature.displayColor;
         output.editing = inputMissionFeature.editing;

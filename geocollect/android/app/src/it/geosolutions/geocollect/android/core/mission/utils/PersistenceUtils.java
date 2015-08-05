@@ -359,7 +359,7 @@ public class PersistenceUtils {
     	
     	
     	String query = queryWriter.toString();
-    	List<Feature> fl = loadFormFeature(mission,query);
+    	List<Feature> fl = loadFormFeature(mission, tableName, query);
     	if(fl!=null && fl.size() == 1){
     		return fl.get(0);
     	}
@@ -371,7 +371,7 @@ public class PersistenceUtils {
 	 * @param wkbReader
 	 * @param query
 	 */
-	private static List<Feature> loadFormFeature(Mission m, String query) {
+	private static List<Feature> loadFormFeature(Mission m, String tableName, String query) {
 		Stmt stmt;
 		List<Feature> mData = new ArrayList<Feature>();
 		if(Database.complete(query)){
@@ -387,6 +387,7 @@ public class PersistenceUtils {
 		        while( stmt.step() ) {
 		            f = new MissionFeature();
 		        	populateFeatureFromStmt(wkbReader, stmt, f);
+		        	f.typeName = tableName;
 		            mData.add(f);
 		        }
 		        stmt.close();

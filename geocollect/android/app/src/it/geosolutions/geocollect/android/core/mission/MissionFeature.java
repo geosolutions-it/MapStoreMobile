@@ -17,6 +17,11 @@ public class MissionFeature extends Feature {
 	public static String DISTANCE_VALUE_ALIAS = "gc_dist_ord";
 
 	/**
+	 * Used to store the source table name of this feature
+	 */
+	public String typeName;
+	
+	/**
 	 * Set to true if the Feature must be shown as "in editing"
 	 */
 	public boolean editing = false;

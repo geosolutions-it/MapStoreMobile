@@ -140,7 +140,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
      */
     private FeatureAdapter adapter;
 
-    private CreatedMissionAdapter missionAdapter;
+    private FeatureAdapter missionAdapter;
 
     /**
      * Callback for the Loader
@@ -215,18 +215,18 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         Log.v("MISSION_LIST_FRAGMENT", "onCreate()");
 
         setRetainInstance(true);
-        
+
         PendingMissionListActivity activity = (PendingMissionListActivity) getSherlockActivity();
-        
+
         // setup the listView
         missionTemplate = MissionUtils.getDefaultTemplate(activity);
 
         ((GeoCollectApplication) activity.getApplication()).setTemplate(missionTemplate);
-        
+
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         boolean usesDownloaded = prefs.getBoolean(PendingMissionListActivity.PREFS_USES_DOWNLOADED_TEMPLATE, false);
         if (usesDownloaded) {
-            int index = prefs.getInt(PendingMissionListActivity.PREFS_DOWNLOADED_TEMPLATE_INDEX, 0) + 1;
+            //int index = prefs.getInt(PendingMissionListActivity.PREFS_DOWNLOADED_TEMPLATE_INDEX, 0) + 1;
             CURRENT_LOADER_INDEX = missionTemplate.getLoaderIndex();
         }
 
@@ -244,24 +244,23 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         final View listFragmentView = inflater.inflate(R.layout.mission_resource_list, container, false);
 
         clearFilterBtn = (Button) listFragmentView.findViewById(R.id.clearFilterBtn);
-        if(clearFilterBtn != null){
+        if (clearFilterBtn != null) {
             clearFilterBtn.setOnClickListener(new OnClickListener() {
-                
+
                 @Override
                 public void onClick(View v) {
-                    if(adapter != null){
+                    if (adapter != null) {
                         adapter.getFilter().filter("");
                         v.setVisibility(View.GONE);
                     }
-                    if(searchView != null){
+                    if (searchView != null) {
                         searchView.setQuery("", false);
                     }
 
                 }
             });
         }
-        
-        
+
         // Now create a SwipeRefreshLayout to wrap the fragment's content view
         mSwipeRefreshLayout = new ListFragmentSwipeRefreshLayout(getSherlockActivity());
 
@@ -290,12 +289,12 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
             getSherlockActivity().setSupportProgressBarIndeterminateVisibility(false);
             getSherlockActivity().setSupportProgressBarVisibility(false);
             // getListView().removeFooterView(footer);
-            //Log.v(TAG, "task terminated");
+            // Log.v(TAG, "task terminated");
 
         }
         adapter.notifyDataSetChanged();
         isLoading = false;
-        if (mSwipeRefreshLayout != null){
+        if (mSwipeRefreshLayout != null) {
             mSwipeRefreshLayout.setRefreshing(false);
         }
 
@@ -342,7 +341,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         }
 
         MissionUtils.checkMapStyles(getResources(), missionTemplate);
-        
+
         startDataLoading(missionTemplate, CURRENT_LOADER_INDEX);
 
         registerForContextMenu(getListView());
@@ -507,27 +506,28 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         if (missionTemplate != null && missionTemplate.schema_sop != null
                 && missionTemplate.schema_sop.localFormStore != null) {
 
-            String tableName = mMode == FragmentMode.CREATION ? missionTemplate.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX
-                    : missionTemplate.schema_sop.localFormStore;
+            String newFeaturesTableName =  missionTemplate.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX ;
+            String surveysTableName = missionTemplate.schema_sop.localFormStore;
+            
             HashMap<String, ArrayList<String>> uploadables = PersistenceUtils.loadUploadables(activity);
-            if (uploadables.containsKey(tableName) && uploadables.get(tableName).size() > 0) {
+            if (
+                  (uploadables.containsKey(newFeaturesTableName) && uploadables.get(newFeaturesTableName).size() > 0)
+               || (uploadables.containsKey(surveysTableName) && uploadables.get(surveysTableName).size() > 0)) {
                 // there are uploadable entries, add a menu item
                 inflater.inflate(R.menu.uploadable, menu);
             }
         }
 
-        if (mMode == FragmentMode.CREATION) {
-            if(mTwoPane){
-                inflater.inflate(R.menu.creating, menu);
-            }
-            return;
+        // TODO use the FAB on the main layout instead of inside the list fragment
+        if (mTwoPane) {
+            inflater.inflate(R.menu.creating, menu);
         }
-
+            
         // Display the Search only if it is not already filtered
         inflater.inflate(R.menu.searchable, menu);
 
         // get searchview and add querylistener
-        //menu.findItem(R.id.search).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        // menu.findItem(R.id.search).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         searchView = (SearchView) menu.findItem(R.id.search).getActionView();
         searchView.setQueryHint(getString(R.string.search_missions));
         searchView.setOnQueryTextListener(this);
@@ -541,14 +541,14 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                 }
             }
         });
-        
+
         // If SRID is set, a filter exists
-        SharedPreferences sp = activity.getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME,
-                Context.MODE_PRIVATE);
+        SharedPreferences sp = activity
+                .getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME, Context.MODE_PRIVATE);
         if (sp.contains(SQLiteCascadeFeatureLoader.FILTER_SRID)) {
             inflater.inflate(R.menu.filterable, menu);
         }
-        
+
         if (mTwoPane && missionTemplate != null) {
             if (missionTemplate.schema_seg != null) {
                 inflater.inflate(R.menu.creating, menu);
@@ -556,13 +556,12 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         }
 
         inflater.inflate(R.menu.map_full, menu);
-        
+
         if (missionTemplate != null) {
-            if (missionTemplate.schema_sop != null 
-                    && ( missionTemplate.schema_sop.orderingField != null || 
-                         missionTemplate.orderingField != null)) {
+            if (missionTemplate.schema_sop != null
+                    && (missionTemplate.schema_sop.orderingField != null || missionTemplate.orderingField != null)) {
                 inflater.inflate(R.menu.orderable, menu);
-                if(sp.getBoolean(SQLiteCascadeFeatureLoader.REVERSE_ORDER_PREF, false)){
+                if (sp.getBoolean(SQLiteCascadeFeatureLoader.REVERSE_ORDER_PREF, false)) {
                     MenuItem orderButton = menu.findItem(R.id.order);
                     orderButton.setIcon(R.drawable.ic_action_sort_by_size);
                 }
@@ -570,17 +569,17 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
 
         }
 
-        
         // Creating the Overflow Menu
         SubMenu subMenu1 = menu.addSubMenu(0, R.id.overflow_menu, 90, "Overflow Menu");
-        SubMenu subMenu2 = subMenu1.addSubMenu(0, R.id.overflow_order, Menu.NONE,  R.string.order_by_ellipsis);
+        SubMenu subMenu2 = subMenu1.addSubMenu(0, R.id.overflow_order, Menu.NONE, R.string.order_by_ellipsis);
         subMenu2.setGroupCheckable(1, true, true);
 
-        subMenu2.add(1, R.id.overflow_order_az, Menu.NONE,  R.string.ordering_az)
-            .setChecked(!sp.getBoolean(SQLiteCascadeFeatureLoader.ORDER_BY_DISTANCE, false));
-        subMenu2.add(1, R.id.overflow_order_distance, Menu.NONE,  R.string.ordering_distance)
-            .setChecked(sp.getBoolean(SQLiteCascadeFeatureLoader.ORDER_BY_DISTANCE, false));;
-        
+        subMenu2.add(1, R.id.overflow_order_az, Menu.NONE, R.string.ordering_az).setChecked(
+                !sp.getBoolean(SQLiteCascadeFeatureLoader.ORDER_BY_DISTANCE, false));
+        subMenu2.add(1, R.id.overflow_order_distance, Menu.NONE, R.string.ordering_distance).setChecked(
+                sp.getBoolean(SQLiteCascadeFeatureLoader.ORDER_BY_DISTANCE, false));
+        ;
+
         subMenu2.setGroupCheckable(1, true, true);
 
         subMenu1.add(0, R.id.overflow_refresh, Menu.NONE, R.string.update);
@@ -588,7 +587,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         MenuItem subMenu1Item = subMenu1.getItem();
         subMenu1Item.setIcon(R.drawable.ic_action_overflow);
         subMenu1Item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        
+
     }
 
     @Override
@@ -603,13 +602,13 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
             // filters the adapters entries using its overridden filter
             adapter.getFilter().filter(newText);
         }
-        if(adapter.isEmpty()){
+        if (adapter.isEmpty()) {
             setNoData();
-            if(clearFilterBtn!=null){
+            if (clearFilterBtn != null) {
                 clearFilterBtn.setVisibility(View.VISIBLE);
             }
-        }else{
-            if(clearFilterBtn!=null){
+        } else {
+            if (clearFilterBtn != null) {
                 clearFilterBtn.setVisibility(View.GONE);
             }
         }
@@ -634,10 +633,11 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         } else if (id == R.id.order) {
 
             orderButtonCallback();
-            SharedPreferences sp = getActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME, Context.MODE_PRIVATE);
-            if(sp.getBoolean(SQLiteCascadeFeatureLoader.REVERSE_ORDER_PREF, false)){
+            SharedPreferences sp = getActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME,
+                    Context.MODE_PRIVATE);
+            if (sp.getBoolean(SQLiteCascadeFeatureLoader.REVERSE_ORDER_PREF, false)) {
                 item.setIcon(R.drawable.ic_action_sort_by_size);
-            }else{
+            } else {
                 item.setIcon(R.drawable.ic_action_reverse_sort);
             }
             return true;
@@ -694,43 +694,46 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                         + MissionTemplate.NEW_NOTICE_SUFFIX : missionTemplate.schema_sop.localFormStore;
                 List<String> uploadIDs = uploadables.get(tableName);
 
-
                 ArrayList<MissionFeature> features = MissionUtils.getMissionFeatures(tableName, db);
                 for (MissionFeature f : features) {
-                	String missionID = mMode == FragmentMode.CREATION ? f.id : MissionUtils.getFeatureGCID(f);
-                	if (uploadIDs.contains(missionID)) {
-                		// this new entry is "uploadable" , add it
-                		uploads.add(f);
-                		if (f.properties != null && f.properties.containsKey(missionTemplate.nameField) && f.properties.get(missionTemplate.nameField) != null) {
-                			itemList += (String) f.properties.get(missionTemplate.nameField) + "\n";
-                		}else{//survey feature do not contain the "nameField", get it from the according mission
-                			for (int i = 0; i < adapter.getCount(); i++) {
-                				MissionFeature mf = adapter.getItem(i);
-                				if(MissionUtils.getFeatureGCID(mf).equals(missionID)){
-                					if (mf.properties != null && mf.properties.containsKey(missionTemplate.nameField)) {
-                						itemList += (String) mf.properties.get(missionTemplate.nameField) + "\n";
-                						break;
-                					}
-                				}
-                			}
-                		}
-                	}
+                    String missionID = mMode == FragmentMode.CREATION ? f.id : MissionUtils.getFeatureGCID(f);
+                    if (uploadIDs.contains(missionID)) {
+                        // this new entry is "uploadable" , add it
+                        uploads.add(f);
+                        if (f.properties != null && f.properties.containsKey(missionTemplate.nameField)
+                                && f.properties.get(missionTemplate.nameField) != null) {
+                            itemList += (String) f.properties.get(missionTemplate.nameField) + "\n";
+                        } else {// survey feature do not contain the "nameField", get it from the according mission
+                            for (int i = 0; i < adapter.getCount(); i++) {
+                                MissionFeature mf = adapter.getItem(i);
+                                if (MissionUtils.getFeatureGCID(mf).equals(missionID)) {
+                                    if (mf.properties != null && mf.properties.containsKey(missionTemplate.nameField)) {
+                                        itemList += (String) mf.properties.get(missionTemplate.nameField) + "\n";
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
-            
+
                 // from here we need to differentiate between "surveys" and "new entries"
                 if (mMode == FragmentMode.CREATION) {
-                	// ->new entries create a string "il(i) item(s) will be uploaded + list"
-                	String entity = getResources().getQuantityString(R.plurals.new_entries, uploads.size());
-                	uploadList = getResources().getQuantityString(R.plurals.upload_intro, uploads.size(), entity)
-                			+ ":\n" + itemList;
-                	title = getString(R.string.upload_title, getString(R.string.new_entry));
+                    
+                    // ->new entries create a string "il(i) item(s) will be uploaded + list"
+                    String entity = getResources().getQuantityString(R.plurals.new_entries, uploads.size());
+                    uploadList = getResources().getQuantityString(R.plurals.upload_intro, uploads.size(), entity)
+                            + ":\n" + itemList;
+                    title = getString(R.string.upload_title, getString(R.string.new_entry));
+                    
                 } else {
-                	// -> surveys create a string "il(i) survey(s) will be uploaded + list"
-                	String entity = getResources().getQuantityString(R.plurals.surveys, uploads.size());
-                	uploadList = getResources().getQuantityString(R.plurals.upload_intro, uploads.size(), entity)
-                			+ ":\n" + itemList;
-                	title = getString(R.string.upload_title, getString(R.string.survey));
+                    // -> surveys create a string "il(i) survey(s) will be uploaded + list"
+                    String entity = getResources().getQuantityString(R.plurals.surveys, uploads.size());
+                    uploadList = getResources().getQuantityString(R.plurals.upload_intro, uploads.size(), entity)
+                            + ":\n" + itemList;
+                    title = getString(R.string.upload_title, getString(R.string.survey));
                 }
+                
                 final ArrayList<MissionFeature> finalUploads = uploads;
                 // show the dialog to confirm the upload
                 new AlertDialog.Builder(getSherlockActivity()).setTitle(title).setMessage(uploadList)
@@ -827,15 +830,17 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                                         missionFeature.properties.put("MY_ORIG_ID", featureIDString);
 
                                         GeoJson gson = new GeoJson();
-                                        
+
                                         MissionFeature toUpload;
-                                        if(mMode == FragmentMode.CREATION){
-                                            toUpload= MissionUtils.alignMissionFeatureProperties(missionFeature, missionTemplate.schema_seg.fields);
-                                        }else{
-                                            toUpload= MissionUtils.alignMissionFeatureProperties(missionFeature, missionTemplate.schema_sop.fields);
+                                        if (mMode == FragmentMode.CREATION) {
+                                            toUpload = MissionUtils.alignMissionFeatureProperties(missionFeature,
+                                                    missionTemplate.schema_seg.fields);
+                                        } else {
+                                            toUpload = MissionUtils.alignMissionFeatureProperties(missionFeature,
+                                                    missionTemplate.schema_sop.fields);
                                         }
-                                        
-                                        String c = gson.toJson( toUpload );
+
+                                        String c = gson.toJson(toUpload);
                                         String data = null;
                                         try {
                                             data = new String(c.getBytes("UTF-8"));
@@ -860,7 +865,8 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                                     /*
                                      * Set the destination folder
                                      */
-                                    arguments.putString(UploadDialog.PARAMS.MISSION_ID, missionTemplate.schema_seg.localSourceStore);
+                                    arguments.putString(UploadDialog.PARAMS.MISSION_ID,
+                                            missionTemplate.schema_seg.localSourceStore);
 
                                     SharedPreferences prefs = PreferenceManager
                                             .getDefaultSharedPreferences(getSherlockActivity());
@@ -893,7 +899,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
             }
 
             return true;
-            
+
         } else if (id == R.id.overflow_refresh) {
 
             onRefresh();
@@ -909,11 +915,12 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
      */
     private void orderButtonCallback() {
         // Get it from the mission template
-       
-        SharedPreferences sp = getSherlockActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME, Context.MODE_PRIVATE);
+
+        SharedPreferences sp = getSherlockActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME,
+                Context.MODE_PRIVATE);
         boolean reverse = sp.getBoolean(SQLiteCascadeFeatureLoader.REVERSE_ORDER_PREF, false);
         SharedPreferences.Editor editor = sp.edit();
-        
+
         // Change the ordering
         Log.v(TAG, "Changing to " + reverse);
         editor.putBoolean(SQLiteCascadeFeatureLoader.REVERSE_ORDER_PREF, !reverse);
@@ -926,23 +933,23 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
      * 
      */
     private void setOrdering(boolean useDistance) {
-        
-        SharedPreferences sp = getSherlockActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME,Context.MODE_PRIVATE);
-        
+
+        SharedPreferences sp = getSherlockActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME,
+                Context.MODE_PRIVATE);
+
         // This check pass only if the value is not already set to the right value.
-        if(sp.getBoolean(SQLiteCascadeFeatureLoader.ORDER_BY_DISTANCE, !useDistance) != useDistance){
-            
+        if (sp.getBoolean(SQLiteCascadeFeatureLoader.ORDER_BY_DISTANCE, !useDistance) != useDistance) {
+
             SharedPreferences.Editor editor = sp.edit();
 
             // Set the ordering
             Log.v(TAG, "useDistance: " + useDistance);
             editor.putBoolean(SQLiteCascadeFeatureLoader.ORDER_BY_DISTANCE, useDistance);
             editor.commit();
-    
+
             forceLoad();
         }
     }
-
 
     /*
      * (non-Javadoc)
@@ -1002,7 +1009,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
     @Override
     public Loader<List<MissionFeature>> onCreateLoader(int id, Bundle arg1) {
         getSherlockActivity().setSupportProgressBarIndeterminateVisibility(true);
-        //getSherlockActivity().getSupportActionBar();
+        // getSherlockActivity().getSupportActionBar();
 
         Log.d("MISSION_LIST", "onCreateLoader() for id " + id);
 
@@ -1028,67 +1035,67 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
             adapter = new FeatureAdapter(getSherlockActivity(), R.layout.mission_resource_row, missionTemplate);
             adapter.setItems(results);
             setListAdapter(adapter);
-            
+
             if (adapter.isEmpty()) {
                 setNoData();
             } else {
-                
+
             }
         }
         stopLoadingGUI();
-        
-        //if this fragment is visible to the user, check if the background data for the current template is available
-        if(getUserVisibleHint()){
-        	checkIfBackgroundIsAvailableForTemplate();
+
+        // if this fragment is visible to the user, check if the background data for the current template is available
+        if (getUserVisibleHint()) {
+            checkIfBackgroundIsAvailableForTemplate();
         }
     }
 
     /**
-     * checks if background data for the current template is available
-     * if not, the user is asked to download
+     * checks if background data for the current template is available if not, the user is asked to download
      */
     private void checkIfBackgroundIsAvailableForTemplate() {
-		
-    	boolean exists = MissionUtils.checkTemplateForBackgroundData(getActivity(), missionTemplate);
-    	
-    	if(!exists){
-			
-			final HashMap<String,Integer> urls = MissionUtils.getContentUrlsAndFileAmountForTemplate(missionTemplate);
-			
-			if(BuildConfig.DEBUG){
-				
-				Log.i(TAG, "downloading "+ urls.toString());
-			}
-			Resources res = getResources();
-			for(String url : urls.keySet()){
-				
-				final String mount  = MapFilesProvider.getEnvironmentDirPath(getActivity());
-				
-				String dialogMessage = res.getQuantityString(R.plurals.dialog_message_with_amount, urls.get(url), urls.get(url));
-                new ZipFileManager(getActivity(), mount, MapFilesProvider.getBaseDir(), url, null, dialogMessage) {
-					@Override
-					public void launchMainActivity(final boolean success) {
-						
-						// TODO apply ? this was earlier in StartupActivity
-//						if (getActivity().getApplication() instanceof GeoCollectApplication) {
-//							((GeoCollectApplication) getActivity().getApplication()).setupMBTilesBackgroundConfiguration();
-//						}
-						//launch.putExtra(PendingMissionListFragment.INFINITE_SCROLL, false);
-						if(success){
-							
-							Toast.makeText(getActivity(), getString(R.string.download_successfull), Toast.LENGTH_SHORT).show();						
-						}
-						
-					}
-				};
-			}
-			
-			
-		}
-		
-	}
 
-	/*
+        boolean exists = MissionUtils.checkTemplateForBackgroundData(getActivity(), missionTemplate);
+
+        if (!exists) {
+
+            final HashMap<String, Integer> urls = MissionUtils.getContentUrlsAndFileAmountForTemplate(missionTemplate);
+
+            if (BuildConfig.DEBUG) {
+
+                Log.i(TAG, "downloading " + urls.toString());
+            }
+            Resources res = getResources();
+            for (String url : urls.keySet()) {
+
+                final String mount = MapFilesProvider.getEnvironmentDirPath(getActivity());
+
+                String dialogMessage = res.getQuantityString(R.plurals.dialog_message_with_amount, urls.get(url),
+                        urls.get(url));
+                new ZipFileManager(getActivity(), mount, MapFilesProvider.getBaseDir(), url, null, dialogMessage) {
+                    @Override
+                    public void launchMainActivity(final boolean success) {
+
+                        // TODO apply ? this was earlier in StartupActivity
+                        // if (getActivity().getApplication() instanceof GeoCollectApplication) {
+                        // ((GeoCollectApplication) getActivity().getApplication()).setupMBTilesBackgroundConfiguration();
+                        // }
+                        // launch.putExtra(PendingMissionListFragment.INFINITE_SCROLL, false);
+                        if (success) {
+
+                            Toast.makeText(getActivity(), getString(R.string.download_successfull), Toast.LENGTH_SHORT)
+                                    .show();
+                        }
+
+                    }
+                };
+            }
+
+        }
+
+    }
+
+    /*
      * (non-Javadoc)
      * 
      * @see android.support.v4.app.LoaderManager.LoaderCallbacks#onLoaderReset(android.support.v4.content.Loader)
@@ -1144,11 +1151,11 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
             }
         } else if (mMode == FragmentMode.PENDING) {
             // Start data loading
-            if(getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX) != null){
+            if (getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX) != null) {
                 getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
             }
         }
-        
+
         getSherlockActivity().supportInvalidateOptionsMenu();
 
     }
@@ -1205,7 +1212,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                 editor.commit();
 
                 forceLoad();
-                
+
             }
 
         } else if (requestCode == ARG_ENABLE_GPS) {
@@ -1216,15 +1223,15 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
             } else {
                 PendingMissionListActivity.startMissionFeatureCreation(getSherlockActivity());
             }
-        }else {
-        
+        } else {
+
             missionTemplate = ((GeoCollectApplication) getActivity().getApplication()).getTemplate();
             CURRENT_LOADER_INDEX = missionTemplate.getLoaderIndex();
             adapter.setTemplate(missionTemplate);
             forceLoad();
         }
     }
-    
+
     /**
      * Callback for the {@link SwipeRefreshLayout}
      */
@@ -1250,7 +1257,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
     private void forceLoad() {
         adapter.clear();
         Loader<Object> l = getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX);
-        if(l != null){
+        if (l != null) {
             l.forceLoad();
         }
     }
@@ -1322,8 +1329,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
 
         if (mMode == FragmentMode.CREATION) {
 
-            missionAdapter = new CreatedMissionAdapter(getSherlockActivity(), R.layout.mission_resource_row,
-                    missionTemplate.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX, missionTemplate);
+            missionAdapter = new FeatureAdapter(getSherlockActivity(), R.layout.mission_resource_row, missionTemplate);
 
             // delete created items on long click listener
             getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
@@ -1341,7 +1347,8 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
 
                                     final Database db = ((PendingMissionListActivity) getSherlockActivity()).spatialiteDatabase;
 
-                                    final String tableName = missionTemplate.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX;
+                                    final String tableName = missionTemplate.schema_seg.localSourceStore
+                                            + MissionTemplate.NEW_NOTICE_SUFFIX;
                                     // delete this new entry
                                     PersistenceUtils.deleteMissionFeature(db, tableName, f.id);
 
@@ -1399,7 +1406,8 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         final Database db = ((PendingMissionListActivity) getSherlockActivity()).spatialiteDatabase;
 
         Log.v(TAG, "Loading created missions for " + t.title);
-        final ArrayList<MissionFeature> missions = MissionUtils.getMissionFeatures(t.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX, db);
+        final ArrayList<MissionFeature> missions = MissionUtils.getMissionFeatures(t.schema_seg.localSourceStore
+                + MissionTemplate.NEW_NOTICE_SUFFIX, db);
 
         final String prio = t.priorityField;
         final HashMap<String, String> colors = t.priorityValuesColors;

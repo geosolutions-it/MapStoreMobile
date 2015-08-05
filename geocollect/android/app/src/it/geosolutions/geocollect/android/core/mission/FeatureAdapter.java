@@ -62,7 +62,7 @@ public class FeatureAdapter extends ArrayAdapter<MissionFeature> {
     
     private MissionFeatureFilter filter;
     
-    private ArrayList<String> uploadableIDs;
+    HashMap<String,ArrayList<String>> uploadableIDs;
 
     private ArrayList<MissionFeature> originalList = new ArrayList<MissionFeature>();
     
@@ -161,17 +161,33 @@ public class FeatureAdapter extends ArrayAdapter<MissionFeature> {
             ImageView editingIcon = (ImageView) v.findViewById(R.id.mission_resource_edit_icon);
             if(editingIcon != null){
     
-                if(result.editing){
-                    editingIcon.setVisibility(View.VISIBLE);
-                    //it was edited, uploadable is a subset of it, look if it is "done"
-                    if(uploadableIDs != null && uploadableIDs.contains(MissionUtils.getFeatureGCID(result))){
-                        //this one is uploadable, give it a hook
-                        editingIcon.setImageResource(R.drawable.ic_navigation_accept_light);
+                String tableToCheck = result.typeName;
+                if(tableToCheck != null && !tableToCheck.endsWith(MissionTemplate.NEW_NOTICE_SUFFIX)){
+                    if(result.editing){
+                        // Editing ongoing
+                        editingIcon.setVisibility(View.VISIBLE);
+                        
+                        // Check if it can be uploaded
+                        tableToCheck = this.template.schema_sop.localFormStore;
+                        //it was edited, uploadable is a subset of it, look if it is "done"
+                        if(uploadableIDs != null && uploadableIDs.containsKey(tableToCheck) && uploadableIDs.get(tableToCheck).contains(MissionUtils.getFeatureGCID(result))){
+                            //this one is uploadable, give it a hook
+                            editingIcon.setImageResource(R.drawable.ic_navigation_accept_light);
+                        }
+                    }else{
+                        editingIcon.setVisibility(View.GONE);
                     }
                 }else{
-                    editingIcon.setVisibility(View.GONE);
+                    
+                    //it was edited, uploadable is a subset of it, look if it is "done"
+                    if(uploadableIDs != null && uploadableIDs.containsKey(tableToCheck) && uploadableIDs.get(tableToCheck).contains(MissionUtils.getFeatureGCID(result))){
+                        editingIcon.setVisibility(View.VISIBLE);
+                        //this one is uploadable, give it a hook
+                        editingIcon.setImageResource(R.drawable.ic_navigation_accept_light);
+                    }else{
+                        editingIcon.setVisibility(View.GONE);
+                    }
                 }
-    
             }
             
             ImageView priorityIcon = (ImageView) v.findViewById(R.id.mission_resource_priority_icon);
@@ -232,13 +248,9 @@ public class FeatureAdapter extends ArrayAdapter<MissionFeature> {
         updateUploadableIDs(getContext());
     }
     
-    private void updateUploadableIDs(Context context) {
+    protected void updateUploadableIDs(Context context) {
         
-        HashMap<String,ArrayList<String>> uploadables = PersistenceUtils.loadUploadables(context);
-        
-        if(uploadables.containsKey(this.template.schema_sop.localFormStore)){
-            uploadableIDs = uploadables.get(this.template.schema_sop.localFormStore); 
-        }
+        uploadableIDs = PersistenceUtils.loadUploadables(context);
         
     }
     @Override

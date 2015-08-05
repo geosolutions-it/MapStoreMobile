@@ -1,42 +1,15 @@
 package it.geosolutions.geocollect.android.core.widgets.dialog;
 
 import it.geosolutions.geocollect.android.app.R;
-import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
-import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.UploadTask;
 import it.geosolutions.geocollect.model.http.CommitResponse;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.HashMap;
-
-import jsqlite.Database;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.ContentBody;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.EntityUtils;
 
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Typeface;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,10 +17,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.gson.Gson;
 /**
- * Fragment that shows uplaod status
+ * Fragment that shows upload status
  * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
  * 
  * adapted for multiple uploads in one background thread by

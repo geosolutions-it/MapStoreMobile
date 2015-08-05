@@ -421,7 +421,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 			String finalQuery = columnNames + " FROM '"+sourceTableName+"' "+filterString+" "+orderString+";";
 					
 			Log.v(TAG, finalQuery);
-			loadMissionFeature(wkbReader, finalQuery);
+			loadMissionFeature(wkbReader, sourceTableName, finalQuery);
 			
 		}
 
@@ -475,7 +475,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 		return mData;
 	}
 
-	private void loadMissionFeature(WKBReader wkbReader, String query) {
+	private void loadMissionFeature(WKBReader wkbReader, String tableName, String query) {
 		Stmt stmt;
 		if(Database.complete(query)){
 			
@@ -488,6 +488,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 		        while( stmt.step() ) {
 		            f = new MissionFeature();
 		        	populateFeatureFromStmt(wkbReader, stmt, f);
+		        	f.typeName = tableName;
 		            mData.add(f);
 		        }
 		        stmt.close();
