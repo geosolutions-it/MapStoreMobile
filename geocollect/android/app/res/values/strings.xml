@@ -82,11 +82,11 @@
     <string name="entry_saved_success">%s successfully saved</string>
     <string name="menu_clear_survey">Clear data of this survey</string>
     <string name="menu_upload">Upload</string>
-    <string name="upload_title">%s Upload</string>
+    <string name="upload_title">Data Upload</string>
     
     <plurals name="upload_intro">
-        <item quantity="one">The following %s will be uploaded</item>
-        <item quantity="other">The following %s will be uploaded</item>
+        <item quantity="one">The following item will be uploaded</item>
+        <item quantity="other">The following items will be uploaded</item>
     </plurals>
 
     <string name="survey">Survey</string>

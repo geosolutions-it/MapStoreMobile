@@ -52,9 +52,9 @@ public abstract class UploadTask  extends AsyncTask<Void, Integer, CommitRespons
 	private Context context;
 	private HashMap<String, String> uploads;
 	private HashMap<String, String[]> mediaUrls;
-	private String dataUrl;
-	private String mediaUrl;
-	private String tableName;
+	private String[] dataUrls;
+	private String[] mediaUrl;
+	private String[] tableNames;
 	private String missionID;
 	private String auth;
 	private boolean deleteFromDisk;
@@ -63,9 +63,9 @@ public abstract class UploadTask  extends AsyncTask<Void, Integer, CommitRespons
 			Context pContext,
 			HashMap<String, String> pUploads,
 			HashMap<String, String[]> pMediaUrls,
-			String pDataUrl,
-			String pMediaUrl,
-			String pTableName,
+			String[] pDataUrl,
+			String[] pMediaUrl,
+			String[] pTableName,
 			String pMissionID,
 			String pAuth,
 			boolean pDeleteFromDisk
@@ -74,9 +74,9 @@ public abstract class UploadTask  extends AsyncTask<Void, Integer, CommitRespons
 		this.context   = pContext;
 		this.uploads   = pUploads;
 		this.mediaUrls = pMediaUrls;
-		this.dataUrl   = pDataUrl;
+		this.dataUrls   = pDataUrl;
 		this.mediaUrl  = pMediaUrl;
-		this.tableName = pTableName;
+		this.tableNames = pTableName;
 		this.missionID = pMissionID;
 		this.auth      = pAuth;
 		this.deleteFromDisk = pDeleteFromDisk;
@@ -92,13 +92,20 @@ public abstract class UploadTask  extends AsyncTask<Void, Integer, CommitRespons
 		CommitResponse result = null ;
 
 		//it these are null there is no upload necessary, break
-		if(this.uploads  == null || this.mediaUrls == null){
+		if ( this.uploads  == null
+	      || this.mediaUrls == null
+	      || this.dataUrls == null
+	      || this.tableNames == null
+          || this.dataUrls.length != this.tableNames.length){
+		    
 			result = new CommitResponse();
 			result.setMessage("no valid arguments provided");
 			result.setStatus(it.geosolutions.geocollect.model.http.Status.ERROR);
 			return result;
 		}
 
+		//TODO : this upload task should handle MissionFeature objects and do the JSON conversion only before upload
+		
 		final int uploadAmount = uploads.size();
 		for(String id : uploads.keySet()){
 
@@ -107,7 +114,8 @@ public abstract class UploadTask  extends AsyncTask<Void, Integer, CommitRespons
 			try {
 				//1.send data
 				final String data = uploads.get(id);
-				String resultString = sendJson(this.dataUrl, data);
+				// TODO: this.dataUrls[0] is WRONG, cycle trough it
+				String resultString = sendJson(this.dataUrls[0], data);
 				result  = getCommitResponse(resultString);
 				
 				if(result == null){ //most likely network error
@@ -129,7 +137,8 @@ public abstract class UploadTask  extends AsyncTask<Void, Integer, CommitRespons
 						//1.delete table entry if desired
 						if(this.deleteFromDisk){
 							final Database db = getSpatialiteDatabase();
-							PersistenceUtils.deleteMissionFeature(db, this.tableName, id);
+							// TODO: this.tableNames[0] is WRONG, use MissionFeature.typeName
+							PersistenceUtils.deleteMissionFeature(db, this.tableNames[0], id);
 							try {
 								db.close();
 							} catch (jsqlite.Exception e) {
@@ -147,11 +156,12 @@ public abstract class UploadTask  extends AsyncTask<Void, Integer, CommitRespons
 						}
 						//3.delete this entry as "uploadable"
 						HashMap<String,ArrayList<String>> uploadables = PersistenceUtils.loadUploadables(this.context);
-						ArrayList<String> uploadList = uploadables.get(tableName);
-						if(uploadList.contains(id)){
+						ArrayList<String> uploadList = uploadables.get(tableNames[0]);
+						if(uploadList != null && uploadList.contains(id)){
 							uploadList.remove(id);
 						}
-						uploadables.put(tableName, uploadList);
+						// TODO: this.tableNames[0] is WRONG, use MissionFeature.typeName
+						uploadables.put(tableNames[0], uploadList);
 						PersistenceUtils.saveUploadables(this.context, uploadables);
 
 					}else{

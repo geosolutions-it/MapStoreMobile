@@ -159,9 +159,9 @@ public class UploadTest extends ActivityUnitTestCase<PendingMissionListActivity>
 				getActivity(),
 				id_json_map,
 				id_mediaurls_map,
-				url,
-				mediaUrl,
-				tableName,
+				new String[]{url},
+				new String[]{mediaUrl},
+				new String[]{tableName},
 				"punti_abbandono",
 				LoginRequestInterceptor.getB64Auth(email, pass),
 				false){

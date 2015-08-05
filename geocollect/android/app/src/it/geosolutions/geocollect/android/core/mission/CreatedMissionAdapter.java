@@ -40,6 +40,7 @@ import android.widget.TextView;
  * Adapter for MissionFeatures "created missions"
  *
  */
+@Deprecated
 public class CreatedMissionAdapter extends ArrayAdapter<MissionFeature>{
     
     /**

@@ -96,6 +96,14 @@ public class LocationProvider {
 				locationManager.removeUpdates(locationListenerNetwork);
 			}catch(final Exception e){
 				Log.e(TAG, "error gotLocation",e);
+
+			}finally{
+			    try{
+				    locationManager.removeUpdates(this);
+	                locationManager.removeUpdates(locationListenerNetwork);
+				}catch(Exception e){
+	                // ignore
+				}
 			}
 		}
 		public void onProviderDisabled(String provider) {}

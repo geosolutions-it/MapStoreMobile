@@ -131,9 +131,9 @@ public class UploadDialog extends RetainedDialogFragment {
 					getActivity(),
 					(HashMap<String, String>) getArguments().getSerializable(PARAMS.MISSIONS),
 					(HashMap<String, String[]>) getArguments().getSerializable(PARAMS.MISSION_MEDIA_URLS),
-					(String)getArguments().getSerializable(PARAMS.DATAURL),
-					(String)getArguments().getSerializable(PARAMS.MEDIAURL),
-					(String)getArguments().getSerializable(PARAMS.TABLENAME),
+					getArguments().getStringArray(PARAMS.DATAURL),
+					getArguments().getStringArray(PARAMS.MEDIAURL),
+					getArguments().getStringArray(PARAMS.TABLENAME),
 					(String)getArguments().getSerializable(PARAMS.MISSION_ID),
 					(String)getArguments().getSerializable(PARAMS.BASIC_AUTH)
 					)
@@ -152,9 +152,14 @@ public class UploadDialog extends RetainedDialogFragment {
 	 */
 	private class UIUploadTask extends UploadTask{
 		
-		public UIUploadTask(Context pContext, HashMap<String, String> pUploads,
-				HashMap<String, String[]> pMediaUrls, String pDataUrl,
-				String pMediaUrl, String pTableName, String pMissionID,
+		public UIUploadTask(
+		        Context pContext,
+		        HashMap<String, String> pUploads,
+				HashMap<String, String[]> pMediaUrls,
+				String[] pDataUrl,
+				String[] pMediaUrl,
+				String[] pTableName,
+				String pMissionID,
 				String pAuth) {
 			super(pContext, pUploads, pMediaUrls, pDataUrl, pMediaUrl, pTableName,pMissionID, pAuth, true);
 		}

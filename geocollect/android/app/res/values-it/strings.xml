@@ -81,12 +81,12 @@
     <string name="entry_saved_success">Dati %s salvati con successo</string>
     <string name="menu_clear_survey">Cancella dati di questo sopralluogo</string>
     <string name="menu_upload">Carica</string>
-    <string name="upload_title">Caricamento dati di tipo %s</string>
+    <string name="upload_title">Caricamento dati</string>
         <plurals name="upload_intro">
-        <item quantity="one">Caricamento %s</item>
-        <item quantity="other">Caricamento %s</item>
+        <item quantity="one">Sarà caricato</item>
+        <item quantity="other">Saranno caricati</item>
     </plurals>
-    <string name="upload_intro">I seguenti %s saranno caricati</string>
+    <string name="upload_intro">Saranno caricati</string>
     <string name="survey">Sopralluogo</string>
     <plurals name="surveys">
         <item quantity="one">sopralluogo</item>
