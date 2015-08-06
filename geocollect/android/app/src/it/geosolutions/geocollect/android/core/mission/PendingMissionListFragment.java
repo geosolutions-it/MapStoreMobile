@@ -135,7 +135,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
      */
     private FeatureAdapter adapter;
 
-    private FeatureAdapter missionAdapter;
+//    private FeatureAdapter missionAdapter;
 
     /**
      * Callback for the Loader
@@ -740,11 +740,11 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                                                         Toast.LENGTH_LONG).show();
 
                                                 // update adapter and menu
-                                                if (mMode == FragmentMode.CREATION) {
+                                                /*if (mMode == FragmentMode.CREATION) {
                                                     fillCreatedMissionFeatureAdapter();
                                                 } else {
-                                                    forceLoad();
-                                                }
+                                                */    forceLoad();
+                                                //}
                                                 getSherlockActivity().supportInvalidateOptionsMenu();
 
                                                 super.onFinish(ctx, result);
@@ -1091,17 +1091,17 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
     @Override
     public void onResume() {
         super.onResume();
-
+/*
         if (mMode == FragmentMode.CREATION) {
             if (missionAdapter != null) {
                 fillCreatedMissionFeatureAdapter();
             }
         } else if (mMode == FragmentMode.PENDING) {
-            // Start data loading
+*/            // Start data loading
             if (getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX) != null) {
                 getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
             }
-        }
+ //       }
 
         getSherlockActivity().supportInvalidateOptionsMenu();
 
@@ -1273,7 +1273,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         // }
 
         mMode = newMode;
-
+/*
         if (mMode == FragmentMode.CREATION) {
 
             missionAdapter = new FeatureAdapter(getSherlockActivity(), R.layout.mission_resource_row, missionTemplate);
@@ -1328,14 +1328,14 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
             setListAdapter(missionAdapter);
 
         } else if (mMode == FragmentMode.PENDING) {
-
+*/
             // remove longclicklistener
             getListView().setOnItemLongClickListener(null);
 
             adapter.setTemplate(missionTemplate);
             setListAdapter(adapter);
 
-        }
+ //       }
 
         // invalidate actionbar
         getSherlockActivity().supportInvalidateOptionsMenu();
@@ -1344,7 +1344,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
 
     /**
      * loads the locally available "created missionfeatures" from the database
-     */
+
     private void fillCreatedMissionFeatureAdapter() {
 
         final MissionTemplate t = missionTemplate;
@@ -1380,7 +1380,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
             setNoData();
         }
     }
-
+     */
     /**
      * returns the current mode of this fragment either PENDING or CREATING
      */

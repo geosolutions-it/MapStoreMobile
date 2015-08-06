@@ -22,8 +22,11 @@ import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import static it.geosolutions.geocollect.android.core.mission.utils.SpatialiteUtils.populateFeatureFromStmt;
 import it.geosolutions.geocollect.android.app.BuildConfig;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
+import it.geosolutions.geocollect.model.config.MissionTemplate;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -456,6 +459,50 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 			}
 		}
 		
+		///////////////////////
+		// Add the NEW items
+		///////////////////////
+		
+		Log.v(TAG, "Loading created missions from " + sourceTableName + MissionTemplate.NEW_NOTICE_SUFFIX);
+        final ArrayList<MissionFeature> missions = MissionUtils.getMissionFeatures(sourceTableName + MissionTemplate.NEW_NOTICE_SUFFIX, db);
+
+        mData.addAll(missions);
+        /*
+        if(orderingField != null && !orderingField.isEmpty()){
+            boolean reverse = mPrefs.getBoolean(REVERSE_ORDER_PREF, false);
+            boolean useDistance = mPrefs.getBoolean(ORDER_BY_DISTANCE, false);
+            
+            if(useDistance){
+                Collections.sort(mData, new Comparator<MissionFeature>() {
+        
+                    @Override
+                    public int compare(MissionFeature lhs, MissionFeature rhs) {
+                        if(lhs.properties == null || !lhs.properties.containsKey(MissionFeature.DISTANCE_VALUE_ALIAS)){
+                            return 1;
+                        }
+                        if(rhs.properties == null || !rhs.properties.containsKey(MissionFeature.DISTANCE_VALUE_ALIAS)){
+                            return -1;
+                        }
+                        
+                        try{
+                            long ldistance = Math.round(Double.parseDouble(lhs.properties.get(MissionFeature.DISTANCE_VALUE_ALIAS).toString()));
+                            long rdistance = Math.round(Double.parseDouble(rhs.properties.get(MissionFeature.DISTANCE_VALUE_ALIAS).toString()));
+                            return (int) (rdistance-ldistance);
+                        }catch (NumberFormatException nfe){
+                            return 0;
+                        }
+                    }
+                } );
+            }else{
+                
+            }
+            
+            if(reverse){
+                Collections.reverse(mData);
+            }
+        }
+        */
+		///////////////////////
 		
 		// Icon Color
 		if ( priorityField != null

@@ -147,13 +147,13 @@ public class FeatureAdapter extends ArrayAdapter<MissionFeature> {
                 }
                 
                 // display distance if present
-                if(result.properties.containsKey(MissionFeature.DISTANCE_VALUE_ALIAS)){
-                    Object dist_prop = result.properties.get(MissionFeature.DISTANCE_VALUE_ALIAS);
-                    if(dist_prop!=null){
-                        TextView dText = (TextView) v.findViewById(R.id.mission_resource_distance_txt);
-                        if(dText != null){
-                            dText.setText(getDistanceText(dist_prop));
-                        }
+                TextView dText = (TextView) v.findViewById(R.id.mission_resource_distance_txt);
+                if(dText != null){
+                    if(result.properties.containsKey(MissionFeature.DISTANCE_VALUE_ALIAS)){
+                        Object dist_prop = result.properties.get(MissionFeature.DISTANCE_VALUE_ALIAS);
+                        dText.setText(getDistanceText(dist_prop));
+                    }else{
+                        dText.setText("");
                     }
                 }
             }

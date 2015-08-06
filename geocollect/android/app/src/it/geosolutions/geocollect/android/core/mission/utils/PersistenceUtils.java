@@ -917,7 +917,7 @@ public class PersistenceUtils {
 	                if(nameColumn<0 || typeColumn<0){
 	                	// I have to retrieve the position of the metadata fields
 	                	for(int i = 0; i<stmt.column_count(); i++){
-	                		Log.v(TAG, stmt.column_name(i));
+	                		//Log.v(TAG, stmt.column_name(i));
 	                		if(stmt.column_name(i).equalsIgnoreCase("name")){
 	                			nameColumn = i;
 	                		}

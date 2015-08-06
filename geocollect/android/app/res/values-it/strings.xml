@@ -82,7 +82,7 @@
     <string name="menu_clear_survey">Cancella dati di questo sopralluogo</string>
     <string name="menu_upload">Carica</string>
     <string name="upload_title">Caricamento dati</string>
-        <plurals name="upload_intro">
+    <plurals name="upload_intro">
         <item quantity="one">Sarà caricato</item>
         <item quantity="other">Saranno caricati</item>
     </plurals>
