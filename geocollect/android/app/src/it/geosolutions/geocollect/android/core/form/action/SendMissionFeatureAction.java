@@ -211,7 +211,7 @@ public class SendMissionFeatureAction extends AndroidAction {
 			}
 			
 			int defaultImageSize = 1000;
-			FormUtils.resizeFotosToMax(fragment.getActivity().getBaseContext(), featureIDString, defaultImageSize);
+			FormUtils.resizeImagesToMax(fragment.getActivity().getBaseContext(), featureIDString, defaultImageSize);
 //			
 //			arguments.putString(UploadDialog.PARAMS.DATA, data);
 //			arguments.putString(UploadDialog.PARAMS.ORIGIN_ID, featureIDString);

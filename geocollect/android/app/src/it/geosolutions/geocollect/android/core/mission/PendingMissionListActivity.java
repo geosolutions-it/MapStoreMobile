@@ -47,6 +47,7 @@ import it.geosolutions.geocollect.android.template.TemplateDownloadTask;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import org.mapsforge.android.maps.MapActivity;
@@ -232,6 +233,12 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 
                 if (!PersistenceUtils.createOrUpdateTablesForTemplate(t, spatialiteDatabase)) {
                     Log.e(TAG, "error creating/updating tables for " + t.nameField);
+                }
+                
+                HashMap<String, ArrayList<String>> uploadables = PersistenceUtils.loadUploadables(this);
+                if (uploadables!= null && uploadables.size() > 0) {
+                    PersistenceUtils.sanitizePendingFeaturesList(uploadables, spatialiteDatabase);
+                    PersistenceUtils.saveUploadables(this, uploadables);
                 }
 
             }

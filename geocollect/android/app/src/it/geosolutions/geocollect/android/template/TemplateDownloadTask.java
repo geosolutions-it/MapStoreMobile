@@ -203,7 +203,7 @@ public abstract class TemplateDownloadTask  extends AsyncTask<String, Void, Void
 
 			}
 		})
-		.setLogLevel(LogLevel.FULL)
+		//.setLogLevel(LogLevel.FULL)
 		.build();
 
 		GeoCollectTemplateDownloadServices services = restAdapter.create(GeoCollectTemplateDownloadServices.class);

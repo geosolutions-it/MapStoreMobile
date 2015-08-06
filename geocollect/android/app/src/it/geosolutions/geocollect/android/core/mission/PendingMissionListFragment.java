@@ -21,14 +21,10 @@ import it.geosolutions.android.map.model.query.BBoxQuery;
 import it.geosolutions.android.map.model.query.BaseFeatureInfoQuery;
 import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.android.map.utils.ZipFileManager;
-import it.geosolutions.android.map.wfs.geojson.GeoJson;
 import it.geosolutions.geocollect.android.app.BuildConfig;
 import it.geosolutions.geocollect.android.core.GeoCollectApplication;
 import it.geosolutions.geocollect.android.app.R;
 import it.geosolutions.geocollect.android.core.form.FormEditActivity;
-import it.geosolutions.geocollect.android.core.form.utils.FormUtils;
-import it.geosolutions.geocollect.android.core.login.LoginActivity;
-import it.geosolutions.geocollect.android.core.login.utils.LoginRequestInterceptor;
 import it.geosolutions.geocollect.android.core.login.utils.NetworkUtil;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
@@ -37,7 +33,6 @@ import it.geosolutions.geocollect.android.core.widgets.dialog.UploadDialog;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.http.CommitResponse;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -386,7 +381,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 
-        // this context menu is only valid for "segnalazioni", for "new segnalazioni" "missionadapter"s longlicklistener is used
+        // this context menu is only valid for "segnalazioni", for "new segnalazioni" "missionadapter"s longclicklistener is used
         // TODO unify both adapters and use either one method for long clicks
 
         // if this item is editable or uploadable, offer the possibility to "reset" the state -> delete its "sop" entry
@@ -578,7 +573,6 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                 !sp.getBoolean(SQLiteCascadeFeatureLoader.ORDER_BY_DISTANCE, false));
         subMenu2.add(1, R.id.overflow_order_distance, Menu.NONE, R.string.ordering_distance).setChecked(
                 sp.getBoolean(SQLiteCascadeFeatureLoader.ORDER_BY_DISTANCE, false));
-        ;
 
         subMenu2.setGroupCheckable(1, true, true);
 
@@ -694,78 +688,12 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                 final String newFeaturesTableName =  missionTemplate.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX ;
                 final String surveysTableName = missionTemplate.schema_sop.localFormStore;
                 
-                List<String> uploadIDs = uploadables.get(newFeaturesTableName);
-                ArrayList<MissionFeature> features;
-                if(uploadIDs!= null && uploadIDs.size() > 0){
-                    features = MissionUtils.getMissionFeatures(newFeaturesTableName, db);
-                    for (MissionFeature f : features) {
-                        String featureID = MissionUtils.getFeatureGCID(f);
-                        if (uploadIDs.contains(featureID)) {
-                            
-                            // this new entry is "uploadable" , add it
-                            uploads.add(f);
-                            
-                            // Fill the Text for the user
-                            if ( f.properties != null 
-                              && f.properties.containsKey(missionTemplate.nameField)
-                              && f.properties.get(missionTemplate.nameField) != null) {
-                                
-                                itemList += (String) f.properties.get(missionTemplate.nameField) + "\n";
-                                
-                            } else {
-                                
-                                // survey feature do not contain the "nameField", get it from the according mission
-                                for (int i = 0; i < adapter.getCount(); i++) {
-                                    MissionFeature mf = adapter.getItem(i);
-                                    if (MissionUtils.getFeatureGCID(mf).equals(featureID)) {
-                                        if ( mf.properties != null 
-                                          && mf.properties.containsKey(missionTemplate.nameField)) {
-                                            
-                                            itemList += (String) mf.properties.get(missionTemplate.nameField) + "\n";
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                
+                // Check if there are new items to upload
+                itemList = updateFeatureUploadList(itemList, uploadables, uploads, newFeaturesTableName);
 
-                uploadIDs = uploadables.get(surveysTableName);
-                if(uploadIDs!= null && uploadIDs.size() > 0){
-                    features = MissionUtils.getMissionFeatures(surveysTableName, db);
-                    for (MissionFeature f : features) {
-                        String featureID = MissionUtils.getFeatureGCID(f);
-                        if (uploadIDs.contains(featureID)) {
-                            
-                            // this new entry is "uploadable" , add it
-                            uploads.add(f);
-                            
-                            // Fill the Text for the user
-                            if ( f.properties != null 
-                              && f.properties.containsKey(missionTemplate.nameField)
-                              && f.properties.get(missionTemplate.nameField) != null) {
-                                
-                                itemList += (String) f.properties.get(missionTemplate.nameField) + "\n";
-                                
-                            } else {
-                                
-                                // survey feature do not contain the "nameField", get it from the according mission
-                                for (int i = 0; i < adapter.getCount(); i++) {
-                                    MissionFeature mf = adapter.getItem(i);
-                                    if (MissionUtils.getFeatureGCID(mf).equals(featureID)) {
-                                        if ( mf.properties != null 
-                                          && mf.properties.containsKey(missionTemplate.nameField)) {
-                                            
-                                            itemList += (String) mf.properties.get(missionTemplate.nameField) + "\n";
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                // Check if there are surveys to upload
+                itemList = updateFeatureUploadList(itemList, uploadables, uploads, surveysTableName);
 
 
                 uploadList = getResources().getQuantityString(R.plurals.upload_intro, uploads.size()) + ":\n" + itemList;
@@ -832,87 +760,10 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
 
                                     // fill up the args for the upload dialog
                                     Bundle arguments = new Bundle();
-                                    arguments.putStringArray(UploadDialog.PARAMS.DATAURL, new String[]{newFeaturesUrl, surveysUrl});
-                                    arguments.putStringArray(UploadDialog.PARAMS.MEDIAURL,  new String[]{newFeaturesMediaUrl, surveysMediaUrl});
-                                    arguments.putStringArray(UploadDialog.PARAMS.TABLENAME, new String[]{newFeaturesTableName, surveysTableName});
 
-                                    // parse the max imagesize
-                                    int defaultImageSize = 1000;
-                                    try {
-                                        defaultImageSize = Integer.parseInt((String) missionTemplate.config.get("maxImageSize"));
-                                    } catch (NumberFormatException e) {
-                                        Log.e(UploadDialog.class.getSimpleName(), e.getClass().getSimpleName(), e);
-                                    } catch (NullPointerException e) {
-                                        Log.e(UploadDialog.class.getSimpleName(), e.getClass().getSimpleName(), e);
-                                    }
-
-                                    HashMap<String, String> id_json_map = new HashMap<String, String>();
-                                    HashMap<String, String[]> id_mediaurls_map = new HashMap<String, String[]>();
-
-                                    // create entries <featureID, String data > for each missionfeature
-                                    // create entries <featureID , String[] uploadUrls> for each missionfeature
-                                    for (MissionFeature missionFeature : finalUploads) {
-
-                                        if (missionFeature.typeName != null && missionFeature.typeName.endsWith(MissionTemplate.NEW_NOTICE_SUFFIX)) {// new entry
-                                            // Edit the MissionFeature for a better JSON compliance
-                                            MissionUtils.alignPropertiesTypes(missionFeature,
-                                                    missionTemplate.schema_seg.fields);
-                                        }
-
-                                        String featureIDString = MissionUtils.getFeatureGCID(missionFeature);
-
-                                        // Set the "MY_ORIG_ID" to link this feature to its photos
-                                        if (missionFeature.properties == null) {
-                                            missionFeature.properties = new HashMap<String, Object>();
-                                        }
-                                        missionFeature.properties.put("MY_ORIG_ID", featureIDString);
-
-                                        GeoJson gson = new GeoJson();
-
-                                        MissionFeature toUpload;
-                                        if (missionFeature.typeName != null && missionFeature.typeName.endsWith(MissionTemplate.NEW_NOTICE_SUFFIX)) {
-                                            toUpload = MissionUtils.alignMissionFeatureProperties(missionFeature,
-                                                    missionTemplate.schema_seg.fields);
-                                        } else {
-                                            toUpload = MissionUtils.alignMissionFeatureProperties(missionFeature,
-                                                    missionTemplate.schema_sop.fields);
-                                        }
-
-                                        String c = gson.toJson(toUpload);
-                                        String data = null;
-                                        try {
-                                            data = new String(c.getBytes("UTF-8"));
-                                        } catch (UnsupportedEncodingException e) {
-                                            Log.e(UploadDialog.class.getSimpleName(),
-                                                    "error transforming missionfeature to gson", e);
-                                        }
-                                        id_json_map.put(featureIDString, data);
-
-                                        // photos
-                                        FormUtils.resizeFotosToMax(getActivity().getBaseContext(), featureIDString, defaultImageSize);
-                                        String[] photoUris = FormUtils.getPhotoUriStrings(getActivity().getBaseContext(), featureIDString);
-                                        id_mediaurls_map.put(featureIDString, photoUris);
-
-                                    }
-                                    // add the populated maps
-                                    arguments.putSerializable(UploadDialog.PARAMS.MISSIONS, id_json_map);
-                                    arguments.putSerializable(UploadDialog.PARAMS.MISSION_MEDIA_URLS, id_mediaurls_map);
-
-                                    /*
-                                     * Set the destination folder
-                                     */
-                                    arguments.putString(UploadDialog.PARAMS.MISSION_ID,
-                                            missionTemplate.schema_seg.localSourceStore);
-
-                                    SharedPreferences prefs = PreferenceManager
-                                            .getDefaultSharedPreferences(getSherlockActivity());
-
-                                    String email = prefs.getString(LoginActivity.PREFS_USER_EMAIL, null);
-                                    String pass = prefs.getString(LoginActivity.PREFS_PASSWORD, null);
-
-                                    arguments.putString(UploadDialog.PARAMS.BASIC_AUTH,
-                                            LoginRequestInterceptor.getB64Auth(email, pass));
-
+                                    arguments.putSerializable(UploadDialog.PARAMS.MISSION_TEMPLATE, missionTemplate);
+                                    arguments.putSerializable(UploadDialog.PARAMS.FEATURES, finalUploads);
+                                    
                                     mTaskFragment.setArguments(arguments);
 
                                     ((DialogFragment) mTaskFragment).setCancelable(false);
@@ -944,6 +795,66 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * @param itemList
+     * @param uploadables
+     * @param uploads
+     * @param newFeaturesTableName
+     * @return
+     */
+    public String updateFeatureUploadList(String itemList, HashMap<String, ArrayList<String>> uploadables,
+            ArrayList<MissionFeature> uploads, final String newFeaturesTableName) {
+        
+        List<String> uploadIDs = uploadables.get(newFeaturesTableName);
+        ArrayList<MissionFeature> features;
+        if(uploadIDs!= null && uploadIDs.size() > 0){
+            features = MissionUtils.getMissionFeatures(newFeaturesTableName, db);
+            for (MissionFeature f : features) {
+                String featureID = MissionUtils.getFeatureGCID(f);
+                if (uploadIDs.contains(featureID)) {
+                    
+                    // this new entry is "uploadable" , add it
+                    uploads.add(f);
+                    
+                    // Fill the Text for the user
+                    itemList = updateListText(itemList, f, featureID);
+                }
+            }
+        }
+        return itemList;
+    }
+
+    /**
+     * @param itemList
+     * @param f
+     * @param featureID
+     * @return
+     */
+    public String updateListText(String itemList, MissionFeature f, String featureID) {
+        if ( f.properties != null 
+          && f.properties.containsKey(missionTemplate.nameField)
+          && f.properties.get(missionTemplate.nameField) != null) {
+            
+            itemList += (String) f.properties.get(missionTemplate.nameField) + "\n";
+            
+        } else {
+            
+            // survey feature do not contain the "nameField", get it from the according mission
+            for (int i = 0; i < adapter.getCount(); i++) {
+                MissionFeature mf = adapter.getItem(i);
+                if (MissionUtils.getFeatureGCID(mf).equals(featureID)) {
+                    if ( mf.properties != null 
+                      && mf.properties.containsKey(missionTemplate.nameField)) {
+                        
+                        itemList += (String) mf.properties.get(missionTemplate.nameField) + "\n";
+                        break;
+                    }
+                }
+            }
+        }
+        return itemList;
     }
 
     /**
@@ -1098,9 +1009,9 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
             final HashMap<String, Integer> urls = MissionUtils.getContentUrlsAndFileAmountForTemplate(missionTemplate);
 
             if (BuildConfig.DEBUG) {
-
                 Log.i(TAG, "downloading " + urls.toString());
             }
+            
             Resources res = getResources();
             for (String url : urls.keySet()) {
 
@@ -1389,8 +1300,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                                     PersistenceUtils.deleteMissionFeature(db, tableName, f.id);
 
                                     // if this entry was uploadable remove it from the list of uploadables
-                                    HashMap<String, ArrayList<String>> uploadables = PersistenceUtils
-                                            .loadUploadables(getSherlockActivity());
+                                    HashMap<String, ArrayList<String>> uploadables = PersistenceUtils.loadUploadables(getSherlockActivity());
                                     if (uploadables.containsKey(tableName) && uploadables.get(tableName).contains(f.id)) {
                                         uploadables.get(tableName).remove(f.id);
                                         PersistenceUtils.saveUploadables(getSherlockActivity(), uploadables);

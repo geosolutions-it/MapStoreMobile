@@ -1,10 +1,14 @@
 package it.geosolutions.geocollect.android.core.widgets.dialog;
 
+import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.app.R;
+import it.geosolutions.geocollect.android.core.mission.MissionFeature;
 import it.geosolutions.geocollect.android.core.mission.utils.UploadTask;
+import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.http.CommitResponse;
 
 import java.util.HashMap;
+import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
@@ -49,6 +53,9 @@ public class UploadDialog extends RetainedDialogFragment {
 		public static final String MISSIONS= "MISSIONS";
 		public static final String MISSION_MEDIA_URLS= "MISSION_MEDIA_URLS";
 		public static final String TABLENAME = "TABLENAME";
+		
+		public static final String FEATURES="FEATURES";
+		public static final String MISSION_TEMPLATE="MISSION_TEMPLATE";
 	}
 	
 
@@ -64,7 +71,6 @@ public class UploadDialog extends RetainedDialogFragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 			//TODO the retained fragment call this method.
 		
-			
 			if(getView()==null){;
 				View view = inflater.inflate(R.layout.progress_send, container);
 				getDialog().setTitle(getString(R.string.sending_data));
@@ -129,13 +135,16 @@ public class UploadDialog extends RetainedDialogFragment {
 		if (isAdded() && (!sending)) {
 			new UIUploadTask(
 					getActivity(),
+					(MissionTemplate)getArguments().getSerializable(PARAMS.MISSION_TEMPLATE),
+					(List<MissionFeature>)getArguments().getSerializable(PARAMS.FEATURES)
+					/*
 					(HashMap<String, String>) getArguments().getSerializable(PARAMS.MISSIONS),
 					(HashMap<String, String[]>) getArguments().getSerializable(PARAMS.MISSION_MEDIA_URLS),
 					getArguments().getStringArray(PARAMS.DATAURL),
 					getArguments().getStringArray(PARAMS.MEDIAURL),
 					getArguments().getStringArray(PARAMS.TABLENAME),
-					(String)getArguments().getSerializable(PARAMS.MISSION_ID),
-					(String)getArguments().getSerializable(PARAMS.BASIC_AUTH)
+					(String)getArguments().getSerializable(PARAMS.MISSION_ID)
+					*/
 					)
 			.execute();
 		}
@@ -154,14 +163,18 @@ public class UploadDialog extends RetainedDialogFragment {
 		
 		public UIUploadTask(
 		        Context pContext,
+		        MissionTemplate mMissionTemplate,
+		        List<MissionFeature> mFeaturesList
+		        /*
 		        HashMap<String, String> pUploads,
 				HashMap<String, String[]> pMediaUrls,
 				String[] pDataUrl,
 				String[] pMediaUrl,
 				String[] pTableName,
-				String pMissionID,
-				String pAuth) {
-			super(pContext, pUploads, pMediaUrls, pDataUrl, pMediaUrl, pTableName,pMissionID, pAuth, true);
+				String pMissionID
+				*/) {
+			super(pContext, mMissionTemplate, mFeaturesList);
+			//super(pContext, pUploads, pMediaUrls, pDataUrl, pMediaUrl, pTableName,pMissionID);
 		}
 
 		@Override

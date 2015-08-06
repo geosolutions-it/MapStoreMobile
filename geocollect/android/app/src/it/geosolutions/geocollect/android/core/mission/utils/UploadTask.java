@@ -1,14 +1,24 @@
 package it.geosolutions.geocollect.android.core.mission.utils;
 
+import it.geosolutions.android.map.wfs.geojson.GeoJson;
+import it.geosolutions.geocollect.android.app.BuildConfig;
 import it.geosolutions.geocollect.android.app.R;
+import it.geosolutions.geocollect.android.core.Config;
+import it.geosolutions.geocollect.android.core.form.utils.FormUtils;
+import it.geosolutions.geocollect.android.core.login.LoginActivity;
+import it.geosolutions.geocollect.android.core.login.utils.LoginRequestInterceptor;
+import it.geosolutions.geocollect.android.core.mission.MissionFeature;
+import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.http.CommitResponse;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import jsqlite.Database;
 
@@ -22,6 +32,7 @@ import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.AbstractHttpMessage;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.protocol.BasicHttpContext;
@@ -30,7 +41,9 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -38,48 +51,47 @@ import com.google.gson.Gson;
 import eu.geopaparazzi.library.util.ResourcesManager;
 
 /**
- * thread  that send data to the server
- * 
- * @author Lorenzo Natali (lorenzo.natali@geo-solutions.it)
- * 
- * separated from the UI by
+ * thread that send data to the server
+ * separated from the UI
  * 
  * @author Robert Oehler
  * 
  */
 public abstract class UploadTask  extends AsyncTask<Void, Integer, CommitResponse> {
 
+    /**
+     * Tag for logging
+     */
+    public static String TAG = "UploadTask";
+    
 	private Context context;
-	private HashMap<String, String> uploads;
-	private HashMap<String, String[]> mediaUrls;
-	private String[] dataUrls;
-	private String[] mediaUrl;
-	private String[] tableNames;
+	private String mediaUrl;
 	private String missionID;
-	private String auth;
 	private boolean deleteFromDisk;
+	
+	private MissionTemplate missionTemplate;
+	private List<MissionFeature> featuresList;
 
+	private String authorizationString;
+	
 	public UploadTask(
 			Context pContext,
-			HashMap<String, String> pUploads,
-			HashMap<String, String[]> pMediaUrls,
-			String[] pDataUrl,
-			String[] pMediaUrl,
-			String[] pTableName,
-			String pMissionID,
-			String pAuth,
-			boolean pDeleteFromDisk
+			MissionTemplate mMissionTemplate,
+            List<MissionFeature> mFeaturesList
 			){
 
 		this.context   = pContext;
-		this.uploads   = pUploads;
-		this.mediaUrls = pMediaUrls;
-		this.dataUrls   = pDataUrl;
-		this.mediaUrl  = pMediaUrl;
-		this.tableNames = pTableName;
-		this.missionID = pMissionID;
-		this.auth      = pAuth;
-		this.deleteFromDisk = pDeleteFromDisk;
+		this.deleteFromDisk = true;
+		
+		this.missionTemplate = mMissionTemplate;
+		this.featuresList = mFeaturesList;
+		
+		if ( missionTemplate !=null
+		  && missionTemplate.schema_seg != null){
+		    this.missionID = missionTemplate.schema_seg.localSourceStore;
+		}
+		
+		this.mediaUrl = Config.MAIN_SERVER_BASE_URL+Config.OPENSDI_PATH+Config.UPLOAD_MEDIA_PATH;
 
 	}
 
@@ -89,14 +101,31 @@ public abstract class UploadTask  extends AsyncTask<Void, Integer, CommitRespons
 
 	@Override
 	protected CommitResponse doInBackground(Void... params) {
-		CommitResponse result = null ;
 
+	    CommitResponse result = null ;
+
+	    int defaultImageSize = Config.DEFAULT_MAX_PHOTO_SIZE;
+        try {
+            if ( missionTemplate != null
+              && missionTemplate.config != null
+              && missionTemplate.config.containsKey("maxImageSize") ){
+                
+                defaultImageSize = Integer.parseInt((String) missionTemplate.config.get("maxImageSize"));
+            }
+            
+        } catch (NumberFormatException e) {
+            if(BuildConfig.DEBUG){
+                Log.e(TAG, e.getLocalizedMessage(), e);
+            }
+        } catch (NullPointerException e) {
+            if(BuildConfig.DEBUG){
+                Log.e(TAG, e.getLocalizedMessage(), e);
+            }
+        }
+	    
 		//it these are null there is no upload necessary, break
-		if ( this.uploads  == null
-	      || this.mediaUrls == null
-	      || this.dataUrls == null
-	      || this.tableNames == null
-          || this.dataUrls.length != this.tableNames.length){
+		if ( this.missionTemplate  == null
+	      || this.featuresList == null){
 		    
 			result = new CommitResponse();
 			result.setMessage("no valid arguments provided");
@@ -104,79 +133,154 @@ public abstract class UploadTask  extends AsyncTask<Void, Integer, CommitRespons
 			return result;
 		}
 
-		//TODO : this upload task should handle MissionFeature objects and do the JSON conversion only before upload
+		//This upload task handles MissionFeature objects and do the JSON conversion only before upload
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
-		final int uploadAmount = uploads.size();
-		for(String id : uploads.keySet()){
+        GeoJson geogson = new GeoJson();
+        Gson gson = new Gson();
+        final int uploadAmount = featuresList.size();
+        for(MissionFeature featureToUpload : featuresList){
+            
+            // Validate
+            if(featureToUpload.typeName == null){
+                if(BuildConfig.DEBUG){
+                    Log.e(TAG, "Cannot upload feature: "+featureToUpload.id);
+                }
+                continue;
+            }
 
-			hideMedia();
+            String tableName = featureToUpload.typeName.endsWith(MissionTemplate.NEW_NOTICE_SUFFIX)
+                    ? missionTemplate.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX
+                    : missionTemplate.schema_sop.localFormStore;
+            
+            hideMedia();
 
-			try {
-				//1.send data
-				final String data = uploads.get(id);
-				// TODO: this.dataUrls[0] is WRONG, cycle trough it
-				String resultString = sendJson(this.dataUrls[0], data);
-				result  = getCommitResponse(resultString);
-				
-				if(result == null){ //most likely network error
-					result = new CommitResponse();
-					result.setMessage("network error transfering data");
-					result.setStatus(it.geosolutions.geocollect.model.http.Status.ERROR);
-					return result;
-				}
+            try {
+                //1.send data
+                
+                // Convert to JSON
+                
+                // Align Feature properties
+                if (featureToUpload.typeName.endsWith(MissionTemplate.NEW_NOTICE_SUFFIX)) {// new entry
+                    // Edit the MissionFeature for a better JSON compliance
+                    MissionUtils.alignPropertiesTypes(featureToUpload, missionTemplate.schema_seg.fields);
+                }
 
-				if(result.isSuccess()){ //data upload successful
-					//2. send media
-					//UI update -> media upload
-					dataDone();
+                String featureIDString = MissionUtils.getFeatureGCID(featureToUpload);
 
-					final String[] photoUrls = this.mediaUrls.get(id);
-					CommitResponse photosSent = sendPhotos(photoUrls, result.getId(), id, uploadAmount);
-					if(photosSent.isSuccess()){
-						//both successful, can delete this entry
-						//1.delete table entry if desired
-						if(this.deleteFromDisk){
-							final Database db = getSpatialiteDatabase();
-							// TODO: this.tableNames[0] is WRONG, use MissionFeature.typeName
-							PersistenceUtils.deleteMissionFeature(db, this.tableNames[0], id);
-							try {
-								db.close();
-							} catch (jsqlite.Exception e) {
-								// ignore
-							}	
-						}
-						//2.delete photos
-						if(photoUrls != null){
-							for(String file : photoUrls){
-								File f = new File(file);
-								if(f.exists()){
-									f.delete();
-								}
-							}
-						}
-						//3.delete this entry as "uploadable"
-						HashMap<String,ArrayList<String>> uploadables = PersistenceUtils.loadUploadables(this.context);
-						ArrayList<String> uploadList = uploadables.get(tableNames[0]);
-						if(uploadList != null && uploadList.contains(id)){
-							uploadList.remove(id);
-						}
-						// TODO: this.tableNames[0] is WRONG, use MissionFeature.typeName
-						uploadables.put(tableNames[0], uploadList);
-						PersistenceUtils.saveUploadables(this.context, uploadables);
+                // Set the "MY_ORIG_ID" to link this feature to its photos
+                if (featureToUpload.properties == null) {
+                    featureToUpload.properties = new HashMap<String, Object>();
+                }
+                featureToUpload.properties.put("MY_ORIG_ID", featureIDString);
 
-					}else{
-						//TODO data sent, photos failed, what to delete ?
-					}
+                MissionFeature toUpload;
+                if (featureToUpload.typeName.endsWith(MissionTemplate.NEW_NOTICE_SUFFIX)) {
+                    toUpload = MissionUtils.alignMissionFeatureProperties(featureToUpload,
+                            missionTemplate.schema_seg.fields);
+                } else {
+                    toUpload = MissionUtils.alignMissionFeatureProperties(featureToUpload,
+                            missionTemplate.schema_sop.fields);
+                }
 
-				}else{
-					// data upload failed
-					//TODO report this or continue with others ?
-				}
-			} catch (Exception e) {
-				Log.e("SendData", "ErrorSending Data",e);
-			}
-		}
-		
+                String c = geogson.toJson(toUpload);
+                String data = null;
+                // Encode
+                try {
+                    
+                    data = new String(c.getBytes("UTF-8"));
+                    
+                } catch (UnsupportedEncodingException e) {
+                    if(BuildConfig.DEBUG){
+                        Log.e(TAG, "error transforming missionfeature to gson", e);
+                    }
+                }
+                
+                // send
+                
+                String resultString = sendJson(
+                        featureToUpload.typeName.endsWith(MissionTemplate.NEW_NOTICE_SUFFIX)
+                        ? missionTemplate.seg_form.url
+                        : missionTemplate.sop_form.url
+                        , data);
+                
+                // Get result
+                result  = getCommitResponse(gson, resultString);
+                
+                if(result == null){ //most likely network error
+                    result = new CommitResponse();
+                    result.setMessage("network error transfering data");
+                    result.setStatus(it.geosolutions.geocollect.model.http.Status.ERROR);
+                    return result;
+                }
+
+                if(result.isSuccess()){ //data upload successful
+                    //2. send media
+                    //UI update -> media upload
+                    dataDone();
+
+                    // Resize images
+                    FormUtils.resizeImagesToMax(context, featureIDString, defaultImageSize);
+                    final String[] photoUrls = FormUtils.getPhotoUriStrings(context, featureIDString);
+                    
+                    // Send images
+                    CommitResponse photosSent = sendPhotos(photoUrls, result.getId(), featureIDString, uploadAmount);
+                    if(photosSent.isSuccess()){
+                        
+                        //both successful, can delete this entry
+                        //1.delete table entry if desired
+                        if(this.deleteFromDisk){
+                            final Database db = getSpatialiteDatabase();
+
+                            PersistenceUtils.deleteMissionFeature(
+                                    db ,
+                                    tableName ,
+                                    featureIDString);
+                            
+                            try {
+                                db.close();
+                            } catch (jsqlite.Exception e) {
+                                // ignore
+                            }   
+                        }
+                        
+                        //2.delete photos
+                        if(photoUrls != null){
+                            for(String file : photoUrls){
+                                File f = new File(file);
+                                if(f.exists()){
+                                    f.delete();
+                                }
+                            }
+                        }
+                        
+                        
+                        //3.delete this entry as "uploadable"
+                        HashMap<String,ArrayList<String>> uploadables = PersistenceUtils.loadUploadables(this.context);
+                        ArrayList<String> uploadList = uploadables.get(tableName);
+                        
+                        if(uploadList != null){
+                            uploadList.remove(featureIDString);
+                        }
+
+                        uploadables.put(tableName, uploadList);
+                        PersistenceUtils.saveUploadables(this.context, uploadables);
+
+                    }else{
+                        //TODO data sent, photos failed, what to delete ?
+                    }
+
+                }else{
+                    // data upload failed
+                    //TODO report this or continue with others ?
+                }
+            } catch (Exception e) {
+                Log.e("SendData", "ErrorSending Data",e);
+            }
+        }
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 		done(result);
 
 		return result;
@@ -201,6 +305,8 @@ public abstract class UploadTask  extends AsyncTask<Void, Integer, CommitRespons
 				"/" + featureID +
 				"/" + dataSentID +
 				"/upload";
+		
+		Gson gson = new Gson();
 		for(String file : filePaths){
 			String res;
 
@@ -215,7 +321,7 @@ public abstract class UploadTask  extends AsyncTask<Void, Integer, CommitRespons
 				return cr;
 			}
 			publishProgress((int) (i / (float) uploadAmount));
-			cr = getCommitResponse(res);
+			cr = getCommitResponse(gson, res);
 			if(cr==null || !cr.isSuccess()){
 				return cr;
 			}
@@ -240,7 +346,8 @@ public abstract class UploadTask  extends AsyncTask<Void, Integer, CommitRespons
 			multipartContent.addPart("file", cBody);
 			httpPost.setEntity(multipartContent); 
 
-			httpPost.addHeader(new BasicHeader(HttpHeaders.AUTHORIZATION, this.auth));
+			// If authentication info exists, add it to the request
+	        addAuthHeaders(httpPost);
 
 			HttpResponse response = httpClient.execute(httpPost, localContext);
 			return EntityUtils.toString(response.getEntity());
@@ -268,7 +375,8 @@ public abstract class UploadTask  extends AsyncTask<Void, Integer, CommitRespons
 		se.setContentEncoding(new BasicHeader(HTTP.CHARSET_PARAM, "UTF-8"));
 		post.setEntity(se);
 
-		post.addHeader(new BasicHeader(HttpHeaders.AUTHORIZATION, this.auth));
+		// If authentication info exists, add it to the request
+		addAuthHeaders(post);
 
 		response = client.execute(post);
 
@@ -285,8 +393,7 @@ public abstract class UploadTask  extends AsyncTask<Void, Integer, CommitRespons
 	 * @param resultString
 	 * @return
 	 */
-	private CommitResponse getCommitResponse(String resultString) {
-		Gson gson = new Gson();
+	public static CommitResponse getCommitResponse(Gson gson, String resultString) {
 		CommitResponse cr  = null;
 		try{
 			cr= gson.fromJson(resultString, CommitResponse.class);
@@ -323,5 +430,32 @@ public abstract class UploadTask  extends AsyncTask<Void, Integer, CommitRespons
 			return null;
 		}
 
+	}
+	
+	/**
+	 * Checks preferences for login informations.
+	 * If found, add the Authorization header to the input request
+	 * @param request
+	 */
+	protected void addAuthHeaders(AbstractHttpMessage request){
+	    
+	    // Get the Authorization from the Preferences
+	    if(authorizationString == null){
+	        
+	        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+            String email = prefs.getString(LoginActivity.PREFS_USER_EMAIL, null);
+            String pass = prefs.getString(LoginActivity.PREFS_PASSWORD, null);
+            if(email != null && pass != null){
+                authorizationString = LoginRequestInterceptor.getB64Auth(email, pass);
+            }
+	    
+	    }
+	    
+	    // If there is an authorizationString, add the header
+	    if(authorizationString != null){
+	        request.addHeader(new BasicHeader(HttpHeaders.AUTHORIZATION, authorizationString));
+	    }
+            
 	}
 }

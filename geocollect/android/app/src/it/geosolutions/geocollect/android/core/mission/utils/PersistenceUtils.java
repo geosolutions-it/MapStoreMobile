@@ -110,6 +110,7 @@ public class PersistenceUtils {
 				success = false;
 			}
 
+			Log.d(TAG, "Loaded template ID: "+t.id);
 		}else{
 			Log.w(TAG, "MissionTemplate could not be found, edits will not be saved");
 			success = false;
@@ -152,9 +153,9 @@ public class PersistenceUtils {
 			Log.w(TAG, "Mission or MissionTemplate could not be found, abort saving..");
 			return false;
 		}
-		// TODO parameterize "_data" suffix
+
     	// default value
-    	String tableName = mission.getTemplate().id+"_data";
+    	String tableName = mission.getTemplate().id + MissionTemplate.DEFAULT_TABLE_DATA_SUFFIX;
     	if(mission.getTemplate().schema_sop != null 
     			&& mission.getTemplate().schema_sop.localFormStore != null
     			&& !mission.getTemplate().schema_sop.localFormStore.isEmpty()){
@@ -329,7 +330,7 @@ public class PersistenceUtils {
 			Log.w(TAG, "Mission or MissionTemplate could not be found, abort loading..");
 			return null;
 		}
-		// TODO parameterize "_data" suffix
+
     	// default value
     	String tableName = mission.getTemplate().schema_sop.localFormStore;
     	//geometry needs ST_AsBinary(CastToXY(GEOMETRY)) AS GEOMETRY
@@ -413,9 +414,9 @@ public class PersistenceUtils {
 			Log.w(TAG, "Mission or MissionTemplate could not be found, abort loading..");
 			return false;
 		}
-		// TODO parameterize "_data" suffix
+
     	// default value
-    	String tableName = mission.getTemplate().id+"_data";
+    	String tableName = mission.getTemplate().id + MissionTemplate.DEFAULT_TABLE_DATA_SUFFIX;
     	if(mission.getTemplate().schema_sop != null 
     			&& mission.getTemplate().schema_sop.localFormStore != null
     			&& !mission.getTemplate().schema_sop.localFormStore.isEmpty()){
@@ -651,9 +652,8 @@ public class PersistenceUtils {
 	 * @return
 	 */
 	public static HashMap<String,XDataType> getTemplateFieldsList(Form form){
-		// TODO implement
-		// what if the same field name is found, but with different type?
-		
+
+		// TODO: what if the same field name is found, but with different type?
 		
 		if(form == null){
 			Log.v(TAG, "Form not found");
@@ -1056,37 +1056,6 @@ public class PersistenceUtils {
 			return generatedID;
 		}
 		
-		// All the following code will not run
-		
-		if(tableName == null || tableName.isEmpty()){
-			Log.v(TAG, "No tableName, cannot create table");
-			return null;
-		}
-		
-		String query = "SELECT max(ORIGIN_ID) FROM ('"+tableName+"');";
-		
-		Stmt stmt;
-		try {
-			stmt = db.prepare(query);
-			if(stmt.step()){
-				if(stmt.column_name(0).equalsIgnoreCase("max(ORIGIN_ID)")){
-        			String maxID = stmt.column_string(0);
-        			stmt.close();
-        			Log.d(TAG, "maxID found : "+maxID);
-        			try{
-        				return Long.valueOf(Long.parseLong(maxID) + 1);
-        			}catch(NumberFormatException e){
-        				Log.e(TAG, "error parsing Max ID for newMission");
-        				return Long.valueOf(0);
-        			}
-        		}
-			}
-		} catch (Exception e) {
-			Log.e(TAG, "error get Max ID for newMission",e);
-			return null;
-		}
-		
-		
 		return Long.valueOf(0);
 	}
 	/**
@@ -1386,5 +1355,40 @@ public class PersistenceUtils {
         //return the output stream as a String  
         return oS.toString();  
     } 
+    
+    public static void sanitizePendingFeaturesList(HashMap<String, ArrayList<String>> uploadables, Database db ){
+        
+        if(uploadables != null
+                && uploadables.size()> 0
+                && db != null){
+            
+            Stmt stmt;
+            ArrayList<String> validIDsList;
+            for(String tableName : uploadables.keySet()){
+                String query = "SELECT \"ORIGIN_ID\" FROM \"" + tableName+"\" ; ";
+                validIDsList = new ArrayList<String>();
+                try {
+                    stmt = db.prepare(query);
+                    while(stmt.step()){
+                        if(stmt.column_name(0).equalsIgnoreCase("ORIGIN_ID")){
+                            String originID = stmt.column_string(0);
+                            if(uploadables.get(tableName).contains(originID)){
+                                Log.d(TAG, "ORIGIN_ID found : "+originID);
+                                validIDsList.add(originID);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error getting ORIGIN_ID for "+ tableName,e);
+                }
+                
+                // Update the ID list
+                uploadables.put(tableName, validIDsList);
+                
+            }
+        }
+        
+        
+    }
 
 }

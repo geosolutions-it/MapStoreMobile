@@ -29,4 +29,8 @@ public class Config {
     public static String OPENSDI_PATH = "/opensdi2-manager/mvc";
     public static String GEOSTORE_PATH = "/geostore/rest/";
     
+    public static String UPLOAD_MEDIA_PATH = "/geocollect/data";
+    
+    public static int DEFAULT_MAX_PHOTO_SIZE = 1000;
+
 }

@@ -115,7 +115,7 @@ public class FormUtils {
      * @param feature_id
      * @param maxSize
      */
-    public static void resizeFotosToMax(final Context context, final String feature_id,
+    public static void resizeImagesToMax(final Context context, final String feature_id,
             final int maxSize) {
 
         if (feature_id == null || feature_id.isEmpty()) {

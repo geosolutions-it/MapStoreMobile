@@ -226,7 +226,7 @@ public class SendAction extends AndroidAction {
 			
 			String originIDString = MissionUtils.getMissionGCID(m);
 			
-			FormUtils.resizeFotosToMax(fragment.getActivity().getBaseContext(), originIDString, defaultImageSize);
+			FormUtils.resizeImagesToMax(fragment.getActivity().getBaseContext(), originIDString, defaultImageSize);
 			
 			Bundle arguments = new Bundle();
 //			arguments.putString(UploadDialog.PARAMS.DATAURL, url);

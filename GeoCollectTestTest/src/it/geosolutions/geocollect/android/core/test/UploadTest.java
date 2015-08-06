@@ -1,21 +1,15 @@
 package it.geosolutions.geocollect.android.core.test;
 
-import it.geosolutions.android.map.wfs.geojson.GeoJson;
-import it.geosolutions.geocollect.android.core.form.utils.FormUtils;
-import it.geosolutions.geocollect.android.core.login.LoginActivity;
-import it.geosolutions.geocollect.android.core.login.utils.LoginRequestInterceptor;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
 import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.SpatialiteUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.UploadTask;
-import it.geosolutions.geocollect.android.core.widgets.dialog.UploadDialog;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.http.CommitResponse;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -23,8 +17,6 @@ import java.util.Random;
 import jsqlite.Database;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.test.ActivityUnitTestCase;
 import android.util.Log;
 import eu.geopaparazzi.library.util.ResourcesManager;
@@ -103,68 +95,11 @@ public class UploadTest extends ActivityUnitTestCase<PendingMissionListActivity>
 		//check the activity context
 		assertNotNull(getActivity());
 		assertTrue(getActivity() instanceof PendingMissionListActivity);
-		
-		//parse the max imagesize
-		int defaultImageSize = 1000;
-		try{
-			defaultImageSize = Integer.parseInt((String) t.config.get("maxImageSize"));	
-		}catch( NumberFormatException e ){
-			Log.e(UploadDialog.class.getSimpleName(), e.getClass().getSimpleName(),e);
-		}catch( NullPointerException e){
-			Log.e(UploadDialog.class.getSimpleName(), e.getClass().getSimpleName(),e);
-		}
-		
-		final String url = t.sop_form.url;
-		final String mediaUrl = t.sop_form.mediaurl;
-		
-		HashMap<String,String> id_json_map = new HashMap<>();					
-		HashMap<String,String[]> id_mediaurls_map = new HashMap<>();
-		
-		//create entries <featureID,  String   data      > for each missionfeature
-		//create entries <featureID , String[] uploadUrls> for each missionfeature
-		for(MissionFeature missionFeature : uploads){
-			
-			String featureIDString = MissionUtils.getFeatureGCID(missionFeature);
-			
-			// Set the "MY_ORIG_ID" to link this feature to its photos
-			if(missionFeature.properties == null){
-				missionFeature.properties = new HashMap<String, Object>();
-			}
-			missionFeature.properties.put("MY_ORIG_ID", featureIDString);
-
-			GeoJson gson = new GeoJson();
-			String c = gson.toJson( missionFeature);
-			String data = null;
-			try {
-				data = new String(c.getBytes("UTF-8"));
-			} catch (UnsupportedEncodingException e) {
-				Log.e(UploadDialog.class.getSimpleName(), "error transforming missionfeature to gson",e);
-			}
-			id_json_map.put(featureIDString, data);
-
-			//photos
-			FormUtils.resizeFotosToMax(targetContext, featureIDString, defaultImageSize);
-			String[] urls = FormUtils.getPhotoUriStrings(targetContext,featureIDString);						
-			id_mediaurls_map.put(featureIDString, urls);
-
-		}
-		
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(targetContext);
-		
-		String email = prefs.getString(LoginActivity.PREFS_USER_EMAIL, null);
-		String pass = prefs.getString(LoginActivity.PREFS_PASSWORD, null);
-		
-		
+	
 		 new UploadTask(
-				getActivity(),
-				id_json_map,
-				id_mediaurls_map,
-				new String[]{url},
-				new String[]{mediaUrl},
-				new String[]{tableName},
-				"punti_abbandono",
-				LoginRequestInterceptor.getB64Auth(email, pass),
-				false){
+		        targetContext,
+				t,
+				uploads){
 			
 			@Override
 			public void hideMedia() {}
@@ -184,8 +119,9 @@ public class UploadTest extends ActivityUnitTestCase<PendingMissionListActivity>
 		//wait for the result
 		Thread.sleep(5000);
 
-		
 	}
+	
+	
 	public Database getSpatialiteDatabase(Context context){
 		
 		Database spatialiteDatabase = null;
