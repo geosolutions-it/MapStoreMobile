@@ -92,7 +92,7 @@
         <dependency>
             <groupId>com.newrelic.agent.android</groupId>
             <artifactId>android-agent</artifactId>
-            <version>5.2.0</version>
+            <version>5.2.1</version>
         </dependency>
 	</dependencies>
 	<build>
@@ -100,6 +100,11 @@
             <resource>
                 <directory>${project.basedir}/template-assets</directory>
                 <targetPath>${project.basedir}/assets</targetPath>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/template-assets</directory>
+                <targetPath>${project.basedir}</targetPath>
                 <filtering>true</filtering>
             </resource>
         </resources>
@@ -157,7 +162,7 @@
                 <plugin>
                   <groupId>com.newrelic.agent.android</groupId>
                   <artifactId>agent-maven-plugin</artifactId>
-                  <version>5.2.0</version>
+                  <version>5.2.1</version>
                   <executions>
                     <execution>
                       <goals>
