@@ -92,7 +92,7 @@
         <dependency>
             <groupId>com.newrelic.agent.android</groupId>
             <artifactId>android-agent</artifactId>
-            <version>5.1.2</version>
+            <version>5.2.0</version>
         </dependency>
 	</dependencies>
 	<build>
@@ -157,7 +157,7 @@
                 <plugin>
                   <groupId>com.newrelic.agent.android</groupId>
                   <artifactId>agent-maven-plugin</artifactId>
-                  <version>5.1.2</version>
+                  <version>5.2.0</version>
                   <executions>
                     <execution>
                       <goals>
