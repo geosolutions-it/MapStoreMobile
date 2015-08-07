@@ -44,14 +44,18 @@ import it.geosolutions.geocollect.android.map.GeoCollectMapActivity;
 import it.geosolutions.geocollect.android.template.TemplateDownloadTask;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Properties;
 
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.newrelic.agent.android.NewRelic;
 
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -61,6 +65,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.AssetManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -134,7 +139,27 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         if(BuildConfig.DEBUG){
             Log.v(TAG, "onCreate()");
         }
+        
+        // Load the application properties file
+        Properties properties = new Properties();
+        try {
+            // access to the folder ‘assets’
+            AssetManager am = getAssets();
+            // opening the file
+            InputStream inputStream = am.open("geocollect.properties");
+            // loading of the properties
+            properties.load(inputStream);
+            
+        } catch (IOException e) {
+            Log.e(GeoCollectApplication.class.getSimpleName(), e.toString());
+        }
 
+        // Get the NewRelic token, if found start the monitoring
+        String newRelicToken = properties.getProperty("newRelicToken"); 
+        if(newRelicToken != null){
+            NewRelic.withApplicationToken(newRelicToken).start(this);
+        }
+        
         // TODO when is the login data necessary to load mission data ?
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(getBaseContext());

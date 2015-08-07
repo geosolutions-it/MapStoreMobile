@@ -21,22 +21,16 @@ import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
 import org.mapsforge.android.maps.BackgroundSourceType;
 
 import android.annotation.TargetApi;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences.Editor;
-import android.content.res.AssetManager;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.newrelic.agent.android.NewRelic;
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -69,26 +63,6 @@ public class GeoCollectApplication extends Application {
 
         MapFilesProvider.setBaseDir("/geocollect");
 
-        // Load the application properties file
-        Properties properties = new Properties();
-        try {
-            // access to the folder ‘assets’
-            AssetManager am = getAssets();
-            // opening the file
-            InputStream inputStream = am.open("geocollect.properties");
-            // loading of the properties
-            properties.load(inputStream);
-            
-        } catch (IOException e) {
-            Log.e(GeoCollectApplication.class.getSimpleName(), e.toString());
-        }
-
-        // Get the NewRelic token, if found start the monitoring
-        String newRelicToken = properties.getProperty("newRelicToken"); 
-        if(newRelicToken != null){
-            NewRelic.withApplicationToken(newRelicToken).start(this);
-        }
-        
         // setupMBTilesBackgroundConfiguration();
     }
 
