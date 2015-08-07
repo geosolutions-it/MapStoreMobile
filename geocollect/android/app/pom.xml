@@ -102,11 +102,6 @@
                 <targetPath>${project.basedir}/assets</targetPath>
                 <filtering>true</filtering>
             </resource>
-            <resource>
-                <directory>${project.basedir}/template-assets</directory>
-                <targetPath>${project.basedir}</targetPath>
-                <filtering>true</filtering>
-            </resource>
         </resources>
 		<sourceDirectory>src</sourceDirectory>
 		<finalName>${project.artifactId}</finalName>
