@@ -281,10 +281,18 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
     @Override
     public void onItemSelected(Object obj) {
 
-        FragmentMode fragmentMode = ((PendingMissionListFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.pendingmission_list)).getFragmentMode();
-
-        if (fragmentMode == FragmentMode.PENDING) {
+        if(obj == null || !(obj instanceof MissionFeature)){
+            if(BuildConfig.DEBUG){
+                Log.w(TAG, "Tried to select an invalid object");
+            }
+            return;
+        }
+        
+        MissionFeature selectedFeature = (MissionFeature) obj;
+        
+        if (selectedFeature.typeName == null
+        || !selectedFeature.typeName.endsWith(MissionTemplate.NEW_NOTICE_SUFFIX)) {
+            
             if (mTwoPane) {
                 // DELETE PREVIOUS MAP VIEWS
                 mapViewManager.destroyMapViews();
@@ -293,9 +301,8 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
                 // fragment transaction.
 
                 Bundle arguments = new Bundle();
-                arguments.putString(PendingMissionDetailFragment.ARG_ITEM_ID, ((Feature) obj).id);
-                arguments.putSerializable(PendingMissionDetailFragment.ARG_ITEM_FEATURE,
-                        (Feature) obj);
+                arguments.putString(PendingMissionDetailFragment.ARG_ITEM_ID, selectedFeature.id);
+                arguments.putSerializable(PendingMissionDetailFragment.ARG_ITEM_FEATURE,selectedFeature);
                 PendingMissionDetailFragment fragment = new PendingMissionDetailFragment();
                 fragment.setArguments(arguments);
                 getSupportFragmentManager().beginTransaction()
@@ -305,18 +312,17 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
                 // In single-pane mode, simply start the detail activity
                 // for the selected item ID.
                 Intent detailIntent = new Intent(this, PendingMissionDetailActivity.class);
-                detailIntent.putExtra(PendingMissionDetailFragment.ARG_ITEM_ID, ((Feature) obj).id);
-                detailIntent.putExtra(PendingMissionDetailFragment.ARG_ITEM_FEATURE, (Feature) obj);
+                detailIntent.putExtra(PendingMissionDetailFragment.ARG_ITEM_ID, selectedFeature.id);
+                detailIntent.putExtra(PendingMissionDetailFragment.ARG_ITEM_FEATURE, selectedFeature);
                 startActivity(detailIntent);
             }
         } else {
 
-            Log.d(PendingMissionListFragment.class.getSimpleName(), "created mission clicked "
-                    + ((MissionFeature) obj).id);
+            Log.d(TAG, "Clicked new feature with ID: " + selectedFeature.id);
 
             Intent editIntent = new Intent(this, FormEditActivity.class);
             editIntent.putExtra(ARG_CREATE_MISSIONFEATURE, true);
-            editIntent.putExtra(PendingMissionDetailFragment.ARG_ITEM_FEATURE, (MissionFeature) obj);
+            editIntent.putExtra(PendingMissionDetailFragment.ARG_ITEM_FEATURE, selectedFeature);
             startActivity(editIntent);
 
         }
