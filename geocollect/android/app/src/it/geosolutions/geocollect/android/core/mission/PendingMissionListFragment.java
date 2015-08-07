@@ -45,7 +45,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
@@ -68,7 +67,6 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -378,11 +376,11 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
 
     }
 
+    /**
+     * Create the Menu visible on longpress on items
+     */
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-
-        // this context menu is only valid for "segnalazioni", for "new segnalazioni" "missionadapter"s longclicklistener is used
-        // TODO unify both adapters and use either one method for long clicks
 
         // if this item is editable or uploadable, offer the possibility to "reset" the state -> delete its "sop" entry
         if (v.getId() == getListView().getId()) {
@@ -393,7 +391,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
             MissionFeature feature = (MissionFeature) lv.getItemAtPosition(info.position);
 
             // identify edited/uploadable
-            if (feature.editing) {
+            if (feature.editing || (feature.typeName != null && feature.typeName.endsWith(MissionTemplate.NEW_NOTICE_SUFFIX))) {
                 // create a dialog to let the user clear this surveys data
                 String title = getString(R.string.survey);
                 if (feature.properties != null && feature.properties.get(template.nameField) != null) {
@@ -402,7 +400,9 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                 if (title != null) {
                     menu.setHeaderTitle(title);
                 }
+
                 menu.add(0, RESET_MISSION_FEATURE_ID, 0, getString(R.string.menu_clear_survey));
+            
             }
         }
     }
@@ -412,29 +412,52 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
 
         // user selected the option to reset, delete the edited item
         if (item.getItemId() == RESET_MISSION_FEATURE_ID) {
+            
             AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
 
-            MissionFeature feature = (MissionFeature) getListView().getItemAtPosition(info.position);
+            final MissionFeature feature = (MissionFeature) getListView().getItemAtPosition(info.position);
             final MissionTemplate template = MissionUtils.getDefaultTemplate(getActivity());
 
             String title = (String) feature.properties.get(template.nameField);
 
             Log.d(TAG, "missionfeature " + title + " selected to reset");
+            final String tableName;
+            final String fid = MissionUtils.getFeatureGCID(feature);
+            if(feature.typeName != null && feature.typeName.endsWith(MissionTemplate.NEW_NOTICE_SUFFIX)){
+                
+                tableName = missionTemplate.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX;
 
-            String tableName = template.schema_sop.localFormStore;
-            // delete db entry
-            PersistenceUtils.deleteMissionFeature(db, tableName, MissionUtils.getFeatureGCID(feature));
-
-            // if this entry was uploadable, remove it from the list of uploadables
-            HashMap<String, ArrayList<String>> uploadables = PersistenceUtils.loadUploadables(getSherlockActivity());
-            final String id = MissionUtils.getFeatureGCID(feature);
-            if (uploadables.containsKey(tableName) && uploadables.get(tableName).contains(id)) {
-                uploadables.get(tableName).remove(id);
-                PersistenceUtils.saveUploadables(getSherlockActivity(), uploadables);
+            }else{
+                tableName = template.schema_sop.localFormStore;
             }
+            
+            new AlertDialog.Builder(getSherlockActivity()).setTitle(R.string.item_delete_title)
+            .setMessage(R.string.item_delete_message)
+            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                    
+                    // delete this new entry
+                    PersistenceUtils.deleteMissionFeature(db, tableName,fid);
 
-            forceLoad();
-            getSherlockActivity().supportInvalidateOptionsMenu();
+                    // if this entry was uploadable remove it from the list of uploadables
+                    HashMap<String, ArrayList<String>> uploadables = PersistenceUtils.loadUploadables(getSherlockActivity());
+                    if (uploadables.containsKey(tableName) && uploadables.get(tableName).contains(fid)) {
+                        uploadables.get(tableName).remove(fid);
+                        PersistenceUtils.saveUploadables(getSherlockActivity(), uploadables);
+                    }
+                    
+                    forceLoad();
+                    getSherlockActivity().supportInvalidateOptionsMenu();
+
+                }
+                
+            }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    // nothing
+                    dialog.dismiss();
+                }
+            }).show();
 
             return true;
         }
@@ -533,8 +556,10 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         });
 
         // If SRID is set, a filter exists
-        SharedPreferences sp = activity
-                .getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sp = activity.getSharedPreferences(
+                SQLiteCascadeFeatureLoader.PREF_NAME,
+                Context.MODE_PRIVATE);
+        
         if (sp.contains(SQLiteCascadeFeatureLoader.FILTER_SRID)) {
             inflater.inflate(R.menu.filterable, menu);
         }
@@ -683,7 +708,6 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
 
                 final String newFeaturesTableName =  missionTemplate.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX ;
                 final String surveysTableName = missionTemplate.schema_sop.localFormStore;
-                
                 
                 // Check if there are new items to upload
                 itemList = updateFeatureUploadList(itemList, uploadables, uploads, newFeaturesTableName);
@@ -1087,17 +1111,11 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
     @Override
     public void onResume() {
         super.onResume();
-/*
-        if (mMode == FragmentMode.CREATION) {
-            if (missionAdapter != null) {
-                fillCreatedMissionFeatureAdapter();
-            }
-        } else if (mMode == FragmentMode.PENDING) {
-*/            // Start data loading
-            if (getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX) != null) {
-                getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
-            }
- //       }
+        
+        // Start data loading
+        if (getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX) != null) {
+            getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
+        }
 
         getSherlockActivity().supportInvalidateOptionsMenu();
 
@@ -1263,120 +1281,19 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
      */
     public void switchAdapter(FragmentMode newMode) {
 
-        // if(newMode == mMode && MissionUtils.getDefaultTemplate(getActivity()).id.equals(missionTemplate.id)){
-        // Log.d(TAG, "returning switch adapter");
-        // return;
-        // }
-
         mMode = newMode;
-/*
-        if (mMode == FragmentMode.CREATION) {
 
-            missionAdapter = new FeatureAdapter(getSherlockActivity(), R.layout.mission_resource_row, missionTemplate);
+        // remove longclicklistener
+        getListView().setOnItemLongClickListener(null);
 
-            // delete created items on long click listener
-            getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
-
-                @Override
-                public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
-
-                    new AlertDialog.Builder(getSherlockActivity()).setTitle(R.string.my_inspections)
-                            .setMessage(R.string.created_inspection_delete)
-                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                    // nothing
-                                    final MissionFeature f = (MissionFeature) getListView().getItemAtPosition(position);
-
-                                    final Database db = ((PendingMissionListActivity) getSherlockActivity()).spatialiteDatabase;
-
-                                    final String tableName = missionTemplate.schema_seg.localSourceStore
-                                            + MissionTemplate.NEW_NOTICE_SUFFIX;
-                                    // delete this new entry
-                                    PersistenceUtils.deleteMissionFeature(db, tableName, f.id);
-
-                                    // if this entry was uploadable remove it from the list of uploadables
-                                    HashMap<String, ArrayList<String>> uploadables = PersistenceUtils.loadUploadables(getSherlockActivity());
-                                    if (uploadables.containsKey(tableName) && uploadables.get(tableName).contains(f.id)) {
-                                        uploadables.get(tableName).remove(f.id);
-                                        PersistenceUtils.saveUploadables(getSherlockActivity(), uploadables);
-                                    }
-
-                                    fillCreatedMissionFeatureAdapter();
-                                }
-                            }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    // nothing
-                                    dialog.dismiss();
-                                }
-                            }).show();
-
-                    return true;
-                }
-            });
-
-            if (getSherlockActivity() instanceof PendingMissionListActivity) {
-
-                fillCreatedMissionFeatureAdapter();
-
-            }
-
-            setListAdapter(missionAdapter);
-
-        } else if (mMode == FragmentMode.PENDING) {
-*/
-            // remove longclicklistener
-            getListView().setOnItemLongClickListener(null);
-
-            adapter.setTemplate(missionTemplate);
-            setListAdapter(adapter);
-
- //       }
+        adapter.setTemplate(missionTemplate);
+        setListAdapter(adapter);
 
         // invalidate actionbar
         getSherlockActivity().supportInvalidateOptionsMenu();
 
     }
 
-    /**
-     * loads the locally available "created missionfeatures" from the database
-
-    private void fillCreatedMissionFeatureAdapter() {
-
-        final MissionTemplate t = missionTemplate;
-
-        final Database db = ((PendingMissionListActivity) getSherlockActivity()).spatialiteDatabase;
-
-        Log.v(TAG, "Loading created missions for " + t.title);
-        final ArrayList<MissionFeature> missions = MissionUtils.getMissionFeatures(t.schema_seg.localSourceStore
-                + MissionTemplate.NEW_NOTICE_SUFFIX, db);
-
-        final String prio = t.priorityField;
-        final HashMap<String, String> colors = t.priorityValuesColors;
-        if (prio != null && colors != null) {
-            for (MissionFeature f : missions) {
-                if (f.properties.containsKey(prio)) {
-                    f.displayColor = colors.get(f.properties.get(prio));
-                }
-            }
-        }
-
-        missionAdapter.clear();
-        if (Build.VERSION.SDK_INT > 10) {
-            missionAdapter.addAll(missions);
-        } else {
-            for (MissionFeature f : missions) {
-                missionAdapter.add(f);
-            }
-        }
-
-        missionAdapter.notifyDataSetChanged();
-
-        if (missionAdapter.isEmpty()) {
-            setNoData();
-        }
-    }
-     */
     /**
      * returns the current mode of this fragment either PENDING or CREATING
      */
@@ -1396,7 +1313,6 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
     }
 
     /**
-     * 
      * @param restarts the loader with a certain index
      */
     public void restartLoader(final int index) {

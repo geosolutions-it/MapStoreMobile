@@ -119,4 +119,7 @@
     
     <string name="label_new">Nuova</string>
     
+    <string name="item_delete_title">Elimina</string>
+    <string name="item_delete_message">Eliminare i dati di questa segnalazione?</string>
+    
 </resources>

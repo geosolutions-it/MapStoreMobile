@@ -124,4 +124,7 @@
     
     <string name="label_new">New</string>
     
+    <string name="item_delete_title">Delete</string>
+    <string name="item_delete_message">Do you really want to delete this item ?</string>
+    
 </resources>
