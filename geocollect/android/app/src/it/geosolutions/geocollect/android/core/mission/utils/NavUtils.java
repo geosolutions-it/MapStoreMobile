@@ -50,7 +50,7 @@ public class NavUtils {
 		int size = 6;
 		
 		if(persistedTemplates != null && persistedTemplates.size() > 0){
-			size += (persistedTemplates.size() * 2);
+			size += (persistedTemplates.size() );
 		}
 		
 		
@@ -66,14 +66,14 @@ public class NavUtils {
 		    // 1
             items[i++] = NavMenuItem.create(101,app.getString(R.string.reporting), "ic_collections_view_as_list", false, app);
             // 2
-            items[i++] = NavMenuItem.create(1001,app.getString(R.string.my_inspections_my)+ " "+app.getString(R.string.reporting), "ic_collections_view_as_list", false, app);
+            //items[i++] = NavMenuItem.create(1001,app.getString(R.string.my_inspections_my)+ " "+app.getString(R.string.reporting), "ic_collections_view_as_list", false, app);
 		
 		}else{
 			
-			for(int j = 0, k = 0; j < persistedTemplates.size(); j++, k+=2 ){
+			for(int j = 0, k = 0; j < persistedTemplates.size(); j++, k++ ){
 				MissionTemplate t = persistedTemplates.get(j);
 				items[i + k]     =  NavMenuItem.create(DOWNLOADED_TEMPLATE_ID + k    ,t.title, "ic_collections_view_as_list", false, app);
-				items[i + k + 1] =  NavMenuItem.create(DOWNLOADED_TEMPLATE_ID + k + 1,app.getString(R.string.my_inspections_my)+ " " +t.title, "ic_collections_view_as_list", false, app);
+				//items[i + k + 1] =  NavMenuItem.create(DOWNLOADED_TEMPLATE_ID + k + 1,app.getString(R.string.my_inspections_my)+ " " +t.title, "ic_collections_view_as_list", false, app);
 			}
 		}
 		

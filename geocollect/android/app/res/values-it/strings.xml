@@ -79,7 +79,7 @@
     <string name="menu_center">Centra</string>
     <string name="menu_filter">Filtra</string>
     <string name="entry_saved_success">Dati %s salvati con successo</string>
-    <string name="menu_clear_survey">Cancella dati di questo sopralluogo</string>
+    <string name="menu_clear_survey">Cancella i dati di questo sopralluogo</string>
     <string name="menu_upload">Carica</string>
     <string name="upload_title">Caricamento dati</string>
     <plurals name="upload_intro">

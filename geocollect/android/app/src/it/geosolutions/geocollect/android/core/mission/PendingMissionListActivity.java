@@ -353,7 +353,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 
             clearDetailFragment();
 
-            final FragmentMode mode = id == 101 ? FragmentMode.PENDING : FragmentMode.CREATION;
+            //final FragmentMode mode = id == 101 ? FragmentMode.PENDING : FragmentMode.CREATION;
 
             Editor ed = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
             ed.putBoolean(PREFS_USES_DOWNLOADED_TEMPLATE, false);
@@ -370,9 +370,10 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
                 ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
                         R.id.pendingmission_list)).restartLoader(mt.getLoaderIndex());
             }
+            
             ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
-                    R.id.pendingmission_list)).switchAdapter(mode);
-
+                    R.id.pendingmission_list)).switchAdapter(FragmentMode.PENDING);
+                    
             break;
         // The Map button is disabled
         /*
@@ -419,13 +420,13 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
             
             final int index = id % 2000;
 
-            final int templateIndex = index / 2;
+            final int templateIndex = index ;
 
             final MissionTemplate t = downloadedTemplates.get(templateIndex);
 
             Log.d(TAG, "downloaded template "+ templateIndex + " selected : " + t.id);
 
-            final FragmentMode mode = index % 2 == 0 ? FragmentMode.PENDING : FragmentMode.CREATION;
+            //final FragmentMode mode = index % 2 == 0 ? FragmentMode.PENDING : FragmentMode.CREATION;
 
             clearDetailFragment();
 
@@ -440,12 +441,11 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
             
             ((GeoCollectApplication)getApplication()).setTemplate(t);
             
-            if (index % 2 == 0) {
-                ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
-                        R.id.pendingmission_list)).restartLoader(t.getLoaderIndex());
-            }
             ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
-                    R.id.pendingmission_list)).switchAdapter(mode);
+                        R.id.pendingmission_list)).restartLoader(t.getLoaderIndex());
+            
+            ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
+                    R.id.pendingmission_list)).switchAdapter(FragmentMode.PENDING);
             
             MissionUtils.checkMapStyles(getResources(), t);
 
@@ -614,8 +614,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         
         navConf = getNavDrawerConfiguration();
 
-        NavDrawerItem[] menu = NavUtils
-                .getNavMenu(PendingMissionListActivity.this);
+        NavDrawerItem[] menu = NavUtils.getNavMenu(PendingMissionListActivity.this);
 
         // cannot modify items of navdraweradapter --> create a new one
         NavDrawerAdapter newNavDrawerAdapter = new NavDrawerAdapter(
