@@ -23,7 +23,6 @@ import it.geosolutions.android.map.model.Layer;
 import it.geosolutions.android.map.model.MSMMap;
 import it.geosolutions.android.map.utils.SpatialDbUtils;
 import it.geosolutions.android.map.view.MapViewManager;
-import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.app.BuildConfig;
 import it.geosolutions.geocollect.android.core.GeoCollectApplication;
 import it.geosolutions.geocollect.android.app.R;
@@ -32,7 +31,6 @@ import it.geosolutions.geocollect.android.core.login.LoginActivity;
 import it.geosolutions.geocollect.android.core.login.LogoutActivity;
 import it.geosolutions.geocollect.android.core.login.utils.LoginRequestInterceptor;
 import it.geosolutions.geocollect.android.core.login.utils.NetworkUtil;
-import it.geosolutions.geocollect.android.core.mission.PendingMissionListFragment.FragmentMode;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.NavUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
@@ -268,7 +266,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
                 // MissionTemplate t = MissionUtils.getDefaultTemplate(getBaseContext());
                 // ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(R.id.pendingmission_list)).setTemplate(t);
                 ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
-                        R.id.pendingmission_list)).switchAdapter(FragmentMode.CREATION);
+                        R.id.pendingmission_list)).switchAdapter();
 
             }
         }
@@ -354,12 +352,10 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         // first option
         case 101:
         case 1001:
-            // only one fragment for now, the other options are indipendent activities
-            // switch to pending mode
+            // only one fragment for now, the other options are independent activities
 
             clearDetailFragment();
 
-            //final FragmentMode mode = id == 101 ? FragmentMode.PENDING : FragmentMode.CREATION;
 
             Editor ed = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
             ed.putBoolean(PREFS_USES_DOWNLOADED_TEMPLATE, false);
@@ -378,7 +374,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
             }
             
             ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
-                    R.id.pendingmission_list)).switchAdapter(FragmentMode.PENDING);
+                    R.id.pendingmission_list)).switchAdapter();
                     
             break;
         // The Map button is disabled
@@ -432,8 +428,6 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 
             Log.d(TAG, "downloaded template "+ templateIndex + " selected : " + t.id);
 
-            //final FragmentMode mode = index % 2 == 0 ? FragmentMode.PENDING : FragmentMode.CREATION;
-
             clearDetailFragment();
 
             Editor ed = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
@@ -451,7 +445,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
                         R.id.pendingmission_list)).restartLoader(t.getLoaderIndex());
             
             ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
-                    R.id.pendingmission_list)).switchAdapter(FragmentMode.PENDING);
+                    R.id.pendingmission_list)).switchAdapter();
             
             MissionUtils.checkMapStyles(getResources(), t);
 

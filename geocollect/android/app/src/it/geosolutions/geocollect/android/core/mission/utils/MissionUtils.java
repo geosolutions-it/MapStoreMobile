@@ -299,6 +299,7 @@ public class MissionUtils {
 		
 		return missingEntries;
 	}
+	
 	/**
 	 * get "created" {@link MissionFeature} from the database
 	 * @param tableName
@@ -306,9 +307,21 @@ public class MissionUtils {
 	 * @return a list of created {@link MissionFeature}
 	 */
 	public static ArrayList<MissionFeature> getMissionFeatures(final String tableName,final Database db){
+	    return getMissionFeatures( tableName, db, null);
+	}
+	
+	/**
+	 * get "created" {@link MissionFeature} from the database, adding the distance property if possible
+	 * @param tableName
+	 * @param db
+	 * @return a list of created {@link MissionFeature}
+	 */
+	public static ArrayList<MissionFeature> getMissionFeatures(final String mTableName,final Database db, Context ctx){
 
 		ArrayList<MissionFeature> missions = new ArrayList<MissionFeature>();
 
+		String tableName = mTableName;
+		
 		// Reader for the Geometry field
 		WKBReader wkbReader = new WKBReader();
 
@@ -334,6 +347,32 @@ public class MissionUtils {
     	// Merge all the column names
     	String selectString = TextUtils.join(",",selectFields);
     	
+    	if(ctx != null){
+    	    
+    	    SharedPreferences prefs = ctx.getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME, Context.MODE_PRIVATE);
+    	    
+    	    boolean useDistance = prefs.getBoolean(SQLiteCascadeFeatureLoader.ORDER_BY_DISTANCE, false);
+            double posX = Double.longBitsToDouble( prefs.getLong(SQLiteCascadeFeatureLoader.LOCATION_X, Double.doubleToLongBits(0)));
+            double posY = Double.longBitsToDouble( prefs.getLong(SQLiteCascadeFeatureLoader.LOCATION_Y, Double.doubleToLongBits(0)));
+            
+            if(useDistance){
+                selectString = selectString + ", Distance(ST_Transform(GEOMETRY,4326), MakePoint("+posX+","+posY+", 4326)) * 111195 AS '"+MissionFeature.DISTANCE_VALUE_ALIAS+"'" ;
+            }
+            
+            //Add Spatial filtering
+            int filterSrid = prefs.getInt(SQLiteCascadeFeatureLoader.FILTER_SRID, -1);
+            // If the SRID is not defined, skip the filter
+            if(filterSrid != -1){
+                double filterN = Double.longBitsToDouble( prefs.getLong(SQLiteCascadeFeatureLoader.FILTER_N, Double.doubleToLongBits(0)));
+                double filterS = Double.longBitsToDouble( prefs.getLong(SQLiteCascadeFeatureLoader.FILTER_S, Double.doubleToLongBits(0)));
+                double filterW = Double.longBitsToDouble( prefs.getLong(SQLiteCascadeFeatureLoader.FILTER_W, Double.doubleToLongBits(0)));
+                double filterE = Double.longBitsToDouble( prefs.getLong(SQLiteCascadeFeatureLoader.FILTER_E, Double.doubleToLongBits(0)));
+                
+                tableName += " WHERE MbrIntersects(GEOMETRY, BuildMbr("+filterW+", "+filterN+", "+filterE+", "+filterS+")) ";
+            }
+            
+    	}
+    	
     	// Build the query
     	StringWriter queryWriter = new StringWriter();
     	queryWriter.append("SELECT ")
@@ -341,6 +380,7 @@ public class MissionUtils {
     		.append(" FROM ")
     		.append(tableName)
     		.append(";");
+    	
     	
     	// The resulting query
     	String query = queryWriter.toString();
@@ -368,12 +408,12 @@ public class MissionUtils {
 		        			f.geometry = geometryFactory.createPoint(new Coordinate(xy[0], xy[1]));
 		        		}
 		        	}
-		        	f.typeName = tableName;
+		        	f.typeName = mTableName;
 					missions.add(f);
 				}
 				stmt.close();
 			} catch (Exception e) {
-				Log.d(MissionUtils.class.getSimpleName(), "Error getCreatedMissions",e);
+				Log.d(TAG, "Error getCreatedMissions",e);
 			}
 		}else{
 			if(BuildConfig.DEBUG){

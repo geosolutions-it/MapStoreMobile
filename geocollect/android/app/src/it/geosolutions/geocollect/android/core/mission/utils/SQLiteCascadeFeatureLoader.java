@@ -464,10 +464,9 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 		///////////////////////
 		
 		Log.v(TAG, "Loading created missions from " + sourceTableName + MissionTemplate.NEW_NOTICE_SUFFIX);
-        final ArrayList<MissionFeature> missions = MissionUtils.getMissionFeatures(sourceTableName + MissionTemplate.NEW_NOTICE_SUFFIX, db);
+        final ArrayList<MissionFeature> missions = MissionUtils.getMissionFeatures(sourceTableName + MissionTemplate.NEW_NOTICE_SUFFIX, db, getContext());
 
         mData.addAll(missions);
-        /*
         if(orderingField != null && !orderingField.isEmpty()){
             boolean reverse = mPrefs.getBoolean(REVERSE_ORDER_PREF, false);
             boolean useDistance = mPrefs.getBoolean(ORDER_BY_DISTANCE, false);
@@ -477,10 +476,14 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
         
                     @Override
                     public int compare(MissionFeature lhs, MissionFeature rhs) {
-                        if(lhs.properties == null || !lhs.properties.containsKey(MissionFeature.DISTANCE_VALUE_ALIAS)){
+                        if(lhs.properties == null
+                                || !lhs.properties.containsKey(MissionFeature.DISTANCE_VALUE_ALIAS)
+                                || lhs.properties.get(MissionFeature.DISTANCE_VALUE_ALIAS)== null){
                             return 1;
                         }
-                        if(rhs.properties == null || !rhs.properties.containsKey(MissionFeature.DISTANCE_VALUE_ALIAS)){
+                        if(rhs.properties == null
+                                || !rhs.properties.containsKey(MissionFeature.DISTANCE_VALUE_ALIAS)
+                                || rhs.properties.get(MissionFeature.DISTANCE_VALUE_ALIAS)== null){
                             return -1;
                         }
                         
@@ -494,14 +497,31 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
                     }
                 } );
             }else{
-                
+                Collections.sort(mData, new Comparator<MissionFeature>() {
+                    
+                    @Override
+                    public int compare(MissionFeature lhs, MissionFeature rhs) {
+                        if(lhs.properties == null || !lhs.properties.containsKey(orderingField)){
+                            return 1;
+                        }
+                        if(rhs.properties == null || !rhs.properties.containsKey(orderingField)){
+                            return -1;
+                        }
+                        
+                        try{
+                            return lhs.properties.get(orderingField).toString().compareTo(rhs.properties.get(orderingField).toString());
+                        }catch (NullPointerException npe){
+                            return 0;
+                        }
+                    }
+                } );
             }
             
             if(reverse){
                 Collections.reverse(mData);
             }
         }
-        */
+
 		///////////////////////
 		
 		// Icon Color

@@ -1279,9 +1279,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
      * 
      * @param FragmentMode the new mode
      */
-    public void switchAdapter(FragmentMode newMode) {
-
-        mMode = newMode;
+    public void switchAdapter() {
 
         // remove longclicklistener
         getListView().setOnItemLongClickListener(null);
@@ -1292,13 +1290,6 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         // invalidate actionbar
         getSherlockActivity().supportInvalidateOptionsMenu();
 
-    }
-
-    /**
-     * returns the current mode of this fragment either PENDING or CREATING
-     */
-    public FragmentMode getFragmentMode() {
-        return mMode;
     }
 
     /**
