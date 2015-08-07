@@ -114,6 +114,8 @@ public class FeatureAdapter extends ArrayAdapter<MissionFeature> {
         MissionFeature result = getItem(position);
     
         if (result != null) {
+            
+            String tableToCheck = result.typeName;
     
             // TODO use ViewHolder
             if(result.properties != null){
@@ -156,12 +158,21 @@ public class FeatureAdapter extends ArrayAdapter<MissionFeature> {
                         dText.setText("");
                     }
                 }
+                
+                // display the "NEW" tag
+                TextView newText = (TextView) v.findViewById(R.id.mission_label_new);
+                if(newText != null){
+                    if(tableToCheck != null && tableToCheck.endsWith(MissionTemplate.NEW_NOTICE_SUFFIX)){
+                        newText.setVisibility(View.VISIBLE);
+                    }else{
+                        newText.setVisibility(View.GONE);
+                    }
+                }
             }
             
             ImageView editingIcon = (ImageView) v.findViewById(R.id.mission_resource_edit_icon);
             if(editingIcon != null){
     
-                String tableToCheck = result.typeName;
                 if(tableToCheck != null && !tableToCheck.endsWith(MissionTemplate.NEW_NOTICE_SUFFIX)){
                     if(result.editing){
                         // Editing ongoing

@@ -122,4 +122,6 @@
     
     <string name="version">Version</string>
     
+    <string name="label_new">New</string>
+    
 </resources>

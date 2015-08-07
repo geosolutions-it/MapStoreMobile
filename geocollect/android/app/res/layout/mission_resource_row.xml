@@ -8,6 +8,19 @@
 	android:paddingLeft="5dip"
     android:background="@drawable/multiselect_list" >
  
+    <TextView 
+        android:id="@+id/mission_resource_distance_txt" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:paddingTop="10dip"
+        android:paddingRight="32dip"
+        android:textSize="15sp"
+        android:maxLines="1"
+        android:layout_centerHorizontal="true"
+        android:ellipsize="end"/> 
+    
 	<ImageView 
 	    android:id="@+id/mission_resource_priority_icon"
    	    android:contentDescription="@string/edit"
@@ -33,6 +46,7 @@
 		    android:layout_height="wrap_content" 
 		    android:layout_below="@id/mission_resource_name"
 		    android:layout_toRightOf="@id/mission_resource_priority_icon"
+		    android:layout_toStartOf="@id/mission_resource_distance_txt"
 		    android:paddingTop="5dip"
 		    android:paddingRight="15dip"
 		    android:textSize="15sp"
@@ -50,18 +64,20 @@
     	android:layout_centerVertical="true"
     	android:visibility="gone"/> 
     	
-	 <TextView 
-        android:id="@+id/mission_resource_distance_txt" 
+    <TextView 
+        android:id="@+id/mission_label_new" 
         android:layout_width="wrap_content" 
         android:layout_height="wrap_content" 
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:paddingTop="14dip"
-        android:paddingRight="32dip"
-        android:textSize="15sp"
-        android:maxLines="1"
-        android:layout_centerHorizontal="true"
-        android:ellipsize="end"/> 
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="96dip"
+        android:paddingRight="4dip"
+        android:paddingLeft="4dip"
+        android:textSize="14sp"
+        android:textColor="#777777"
+        android:background="#DDDDDD"
+        android:text="@string/label_new"/> 
 	
  
 </RelativeLayout>

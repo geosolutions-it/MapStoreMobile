@@ -512,11 +512,6 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                 inflater.inflate(R.menu.uploadable, menu);
             }
         }
-
-        // TODO use the FAB on the main layout instead of inside the list fragment
-        if (mTwoPane) {
-            inflater.inflate(R.menu.creating, menu);
-        }
             
         // Display the Search only if it is not already filtered
         inflater.inflate(R.menu.searchable, menu);
@@ -544,6 +539,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
             inflater.inflate(R.menu.filterable, menu);
         }
 
+        // TODO use the FAB on the main layout instead of inside the list fragment
         if (mTwoPane && missionTemplate != null) {
             if (missionTemplate.schema_seg != null) {
                 inflater.inflate(R.menu.creating, menu);
