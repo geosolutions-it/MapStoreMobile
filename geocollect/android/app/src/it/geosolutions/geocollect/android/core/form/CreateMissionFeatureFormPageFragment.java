@@ -321,7 +321,7 @@ public class CreateMissionFeatureFormPageFragment extends MapFragment {
 			//here
 			Log.d(TAG, "saving "+value +" for "+ f.fieldId);
 			
-			if(!f.fieldId.equals("GEOMETRY")){
+			if(!f.fieldId.equals(Mission.GEOMETRY_FIELD_STRING)){
 				((FormEditActivity) getSherlockActivity()).mMission.properties.put(f.fieldId, value);
 			}
 			

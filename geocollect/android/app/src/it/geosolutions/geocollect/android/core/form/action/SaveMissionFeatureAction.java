@@ -60,7 +60,7 @@ public class SaveMissionFeatureAction extends AndroidAction {
 		final String tableName = t.schema_seg.localSourceStore+ MissionTemplate.NEW_NOTICE_SUFFIX;
 		
 		// check database for mandatory fields
-		ArrayList<String> notFilledMandatoryEntries = MissionUtils.checkIfAllMandatoryFieldsAreSatisfied(t.seg_form,"ORIGIN_ID",db,tableName);
+		ArrayList<String> notFilledMandatoryEntries = MissionUtils.checkIfAllMandatoryFieldsAreSatisfied(t.seg_form, Mission.ORIGIN_ID_STRING, db, tableName);
 		
 		if(notFilledMandatoryEntries.size() > 0){
 			String missing = fragment.getString(R.string.mandatory_fields_not_filled)+"\n\n";

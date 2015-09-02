@@ -284,11 +284,11 @@ public class PersistenceUtils {
 					
 					if(f.xtype == XType.mapViewPoint){
 						// a geometry must be built
-						s = "UPDATE '"+tableName+"' SET "+ f.fieldId +" = "+ value +" WHERE ORIGIN_ID = '"+originIDString+"';";
+						s = "UPDATE '"+tableName+"' SET "+ f.fieldId +" = "+ value +" WHERE "+ Mission.ORIGIN_ID_STRING +" = '"+originIDString+"';";
 					}else{
 						// Standard values
 						value = value.replace("'", "''");
-						s = "UPDATE '"+tableName+"' SET "+ f.fieldId +" = '"+ value +"' WHERE ORIGIN_ID = '"+originIDString+"';";
+						s = "UPDATE '"+tableName+"' SET "+ f.fieldId +" = '"+ value +"' WHERE "+ Mission.ORIGIN_ID_STRING +" = '"+originIDString+"';";
 					}
 					Log.v(TAG, "Query :\n"+s);
 					if(Database.complete(s)){
@@ -354,7 +354,7 @@ public class PersistenceUtils {
     		.append(selectString)
     		.append(" FROM ")
     		.append(tableName)
-    		.append(" WHERE ORIGIN_ID = '")
+    		.append(" WHERE '").append( Mission.ORIGIN_ID_STRING ).append("' = '")
     		.append(originIDString)
     		.append("';");
     	
@@ -430,7 +430,7 @@ public class PersistenceUtils {
 		for(Field f : page.fields){
 			try {
 				if(f.xtype == XType.spinner){
-					String s = "SELECT " + f.fieldId +" FROM '" + tableName + "' WHERE ORIGIN_ID = '" + origin_id+"';";
+					String s = "SELECT " + f.fieldId +" FROM '" + tableName + "' WHERE "+ Mission.ORIGIN_ID_STRING +" = '" + origin_id+"';";
 					Stmt st = db.prepare(s);
 					if(st.step()){
 						final View v = layout.findViewWithTag(f.fieldId);
@@ -479,9 +479,9 @@ public class PersistenceUtils {
 					String originIDString = MissionUtils.getMissionGCID(mission);					
 					if(f.xtype == XType.mapViewPoint){
 						// a point must be retreived
-						s = "SELECT Y(" + f.fieldId + "), X(" + f.fieldId + ") FROM '" + tableName + "' WHERE ORIGIN_ID = '" + originIDString +"';";
+						s = "SELECT Y(" + f.fieldId + "), X(" + f.fieldId + ") FROM '" + tableName + "' WHERE "+ Mission.ORIGIN_ID_STRING +" = '" + originIDString +"';";
 					}else{
-						s = "SELECT " + f.fieldId +" FROM '" + tableName + "' WHERE ORIGIN_ID = '" + originIDString +"';";
+						s = "SELECT " + f.fieldId +" FROM '" + tableName + "' WHERE "+ Mission.ORIGIN_ID_STRING +" = '" + originIDString +"';";
 					}
 					if(jsqlite.Database.complete(s)){
 						st = mission.db.prepare(s);
@@ -613,7 +613,7 @@ public class PersistenceUtils {
 							// no record found, creating..
 							Log.v(TAG, "No record found, creating..");
 							//This causes the write of ORIGIN_ID which will lead to "inediting" in pendingmissionlist
-							s = "INSERT INTO '"+tableName+"' ( ORIGIN_ID , MY_ORIG_ID ) VALUES ( '"+ originIDString +"' , '"+ originIDString +"');";
+							s = "INSERT INTO '"+tableName+"' ( "+ Mission.ORIGIN_ID_STRING +" , MY_ORIG_ID ) VALUES ( '"+ originIDString +"' , '"+ originIDString +"');";
 							st = mission.db.prepare(s);
 							if(st.step()){
 								// nothing will be returned anyway
@@ -764,8 +764,8 @@ public class PersistenceUtils {
 			                
 			                columnName = stmt.column_string(nameColumn);
 			                if(columnName != null){
-			                	origin_id_found = origin_id_found || columnName.equalsIgnoreCase("ORIGIN_ID");
-			                	pk_uid_found = pk_uid_found || columnName.equalsIgnoreCase("PK_UID");			                	
+			                	origin_id_found = origin_id_found || columnName.equalsIgnoreCase(Mission.ORIGIN_ID_STRING);
+			                	pk_uid_found = pk_uid_found || columnName.equalsIgnoreCase(Mission.PK_UID_STRING);			                	
 			                }else{
 			                	// This should never happen
 			                	Log.v(TAG, "Found a NULL column name, this is strange.");
@@ -775,12 +775,12 @@ public class PersistenceUtils {
 			            
 			            if(!origin_id_found){
 			            	
-			            	stmt = db.prepare("ALTER TABLE '"+tableName+"' ADD COLUMN 'ORIGIN_ID' TEXT;");
+			            	stmt = db.prepare("ALTER TABLE '"+tableName+"' ADD COLUMN '"+ Mission.ORIGIN_ID_STRING +"' TEXT;");
 			            	stmt.step();
 			            	stmt.close();
 			            	
 			            	if(pk_uid_found){
-				            	stmt = db.prepare("UPDATE '"+tableName+"' SET ORIGIN_ID = PK_UID;");
+				            	stmt = db.prepare("UPDATE '"+tableName+"' SET "+ Mission.ORIGIN_ID_STRING +" = PK_UID;");
 				            	stmt.step();
 				            	stmt.close();
 			            	}
@@ -1073,7 +1073,7 @@ public class PersistenceUtils {
 		}
 		
 		
-		String insert = "INSERT INTO '"+tableName+"' (ORIGIN_ID) VALUES ('"+id+"');";
+		String insert = "INSERT INTO '"+tableName+"' ("+Mission.ORIGIN_ID_STRING+") VALUES ('"+id+"');";
 		
 		
 		try {
@@ -1103,7 +1103,7 @@ public class PersistenceUtils {
 			return;
 		}		
 		
-		String delete = "DELETE FROM '"+tableName+"' WHERE ORIGIN_ID = ('"+id+"');";
+		String delete = "DELETE FROM '"+tableName+"' WHERE "+Mission.ORIGIN_ID_STRING+" = ('"+id+"');";
 		
 		
 		try {
@@ -1125,7 +1125,7 @@ public class PersistenceUtils {
 		
 		double[] result = new double[2];
 		
-		String query = "SELECT x(GEOMETRY), y(GEOMETRY) FROM '"+tableName+"' WHERE ORIGIN_ID = ('"+id+"');";
+		String query = "SELECT x(GEOMETRY), y(GEOMETRY) FROM '"+tableName+"' WHERE "+Mission.ORIGIN_ID_STRING+" = ('"+id+"');";
 		
 		Stmt stmt;
 		try {
@@ -1166,11 +1166,11 @@ public class PersistenceUtils {
 		String s;
 		if(f.xtype == XType.mapViewPoint){
 			// a geometry must be built
-			s = "UPDATE '"+tableName+"' SET "+ f.fieldId +" = "+ value +" WHERE ORIGIN_ID = '"+id+"';";
+			s = "UPDATE '"+tableName+"' SET "+ f.fieldId +" = "+ value +" WHERE "+Mission.ORIGIN_ID_STRING+" = '"+id+"';";
 		}else{
 			// Standard values
 			value = value.replace("'", "''");
-			s = "UPDATE '"+tableName+"' SET "+ f.fieldId +" = '"+ value +"' WHERE ORIGIN_ID = '"+id+"';";
+			s = "UPDATE '"+tableName+"' SET "+ f.fieldId +" = '"+ value +"' WHERE "+Mission.ORIGIN_ID_STRING+" = '"+id+"';";
 		}
 		Log.v(TAG, "Query :\n"+s);
 		if(Database.complete(s)){
@@ -1365,12 +1365,12 @@ public class PersistenceUtils {
             Stmt stmt;
             ArrayList<String> validIDsList;
             for(String tableName : uploadables.keySet()){
-                String query = "SELECT \"ORIGIN_ID\" FROM \"" + tableName+"\" ; ";
+                String query = "SELECT \""+Mission.ORIGIN_ID_STRING+"\" FROM \"" + tableName+"\" ; ";
                 validIDsList = new ArrayList<String>();
                 try {
                     stmt = db.prepare(query);
                     while(stmt.step()){
-                        if(stmt.column_name(0).equalsIgnoreCase("ORIGIN_ID")){
+                        if(stmt.column_name(0).equalsIgnoreCase(Mission.ORIGIN_ID_STRING)){
                             String originID = stmt.column_string(0);
                             if(uploadables.get(tableName).contains(originID)){
                                 Log.d(TAG, "ORIGIN_ID found : "+originID);

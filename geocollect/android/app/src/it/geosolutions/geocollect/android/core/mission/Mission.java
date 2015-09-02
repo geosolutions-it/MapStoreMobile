@@ -43,11 +43,17 @@ public class Mission implements Serializable{
 	 */
 	private static final long serialVersionUID = 1L;
 	
+	// Contract Strings
+	public static String MY_ORIG_ID_STRING = "MY_ORIG_ID";
+	public static String ORIGIN_ID_STRING = "ORIGIN_ID";
+	public static String PK_UID_STRING = "PK_UID";
+	public static String GEOMETRY_FIELD_STRING = "GEOMETRY";
+    
 	private static final String ORIGIN_PROVIDER_TAG="origin";
 	private static final String DATA_PROVIDER_TAG="data";
 	private static final String CONFIG_PROVIDER_TAG="config";
 	private static final String LOCAL_PROVIDER_TAG="local";
-	
+    
 	private MissionTemplate template;
 	private Feature origin;
 	/**

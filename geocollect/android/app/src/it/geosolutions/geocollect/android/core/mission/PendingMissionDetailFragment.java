@@ -338,7 +338,7 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 		
 		// Default ID
 		String originIDString = MissionUtils.getMissionGCID(mission);
-		final String s = "SELECT Y(" + f.fieldId + "), X(" + f.fieldId + ") FROM '" + tableName + "' WHERE ORIGIN_ID = '" + originIDString +"';";
+		final String s = "SELECT Y(" + f.fieldId + "), X(" + f.fieldId + ") FROM '" + tableName + "' WHERE "+ Mission.ORIGIN_ID_STRING +" = '" + originIDString +"';";
 		
 		if(mission == null || mission.db == null){
 			Log.w(TAG, "Cannot retrieve mission database");

@@ -7,6 +7,7 @@ import it.geosolutions.geocollect.android.core.Config;
 import it.geosolutions.geocollect.android.core.form.utils.FormUtils;
 import it.geosolutions.geocollect.android.core.login.LoginActivity;
 import it.geosolutions.geocollect.android.core.login.utils.LoginRequestInterceptor;
+import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.http.CommitResponse;
@@ -172,7 +173,7 @@ public abstract class UploadTask  extends AsyncTask<Void, Integer, CommitRespons
                 if (featureToUpload.properties == null) {
                     featureToUpload.properties = new HashMap<String, Object>();
                 }
-                featureToUpload.properties.put("MY_ORIG_ID", featureIDString);
+                featureToUpload.properties.put(Mission.MY_ORIG_ID_STRING, featureIDString);
 
                 MissionFeature toUpload;
                 if (featureToUpload.typeName.endsWith(MissionTemplate.NEW_NOTICE_SUFFIX)) {

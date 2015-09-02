@@ -18,6 +18,7 @@
 package it.geosolutions.geocollect.android.core.mission.utils;
 
 import it.geosolutions.geocollect.android.app.BuildConfig;
+import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
 
 import java.io.File;
@@ -484,10 +485,10 @@ public class SpatialiteUtils {
 			columnName = stmt.column_name(colpos);
 			if(columnName != null){
 				
-				if(columnName.equalsIgnoreCase("PK_UID")||columnName.equalsIgnoreCase("ORIGIN_ID")){
+				if(columnName.equalsIgnoreCase(Mission.PK_UID_STRING)||columnName.equalsIgnoreCase(Mission.ORIGIN_ID_STRING)){
 					// The output Feature ID should not be the same as the input Feature one
 					f.id = stmt.column_string(colpos);
-				}else if(columnName.equalsIgnoreCase("GEOMETRY")){
+				}else if(columnName.equalsIgnoreCase(Mission.GEOMETRY_FIELD_STRING)){
 					// At the moment, only Point is supported
 					// Here, the "GEOMETRY" column contains the result of 
 					//	ST_AsBinary(CastToXY("GEOMETRY"))

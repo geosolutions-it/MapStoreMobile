@@ -21,6 +21,7 @@ package it.geosolutions.geocollect.android.core.mission.utils;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import static it.geosolutions.geocollect.android.core.mission.utils.SpatialiteUtils.populateFeatureFromStmt;
 import it.geosolutions.geocollect.android.app.BuildConfig;
+import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 
@@ -239,8 +240,8 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 						StringBuilder columnNames = new StringBuilder(300);
 						StringBuilder columnValues = new StringBuilder(300);
                         
-                        columnNames.append(" ( ").append( "ORIGIN_ID");
-                        columnValues.append(" ( ").append( "'");
+                        columnNames.append(" ( ").append(Mission.ORIGIN_ID_STRING);
+                        columnValues.append(" ( ").append("'");
                         
                         int namesToTruncate = columnNames.length();
                         int valuesToTruncate = columnValues.length();
@@ -432,7 +433,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 		
 		if(formTableName != null && !formTableName.isEmpty()){
 			ArrayList<String> editingIds = new ArrayList<String>();
-			String query = "SELECT ORIGIN_ID FROM '"+formTableName+"';";
+			String query = "SELECT "+ Mission.ORIGIN_ID_STRING +" FROM '"+formTableName+"';";
 						
 			if(Database.complete(query)){
 				try {

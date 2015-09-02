@@ -82,7 +82,7 @@ public class SendMissionFeatureAction extends AndroidAction {
 		Database db = ((FormEditActivity) fragment.getSherlockActivity()).spatialiteDatabase;
 		
 		// check database for mandatory fields
-		ArrayList<String> notFilledMandatoryEntries = MissionUtils.checkIfAllMandatoryFieldsAreSatisfied(t.seg_form,"ORIGIN_ID",db,t.schema_seg.localSourceStore+ MissionTemplate.NEW_NOTICE_SUFFIX);
+		ArrayList<String> notFilledMandatoryEntries = MissionUtils.checkIfAllMandatoryFieldsAreSatisfied(t.seg_form, Mission.ORIGIN_ID_STRING, db,t.schema_seg.localSourceStore+ MissionTemplate.NEW_NOTICE_SUFFIX);
 		
 		if(notFilledMandatoryEntries.size() > 0){
 			String missing = fragment.getString(R.string.mandatory_fields_not_filled)+"\n\n";
@@ -199,7 +199,7 @@ public class SendMissionFeatureAction extends AndroidAction {
 			if(missionFeature.properties == null){
 				missionFeature.properties = new HashMap<String, Object>();
 			}
-			missionFeature.properties.put("MY_ORIG_ID", featureIDString);
+			missionFeature.properties.put(Mission.MY_ORIG_ID_STRING, featureIDString);
 			
 			GeoJson gson = new GeoJson();
 			String c = gson.toJson( missionFeature);
