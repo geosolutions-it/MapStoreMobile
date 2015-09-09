@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>it.geosolutions.geocollect.android</groupId>
 	<artifactId>geocollect-app</artifactId>
-	<version>1.12</version>
+	<version>1.13</version>
 	<packaging>apk</packaging>
 	<name>GeoCollect App</name>
     <parent>
