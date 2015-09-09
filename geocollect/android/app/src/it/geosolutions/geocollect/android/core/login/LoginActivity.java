@@ -319,7 +319,7 @@ public class LoginActivity extends Activity {
 					URLListPersistanceUtil.save(getBaseContext(), urls);
 					
 					//auth key received, get userdata
-					LoginUtil.user(getBaseContext(), mSelectedUrl, authKey, authorizationString, new UserDataStatusCallback() {
+					LoginUtil.getUserDetails(getBaseContext(), mSelectedUrl, authKey, authorizationString, new UserDataStatusCallback() {
 						
 						@Override
 						public void received(String authorizationString) {

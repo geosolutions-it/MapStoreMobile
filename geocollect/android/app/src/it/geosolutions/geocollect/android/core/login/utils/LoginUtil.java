@@ -115,7 +115,16 @@ public class LoginUtil {
 		});
 	}
 	
-	public static void user(final Context pContext, final String pUrl, final String pAuthKey, final String authorizationString, final UserDataStatusCallback pCallback){
+	
+	/**
+	 * 
+	 * @param pContext
+	 * @param pUrl
+	 * @param pAuthKey
+	 * @param authorizationString
+	 * @param pCallback
+	 */
+	public static void getUserDetails(final Context pContext, final String pUrl, final String pAuthKey, final String authorizationString, final UserDataStatusCallback pCallback){
 		
 		Gson gson = GsonUtil.createFeatureGson();
 		RestAdapter restAdapter = new RestAdapter.Builder()
@@ -124,6 +133,8 @@ public class LoginUtil {
 //		.setLogLevel(LogLevel.FULL)
 		.build();
 
+		
+		// This service points to OpenSDI-Manager2
 		GeoCollectLoginServices geoCollectService = restAdapter.create(GeoCollectLoginServices.class);
 		geoCollectService.user(pAuthKey, new Callback<UserDataResponse>() {
 			
@@ -141,7 +152,7 @@ public class LoginUtil {
 				
 				//TODO enter real values
 				ed.putString(LoginActivity.PREFS_USER_SURNAME, username);
-				ed.putString(LoginActivity.PREFS_USER_FORENAME, "Antonio");
+				ed.putString(LoginActivity.PREFS_USER_FORENAME, username);
 				ed.putString(LoginActivity.PREFS_USER_ENTE, "Comune di Genova");
 				ed.commit();
 				
@@ -158,6 +169,10 @@ public class LoginUtil {
 				pCallback.failed(error);
 			}
 		});
+		
+		
+		
+		
 		
 	}
 	

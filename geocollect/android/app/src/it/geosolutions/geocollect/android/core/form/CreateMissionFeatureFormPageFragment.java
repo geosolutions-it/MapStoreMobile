@@ -85,7 +85,6 @@ public class CreateMissionFeatureFormPageFragment extends MapFragment {
 		if(pageNumber!=null){
 			MissionTemplate t = MissionUtils.getDefaultTemplate(getActivity());
 			
-			
 			//if page number exists i suppose pages is not empty
 			page = t.seg_form.pages.get(pageNumber);	
 		}

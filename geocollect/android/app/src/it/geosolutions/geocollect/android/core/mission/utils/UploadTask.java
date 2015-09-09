@@ -173,7 +173,19 @@ public abstract class UploadTask  extends AsyncTask<Void, Integer, CommitRespons
                 if (featureToUpload.properties == null) {
                     featureToUpload.properties = new HashMap<String, Object>();
                 }
-                featureToUpload.properties.put(Mission.MY_ORIG_ID_STRING, featureIDString);
+                
+                // Look for a "my_orig_id" property and populate it
+                boolean hasMyOrigID = false;
+                for(String inputKey: featureToUpload.properties.keySet()){
+                    if(inputKey.equalsIgnoreCase(Mission.MY_ORIG_ID_STRING)){
+                        featureToUpload.properties.put(inputKey, featureIDString);
+                        hasMyOrigID = true;
+                    }
+                }
+                // If not found, add it
+                if(!hasMyOrigID){
+                    featureToUpload.properties.put(Mission.MY_ORIG_ID_STRING, featureIDString);
+                }
 
                 MissionFeature toUpload;
                 if (featureToUpload.typeName.endsWith(MissionTemplate.NEW_NOTICE_SUFFIX)) {

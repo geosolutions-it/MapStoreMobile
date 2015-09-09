@@ -4,7 +4,6 @@ import it.geosolutions.android.map.geostore.model.Attribute;
 import it.geosolutions.android.map.geostore.model.Container;
 import it.geosolutions.android.map.geostore.model.GeoStoreAttributeTypeAdapter;
 import it.geosolutions.android.map.geostore.model.GeoStoreResourceTypeAdapter;
-import it.geosolutions.android.map.geostore.model.GeoStoreTypeAdapter;
 import it.geosolutions.android.map.geostore.model.Resource;
 import it.geosolutions.android.map.geostore.model.ResourceContainer;
 import it.geosolutions.android.map.geostore.model.ResourceList;
@@ -15,7 +14,6 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.http.HttpEntity;

@@ -1047,7 +1047,7 @@ public class MapsActivity extends MapActivityBase {
 		ArrayList<Attribute> arrayList = (ArrayList<Attribute>) data.getExtras().getSerializable(GetFeatureInfoLayerListActivity.RESULT_FEATURE_EXTRA);
 		Feature f = new Feature(arrayList);
 		String layer = data.getExtras().getString(GetFeatureInfoLayerListActivity.LAYER_FEATURE_EXTRA);
-		//TODO parametrize id column name
+		//TODO parameterize id column name
 		
 		Attribute a = f.getAttribute(featureIdField);
 		
