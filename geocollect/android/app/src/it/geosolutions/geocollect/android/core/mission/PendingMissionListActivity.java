@@ -160,9 +160,8 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
             NewRelic.withApplicationToken(newRelicToken).start(this);
         }
         
-        // TODO when is the login data necessary to load mission data ?
-        final SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(getBaseContext());
+        // Login data is always necessary to load mission data
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
         final String authKey = prefs.getString(LoginActivity.PREFS_AUTH_KEY, null);
 
@@ -681,9 +680,9 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         ArrayList<String> bg_layers = null;
         
         try{
-            if(t.config != null && t.config.get("backgroundLayers") != null){
-                if(t.config.get("backgroundLayers") instanceof ArrayList<?>){
-                    bg_layers = (ArrayList<String>) t.config.get("backgroundLayers");
+            if(t.config != null && t.config.get(MissionTemplate.BG_LAYERS_KEY) != null){
+                if(t.config.get(MissionTemplate.BG_LAYERS_KEY) instanceof ArrayList<?>){
+                    bg_layers = (ArrayList<String>) t.config.get(MissionTemplate.BG_LAYERS_KEY);
                 }
             }
         }catch (ClassCastException cce){

@@ -13,4 +13,8 @@
         android:showAsAction="always"
         android:title="@string/menu_center"/>
     
+    <item android:id="@+id/settings"
+          android:title="@string/action_settings"
+          android:showAsAction="never"
+          android:icon="@drawable/ic_action_settings"></item>
 </menu>

@@ -49,17 +49,15 @@ public class GeoCollectMapActivity extends MapsActivity {
         MenuInflater inf = getSupportMenuInflater();
         inf.inflate(R.menu.simple_map_menu, (Menu) menu);
         
-        return super.onCreateOptionsMenu(menu);
+        return true;
     }
     
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        
         MenuInflater inf = getSupportMenuInflater();
         inf.inflate(R.menu.simple_map_menu, (Menu) menu);
-        
     }
+    
     
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

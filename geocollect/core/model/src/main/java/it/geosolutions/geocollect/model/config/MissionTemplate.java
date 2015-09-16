@@ -35,8 +35,13 @@ public class MissionTemplate implements Serializable{
 	 */
 	private static final long serialVersionUID = 1L;
 
-    public static final String DEFAULT_TABLE_DATA_SUFFIX = "_data";
+	/**
+	 * JSON String key to index background layers
+	 */
+	public static final String BG_LAYERS_KEY = "backgroundLayers";
 	
+	public static final String DEFAULT_TABLE_DATA_SUFFIX = "_data";
+    
 	/**
 	 * Suffix for the new notices tables
 	 */
