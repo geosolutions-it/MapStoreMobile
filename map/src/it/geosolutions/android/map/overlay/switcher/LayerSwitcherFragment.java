@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -134,19 +135,21 @@ public class LayerSwitcherFragment extends SherlockListFragment implements
  */
 	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
-		final MapsActivity ac = (MapsActivity) getActivity();
     
-		// the map selection activity launcher
-    ImageButton msEd = (ImageButton) view.findViewById(R.id.layer_add);
-	msEd.setOnClickListener(new OnClickListener() {
-		
-		@Override
-		public void onClick(View v) {
-			closeActionMode();
-				Intent pref = new Intent(ac, BrowseSourcesActivity.class);
-		    ac.startActivityForResult(pref, MapsActivity.LAYER_ADD);
-		}
-	});
+        // the map selection activity launcher
+        ImageButton msEd = (ImageButton) view.findViewById(R.id.layer_add);
+        msEd.setOnClickListener(new OnClickListener() {
+        	
+        	@Override
+        	public void onClick(View v) {
+        		closeActionMode();
+        		Activity fa = getActivity();
+        		if(fa != null){
+            		Intent pref = new Intent(fa, BrowseSourcesActivity.class);
+            		fa.startActivityForResult(pref, MapsActivity.LAYER_ADD);
+        		}
+        	}
+        });
 		
 		// reset the ActionBar ActionMode
 	closeActionMode();

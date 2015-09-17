@@ -17,15 +17,12 @@
  */
 package it.geosolutions.android.map.view;
 
-import it.geosolutions.android.map.MapsActivity;
-import it.geosolutions.android.map.R;
+import it.geosolutions.android.map.activities.MapActivityBase;
 import it.geosolutions.android.map.control.MapControl;
 import it.geosolutions.android.map.overlay.FreezableOverlay;
 import it.geosolutions.android.map.overlay.MarkerOverlay;
 import it.geosolutions.android.map.overlay.managers.MultiSourceOverlayManager;
 import it.geosolutions.android.map.overlay.managers.OverlayManager;
-import it.geosolutions.android.map.utils.MapFilesProvider;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,9 +30,7 @@ import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.overlay.Overlay;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Canvas;
-import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -46,7 +41,7 @@ import android.view.MotionEvent;
  */
 public class AdvancedMapView extends MapView {
 	protected List<MapControl> controls =  new ArrayList<MapControl>();
-	protected MapsActivity activity;
+	protected MapActivityBase activity;
 	public OverlayManager overlayManger;
 	
 	public OverlayManager getOverlayManger() {
@@ -71,8 +66,8 @@ public class AdvancedMapView extends MapView {
 	public AdvancedMapView(Context context) {
 		super(context);
 		//get reference to mapsActivity for actionbar support
-		if(context instanceof MapsActivity){
-			activity = (MapsActivity) context; 
+		if(context instanceof MapActivityBase){
+			activity = (MapActivityBase) context; 
 		}
 	}
 	
@@ -83,8 +78,8 @@ public class AdvancedMapView extends MapView {
 	 */
 	public  AdvancedMapView(Context context, AttributeSet attributeSet){
 		super(context,attributeSet);
-		if(context instanceof MapsActivity){
-			activity = (MapsActivity) context; 
+		if(context instanceof MapActivityBase){
+			activity = (MapActivityBase) context; 
 		}
 
 	}

@@ -216,7 +216,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
                         public void run() {
 
                             navConf = getNavDrawerConfiguration();
-
+                            /*
                             NavDrawerItem[] menu = NavUtils
                                     .getNavMenu(PendingMissionListActivity.this);
 
@@ -225,7 +225,8 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
                                     PendingMissionListActivity.this, R.layout.navdrawer_item, menu);
 
                             mDrawerList.setAdapter(newNavDrawerAdapter);
-                            
+                            */
+                            mDrawerList.setAdapter(navConf.getBaseAdapter());
                             Log.d(TAG, "navdrawer updated");
 
                         }
@@ -637,7 +638,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         }
         
         navConf = getNavDrawerConfiguration();
-
+        /*
         NavDrawerItem[] menu = NavUtils.getNavMenu(PendingMissionListActivity.this);
 
         // cannot modify items of navdraweradapter --> create a new one
@@ -645,9 +646,11 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
                 PendingMissionListActivity.this, R.layout.navdrawer_item, menu);
 
         mDrawerList.setAdapter(newNavDrawerAdapter);
-
+        */
+        mDrawerList.setAdapter(navConf.getBaseAdapter());
+        
         Log.d(TAG, "navdrawer updated");
-        newNavDrawerAdapter.notifyDataSetChanged();
+        navConf.getBaseAdapter().notifyDataSetChanged();
         
         // We need to explicitly call the child Fragments onActivityResult()
         for (Fragment fragment : getSupportFragmentManager().getFragments()) {

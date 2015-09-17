@@ -112,7 +112,7 @@ public class PersistenceUtils {
 
 			Log.d(TAG, "Loaded template ID: "+t.id);
 		}else{
-			Log.w(TAG, "MissionTemplate could not be found, edits will not be saved");
+			Log.w(TAG, "MissionTemplate is not valid, skipping...");
 			success = false;
 		}
 		return success;
@@ -1200,6 +1200,13 @@ public class PersistenceUtils {
 		try {
 			if(templates != null && templates.size() > 0){
 
+			    if(BuildConfig.DEBUG){
+	                int i = 0;
+	                for(MissionTemplate mt : templates){
+	                    Log.d(TAG, "** SavedTemplates - Mission "+i+++" :"+(mt.id!=null?mt.id:"NULL"));
+	                }
+	            }
+			    
 				FileOutputStream fo = context.openFileOutput(DOWNLOADED_TEMPLATES, Context.MODE_PRIVATE);
 				ObjectOutputStream out = new ObjectOutputStream(fo);
 				out.writeObject(templates);
@@ -1221,7 +1228,13 @@ public class PersistenceUtils {
 			ObjectInputStream in = new ObjectInputStream(fi);
 			@SuppressWarnings("unchecked")
 			ArrayList<MissionTemplate> templates = (ArrayList<MissionTemplate>) in.readObject();
-			Log.d(TAG, "Saved Templates load succeeded");
+			if(BuildConfig.DEBUG){
+			    int i = 0;
+    			for(MissionTemplate mt : templates){
+    			    Log.d(TAG, "SavedTemplates - Mission "+i+++" :"+(mt.id!=null?mt.id:"NULL"));
+    			}
+    			Log.d(TAG, "Saved Templates load succeeded");
+			}
 			in.close();
 			fi.close();
 
