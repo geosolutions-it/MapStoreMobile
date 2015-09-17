@@ -134,28 +134,7 @@ public class LogoutActivity extends Activity {
 			}
 		});
 		
-		final ArrayList<MissionTemplate> templates = PersistenceUtils.loadSavedTemplates(getBaseContext());
-	
-		
-		final HashMap <MissionTemplate,Boolean> downloads = new HashMap<MissionTemplate,Boolean>();
-		
-        if(templates != null){
-            for(MissionTemplate t : templates){
-                
-                boolean exists = MissionUtils.checkTemplateForBackgroundData(getBaseContext(), t);
-                
-                downloads.put(t, exists);
-                
-                if(BuildConfig.DEBUG){
-                    Log.i(TAG,"adding to downloads "+t.title+" , id "+t.id +" exists "+Boolean.toString(exists));
-                }
-            }
-        }
-		
-		final ListView missionListview = (ListView) findViewById(R.id.mission_list);
-		
-		final MissionDownloadItemAdapter downloadsAdapter = new MissionDownloadItemAdapter(getBaseContext(), downloads);
-		missionListview.setAdapter(downloadsAdapter);
+		updateTemplateList();
 		
 		final ProgressBar progress = (ProgressBar) findViewById(R.id.update_missions_progress);
 		
@@ -192,7 +171,7 @@ public class LogoutActivity extends Activity {
 		                                    spatialiteDatabase)) {
 		                                Log.w(TAG, "error creating/updating table");
 		                            } else {
-		                                // if insert succesfull add to list of valid templates
+		                                // if insert successful add to list of valid templates
 		                                validTemplates.add(t);
 		                            }
 		                        }
@@ -225,6 +204,9 @@ public class LogoutActivity extends Activity {
 		                    }
 		                    
 		                    ed.commit();
+		                    
+		                    // 4. Refresh UI
+		                    updateTemplateList();
 		                }
 		            };
 		            
@@ -240,6 +222,29 @@ public class LogoutActivity extends Activity {
 		});
 		
 	}
+
+    /**
+     * 
+     */
+    public void updateTemplateList() {
+        final ArrayList<MissionTemplate> templates = PersistenceUtils.loadSavedTemplates(getBaseContext());
+		final HashMap <MissionTemplate,Boolean> downloads = new HashMap<MissionTemplate,Boolean>();
+        if(templates != null){
+            for(MissionTemplate t : templates){
+                
+                boolean exists = MissionUtils.checkTemplateForBackgroundData(getBaseContext(), t);
+                
+                downloads.put(t, exists);
+                
+                if(BuildConfig.DEBUG){
+                    Log.i(TAG,"adding to downloads "+t.title+" , id "+t.id +" exists "+Boolean.toString(exists));
+                }
+            }
+        }
+		final ListView missionListview = (ListView) findViewById(R.id.mission_list);
+		final MissionDownloadItemAdapter downloadsAdapter = new MissionDownloadItemAdapter(getBaseContext(), downloads);
+		missionListview.setAdapter(downloadsAdapter);
+    }
 
 	private void tryToFillFormWithSavedData() {
 		
