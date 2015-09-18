@@ -196,8 +196,9 @@ public class SendAction extends AndroidAction {
 					if(result !=null && result.isSuccess()){
 						if(ctx != null){
 							Toast.makeText(ctx, getResources().getString(R.string.data_send_success), Toast.LENGTH_LONG).show();
-							NavUtils.navigateUpTo(ctx, new Intent(ctx,
-									PendingMissionListActivity.class));
+							Intent i = new Intent(ctx, PendingMissionListActivity.class);
+			                i.putExtra(PendingMissionListActivity.KEY_NAVIGATING_UP, true);
+			                NavUtils.navigateUpTo(ctx, i);
 						}
 						super.onFinish(ctx,result);
 					}else{

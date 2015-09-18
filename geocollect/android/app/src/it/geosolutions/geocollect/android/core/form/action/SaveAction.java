@@ -126,8 +126,9 @@ public class SaveAction extends AndroidAction {
 	        	//confirm save to user
 	        	Toast.makeText(fragment.getSherlockActivity(), fragment.getResources().getString(R.string.entry_saved_success,fragment.getResources().getString(R.string.survey)), Toast.LENGTH_LONG).show();
 	        	//done, navigate back
-	        	NavUtils.navigateUpTo(fragment.getSherlockActivity(), new Intent(fragment.getSherlockActivity(), PendingMissionListActivity.class));
-	        	
+	        	Intent i = new Intent(fragment.getSherlockActivity(), PendingMissionListActivity.class);
+	        	i.putExtra(PendingMissionListActivity.KEY_NAVIGATING_UP, true);
+	        	NavUtils.navigateUpTo(fragment.getSherlockActivity(), i );
 	        }
 	     })
 	    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {

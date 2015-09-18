@@ -121,8 +121,9 @@ public class PendingMissionDetailActivity extends SherlockFragmentActivity imple
 			//
 			// http://developer.android.com/design/patterns/navigation.html#up-vs-back
 			//
-			NavUtils.navigateUpTo(this, new Intent(this,
-					PendingMissionListActivity.class));
+            Intent i = new Intent(this, PendingMissionListActivity.class);
+            i.putExtra(PendingMissionListActivity.KEY_NAVIGATING_UP, true);
+            NavUtils.navigateUpTo(this, i );
 			return true;
 		}
 

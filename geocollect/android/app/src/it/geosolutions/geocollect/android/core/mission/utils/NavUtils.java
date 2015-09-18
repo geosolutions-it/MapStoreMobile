@@ -65,9 +65,7 @@ public class NavUtils {
     		
 		    // 1
             items[i++] = NavMenuItem.create(101,app.getString(R.string.reporting), "ic_collections_view_as_list", false, app);
-            // 2
-            //items[i++] = NavMenuItem.create(1001,app.getString(R.string.my_inspections_my)+ " "+app.getString(R.string.reporting), "ic_collections_view_as_list", false, app);
-		
+
 		}else{
 			
 			for(int j = 0, k = 0; j < persistedTemplates.size(); j++, k++ ){

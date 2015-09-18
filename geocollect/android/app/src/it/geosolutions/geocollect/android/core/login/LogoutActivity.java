@@ -39,6 +39,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckedTextView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -221,8 +222,47 @@ public class LogoutActivity extends Activity {
 			}
 		});
 		
+        final CheckedTextView ctv = (CheckedTextView) findViewById(R.id.startup_option_checkbox);
+        // Initialize
+        ctv.setChecked(getStartAsMap());
+        ctv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (ctv.isChecked()){
+                    ctv.setChecked(false);
+                    ctv.setEnabled(false);
+                    if(!setStartAsMap(false)){
+                        ctv.setChecked(true);
+                    }
+                    ctv.setEnabled(true);
+                    
+                }
+                else {
+                    ctv.setChecked(true);
+                    ctv.setEnabled(false);
+                    if(!setStartAsMap(true)){
+                        ctv.setChecked(false);
+                    }
+                    ctv.setEnabled(true);
+                }
+            }
+        });
 	}
 
+	/**
+	 * Set the preference for the starting Activity
+	 * - TRUE: start with map
+	 * - FALSE: start with list
+	 * @param okMap
+	 * @return
+	 */
+	public boolean setStartAsMap(boolean okMap){
+	    
+	    Editor ed = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
+	    ed.putBoolean(PendingMissionListActivity.PREFS_START_WITH_MAP, okMap);
+	    return ed.commit();
+	}
+	
     /**
      * 
      */
@@ -436,5 +476,21 @@ public class LogoutActivity extends Activity {
 	        return arg0;
 	    }
 	}
+	
+    /**
+     * Get the preference for the starting Activity
+     * - TRUE: start with map
+     * - FALSE: start with list
+     * @return boolean
+     */
+    public boolean getStartAsMap(){
+        
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        try {
+            return sp.getBoolean(PendingMissionListActivity.PREFS_START_WITH_MAP, false);
+        }catch(ClassCastException cce){
+            return false;
+        }
+    }
 
 }

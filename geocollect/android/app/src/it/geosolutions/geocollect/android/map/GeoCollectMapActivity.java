@@ -35,7 +35,9 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -45,7 +47,6 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -95,17 +96,13 @@ import it.geosolutions.android.map.utils.SpatialDbUtils;
 import it.geosolutions.android.map.utils.StorageUtils;
 import it.geosolutions.android.map.view.AdvancedMapView;
 import it.geosolutions.geocollect.android.app.R;
-import it.geosolutions.geocollect.android.core.GeoCollectApplication;
 import it.geosolutions.geocollect.android.core.login.LoginActivity;
 import it.geosolutions.geocollect.android.core.login.LogoutActivity;
 import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
-import it.geosolutions.geocollect.android.core.mission.PendingMissionListFragment;
 import it.geosolutions.geocollect.android.core.mission.utils.NavUtils;
-import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
 import it.geosolutions.geocollect.android.core.navigation.NavDrawerActivityConfiguration;
 import it.geosolutions.geocollect.android.core.navigation.NavDrawerAdapter;
 import it.geosolutions.geocollect.android.core.navigation.NavDrawerItem;
-import it.geosolutions.geocollect.model.config.MissionTemplate;
 
 /**
  * Custom Map to use with GeoCollect application
@@ -406,51 +403,6 @@ public class GeoCollectMapActivity extends MapActivityBase {
     }
 
     /**
-     * Creates/Restore the layer switcher or restore the old one and add all other menu
-     * 
-     * @param savedInstanceState
-     * @param layerManager
-     */
-    private void setupLeftMenu(Bundle savedInstanceState, MultiSourceOverlayManager layerManager) {
-        // work on fragment management
-        FragmentManager fManager = getSupportFragmentManager();
-        LayerSwitcherFragment osf;
-        if (savedInstanceState != null) {
-            osf = (LayerSwitcherFragment) fManager.findFragmentById(R.id.left_drawer_container);
-            if (osf == null) {
-                Log.e(TAG, "unable to restore layer switcher");
-            }
-            layerManager.setLayerChangeListener(osf);
-            layerManager.restoreInstanceState(savedInstanceState);
-
-        } else {
-            layerManager.defaultInit();
-            // @SuppressWarnings("unchecked")
-            // ArrayList<Layer> layers = (ArrayList<Layer>) LocalPersistence.readObjectFromFile(this, LocalPersistence.CURRENT_MAP);
-            // if(layers != null){
-            // layerManager.setLayers(layers);
-            // }else{
-
-            if (getIntent() != null && getIntent().getExtras() != null && getIntent().getExtras().containsKey(MapsActivity.MSM_MAP)) {
-
-                layerManager.loadMap((MSMMap) getIntent().getExtras().getSerializable(MapsActivity.MSM_MAP));
-
-            } else {
-                boolean dontLoadMBTileLayer = MapFilesProvider.getBackgroundSourceType() == BackgroundSourceType.MBTILES ? true
-                        : false;
-                MSMMap map = SpatialDbUtils.mapFromDb(dontLoadMBTileLayer);
-                StorageUtils.setupSources(this);
-                // This adds layers also if its called loadMap but it will not order layers
-                // layerManager.loadMap(map);
-                // so use this instead
-                addLayersOrdered(map.layers);
-            }
-
-            // }
-        }
-    }
-
-    /**
      * Resume the state of:
      * 
      * * tile cache * Controls
@@ -586,7 +538,6 @@ public class GeoCollectMapActivity extends MapActivityBase {
                             // do nothing
                         }
                     }).show();
-
         } else {
             finish();
         }
@@ -752,7 +703,7 @@ public class GeoCollectMapActivity extends MapActivityBase {
             ImageButton mcbmb = (ImageButton) findViewById(R.id.ButtonMarker);
             mcbmb.setVisibility(View.VISIBLE);
             mc.setActivationButton(mcbmb);
-            // info button // TODO: do we need this button?
+            // info button
             ImageButton mcib = (ImageButton) findViewById(R.id.marker_info_button);
             mcib.setVisibility(View.VISIBLE);
             mc.setInfoButton(mcib);
@@ -772,8 +723,6 @@ public class GeoCollectMapActivity extends MapActivityBase {
         group.add(ic);
 
         ic.setGroup(group);
-
-        // TODO move this in a control
 
         // Set modes for controls
         if (Intent.ACTION_VIEW.equals(action)) {
@@ -853,6 +802,26 @@ public class GeoCollectMapActivity extends MapActivityBase {
         super.onActivityResult(requestCode, resultCode, incomingIntent);
         Log.d(TAG, "onActivityResult");
 
+        if (requestCode == LoginActivity.REQUEST_LOGIN) {
+
+            if (resultCode == RESULT_CANCELED) {
+                // user cancelled to enter credentials
+                Toast.makeText(getBaseContext(), getString(R.string.login_canceled),
+                        Toast.LENGTH_LONG).show();
+                finish();
+                return;
+            }
+        }
+        if (requestCode == LogoutActivity.REQUEST_LOGOUT) {
+            if (resultCode == LogoutActivity.LOGGED_OUT) {
+                // there is a notification in LogoutActivity already
+                startActivityForResult(
+                        new Intent(this, LoginActivity.class),
+                        LoginActivity.REQUEST_LOGIN);
+                return;
+            }
+        }
+        
         if (requestCode == LayerSwitcherFragment.OPACITY_SETTIN_REQUEST_ID) {
 
             final int newValue = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getInt(
@@ -964,7 +933,6 @@ public class GeoCollectMapActivity extends MapActivityBase {
                 GetFeatureInfoLayerListActivity.RESULT_FEATURE_EXTRA);
         Feature f = new Feature(arrayList);
         String layer = data.getExtras().getString(GetFeatureInfoLayerListActivity.LAYER_FEATURE_EXTRA);
-        // TODO parameterize id column name
 
         Attribute a = f.getAttribute(featureIdField);
 
@@ -1253,69 +1221,11 @@ public class GeoCollectMapActivity extends MapActivityBase {
     
 
     protected void onNavItemSelected(int id) {
-        switch ((int) id) {
-        // The Map button is disabled
-        /*
-         * case 102: // Start the Map activity launchFullMap(); break;
-         */
-        // Settings
-        case 203:
-            final SharedPreferences prefs = PreferenceManager
-                    .getDefaultSharedPreferences(getBaseContext());
-
-            final String user_email = prefs.getString(LoginActivity.PREFS_USER_EMAIL, null);
-            final String user_pw = prefs.getString(LoginActivity.PREFS_PASSWORD, null);
-
-            if (user_email != null && user_pw != null) {
-                // user is most likely logged in, show LogoutActivity
-                startActivityForResult(new Intent(this, LogoutActivity.class),
-                        LogoutActivity.REQUEST_LOGOUT);
-            } else {
-
-                startActivity(new Intent(this, LoginActivity.class));
-            }
-
-            break;
-        // quit
-        case 204:
-            confirmExit();
-            break;
-        
-        // logout
-        case 205:
-            //confirmLogout();
-            break;
-        }
-
-        // downloaded templates will have a dynamic id currently starting from 2000
-        if (id >= 2000) {
-
-            final ArrayList<MissionTemplate> downloadedTemplates = PersistenceUtils
-                    .loadSavedTemplates(getBaseContext());
-
-            if(downloadedTemplates == null){
-                return;
-            }
-            
-            final int templateIndex = id % 2000;
-
-            final MissionTemplate t = downloadedTemplates.get(templateIndex);
-
-            Log.d(TAG, "downloaded template "+ templateIndex + " selected : " + t.id);
-
-            Editor ed = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
-            ed.putBoolean(PendingMissionListActivity.PREFS_USES_DOWNLOADED_TEMPLATE, true);
-            ed.putInt(PendingMissionListActivity.PREFS_DOWNLOADED_TEMPLATE_INDEX, templateIndex);
-            ed.putString(PendingMissionListActivity.PREFS_SELECTED_TEMPLATE_ID, t.id);
-            ed.commit();
-
-            ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
-                    R.id.pendingmission_list)).setTemplate(t);
-            
-            ((GeoCollectApplication)getApplication()).setTemplate(t);
-            
-            // TODO : start Main List with selected template
-
+        if(id != 900){
+            Intent intent = new Intent();
+            intent.putExtra(PendingMissionListActivity.KEY_MAP_RESULT, id);
+            setResult(RESULT_OK, intent);
+            finish();
         }
     }
     
@@ -1332,5 +1242,45 @@ public class GeoCollectMapActivity extends MapActivityBase {
         }
         return super.onKeyDown(keyCode, event);
     }
+    
+    
+    /**
+     * Display a confirm prompt before logging out the user
+     */
+    public static void confirmLogout(final Activity act) {
+        final Context ctx = act.getBaseContext();
+        new AlertDialog.Builder(act).setTitle(R.string.action_logout)
+                .setMessage(R.string.button_confirm_logout)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        //clear user data
+                        final Editor ed = PreferenceManager.getDefaultSharedPreferences(ctx).edit();
+
+                        ed.putString(LoginActivity.PREFS_USER_EMAIL, null);
+                        ed.putString(LoginActivity.PREFS_USER_FORENAME, null);
+                        ed.putString(LoginActivity.PREFS_USER_SURNAME, null);
+                        ed.putString(LoginActivity.PREFS_PASSWORD, null);
+                        ed.putString(LoginActivity.PREFS_AUTH_KEY, null);
+                        ed.putString(LoginActivity.PREFS_USER_ENTE, null);
+
+                        ed.commit();
+
+                        Toast.makeText(ctx, ctx.getString(R.string.logout_logged_out),Toast.LENGTH_LONG).show();
+                        
+                        if(act != null){
+                            act.startActivityForResult(
+                                    new Intent(ctx, LoginActivity.class),
+                                    LoginActivity.REQUEST_LOGIN);
+                        }
+
+                    }
+                }).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // do nothing
+                    }
+                }).show();
+    }
+
 
 }

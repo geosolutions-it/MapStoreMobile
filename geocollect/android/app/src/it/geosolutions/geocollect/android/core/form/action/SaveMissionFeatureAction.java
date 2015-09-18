@@ -115,6 +115,7 @@ public class SaveMissionFeatureAction extends AndroidAction {
 	        	//done, navigate back to list of "new" surveys
 	        	Intent i = new Intent(fragment.getSherlockActivity(),PendingMissionListActivity.class);
 	        	i.putExtra(PendingMissionListActivity.ARG_CREATE_MISSIONFEATURE, true);
+	        	i.putExtra(PendingMissionListActivity.KEY_NAVIGATING_UP, true);
 	        	NavUtils.navigateUpTo(fragment.getSherlockActivity(), i);
 	        	
 	        }

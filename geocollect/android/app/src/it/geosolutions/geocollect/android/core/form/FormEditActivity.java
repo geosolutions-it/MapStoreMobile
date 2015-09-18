@@ -338,6 +338,7 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
 			if(mCreateMissionFeature){
 				i.putExtra(PendingMissionListActivity.ARG_CREATE_MISSIONFEATURE, true);
 			}
+			i.putExtra(PendingMissionListActivity.KEY_NAVIGATING_UP, true);
 			NavUtils.navigateUpTo(this, i);
 			return true;
 		}

@@ -107,8 +107,13 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
     public static final String PREFS_DOWNLOADED_TEMPLATE_INDEX = "DOWNLOADED_TEMPLATE_INDEX";
     public static final String PREFS_SELECTED_TEMPLATE_ID = "SELECTED_TEMPLATE_ID";
     
+    public static final String PREFS_START_WITH_MAP = "START_WITH_MAP";
+    
     public static final String UPDATE_MISSIONS = "UpdateMissionsPeriodically";
     public static final int UPDATE_MISSIONS_TIME_AMOUNT = 30; // Minutes
+    public static final String CHECK_FOR_MAP_START = "CheckForMapStart";
+    
+    private boolean shouldStartMap = false;
     
     /**
      * Contract key for map configuration
@@ -116,7 +121,9 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
     public static String KEY_MAPSTARTLAT = "mapStartLat";
     public static String KEY_MAPSTARTLON = "mapStartLon";
     public static String KEY_MAPSTARTZOOM = "mapStartZoom";
-
+    public static String KEY_MAP_RESULT = "mapResult";
+    public static String KEY_NAVIGATING_UP = "navigatingUp";
+    
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet device.
      */
@@ -170,12 +177,22 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
         final String authKey = prefs.getString(LoginActivity.PREFS_AUTH_KEY, null);
+        
+        if(
+           savedInstanceState == null && 
+           (getIntent() == null || !getIntent().hasExtra(KEY_NAVIGATING_UP)
+        )){
+            shouldStartMap = getStartAsMap();
+        }else{
+            shouldStartMap = false;
+        }
 
         if (authKey == null) {
 
             startActivityForResult(new Intent(this, LoginActivity.class),
                     LoginActivity.REQUEST_LOGIN);
-
+            shouldStartMap = false;
+            
         } else if (!Once.beenDone(TimeUnit.MINUTES, UPDATE_MISSIONS_TIME_AMOUNT, UPDATE_MISSIONS) && NetworkUtil.isOnline(getBaseContext())) {
 
             if(BuildConfig.DEBUG){
@@ -223,16 +240,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
                         public void run() {
 
                             navConf = getNavDrawerConfiguration();
-                            /*
-                            NavDrawerItem[] menu = NavUtils
-                                    .getNavMenu(PendingMissionListActivity.this);
 
-                            // cannot modify items of navdraweradapter --> create a new one
-                            NavDrawerAdapter newNavDrawerAdapter = new NavDrawerAdapter(
-                                    PendingMissionListActivity.this, R.layout.navdrawer_item, menu);
-
-                            mDrawerList.setAdapter(newNavDrawerAdapter);
-                            */
                             mDrawerList.setAdapter(navConf.getBaseAdapter());
                             Log.d(TAG, "navdrawer updated");
 
@@ -291,18 +299,6 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
             // 'activated' state when touched.
             ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
                     R.id.pendingmission_list)).setActivateOnItemClick(true);
-        }
-
-        // TODO: If exposing deep links into your app, handle intents here.
-        if (getIntent().getExtras() != null) {
-            boolean createMission = getIntent().getExtras().getBoolean(ARG_CREATE_MISSIONFEATURE);
-            if (createMission) {
-                // MissionTemplate t = MissionUtils.getDefaultTemplate(getBaseContext());
-                // ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(R.id.pendingmission_list)).setTemplate(t);
-                ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
-                        R.id.pendingmission_list)).switchAdapter();
-
-            }
         }
 
     }
@@ -383,39 +379,6 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
     @Override
     protected void onNavItemSelected(int id) {
         switch ((int) id) {
-        // first option
-        case 101:
-        case 1001:
-            // only one fragment for now, the other options are independent activities
-
-            clearDetailFragment();
-
-
-            Editor ed = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
-            ed.putBoolean(PREFS_USES_DOWNLOADED_TEMPLATE, false);
-            ed.commit();
-
-            MissionTemplate mt = MissionUtils.getDefaultTemplate(getBaseContext());
-
-            ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
-                    R.id.pendingmission_list)).setTemplate(mt);
-            
-            ((GeoCollectApplication)getApplication()).setTemplate(mt);
-            
-            if (id == 101) {
-                ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
-                        R.id.pendingmission_list)).restartLoader(mt.getLoaderIndex());
-            }
-            
-            ((PendingMissionListFragment) getSupportFragmentManager().findFragmentById(
-                    R.id.pendingmission_list)).switchAdapter();
-                    
-            break;
-        // The Map button is disabled
-        /*
-         * case 102: // Start the Map activity launchFullMap(); break;
-         */
-        // Settings
         case 203:
             final SharedPreferences prefs = PreferenceManager
                     .getDefaultSharedPreferences(getBaseContext());
@@ -441,6 +404,9 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         // logout
         case 205:
             confirmLogout();
+            break;
+            
+        default:
             break;
         }
 
@@ -524,7 +490,6 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         finish();
-
                     }
                 }).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -646,16 +611,17 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
             }
         }
         
+        if (requestCode == PendingMissionListActivity.SPATIAL_QUERY){
+            shouldStartMap = false;
+            if(data != null && data.hasExtra(KEY_MAP_RESULT)){
+                
+                onNavItemSelected(data.getIntExtra(KEY_MAP_RESULT, 900));
+                
+                return;
+            }
+        }
+        
         navConf = getNavDrawerConfiguration();
-        /*
-        NavDrawerItem[] menu = NavUtils.getNavMenu(PendingMissionListActivity.this);
-
-        // cannot modify items of navdraweradapter --> create a new one
-        NavDrawerAdapter newNavDrawerAdapter = new NavDrawerAdapter(
-                PendingMissionListActivity.this, R.layout.navdrawer_item, menu);
-
-        mDrawerList.setAdapter(newNavDrawerAdapter);
-        */
         mDrawerList.setAdapter(navConf.getBaseAdapter());
         
         Log.d(TAG, "navdrawer updated");
@@ -728,22 +694,6 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         // Set the correct layers
         m.layers = layersList;
         
-
-        // if(m.layers == null || m.layers.isEmpty()){
-        // // retry, SpatialDataSourceManager is buggy
-        // SpatialDataSourceManager dbManager = SpatialDataSourceManager.getInstance();
-        //
-        // try {
-        // //Only if not already loaded some tables
-        // if (dbManager.getSpatialVectorTables(false).size() <= 0) {
-        // dbManager.init(this, MapFilesProvider.getBaseDirectoryFile());
-        // }
-        // } catch (Exception e) {
-        // // ignore
-        // }
-        // m = SpatialDbUtils.mapFromDb();
-        // }
-        
         // Set map configurations, if available
         if(t.config != null){
             if(t.config.get(KEY_MAPSTARTLAT) != null){
@@ -782,12 +732,6 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         launch.putExtra(MapsActivity.PARAMETERS.DRAWER_MODE, DrawerMode.ONLY_LEFT.ordinal());
         // }
 
-        /*
-        launch.putExtra(MapsActivity.PARAMETERS.CUSTOM_MAPINFO_CONTROL,
-                new ReturningMapInfoControl());
-                */
-
-        // launch.putExtra(MapsActivity.LAYERS_TO_ADD, m.layers) ;
         startActivityForResult(launch, SPATIAL_QUERY);
     }
     
@@ -899,6 +843,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         return locationManager.getBestProvider(criteria, true);
     }
     
+    
     @Override
     protected void onResume() {
         super.onResume();
@@ -918,12 +863,16 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
                   }
                 };
         }
-        
+
         registerReceiver(mReceiver, mIntentFilter);
         
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         if(locationManager != null){
             locationManager.requestLocationUpdates(getProviderName(), LOCATION_MINTIME, LOCATION_MINDISTANCE, this);
+        }
+        
+        if(shouldStartMap){
+            launchFullMap();
         }
     }
     
@@ -938,6 +887,22 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         if(locationManager != null){
             locationManager.removeUpdates(this);
+        }
+    }
+    
+    /**
+     * Get the preference for the starting Activity
+     * - TRUE: start with map
+     * - FALSE: start with list
+     * @return boolean
+     */
+    public boolean getStartAsMap(){
+        
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        try {
+            return sp.getBoolean(PendingMissionListActivity.PREFS_START_WITH_MAP, false);
+        }catch(ClassCastException cce){
+            return false;
         }
     }
 }

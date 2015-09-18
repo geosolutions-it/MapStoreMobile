@@ -178,6 +178,7 @@ public class SendMissionFeatureAction extends AndroidAction {
 				        	//back to list
 				        	Intent i = new Intent(ctx,PendingMissionListActivity.class);
 				        	i.putExtra(PendingMissionListActivity.ARG_CREATE_MISSIONFEATURE, true);
+				        	i.putExtra(PendingMissionListActivity.KEY_NAVIGATING_UP, true);
 				        	NavUtils.navigateUpTo(ctx, i);
 						}
 						super.onFinish(ctx,result);

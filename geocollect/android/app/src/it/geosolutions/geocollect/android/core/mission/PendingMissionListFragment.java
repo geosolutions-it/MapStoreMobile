@@ -249,7 +249,8 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                     if (searchView != null) {
                         searchView.setQuery("", false);
                     }
-
+                    clearSpatialFilter();
+                    getSherlockActivity().invalidateOptionsMenu();
                 }
             });
         }
@@ -674,19 +675,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
             // Clear the Spatial Filter
             if (getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX) != null) {
 
-                SharedPreferences sp = getSherlockActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME,
-                        Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sp.edit();
-                // Change the ordering
-                editor.remove(SQLiteCascadeFeatureLoader.FILTER_N);
-                editor.remove(SQLiteCascadeFeatureLoader.FILTER_S);
-                editor.remove(SQLiteCascadeFeatureLoader.FILTER_W);
-                editor.remove(SQLiteCascadeFeatureLoader.FILTER_E);
-                editor.remove(SQLiteCascadeFeatureLoader.FILTER_SRID);
-                editor.commit();
-
-                adapter.clear();
-                getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
+                clearSpatialFilter();
                 item.setVisible(false);
             }
             return true;
@@ -815,6 +804,24 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * 
+     */
+    public void clearSpatialFilter() {
+        SharedPreferences sp = getSherlockActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        // Change the ordering
+        editor.remove(SQLiteCascadeFeatureLoader.FILTER_N);
+        editor.remove(SQLiteCascadeFeatureLoader.FILTER_S);
+        editor.remove(SQLiteCascadeFeatureLoader.FILTER_W);
+        editor.remove(SQLiteCascadeFeatureLoader.FILTER_E);
+        editor.remove(SQLiteCascadeFeatureLoader.FILTER_SRID);
+        editor.commit();
+
+        adapter.clear();
+        getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
     }
 
     /**
