@@ -13,7 +13,7 @@
     <!-- end of Map Specific permission -->
    
     <uses-sdk
-        android:minSdkVersion="9"
+        android:minSdkVersion="11"
         android:targetSdkVersion="19" />
 
     <application

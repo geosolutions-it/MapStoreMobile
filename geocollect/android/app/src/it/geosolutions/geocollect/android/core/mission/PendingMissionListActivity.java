@@ -50,6 +50,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+
+import jonathanfinerty.once.Once;
 
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
@@ -103,6 +106,9 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
     public static final String PREFS_USES_DOWNLOADED_TEMPLATE = "USES_DOWNLOADED_TEMPLATE";
     public static final String PREFS_DOWNLOADED_TEMPLATE_INDEX = "DOWNLOADED_TEMPLATE_INDEX";
     public static final String PREFS_SELECTED_TEMPLATE_ID = "SELECTED_TEMPLATE_ID";
+    
+    public static final String UPDATE_MISSIONS = "UpdateMissionsPeriodically";
+    public static final int UPDATE_MISSIONS_TIME_AMOUNT = 30; // Minutes
     
     /**
      * Contract key for map configuration
@@ -170,10 +176,11 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
             startActivityForResult(new Intent(this, LoginActivity.class),
                     LoginActivity.REQUEST_LOGIN);
 
-        } else if (NetworkUtil.isOnline(getBaseContext())) {
+        } else if (!Once.beenDone(TimeUnit.MINUTES, UPDATE_MISSIONS_TIME_AMOUNT, UPDATE_MISSIONS) && NetworkUtil.isOnline(getBaseContext())) {
 
-            // TODO --> set when to check the remote templates, for now always onCreate when authkey available && online
-            Log.d(TAG, "fetching remote Templates");
+            if(BuildConfig.DEBUG){
+                Log.d(TAG, "fetching remote Templates");
+            }
 
             final TemplateDownloadTask task = new TemplateDownloadTask() {
                 @Override
@@ -231,6 +238,8 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
 
                         }
                     });
+                    
+                    Once.markDone(UPDATE_MISSIONS);
                 }
             };
             

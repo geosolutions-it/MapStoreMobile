@@ -21,6 +21,9 @@ import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 
 import java.io.File;
+
+import jonathanfinerty.once.Once;
+
 import org.mapsforge.android.maps.BackgroundSourceType;
 
 import android.annotation.TargetApi;
@@ -49,11 +52,6 @@ public class GeoCollectApplication extends Application {
     @TargetApi(Build.VERSION_CODES.GINGERBREAD_MR1)
     @Override
     public void onCreate() {
-        // TODO: remove this block on production
-        // if (true && Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-        // StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().detectAll().penaltyDialog().build());
-        // StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyDeath().build());
-        // }
 
         super.onCreate();
 
@@ -63,7 +61,7 @@ public class GeoCollectApplication extends Application {
 
         MapFilesProvider.setBaseDir("/geocollect");
 
-        // setupMBTilesBackgroundConfiguration();
+        Once.initialise(this);
     }
 
     public void setupMBTilesBackgroundConfiguration() {

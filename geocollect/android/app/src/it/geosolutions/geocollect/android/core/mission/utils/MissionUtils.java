@@ -44,6 +44,7 @@ import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -318,7 +319,7 @@ public class MissionUtils {
 	 */
 	public static ArrayList<MissionFeature> getMissionFeatures(final String mTableName,final Database db, Context ctx){
 
-		ArrayList<MissionFeature> missions = new ArrayList<MissionFeature>();
+		ArrayList<MissionFeature> mFeaturesList = new ArrayList<MissionFeature>();
 
 		String tableName = mTableName;
 		
@@ -333,7 +334,13 @@ public class MissionUtils {
 		
 		// Cycle all the columns to find the "Point" type one
 		HashMap<String, String> columns = SpatialiteUtils.getPropertiesFields(db,tableName);
-
+		if(columns == null){
+		    if(BuildConfig.DEBUG){
+		        Log.w(TAG, "Cannot retrieve columns from database");
+		    }
+		    return mFeaturesList;
+		}
+		
     	List<String> selectFields = new ArrayList<String>();
     	for(String columnName : columns.keySet()){
     		//Spatialite custom field point
@@ -409,7 +416,7 @@ public class MissionUtils {
 		        		}
 		        	}
 		        	f.typeName = mTableName;
-					missions.add(f);
+					mFeaturesList.add(f);
 				}
 				stmt.close();
 			} catch (Exception e) {
@@ -421,7 +428,7 @@ public class MissionUtils {
 			}
 		}
 
-		return missions;
+		return mFeaturesList;
 	}
 	
 	/**
@@ -773,5 +780,37 @@ public class MissionUtils {
         }
         
         return output;
+    }
+    
+    /**
+     * MissionTemplate Comparator
+     * This is based on Template ID, all other fields are ignored
+     * @author Lorenzo Pini (lorenzo.pini@geo-solutions.it)
+     */
+    public static class MissionTemplateComparator implements Comparator<MissionTemplate> {
+        @Override
+        public int compare(MissionTemplate o1, MissionTemplate o2) {
+            if(o1 == o2){
+                return 0;
+            }
+            if(o1 == null){
+                return -1;
+            }
+            
+            if(o2 == null){
+                return 1;
+            }
+            
+            if(o1.id == null || o1.id.isEmpty()){
+                return -1;
+            }
+            
+            if(o2.id == null || o2.id.isEmpty()){
+                return -1;
+            }
+            
+            return o1.id.compareTo(o2.id);
+            
+        }
     }
 }
