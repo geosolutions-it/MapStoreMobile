@@ -114,9 +114,13 @@ public class FormBuilder {
 		if (fields == null) {
 			return;
 		}
+		
+		ArrayList<String> addedFields = new ArrayList<String>();
 		for (Field f : fields) {
 			//the null field will be ignored
-			if(f == null )continue;
+			if(f == null || addedFields.contains(f.fieldId) ){
+			    continue;
+			}
 			if (f.xtype == null) {
 				//textfield as default
 				addTextField(f, mFormView, context,mission);
@@ -158,6 +162,8 @@ public class FormBuilder {
 					addTextField(f, mFormView, context,mission);
 				}
 			}
+			
+			addedFields.add(f.fieldId);
 		}
 		//mFormView.getParent().requestLayout();
 
@@ -453,24 +459,36 @@ public class FormBuilder {
 	private static void addSpinner(Field field, LinearLayout mFormView,
 			Context context, Mission mission) {
 		TextView tvLabel = getLabelForField(field, context);
-		String[] allowed = getFieldAllowedFrom(field);
+		List<HashMap<String, String>> l = getFieldAllowedData(field);
+		String[] from = getFieldAllowedFrom(field);
 		SpinnerAdapter adapter = new SimpleAdapter(
 					context,
-					getFieldAllowedData(field),
+					l,
 				 	android.R.layout.simple_spinner_dropdown_item,
-				 	allowed, 
+				 	from, 
 	        		new int[]{android.R.id.text1}
     	);
 		Spinner spinner = new Spinner(context);
+		spinner.setAdapter(adapter);
 		
+		ArrayList<String> allowedList = new ArrayList<String>();
+		for( HashMap<String, String> hm : l){
+		    for(String s : hm.values()){
+		        allowedList.add(s);
+		    }
+		}
 		
+		String[] allowed = allowedList.isEmpty()? null : allowedList.toArray(new String[allowedList.size()]);
+		
+		field.value="${origin."+field.fieldId+"}";
 		//set initial value
 		String value = mission.getValueAsString(context, field);
 		if(value!=null && allowed!=null){
 			int valueIndex=-1;
 			for(int i = 0;i<allowed.length;i++){
-				if(value.equals(allowed[i]));
-				valueIndex = i;
+				if(value.equals(allowed[i])){
+				    valueIndex = i;
+				}
 			}
 			if(valueIndex>=0){
 				spinner.setSelection(valueIndex);
@@ -485,7 +503,6 @@ public class FormBuilder {
 		spinner.setTag(field.fieldId);
 		mFormView.addView(tvLabel);
 		mFormView.addView(spinner);
-		spinner.setAdapter(adapter);
 	}
 
 	private static TextView getLabelForField(Field field, Context context) {

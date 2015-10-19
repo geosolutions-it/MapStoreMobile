@@ -184,8 +184,9 @@ public class PersistenceUtils {
 			}
 			
 			String s;
-			String value;
+			String value = null;
 			Stmt st = null;
+			Boolean ignoreField = false;
 			for(Field f : page.fields){
 				if(f == null )continue;
 
@@ -196,117 +197,129 @@ public class PersistenceUtils {
 					continue;
 				}
 				
+				ignoreField = false;
+				
 				if (f.xtype == null) {
 					// TODO: load all the fields in one query
 					value = ((TextView)v).getText().toString();
 				} else {
-					// switch witch widget create
-					switch (f.xtype) {
-					case textfield:
-						value = ((TextView)v).getText().toString();
-						break;
-					case textarea:
-						value = ((TextView)v).getText().toString();
-						break;
-					case datefield:
-						value = ((DatePicker)v).getText().toString();
-						break;
-					case checkbox:
-						value = ((CheckBox)v).isChecked() ? "1" : "0";
-						break;
-					case spinner:
-						if(((Spinner)v).getSelectedItem() instanceof HashMap<?, ?>){
-							HashMap<String, String> h = (HashMap<String, String>) ((Spinner)v).getSelectedItem();
-							if(h.get("f1") != null){
-								value = h.get("f1");
-								break;
-							}else{
-								continue;
-							}
-						}else{
-							Log.w(TAG, "Type mismatch on Spinner :"+f.fieldId);
-							continue;
-						}
-					case label:
-						// skip
-						continue;
-						//break;
-					case separator:
-						// skip
-						continue;
-						//break;
-					case photo:
-						// skip
-						continue;
-						//break;
-					case mapViewPoint:
-						if(!(Boolean)FormBuilder.getAttributeWithDefault(f,"editable",true)){
-							// Field is not editable, do not save
-							continue;
-						}
-						AdvancedMapView amv = ((AdvancedMapView)v);
-						if( amv.getMarkerOverlay()==null){
-							Log.v(TAG, "Missing MarkerOverlay for "+f.fieldId);
-							continue;
-						}
-						if(amv.getMarkerOverlay().getMarkers() == null){
-							Log.v(TAG, "Missing Markers for "+f.fieldId);
-							continue;
-						}
-						if(	amv.getMarkerOverlay().getMarkers().size()<=0){
-							Log.v(TAG, "Empty Markers for "+f.fieldId);
-							continue;
-						}
-						if(amv.getMarkerOverlay().getMarkers().get(0) == null) {
-							Log.v(TAG, "First Marker is NULL for "+f.fieldId);
-							continue;
-						}
-						if(amv.getMarkerOverlay().getMarkers().get(0).getGeoPoint() != null){
-							GeoPoint g = amv.getMarkerOverlay().getMarkers().get(0).getGeoPoint();
-							if(g != null){
-								value = "MakePoint("+g.longitude+","+g.latitude+", 4326)";
-							}else{
-								Log.v(TAG, "Missing Geopoint for "+f.fieldId);
-								continue;
-							}
-						}else{
-							Log.w(TAG, "Cannot list features for "+f.fieldId);
-							continue;
-						}
-						break;
-					default:
-						//textfield as default
-						value = ((TextView)v).getText().toString();
-					}
+				    try {
+    					// switch witch widget create
+    					switch (f.xtype) {
+    					case textfield:
+    						value = ((TextView)v).getText().toString();
+    						break;
+    					case textarea:
+    						value = ((TextView)v).getText().toString();
+    						break;
+    					case datefield:
+    						value = ((DatePicker)v).getText().toString();
+    						break;
+    					case checkbox:
+    						value = ((CheckBox)v).isChecked() ? "1" : "0";
+    						break;
+    					case spinner:
+    						if(((Spinner)v).getSelectedItem() instanceof HashMap<?, ?>){
+    							HashMap<String, String> h = (HashMap<String, String>) ((Spinner)v).getSelectedItem();
+    							if(h.get("f1") != null){
+    								value = h.get("f1");
+    								break;
+    							}else{
+    								continue;
+    							}
+    						}else{
+    							Log.w(TAG, "Type mismatch on Spinner :"+f.fieldId);
+    							continue;
+    						}
+    					case label:
+    						// skip
+    						continue;
+    						//break;
+    					case separator:
+    						// skip
+    						continue;
+    						//break;
+    					case photo:
+    						// skip
+    						continue;
+    						//break;
+    					case mapViewPoint:
+    						if(!(Boolean)FormBuilder.getAttributeWithDefault(f,"editable",true)){
+    							// Field is not editable, do not save
+    							continue;
+    						}
+    						AdvancedMapView amv = ((AdvancedMapView)v);
+    						if( amv.getMarkerOverlay()==null){
+    							Log.v(TAG, "Missing MarkerOverlay for "+f.fieldId);
+    							continue;
+    						}
+    						if(amv.getMarkerOverlay().getMarkers() == null){
+    							Log.v(TAG, "Missing Markers for "+f.fieldId);
+    							continue;
+    						}
+    						if(	amv.getMarkerOverlay().getMarkers().size()<=0){
+    							Log.v(TAG, "Empty Markers for "+f.fieldId);
+    							continue;
+    						}
+    						if(amv.getMarkerOverlay().getMarkers().get(0) == null) {
+    							Log.v(TAG, "First Marker is NULL for "+f.fieldId);
+    							continue;
+    						}
+    						if(amv.getMarkerOverlay().getMarkers().get(0).getGeoPoint() != null){
+    							GeoPoint g = amv.getMarkerOverlay().getMarkers().get(0).getGeoPoint();
+    							if(g != null){
+    								value = "MakePoint("+g.longitude+","+g.latitude+", 4326)";
+    							}else{
+    								Log.v(TAG, "Missing Geopoint for "+f.fieldId);
+    								continue;
+    							}
+    						}else{
+    							Log.w(TAG, "Cannot list features for "+f.fieldId);
+    							continue;
+    						}
+    						break;
+    					default:
+    						//textfield as default
+    						value = ((TextView)v).getText().toString();
+    					}
+				    }catch(ClassCastException cce){
+				        if(BuildConfig.DEBUG){
+				            Log.e(TAG, "Configuration Error, maybe you set two fields with the same fieldIs ?");
+				            ignoreField = true;
+				            continue;
+				        }
+				    }
 				}
-				try {	
-					
-					String originIDString = MissionUtils.getMissionGCID(mission);
-					
-					if(f.xtype == XType.mapViewPoint){
-						// a geometry must be built
-						s = "UPDATE '"+tableName+"' SET "+ f.fieldId +" = "+ value +" WHERE "+ Mission.ORIGIN_ID_STRING +" = '"+originIDString+"';";
-					}else{
-						// Standard values
-						value = value.replace("'", "''");
-						s = "UPDATE '"+tableName+"' SET "+ f.fieldId +" = '"+ value +"' WHERE "+ Mission.ORIGIN_ID_STRING +" = '"+originIDString+"';";
-					}
-					Log.v(TAG, "Query :\n"+s);
-					if(Database.complete(s)){
-						st = mission.db.prepare(s);
-						if(st.step()){
-							//Log.v(TAG, "Updated");
-						}else{
-							// useless check, the step on an update returns zero rows
-							//Log.v(TAG, "Update failed");
-						}
-					}else{
-						Log.w(TAG, "Skipping non complete statement:\n"+s);
-					}
-					
-				} catch (Exception e) {
-					Log.e(TAG, Log.getStackTraceString(e));
-					return false;
+				if(!ignoreField){
+    				try {	
+    					
+    					String originIDString = MissionUtils.getMissionGCID(mission);
+    					
+    					if(f.xtype == XType.mapViewPoint){
+    						// a geometry must be built
+    						s = "UPDATE '"+tableName+"' SET "+ f.fieldId +" = "+ value +" WHERE "+ Mission.ORIGIN_ID_STRING +" = '"+originIDString+"';";
+    					}else{
+    						// Standard values
+    						value = value.replace("'", "''");
+    						s = "UPDATE '"+tableName+"' SET "+ f.fieldId +" = '"+ value +"' WHERE "+ Mission.ORIGIN_ID_STRING +" = '"+originIDString+"';";
+    					}
+    					Log.v(TAG, "Query :\n"+s);
+    					if(Database.complete(s)){
+    						st = mission.db.prepare(s);
+    						if(st.step()){
+    							//Log.v(TAG, "Updated");
+    						}else{
+    							// useless check, the step on an update returns zero rows
+    							//Log.v(TAG, "Update failed");
+    						}
+    					}else{
+    						Log.w(TAG, "Skipping non complete statement:\n"+s);
+    					}
+    					
+    				} catch (Exception e) {
+    					Log.e(TAG, Log.getStackTraceString(e));
+    					return false;
+    				}
 				}
 			}
 			if(st!=null){
@@ -473,14 +486,20 @@ public class PersistenceUtils {
 			
 			String s;
 			Stmt st = null;
+			ArrayList<String> addedFields = new ArrayList<String>();
 			for(Field f : page.fields){
-				if(f == null )continue;
+				
+			    if( f == null || addedFields.contains(f.fieldId) )
+				{
+				    continue;
+			    }
+				
 				try {
 					// TODO: load all the fields in one query
 					String originIDString = MissionUtils.getMissionGCID(mission);					
 					if(f.xtype == XType.mapViewPoint){
 						// a point must be retreived
-						s = "SELECT Y(" + f.fieldId + "), X(" + f.fieldId + ") FROM '" + tableName + "' WHERE "+ Mission.ORIGIN_ID_STRING +" = '" + originIDString +"';";
+						s = "SELECT Y( GEOMETRY ), X( GEOMETRY ) FROM '" + tableName + "' WHERE "+ Mission.ORIGIN_ID_STRING +" = '" + originIDString +"';";
 					}else{
 						s = "SELECT " + f.fieldId +" FROM '" + tableName + "' WHERE "+ Mission.ORIGIN_ID_STRING +" = '" + originIDString +"';";
 					}
@@ -623,6 +642,8 @@ public class PersistenceUtils {
 
 						}
 						st.close();
+						
+						addedFields.add(f.fieldId);
 					}
 				} catch (Exception e) {
 					Log.e(TAG, Log.getStackTraceString(e));
