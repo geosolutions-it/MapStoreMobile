@@ -217,7 +217,7 @@ public class FormBuilder {
 		o.setMarkerOverlay(m);
 		m.setProjection(mapView.getProjection());
 		// only from tag is supported
-		List<String> tags = MissionUtils.getTags(field.value);
+		List<String> tags = MissionUtils.getTags("${origin."+mission.getOrigin().geometry_name+"}");
 		GeoPoint geoPoint = null;
 		if(tags!=null && tags.size() ==1){
 			//Get geometry now geoPoint only supported)

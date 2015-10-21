@@ -201,7 +201,10 @@ public class SendMissionFeatureAction extends AndroidAction {
 				missionFeature.properties = new HashMap<String, Object>();
 			}
 			missionFeature.properties.put(Mission.MY_ORIG_ID_STRING, featureIDString);
-			
+            
+			// Auto set GCID
+			missionFeature.properties.put(MissionUtils.GCID_STRING, featureIDString);
+            
 			GeoJson gson = new GeoJson();
 			String c = gson.toJson( missionFeature);
 			String data = null;

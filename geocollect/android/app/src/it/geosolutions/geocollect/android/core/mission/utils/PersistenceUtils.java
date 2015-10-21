@@ -561,10 +561,6 @@ public class PersistenceUtils {
 								case mapViewPoint:
 									if(v != null){
 										Log.v(TAG, "Setting Point value :"+st.column_double(0)+" , "+st.column_double(1));
-										if(st.column_double(0)+st.column_double(1)==0){
-											Log.v(TAG, "Skipping zero coordinates on "+f.fieldId);
-											break;
-										}
 										
 										// do we need to show the origin point?
 										boolean displayOriginalValue = false;
@@ -585,29 +581,39 @@ public class PersistenceUtils {
 											// Remove existing markers
 											mo.getOverlayItems().removeAll(mo.getOverlayItems());
 											mo.getMarkers().removeAll(mo.getMarkers());
+											
+											GeoPoint origin_geoPoint = null;
 
-											if(displayOriginalValue){
-												// only from tag is supported
-												List<String> tags = MissionUtils.getTags(f.value);
-												GeoPoint origin_geoPoint = null;
-												if(tags!=null && tags.size() ==1){
-													//Get geometry now geoPoint only supported)
-													//TODO support for different formats
-													Point geom = (Point) mission.getValueByTag(context, tags.get(0));
-													if(geom !=null){
-														if(!geom.isEmpty()){
-															double lat = geom.getY();
-															double lon = geom.getX();
-															origin_geoPoint = new GeoPoint(lat, lon);
-														}
+											// only from tag is supported
+											List<String> tags = MissionUtils.getTags("${origin."+mission.getOrigin().geometry_name+"}");
+											
+											if(tags!=null && tags.size() ==1){
+												//Get geometry now geoPoint only supported)
+												//TODO support for different formats
+												Point geom = (Point) mission.getValueByTag(context, tags.get(0));
+												if(geom !=null){
+													if(!geom.isEmpty()){
+														double lat = geom.getY();
+														double lon = geom.getX();
+														origin_geoPoint = new GeoPoint(lat, lon);
 													}
 												}
-
-												// Add new marker based on geopoint
-												DescribedMarker origin_marker = new MarkerDTO(origin_geoPoint.latitude, origin_geoPoint.longitude,MarkerDTO.PIN_BLUE).createMarker(context);
-												mo.getOverlayItems().add(origin_marker);
 											}
-											// TODO : If displayOriginalValue is true, the map should be read-only to prevent mismatch saving marker position on database
+
+											// Add new marker based on geopoint
+											//DescribedMarker origin_marker = new MarkerDTO(origin_geoPoint.latitude, origin_geoPoint.longitude,MarkerDTO.PIN_BLUE).createMarker(context);
+											//mo.getOverlayItems().add(origin_marker);
+											
+											if(geoPoint.latitude + geoPoint.longitude==0){
+											    if(origin_geoPoint != null && origin_geoPoint.latitude+origin_geoPoint.longitude != 0){
+											        Log.v(TAG, "Zero coordinates on "+f.fieldId+". " +
+											        		"Setting to original values: "+origin_geoPoint.latitude+" , "+origin_geoPoint.longitude);
+											        geoPoint = origin_geoPoint;
+											    }else{
+											        Log.v(TAG, "No coordinates found, skipping.");
+											        break;
+											    }
+											}
 											
 											// Add new marker based on geopoint
 											DescribedMarker marker = new MarkerDTO(geoPoint.latitude, geoPoint.longitude,MarkerDTO.PIN_RED).createMarker(context);

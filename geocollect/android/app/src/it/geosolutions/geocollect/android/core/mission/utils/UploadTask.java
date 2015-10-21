@@ -191,6 +191,10 @@ public abstract class UploadTask  extends AsyncTask<Void, Integer, CommitRespons
                 if (featureToUpload.typeName.endsWith(MissionTemplate.NEW_NOTICE_SUFFIX)) {
                     toUpload = MissionUtils.alignMissionFeatureProperties(featureToUpload,
                             missionTemplate.schema_seg.fields);
+                    // Auto set GCID
+                    toUpload.properties.put(MissionUtils.GCID_STRING, featureIDString);
+                    toUpload.properties.put(MissionUtils.GCID_STRING.toLowerCase(), featureIDString);
+                    
                 } else {
                     toUpload = MissionUtils.alignMissionFeatureProperties(featureToUpload,
                             missionTemplate.schema_sop.fields);
