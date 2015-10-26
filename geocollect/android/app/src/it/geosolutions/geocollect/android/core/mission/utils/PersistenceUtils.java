@@ -208,6 +208,14 @@ public class PersistenceUtils {
     					switch (f.xtype) {
     					case textfield:
     						value = ((TextView)v).getText().toString();
+    						if(f.type == XDataType.integer
+					        || f.type == XDataType.decimal
+                            || f.type == XDataType.real){
+    						    if(value.isEmpty()){
+    						        value = null;
+    						    }
+    						}
+    						
     						break;
     					case textarea:
     						value = ((TextView)v).getText().toString();
@@ -299,9 +307,13 @@ public class PersistenceUtils {
     						// a geometry must be built
     						s = "UPDATE '"+tableName+"' SET "+ f.fieldId +" = "+ value +" WHERE "+ Mission.ORIGIN_ID_STRING +" = '"+originIDString+"';";
     					}else{
-    						// Standard values
-    						value = value.replace("'", "''");
-    						s = "UPDATE '"+tableName+"' SET "+ f.fieldId +" = '"+ value +"' WHERE "+ Mission.ORIGIN_ID_STRING +" = '"+originIDString+"';";
+    					    if(value != null){
+        						// Standard values
+        						value = value.replace("'", "''");
+        						s = "UPDATE '"+tableName+"' SET "+ f.fieldId +" = '"+ value +"' WHERE "+ Mission.ORIGIN_ID_STRING +" = '"+originIDString+"';";
+    					    }else{
+    					        s = "UPDATE '"+tableName+"' SET "+ f.fieldId +" = NULL WHERE "+ Mission.ORIGIN_ID_STRING +" = '"+originIDString+"';";
+    					    }
     					}
     					Log.v(TAG, "Query :\n"+s);
     					if(Database.complete(s)){
