@@ -1,32 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="it.geosolutions.geocollect.android.app"
     android:versionCode="16"
     android:versionName="1.15" >
-	<uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <!-- Map Specific permission -->
     <uses-permission android:name="android.permission.VIBRATE" />
     <!-- end of Map Specific permission -->
-   
+
     <uses-sdk
         android:minSdkVersion="11"
         android:targetSdkVersion="19" />
 
     <application
-        android:debuggable="false"
+        android:name="it.geosolutions.geocollect.android.core.GeoCollectApplication"
         android:allowBackup="true"
+        android:debuggable="false"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:name="it.geosolutions.geocollect.android.core.GeoCollectApplication"
         android:theme="@style/Theme.Sherlock.Light.DarkActionBar" >
-
-         <activity
-            android:name="it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity">
-            android:label="@string/app_name"
+        <activity android:name="it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity" >
+            android:label="@string/app_name"
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -34,7 +34,6 @@
             </intent-filter>
         </activity>
         <activity android:name="it.geosolutions.geocollect.android.core.form.FormEditActivity" />
-
         <activity
             android:name="it.geosolutions.geocollect.android.core.mission.PendingMissionDetailActivity"
             android:parentActivityName="it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity" >
@@ -43,11 +42,11 @@
                 android:value="it.geosolutions.geocollect.android.core.PendingMissionListActivity" />
         </activity>
         <activity android:name="it.geosolutions.geocollect.android.core.mission.SimpleMapActivity" />
-        <!--  PREFERENCES  -->
+        <!-- PREFERENCES -->
         <activity
             android:name="it.geosolutions.geocollect.android.core.preferences.GeoCollectPreferences"
-		    android:theme="@android:style/Theme.Black.NoTitleBar" >
-		</activity>
+            android:theme="@android:style/Theme.Black.NoTitleBar" >
+        </activity>
         <!-- Login/Logout -->
         <activity
             android:name="it.geosolutions.geocollect.android.core.login.LoginActivity"
@@ -60,21 +59,18 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Sherlock.Light.NoActionBar" />
-        <activity
-		    android:name="it.geosolutions.geocollect.android.map.GeoCollectMapActivity"
-		    />
+        <activity android:name="it.geosolutions.geocollect.android.map.GeoCollectMapActivity" />
         <!-- *************** -->
         <!-- MAPSTORE_MOBILE -->
         <!-- *************** -->
-        
-         <activity
+
+        <activity
             android:name="it.geosolutions.android.map.DataListActivity"
             android:label="@string/app_name" >
         </activity>
-         <activity 
-             android:name="it.geosolutions.android.map.MapsActivity" 
-             android:label="@string/app_name"
-             >
+        <activity
+            android:name="it.geosolutions.android.map.MapsActivity"
+            android:label="@string/app_name" >
         </activity>
         <activity
             android:name="it.geosolutions.android.map.activities.style.LinesDataPropertiesActivity"
@@ -106,25 +102,34 @@
         </activity>
         <!-- End Map -->
         <!-- GeoStore -->
-         <activity android:name="it.geosolutions.android.map.geostore.activities.GeoStoreResourcesActivity" >
+        <activity android:name="it.geosolutions.android.map.geostore.activities.GeoStoreResourcesActivity" >
         </activity>
-         <activity android:name="it.geosolutions.android.map.geostore.activities.GeoStoreResourceDetailActivity">
+        <activity android:name="it.geosolutions.android.map.geostore.activities.GeoStoreResourceDetailActivity" >
         </activity>
         <!-- End GeoStore -->
-        <activity android:name="it.geosolutions.android.map.mapstore.activities.MapStoreLayerListActivity">
+        <activity android:name="it.geosolutions.android.map.mapstore.activities.MapStoreLayerListActivity" >
         </activity>
-        <!-- Layer add  -->
-        <activity android:name="it.geosolutions.android.map.activities.BrowseSourcesActivity"></activity>
-        <activity android:name="it.geosolutions.android.map.spatialite.activities.SpatialiteLayerListActivity"></activity>
+        <!-- Layer add -->
+        <activity android:name="it.geosolutions.android.map.activities.BrowseSourcesActivity" >
+        </activity>
+        <activity android:name="it.geosolutions.android.map.spatialite.activities.SpatialiteLayerListActivity" >
+        </activity>
         <!-- Source Add -->
-        <activity android:name="it.geosolutions.android.map.activities.NewSourceActivity"></activity>
-        <!-- About  -->
-        <activity android:name="it.geosolutions.android.map.activities.about.InfoView"></activity>
-        <!-- MBTilesOpacitySetting  -->
-        <activity android:name="it.geosolutions.android.map.activities.MBTilesLayerOpacitySettingActivity"></activity>
+        <activity android:name="it.geosolutions.android.map.activities.NewSourceActivity" >
+        </activity>
+        <!-- About -->
+        <activity android:name="it.geosolutions.android.map.activities.about.InfoView" >
+        </activity>
+        <!-- MBTilesOpacitySetting -->
+        <activity android:name="it.geosolutions.android.map.activities.MBTilesLayerOpacitySettingActivity" >
+        </activity>
         <!-- ********************** -->
         <!-- END OF MAPSTORE MOBILE -->
         <!-- ********************** -->
+        <activity
+            android:name="it.geosolutions.geocollect.android.app.CreditsActivity"
+            android:label="@string/title_activity_credits" >
+        </activity>
     </application>
-	
+
 </manifest>

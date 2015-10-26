@@ -24,6 +24,7 @@ import it.geosolutions.android.map.model.MSMMap;
 import it.geosolutions.android.map.utils.SpatialDbUtils;
 import it.geosolutions.android.map.view.MapViewManager;
 import it.geosolutions.geocollect.android.app.BuildConfig;
+import it.geosolutions.geocollect.android.app.CreditsActivity;
 import it.geosolutions.geocollect.android.core.GeoCollectApplication;
 import it.geosolutions.geocollect.android.app.R;
 import it.geosolutions.geocollect.android.core.form.FormEditActivity;
@@ -405,7 +406,9 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         case 205:
             confirmLogout();
             break;
-            
+        case 900:
+            startActivity(new Intent(this, CreditsActivity.class));
+            break;
         default:
             break;
         }

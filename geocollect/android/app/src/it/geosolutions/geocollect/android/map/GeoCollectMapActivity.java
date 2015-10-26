@@ -95,6 +95,7 @@ import it.geosolutions.android.map.utils.MarkerUtils;
 import it.geosolutions.android.map.utils.SpatialDbUtils;
 import it.geosolutions.android.map.utils.StorageUtils;
 import it.geosolutions.android.map.view.AdvancedMapView;
+import it.geosolutions.geocollect.android.app.CreditsActivity;
 import it.geosolutions.geocollect.android.app.R;
 import it.geosolutions.geocollect.android.core.login.LoginActivity;
 import it.geosolutions.geocollect.android.core.login.LogoutActivity;
@@ -1226,6 +1227,8 @@ public class GeoCollectMapActivity extends MapActivityBase {
             intent.putExtra(PendingMissionListActivity.KEY_MAP_RESULT, id);
             setResult(RESULT_OK, intent);
             finish();
+        }else{
+            startActivity(new Intent(this, CreditsActivity.class));
         }
     }
     
