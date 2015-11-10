@@ -272,7 +272,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
                                   
                                   columnNames .append( ", " ).append( e.getKey() );
                                   
-                                  if(converted.equals("text")||converted.equals("blob")){
+                                  if(converted.equals("text")||converted.equals("blob") || !isNumeric(String.valueOf(f.properties.get(e.getKey()))) ){
                                       columnValues .append( ", '" ).append( SpatialiteUtils.escape((String) f.properties.get(e.getKey())) ).append("' " );
                                   }else{
                                       columnValues .append( ", " ).append( f.properties.get(e.getKey())) ;
@@ -626,5 +626,23 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 	private void releaseResources(List<MissionFeature> mData) {
 		// release resource if needed
 
+	}
+	
+	/**
+	 * Returns true if the given string is a number
+	 * @param str
+	 * @return
+	 */
+	public static boolean isNumeric(String str)  
+	{  
+	    if(str == null){
+	        return false;
+	    }
+        try {  
+            Double.parseDouble(str);  
+        } catch(NumberFormatException nfe) {  
+            return false;  
+        }  
+        return true;  
 	}
 }
