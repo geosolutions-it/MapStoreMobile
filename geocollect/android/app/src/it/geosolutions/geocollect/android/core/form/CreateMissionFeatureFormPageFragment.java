@@ -2,6 +2,7 @@ package it.geosolutions.geocollect.android.core.form;
 
 import it.geosolutions.android.map.fragment.MapFragment;
 import it.geosolutions.android.map.view.AdvancedMapView;
+import it.geosolutions.geocollect.android.app.BuildConfig;
 import it.geosolutions.geocollect.android.app.R;
 import it.geosolutions.geocollect.android.core.form.action.AndroidAction;
 import it.geosolutions.geocollect.android.core.form.action.CameraAction;
@@ -133,6 +134,10 @@ public class CreateMissionFeatureFormPageFragment extends MapFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
 
+	    if(BuildConfig.DEBUG){
+	        Log.v(TAG, "onCreateView()");
+	    }
+	    
 		if (mScrollView == null) {
 			// normally inflate the view hierarchy
 			mScrollView = (ScrollView) inflater.inflate(R.layout.form_page_fragment,container, false);
@@ -146,9 +151,13 @@ public class CreateMissionFeatureFormPageFragment extends MapFragment {
 		}
 		
 		mFormView.setGravity(Gravity.TOP);
+		
+		if(savedInstanceState != null && savedInstanceState.containsKey(CREATED_MISSION)){
+		    ((FormEditActivity) getSherlockActivity()).mMission = (MissionFeature) savedInstanceState.get(CREATED_MISSION);
+		}
+		
 		buildForm();
 
-		
 		return mScrollView;
 	}
 	
@@ -157,8 +166,9 @@ public class CreateMissionFeatureFormPageFragment extends MapFragment {
      */
     private void buildForm() {
 		// if the view hierarchy was already build, skip this
-		if (mDone)
+		if (mDone){
 			return;
+		}
 
 		MissionFeatureFormBuilder.buildForm(getActivity(), this.mFormView, page.fields, ((FormEditActivity)getSherlockActivity()).mMission);
 		
@@ -203,7 +213,8 @@ public class CreateMissionFeatureFormPageFragment extends MapFragment {
     @Override
     public void onPause() {
     	super.onPause();
-    	
+    	Log.d(TAG, "onPause()");
+
     	if(page != null && mFormView != null){
     		storePageData(page, mFormView);
     	}
