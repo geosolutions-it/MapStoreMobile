@@ -26,6 +26,7 @@ public enum XDataType {
 	date,
 	datetime,
 	integer,
+	numeric,
 	decimal,
 	phone,
 	person,

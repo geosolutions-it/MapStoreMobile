@@ -125,7 +125,8 @@ public class SpatialiteUtils {
 		}
 
 		if(	toCheck.equals("numeric")
-				){
+			|| toCheck.equals("long")
+            	){
 			return "numeric";
 		}
 

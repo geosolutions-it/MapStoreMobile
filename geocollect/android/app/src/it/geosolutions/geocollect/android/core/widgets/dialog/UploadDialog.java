@@ -1,13 +1,11 @@
 package it.geosolutions.geocollect.android.core.widgets.dialog;
 
-import it.geosolutions.android.map.wfs.geojson.feature.Feature;
 import it.geosolutions.geocollect.android.app.R;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
 import it.geosolutions.geocollect.android.core.mission.utils.UploadTask;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.http.CommitResponse;
 
-import java.util.HashMap;
 import java.util.List;
 
 import android.app.Activity;

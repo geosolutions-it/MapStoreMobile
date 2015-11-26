@@ -821,7 +821,9 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
         editor.commit();
 
         adapter.clear();
-        getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
+        if(getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX) != null){
+            getSherlockActivity().getSupportLoaderManager().getLoader(CURRENT_LOADER_INDEX).forceLoad();
+        }
     }
 
     /**

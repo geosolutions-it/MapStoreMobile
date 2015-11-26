@@ -19,6 +19,7 @@ package it.geosolutions.geocollect.android.core.form;
 
 
 import it.geosolutions.android.map.fragment.MapFragment;
+import it.geosolutions.geocollect.android.app.BuildConfig;
 import it.geosolutions.geocollect.android.app.R;
 import it.geosolutions.geocollect.android.core.form.action.AndroidAction;
 import it.geosolutions.geocollect.android.core.form.action.CameraAction;
@@ -190,9 +191,15 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
      * Creates the page content cycling the page fields
      */
     private void buildForm() {
+        
+        if(BuildConfig.DEBUG){
+            Log.d(TAG, "buildForm()");
+        }
+        
 		// if the view hierarchy was already build, skip this
-		if (mDone)
+		if (mDone){
 			return;
+		}
 
 		FormBuilder.buildForm(getActivity(), this.mFormView, page.fields, mission);//TODO page is not enough, some data should be accessible like constants and data
 		
@@ -378,7 +385,9 @@ public class FormPageFragment extends MapFragment  implements LoaderCallbacks<Vo
 	@Override
 	public void onPause() {
 		super.onPause();
-		Log.d(TAG, "onPause()");
+		if(BuildConfig.DEBUG){
+		    Log.d(TAG, "onPause()");
+		}
 
 		if(imageLoader != null && imageLoader.isInited()){
 			imageLoader.pause();
