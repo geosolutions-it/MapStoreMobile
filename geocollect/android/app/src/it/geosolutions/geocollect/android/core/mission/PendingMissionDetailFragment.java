@@ -124,7 +124,7 @@ public class PendingMissionDetailFragment extends MapFragment implements LoaderC
 			// normally inflate the view hierarchy
 			mScrollView = (ScrollView) inflater.inflate(R.layout.preview_page_fragment,
 					container, false);
-			mFormView = (LinearLayout) mScrollView.findViewById(R.id.formcontent);
+			mFormView = (LinearLayout) mScrollView.findViewById(R.id.previewcontent);
 			mProgressView = (ProgressBar) mScrollView
 					.findViewById(R.id.loading);
 		} else {
