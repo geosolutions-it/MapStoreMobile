@@ -118,7 +118,7 @@ public class FormBuilder {
 		ArrayList<String> addedFields = new ArrayList<String>();
 		for (Field f : fields) {
 			//the null field will be ignored
-			if(f == null || addedFields.contains(f.fieldId) ){
+			if(f == null || (f.fieldId != null && addedFields.contains(f.fieldId)) ){
 			    continue;
 			}
 			if (f.xtype == null) {
@@ -830,7 +830,6 @@ public class FormBuilder {
 					LayoutParams.WRAP_CONTENT);
 		}
 		
-		params.weight = 0.4f;
 		params.bottomMargin = 20;
 		params.topMargin = 20;
 		params.leftMargin = 10;
