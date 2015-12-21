@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.mapsforge.android.maps.MapView;
+import org.mapsforge.android.maps.mapgenerator.mbtiles.MbTilesDatabaseRenderer;
 import org.mapsforge.core.model.GeoPoint;
 
 import android.content.Context;
@@ -268,6 +269,13 @@ public class FormBuilder {
         if(filePath != null && type == 0){
             //use it
             mapView.setMapFile(new File(filePath));
+            
+        }else if(filePath != null && type == 1){
+            // Set a fake background, will not be rendered
+            // TODO: Change this workaround when the library will support setting MBTILES files as actual backgrounds
+            mapView.setMapFile((new File(MapFilesProvider.getBaseDirectoryFile(), "bg.map")));
+            // Set the MBTILES background renderer
+            mapView.setRenderer(new MbTilesDatabaseRenderer(context, filePath), true);
             
         }else if (mapFile!=null) {
             
