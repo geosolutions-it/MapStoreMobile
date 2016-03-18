@@ -729,7 +729,7 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         }
         
         launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL_MIN, (byte) 11);
-        launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL_MAX, (byte) 19);
+        launch.putExtra(MapsActivity.PARAMETERS.ZOOM_LEVEL_MAX, (byte) 22);
         launch.putExtra(MapsActivity.MSM_MAP, m);
         // select here a drawer mode
         launch.putExtra(MapsActivity.PARAMETERS.DRAWER_MODE, DrawerMode.ONLY_LEFT.ordinal());
