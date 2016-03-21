@@ -752,7 +752,7 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
                                                 /*if (mMode == FragmentMode.CREATION) {
                                                     fillCreatedMissionFeatureAdapter();
                                                 } else {
-                                                */    forceLoad();
+                                                */    onRefresh();
                                                 //}
                                                 getSherlockActivity().supportInvalidateOptionsMenu();
 
