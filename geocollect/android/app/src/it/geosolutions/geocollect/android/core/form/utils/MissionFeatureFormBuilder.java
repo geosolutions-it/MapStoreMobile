@@ -1,6 +1,6 @@
 /*
  * GeoSolutions - MapstoreMobile - GeoSpatial Framework on Android based devices
- * Copyright (C) 2014  GeoSolutions (www.geo-solutions.it)
+ * Copyright (C) 2014 - 2016  GeoSolutions (www.geo-solutions.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,18 @@ import it.geosolutions.android.map.control.CoordinateControl;
 import it.geosolutions.android.map.control.LocationControl;
 import it.geosolutions.android.map.control.MarkerControl;
 import it.geosolutions.android.map.dto.MarkerDTO;
+import it.geosolutions.android.map.model.Layer;
+import it.geosolutions.android.map.model.MSMMap;
 import it.geosolutions.android.map.overlay.MarkerOverlay;
 import it.geosolutions.android.map.overlay.items.DescribedMarker;
 import it.geosolutions.android.map.overlay.managers.MultiSourceOverlayManager;
 import it.geosolutions.android.map.utils.MapFilesProvider;
+import it.geosolutions.android.map.utils.SpatialDbUtils;
 import it.geosolutions.android.map.view.AdvancedMapView;
 import it.geosolutions.android.map.wfs.geojson.feature.Feature;
+import it.geosolutions.geocollect.android.app.BuildConfig;
 import it.geosolutions.geocollect.android.app.R;
+import it.geosolutions.geocollect.android.core.GeoCollectApplication;
 import it.geosolutions.geocollect.android.core.form.FormEditActivity;
 import it.geosolutions.geocollect.android.core.form.ViewPagerAwareMarkerControl;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
@@ -36,6 +41,7 @@ import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.LocationProvider.LocationResultCallback;
 import it.geosolutions.geocollect.android.core.widgets.DatePicker;
 import it.geosolutions.geocollect.android.core.widgets.UILImageAdapter;
+import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.viewmodel.Field;
 
 import java.io.File;
@@ -46,10 +52,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
 import org.mapsforge.android.maps.MapView;
+import org.mapsforge.android.maps.mapgenerator.mbtiles.MbTilesDatabaseRenderer;
 import org.mapsforge.core.model.GeoPoint;
 
 import android.content.Context;
@@ -76,6 +84,7 @@ import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.vividsolutions.jts.geom.Point;
@@ -298,9 +307,6 @@ public class MissionFeatureFormBuilder {
 
 		o.setMarkerOverlay(m);
 		
-		//Marker Control 
-
-		
 		//check editable
 		Boolean editable = (Boolean)getAttributeWithDefault(field,"editable",true);
 		//check disablePan
@@ -317,9 +323,6 @@ public class MissionFeatureFormBuilder {
 		
 		if(editable){
 			 mc.setMode(MarkerControl.MODE_EDIT);
-			 //TODO make infobutton work
-			 //infoButton.setVisibility(ImageButton.VISIBLE);
-
 		}
 
         File mapFile = MapFilesProvider.getBackgroundMapFile();
@@ -331,6 +334,13 @@ public class MissionFeatureFormBuilder {
             //use it
             mapView.setMapFile(new File(filePath));
             
+        }else if(filePath != null && type == 1){
+            // Set a fake background, will not be rendered
+            // TODO: Change this workaround when the library will support setting MBTILES files as actual backgrounds
+            mapView.setMapFile((new File(MapFilesProvider.getBaseDirectoryFile(), "bg.map")));
+            // Set the MBTILES background renderer
+            mapView.setRenderer(new MbTilesDatabaseRenderer(context, filePath), true);
+            
         }else if (mapFile!=null) {
             
             Log.i(TAG,"setting background file");
@@ -338,6 +348,49 @@ public class MissionFeatureFormBuilder {
             
         } else {
             Log.i(TAG,"unable to set background file");
+        }
+        
+        // Load map from mission
+        if(context instanceof SherlockFragmentActivity){
+            MissionTemplate t = ((GeoCollectApplication) ((SherlockFragmentActivity)context).getApplication()).getTemplate();
+    
+            MSMMap missionmap = SpatialDbUtils.mapFromDb();
+            ArrayList<String> bg_layers = null;
+            
+            try{
+                if(t.config != null && t.config.get(MissionTemplate.BG_LAYERS_KEY) != null){
+                    if(t.config.get(MissionTemplate.BG_LAYERS_KEY) instanceof ArrayList<?>){
+                        bg_layers = (ArrayList<String>) t.config.get(MissionTemplate.BG_LAYERS_KEY);
+                    }
+                }
+            }catch (ClassCastException cce){
+                if(BuildConfig.DEBUG){
+                    Log.w(TAG, "backgroundLayers tag is not an ArrayList, ignoring");
+                }
+                bg_layers = null;
+            }
+            
+            // Use only the layers that are related to this Mission
+            ArrayList<Layer> layersList = new ArrayList<Layer>();
+            Layer layer = null;
+            
+            for (Iterator<Layer> it = missionmap.layers.iterator(); it.hasNext();) {
+                layer = it.next();
+                if (layer.getTitle().equals(t.schema_seg.localSourceStore)
+                   || layer.getTitle().equals(t.schema_sop.localFormStore) 
+                   || layer.getTitle().equals(t.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX)
+                ) {
+                    layersList.add(layer);
+                }else if (bg_layers != null && bg_layers.contains(layer.getTitle())){
+                    // Adding in the head position, so the layer will
+                    // be on the last in the LayerSwitcher order 
+                    layersList.add(0, layer);
+                }
+            }
+            // Set the correct layers
+            missionmap.layers = layersList;
+            
+            o.loadMap(missionmap);
         }
         
 		//pannable

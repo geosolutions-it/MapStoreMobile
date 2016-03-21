@@ -1,6 +1,6 @@
 /*
  * GeoSolutions - MapstoreMobile - GeoSpatial Framework on Android based devices
- * Copyright (C) 2014 - 2015  GeoSolutions (www.geo-solutions.it)
+ * Copyright (C) 2014 - 2016  GeoSolutions (www.geo-solutions.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -244,9 +244,6 @@ public class FormBuilder {
 		
 		o.setMarkerOverlay(m);
 		
-		//Marker Control 
-		
-		
 		//check editable
 		Boolean editable = (Boolean)getAttributeWithDefault(field,"editable",true);
 		//check disablePan
@@ -256,10 +253,11 @@ public class FormBuilder {
 		
 		//add marker control
 		MarkerControl mc;
-		if(context instanceof FormEditActivity)
+		if(context instanceof FormEditActivity){
 			mc = new ViewPagerAwareMarkerControl(mapView,editable, ((FormEditActivity)context).mViewPager);
-		else
+		}else{
 			mc = new MarkerControl(mapView,editable);
+		}
 
 		//mc.setInfoButton(infoButton);
 		mapView.addControl(mc);
@@ -337,7 +335,6 @@ public class FormBuilder {
             o.loadMap(missionmap);
     	}
         
-       
 		//pannable
 		mapView.setClickable(!disablePan);
 		
