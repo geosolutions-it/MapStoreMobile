@@ -746,11 +746,15 @@ public class PendingMissionListActivity extends AbstractNavDrawerActivity implem
         if (!isGPSAvailable(abs_activity)) {
 
             new AlertDialog.Builder(abs_activity).setTitle(R.string.app_name).setMessage(R.string.gps_not_enabled)
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    .setPositiveButton(R.string.open_gps_settings, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
 
                             abs_activity.startActivityForResult(new Intent(
                                     android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS), PendingMissionListFragment.ARG_ENABLE_GPS);
+                        }
+                    }).setNegativeButton(R.string.not_now, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            startMissionFeatureCreation(abs_activity);
                         }
                     }).show();
         } else {

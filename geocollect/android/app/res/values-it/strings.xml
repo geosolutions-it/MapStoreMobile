@@ -72,6 +72,7 @@
     <string name="my_inspections_my">Aggiungi</string>
     <string name="create_a_inspection">Crea una segnalazione</string>
     <string name="created_inspection_delete">Vuoi veramente cancellare questa segnalazione?</string>
+    <string name="open_gps_settings">Apri Impostazioni</string>
     <string name="gps_not_enabled">Si prega di attivare la Geolocalizzazione per localizzare questa segnalazione</string>
     <string name="gps_still_not_enabled">Non hai attivato la Geolocalizzazione, non é possibile continuare</string>
     <string name="search_missions">Cerca Segnalazioni</string>
@@ -123,4 +124,7 @@
     <string name="item_delete_title">Elimina</string>
     <string name="item_delete_message">Eliminare i dati di questa segnalazione?</string>
     
+    <string name="no">No</string>
+    <string name="not_now">Non adesso</string>
+       
 </resources>

@@ -288,6 +288,7 @@ public class MissionFeatureFormBuilder {
 		
 		GeoPoint geoPoint = null;
 		
+		boolean hasProvider = false;
 		if(feature.geometry != null){
 
 			final Point p = feature.geometry.getCentroid();
@@ -298,11 +299,11 @@ public class MissionFeatureFormBuilder {
 				geoPoint = new GeoPoint(p.getY(), p.getX());
 			}else{
 				//get a better position
-				acquirePosition(context, mapView, m, o);
+				hasProvider = acquirePosition(context, mapView, m, o);
 			}
 		}else{
 			//get a position
-			acquirePosition(context, mapView, m, o);
+			hasProvider = acquirePosition(context, mapView, m, o);
 		}
 
 		o.setMarkerOverlay(m);
@@ -412,7 +413,11 @@ public class MissionFeatureFormBuilder {
 
 		if(geoPoint != null){
 			centerMapAndSetMarker(context, geoPoint, mapView, m, o);
+		}else if (!hasProvider && mapView.getMapRenderer() != null){
+		    // Set a marker on the center of the map
+		    centerMapAndSetMarker(context, mapView.getMapRenderer().getStartPoint() , mapView, m, o);
 		}
+		
 		if(context instanceof FormEditActivity){
 			
 			
@@ -428,13 +433,14 @@ public class MissionFeatureFormBuilder {
 	}
 	/**
 	 * start the location acquisition
+	 * @return false if no providers are available, true otherwise
 	 * @param context
 	 * @param mapView
 	 * @param m
 	 * @param o
 	 * @param field
 	 */
-	public static void acquirePosition(final Context context,final MapView mapView,final MarkerOverlay m,final MultiSourceOverlayManager o){
+	public static boolean acquirePosition(final Context context,final MapView mapView,final MarkerOverlay m,final MultiSourceOverlayManager o){
 		
 		
 		LocationResultCallback locationResult = new LocationResultCallback(){
@@ -446,7 +452,14 @@ public class MissionFeatureFormBuilder {
 				}
 			}
 		};
-		new LocationProvider().getLocation(context, locationResult);
+		LocationProvider lp = new LocationProvider();
+		boolean hasProvider = lp.getLocation(context, locationResult);
+		if(!hasProvider){
+		    if(BuildConfig.DEBUG){
+		        Log.d(TAG, "No location provider found");
+		    }
+		}
+		return hasProvider;
 	}
 	/**
 	 * center the mapView on the provided geopoint, add a marker and show it
@@ -457,7 +470,10 @@ public class MissionFeatureFormBuilder {
 	 * @param o
 	 * @param field
 	 */
-	public static void centerMapAndSetMarker(Context context,final GeoPoint geoPoint,MapView mapView,MarkerOverlay m,MultiSourceOverlayManager o){
+	public static void centerMapAndSetMarker(Context context, final GeoPoint geoPoint, MapView mapView, MarkerOverlay m, MultiSourceOverlayManager o){
+	    if(geoPoint == null || mapView == null || m == null || o == null){
+	        return;
+	    }
 		o.setMarkerVisible();
 		DescribedMarker marker = new MarkerDTO(geoPoint.latitude, geoPoint.longitude,MarkerDTO.PIN_BLUE).createMarker(context);
 		

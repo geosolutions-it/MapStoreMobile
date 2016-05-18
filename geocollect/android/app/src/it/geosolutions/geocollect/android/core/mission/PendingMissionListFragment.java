@@ -1,6 +1,6 @@
 /*
  * GeoSolutions - MapstoreMobile - GeoSpatial Framework on Android based devices
- * Copyright (C) 2014  GeoSolutions (www.geo-solutions.it)
+ * Copyright (C) 2014 - 2016  GeoSolutions (www.geo-solutions.it)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@ import it.geosolutions.android.map.utils.ZipFileManager;
 import it.geosolutions.geocollect.android.app.BuildConfig;
 import it.geosolutions.geocollect.android.core.GeoCollectApplication;
 import it.geosolutions.geocollect.android.app.R;
-import it.geosolutions.geocollect.android.core.form.FormEditActivity;
 import it.geosolutions.geocollect.android.core.login.utils.NetworkUtil;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
@@ -1186,13 +1185,10 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
             }
 
         } else if (requestCode == ARG_ENABLE_GPS) {
-            Log.d(FormEditActivity.class.getSimpleName(), "back from GPS settings");
-
-            if (!PendingMissionListActivity.isGPSAvailable(getSherlockActivity())) {
-                Toast.makeText(getActivity(), R.string.gps_still_not_enabled, Toast.LENGTH_LONG).show();
-            } else {
-                PendingMissionListActivity.startMissionFeatureCreation(getSherlockActivity());
+            if(BuildConfig.DEBUG){
+                Log.d(TAG, "back from GPS settings");
             }
+            PendingMissionListActivity.startMissionFeatureCreation(getSherlockActivity());
         } else {
 
             missionTemplate = ((GeoCollectApplication) getActivity().getApplication()).getTemplate();

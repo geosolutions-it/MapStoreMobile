@@ -71,6 +71,7 @@
     <string name="my_inspections_my">My</string>
     <string name="create_a_inspection">Create an inspection</string>
     <string name="created_inspection_delete">Do you really want to delete this inspection ?</string>
+    <string name="open_gps_settings">Open Settings</string>
     <string name="gps_not_enabled">Please enable GPS to acquire the position of the inspection</string>
     <string name="gps_still_not_enabled">You did not enable the GPS, cannot continue</string>
     <string name="search_missions">Search Missions</string>
@@ -122,4 +123,7 @@
     <string name="title_activity_credits">Credits</string>
     <string name="credits_text">Made By GeoSolutions</string>
 
+    <string name="no">No</string>
+    <string name="not_now">Not now</string>
+    
 </resources>
