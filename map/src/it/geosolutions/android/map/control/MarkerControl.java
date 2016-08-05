@@ -205,6 +205,11 @@ public class MarkerControl extends MapControl implements OnTouchListener, OnGest
 	 * @param dm
 	 */
 	public void selectMarker(DescribedMarker dm) {
+		
+		//notify selection with vibration	
+		Vibrator vibe = (Vibrator) view.getContext().getSystemService(Context.VIBRATOR_SERVICE) ;
+		vibe.vibrate(100);
+		
 		if(selectedMarker !=null){
 			selectedMarker.highlightOff();
 		}
@@ -285,9 +290,7 @@ public class MarkerControl extends MapControl implements OnTouchListener, OnGest
 			originalMarker.setDescription(dm.getDescription());
 			originalMarker.setDrawable(dm.getDrawable());
 			originalMarkerPoint = selectedMarker.getXY(view.getMapViewPosition(), null);
-			//notify selection with vibration
-			Vibrator vibe = (Vibrator) view.getContext().getSystemService(Context.VIBRATOR_SERVICE) ;
-			vibe.vibrate(50); 
+				
 			Toast.makeText(view.getContext(), R.string.map_marker_drag_suggestion, Toast.LENGTH_SHORT).show();
 		}
 		
