@@ -31,5 +31,6 @@ public enum XType {
 	spinner,
 	photo,
 	mapViewPoint,
-	separatorWithIcon
+	separatorWithIcon,
+	wmc
 }

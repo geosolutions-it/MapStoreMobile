@@ -19,6 +19,7 @@
 package it.geosolutions.geocollect.android.core.form;
 
 import it.geosolutions.android.map.view.MapViewManager;
+import it.geosolutions.geocollect.android.app.BuildConfig;
 import it.geosolutions.geocollect.android.app.R;
 import it.geosolutions.geocollect.android.core.form.utils.FormUtils;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
@@ -29,6 +30,8 @@ import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.SpatialiteUtils;
 import it.geosolutions.geocollect.android.core.widgets.EnableSwipeViewPager;
 import it.geosolutions.geocollect.android.core.widgets.UILImageAdapter;
+import it.geosolutions.geocollect.android.core.wmc.ui.WMCForm;
+import it.geosolutions.geocollect.android.core.wmc.ui.WMCForm.OnDisconnectListener;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.viewmodel.Field;
 import it.geosolutions.geocollect.model.viewmodel.Page;
@@ -45,6 +48,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.NavUtils;
@@ -190,6 +194,17 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
             			}
             		}
             	}
+            	
+            	//if the item to be destroyed is a WMCForm and it is connected disconnect silently
+            	if(object instanceof WMCForm){
+            		WMCForm form = (WMCForm) object;
+            		if(form.isConnected()){
+            			if(BuildConfig.DEBUG){
+            				Log.i("FormEditActivity", "disconnecting silently");
+            			}
+            			form.disconnect(false);
+            		}
+            	}
             }
         };
 
@@ -265,6 +280,32 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
 
 
     }
+    
+    @Override
+    public void onBackPressed() {
+   
+    	boolean destroy = true;
+    	for(Fragment fragment : getSupportFragmentManager().getFragments()){
+    		if(fragment instanceof WMCForm){
+
+    			final WMCForm form = (WMCForm) fragment;
+    			if(form.isConnected()){
+    				//don't destroy now
+    				destroy = false;
+    				//ask user if to disconnect
+    				form.showAskForDisconnectDialog(FormEditActivity.this, new OnDisconnectListener() {
+						@Override
+						public void onDisconnect() {
+							 FormEditActivity.super.onBackPressed();
+						}
+					});
+    			}
+    		}
+    	}
+    	if(destroy){    	    		
+    		super.onBackPressed();
+    	}
+    }
 
    
 
@@ -293,7 +334,24 @@ public class FormEditActivity extends SherlockFragmentActivity  implements MapAc
         public SherlockFragment getItem(int i) {
             SherlockFragment fragment = null;
             if(!mCreateMissionFeature){
-            	fragment = new FormPageFragment();
+            	
+            	if(t != null && t.seg_form.pages.size() > 0){
+            		Page page = t.sop_form.pages.get(i);
+            		if(page.fields != null && page.fields.size() > 0){
+            			for(Field field : page.fields){
+
+            				if(field.xtype == XType.wmc){
+            					if(BuildConfig.DEBUG){
+            						Log.i("FormEditActivity", "this is a wmc page");
+            					}
+            					fragment = new WMCForm();
+            				}
+            			}
+            		}
+            	}
+            	if(fragment == null){
+            		fragment = new FormPageFragment();
+            	}
             }else{
             	fragment = new CreateMissionFeatureFormPageFragment();
             	
