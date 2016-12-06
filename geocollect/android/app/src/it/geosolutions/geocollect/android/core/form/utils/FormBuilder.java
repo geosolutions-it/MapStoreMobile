@@ -300,7 +300,7 @@ public class FormBuilder {
             ArrayList<String> bg_layers = null;
             
             try{
-                if(t.config != null && t.config.get(MissionTemplate.BG_LAYERS_KEY) != null){
+                if(t != null && t.config != null && t.config.get(MissionTemplate.BG_LAYERS_KEY) != null){
                     if(t.config.get(MissionTemplate.BG_LAYERS_KEY) instanceof ArrayList<?>){
                         bg_layers = (ArrayList<String>) t.config.get(MissionTemplate.BG_LAYERS_KEY);
                     }
@@ -315,24 +315,25 @@ public class FormBuilder {
             // Use only the layers that are related to this Mission
             ArrayList<Layer> layersList = new ArrayList<Layer>();
             Layer layer = null;
-            
-            for (Iterator<Layer> it = missionmap.layers.iterator(); it.hasNext();) {
-                layer = it.next();
-                if (layer.getTitle().equals(t.schema_seg.localSourceStore)
-                   || layer.getTitle().equals(t.schema_sop.localFormStore) 
-                   || layer.getTitle().equals(t.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX)
-                ) {
-                    layersList.add(layer);
-                }else if (bg_layers != null && bg_layers.contains(layer.getTitle())){
-                    // Adding in the head position, so the layer will
-                    // be on the last in the LayerSwitcher order 
-                    layersList.add(0, layer);
-                }
+            if(t != null){
+            	for (Iterator<Layer> it = missionmap.layers.iterator(); it.hasNext();) {
+            		layer = it.next();
+            		if (layer.getTitle().equals(t.schema_seg.localSourceStore)
+            				|| layer.getTitle().equals(t.schema_sop.localFormStore) 
+            				|| layer.getTitle().equals(t.schema_seg.localSourceStore + MissionTemplate.NEW_NOTICE_SUFFIX)
+            				) {
+            			layersList.add(layer);
+            		}else if (bg_layers != null && bg_layers.contains(layer.getTitle())){
+            			// Adding in the head position, so the layer will
+            			// be on the last in the LayerSwitcher order 
+            			layersList.add(0, layer);
+            		}
+            	}
+            	// Set the correct layers
+            	missionmap.layers = layersList;
+
+            	o.loadMap(missionmap);
             }
-            // Set the correct layers
-            missionmap.layers = layersList;
-            
-            o.loadMap(missionmap);
     	}
         
 		//pannable

@@ -126,4 +126,96 @@
     <string name="no">No</string>
     <string name="not_now">Not now</string>
     
+    <!-- WMC -->
+    <!-- Form titles -->
+    <string name="wmc_site">Site</string>
+    <string name="wmc_code">Code</string>
+    <string name="wmc_sensor">Sensor</string>
+    <string name="wmc_type">Type</string>
+    <string name="wmc_curr_time">Current time</string>
+    <string name="wmc_curr_date">Current date</string>
+    <string name="wmc_delivery">Delivery</string>
+    <string name="wmc_hf">HF [Vr]</string>
+    <string name="wmc_k_const">K Const.</string>
+    <string name="wmc_communication">Communication</string>
+    <string name="wmc_overall">Overall counter [m3]</string>
+    <string name="wmc_total">Total</string>
+    <string name="wmc_ts_title">Time slots [h]</string>
+    <string name="wmc_ts_1">Time Slot 1</string>
+    <string name="wmc_ts_2">Time Slot 2</string>
+    <string name="wmc_overall_preset">Overall Preset</string>
+    <string name="wmc_provider">Provider</string>
+    <string name="wmc_pin_code">Pin Code</string>
+    <string name="wmc_sms_rec">SMS Recipient</string>
+    <string name="wmc_sms_origin">SMS Origin</string>
+    <string name="wmc_time_server">Time Server</string>
+    <string name="wmc_counter">Counter</string>
+    <string name="wmc_rssi">GSM RSSI</string>
+    <string name="wmc_sms_test">SMS Test Receiver</string>
+    <string name="wmc_device">Device</string>
+
+    <!-- buttons -->
+    <string name="button_close">Close</string>
+    <string name="button_clear">Clear</string>
+    <string name="button_graph">Graph</string>
+    <string name="button_preset">Preset</string>
+    <string name="button_sms_test">SMS test</string>
+    <string name="button_gms_on">GSM on</string>
+    <string name="button_sync">Sync time</string>
+    <string name="button_connect">Connect</string>
+    <string name="button_disconnect">Disconnect</string>
+    
+    <!-- state -->
+    <string name="state_bt_not_available">Your device does not feature a Bluetooth adapter, cannot connect</string>
+    <string name="state_bt_none_available">The system has no paired Bluetooth devices</string>
+    <string name="state_bt_none_selected">Select a device to connect first</string>
+    <string name="state_not_connected">Connect to a device first</string>
+    <string name="state_device_selected">Device selected %s</string>
+    <string name="state_connect_success">Successfully connected to %s</string>
+    <string name="state_connect_failure">Error connecting to Bluetooth device %s</string>
+    <string name="state_connection_active">Active connection to %s</string>
+    <string name="state_disconnected">Disconnected from WMC device</string>
+    <string name="state_sensor_type_changed">The change will be effective when writing the configuration to the device</string>
+    <string name="state_write_success">Configuration written with success</string>
+    <string name="state_write_failure">Error writing configuration</string>
+    <string name="state_read_success">Configuration read with success</string>
+    <string name="state_read_failure">Error reading configuration</string>
+    <string name="state_no_config_available">No configuration available, connect to a device or load one first</string>
+    <string name="state_sync_success">Counter synchronized with success</string>
+    <string name="state_sync_failure">Error synchronizing clock</string>
+    <string name="state_bt_failure">Error connecting to device</string>
+    <string name="state_preset_failure">Input must be &gt; %1$.2f and &lt; %2$.2f</string>
+    <string name="state_preset_success">Overall counter preset successfully applied</string>
+    <string name="state_clear_success">Week counter cleared with success</string>
+    <string name="state_site_code_invalid">Site Code must be between 0000 and 2999</string>
+    <string name="state_gms_request_sent">GSM module activation, wait some time for network registration</string>
+    <string name="state_test_sms_sent">SMS sent to recipient</string>
+    <string name="state_test_sms_invalid">SMS test recipient is invalid</string>
+    <string name="state_comm_error">Communication error</string>
+    <string name="state_recipient_null">Recipient is void</string>
+    <string name="state_provider_null">Provider is void</string>
+    <string name="state_origin_null">Origin is void</string>
+    <string name="state_time_server_invalid">Time server is incorrect</string>
+    <string name="state_pin_code_invalid">Pin code is invalid</string>
+    <string name="state_pin_code_not_numeric">Pin code must be numeric, have four numbers and within [0001,9999]</string>
+
+    <string name="state_time_slot_start_null">%s beginning is void</string>
+    <string name="state_time_slot_start_oob">%s beginning must be &lt;= 23</string>
+    <string name="state_time_slot_end_null">%s ending is void</string>
+    <string name="state_time_slot_end_oob">%s ending must be &lt;= 23</string>
+    <string name="state_time_slot_start_edited">%1$s beginning changed to %2$d</string>
+    <string name="state_time_slot_end_edited">%1$s ending changed to %2$d</string>
+
+    <string name="state_hf_litres_null">HF litres per round is void</string>
+    <string name="state_hf_litres_oob">HF litres per round must be &gt; 0 and &lt; 1000</string>
+    <string name="state_lf_const_null">LF const. is void</string>
+    <string name="state_lf_const_oob">LF const. must be &gt; 0 and &lt; 1000</string>
+    <string name="state_incorrect_input">Incorrect input</string>
+    
+     <string name="state_active_connection">You have an active connection to a WMC device. Do you want to disconnect ?</string>
+
+    <string name="progress_please_wait">Please wait &#8230;</string>
+
+    <!-- WMC -->
+    
 </resources>

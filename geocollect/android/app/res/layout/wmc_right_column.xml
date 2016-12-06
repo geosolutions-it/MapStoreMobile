@@ -1,0 +1,478 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/right_column"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/sensor_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:background="@drawable/bordered_button"
+        android:orientation="vertical"
+        android:padding="5dp">
+
+        <TextView
+            android:id="@+id/title_sensor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/wmc_sensor"
+            android:textSize="18sp"/>
+
+        <LinearLayout
+            android:id="@+id/type_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="2dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/type_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:text="@string/wmc_type"/>
+
+            <Spinner
+                android:id="@+id/type_spinner"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:entries="@array/type_values"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/hf_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="2dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/hf_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:text="@string/wmc_hf"/>
+
+            <EditText
+                android:id="@+id/hf_et"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:background="@drawable/bordered_button"
+                android:focusable="false"
+                android:paddingLeft="2dp"
+                android:inputType="number|numberDecimal"
+                android:imeOptions="actionDone"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/k_const_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="2dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/k_const_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:text="@string/wmc_k_const"/>
+
+            <EditText
+                android:id="@+id/k_const_et"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:background="@drawable/bordered_button"
+                android:focusable="false"
+                android:paddingLeft="2dp"
+                android:inputType="number|numberDecimal"
+                android:imeOptions="actionDone"/>
+        </LinearLayout>
+
+    </LinearLayout><!-- sensor -->
+
+    <LinearLayout
+        android:id="@+id/communication_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:background="@drawable/bordered_button"
+        android:orientation="vertical"
+        android:padding="5dp">
+
+        <TextView
+            android:id="@+id/title_communication"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/wmc_communication"
+            android:textSize="18sp"/>
+
+        <LinearLayout
+            android:id="@+id/provider_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="2dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/provider_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:text="@string/wmc_provider"/>
+
+            <EditText
+                android:id="@+id/provider_et"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:background="@drawable/bordered_button"
+                android:focusable="false"
+                android:inputType="textWebEmailAddress"
+                android:paddingLeft="2dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/pin_code_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="2dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/pin_code_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:text="@string/wmc_pin_code"/>
+
+            <EditText
+                android:id="@+id/pin_code_et"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:background="@drawable/bordered_button"
+                android:focusable="false"
+                android:inputType="number"
+                android:paddingLeft="2dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/sms_rec_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="2dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/sms_rec_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:text="@string/wmc_sms_rec"/>
+
+            <EditText
+                android:id="@+id/sms_rec_et"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:background="@drawable/bordered_button"
+                android:focusable="false"
+                android:inputType="phone"
+                android:paddingLeft="2dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/sms_origin_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="2dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/sms_origin_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:text="@string/wmc_sms_origin"/>
+
+            <EditText
+                android:id="@+id/sms_origin_et"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:background="@drawable/bordered_button"
+                android:focusable="false"
+                android:inputType="phone"
+                android:paddingLeft="2dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/time_server_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="2dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/time_server_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:text="@string/wmc_time_server"/>
+
+            <EditText
+                android:id="@+id/time_server_et"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:background="@drawable/bordered_button"
+                android:focusable="false"
+                android:paddingLeft="2dp"
+                android:inputType="textWebEmailAddress"
+                android:textSize="16sp"/>
+        </LinearLayout>
+
+    </LinearLayout> <!-- communication -->
+
+    <LinearLayout
+        android:id="@+id/time_slots_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:background="@drawable/bordered_button"
+        android:orientation="vertical"
+        android:padding="5dp">
+
+        <TextView
+            android:id="@+id/title_time_slots"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/wmc_ts_title"
+            android:textSize="18sp"/>
+
+        <LinearLayout
+            android:id="@+id/ts_b_e_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="2dp"
+            android:orientation="horizontal">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="15dp"
+                android:layout_weight=".5"/>
+
+            <TextView
+                android:id="@+id/ts_b"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".25"
+                android:gravity="center_horizontal"
+                android:text="B"/>
+
+            <TextView
+                android:id="@+id/ts_e"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".25"
+                android:gravity="center_horizontal"
+                android:text="E"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/tslots_t1_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="2dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tslots_t1_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:text="@string/wmc_ts_1"/>
+
+            <EditText
+                android:id="@+id/tslots_t1_b_et"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".25"
+                android:background="@drawable/bordered_button"
+                android:focusable="false"
+                android:gravity="center_horizontal"
+                android:inputType="number|numberDecimal"
+                android:imeOptions="actionDone"
+                android:paddingLeft="2dp"/>
+
+            <EditText
+                android:id="@+id/tslots_t1_e_et"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".25"
+                android:background="@drawable/bordered_button"
+                android:focusable="false"
+                android:gravity="center_horizontal"
+                android:inputType="number|numberDecimal"
+                android:imeOptions="actionDone"
+                android:paddingLeft="2dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/tslots_t2_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="2dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tslots_t2_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:text="@string/wmc_ts_2"/>
+
+            <EditText
+                android:id="@+id/tslots_t2_b_et"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".25"
+                android:background="@drawable/bordered_button"
+                android:focusable="false"
+                android:gravity="center_horizontal"
+                android:inputType="number|numberDecimal"
+                android:imeOptions="actionDone"
+                android:paddingLeft="2dp"/>
+
+            <EditText
+                android:id="@+id/tslots_t2_e_et"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".25"
+                android:background="@drawable/bordered_button"
+                android:focusable="false"
+                android:gravity="center_horizontal"
+                android:inputType="number|numberDecimal"
+                android:imeOptions="actionDone"
+                android:paddingLeft="2dp"/>
+        </LinearLayout>
+
+
+    </LinearLayout> <!-- time slots -->
+
+    <LinearLayout
+        android:id="@+id/extras_layout"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_margin="5dp"
+        android:orientation="vertical"
+        android:padding="5dp">
+
+        <LinearLayout
+            android:id="@+id/rssi_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="2dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/rssi_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:text="@string/wmc_rssi"/>
+
+            <EditText
+                android:id="@+id/rssi_et"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:background="@drawable/bordered_button"
+                android:focusable="false"
+                android:paddingLeft="2dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/sms_test_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="2dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/sms_test_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:text="@string/wmc_sms_test"/>
+
+            <EditText
+                android:id="@+id/sms_test_et"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:background="@drawable/bordered_button"
+                android:inputType="phone"
+                android:paddingLeft="2dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/test_button_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="2dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/gsm_on_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:text="@string/button_gms_on"/>
+
+            <Button
+                android:id="@+id/sms_test_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:text="@string/button_sms_test"/>
+        </LinearLayout>
+
+    </LinearLayout> <!-- extras -->
+
+</LinearLayout> <!-- right column -->
