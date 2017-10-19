@@ -116,7 +116,7 @@
     <string name="button_confirm_logout">Do you really want to logout?</string>
     <string name="ordering_az">A-Z</string>
     <string name="ordering_distance">Distance</string>
-    <string name="prefer_edited">Show pending uploads</string>
+    <string name="prefer_edited">Show Pending Uploads</string>
     <string name="version">Version</string>
     <string name="label_new">New</string>
     <string name="item_delete_title">Delete</string>
