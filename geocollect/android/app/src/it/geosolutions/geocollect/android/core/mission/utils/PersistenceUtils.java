@@ -57,6 +57,8 @@ import android.widget.TextView;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.io.WKBReader;
 
+import eu.geopaparazzi.spatialite.database.spatial.core.GeometryType;
+
 /**
  * Utils class to store and retrieve data from SQLite database
  * @author Lorenzo Pini lorenzo.pini@geo-solutions.it
@@ -732,13 +734,27 @@ public class PersistenceUtils {
 	/**
 	 * Creates a table with the given tableName and data types in the given db
 	 * Does not convert the table if already exists
+	 * with default geometry POINT_XY
 	 * @param db
 	 * @param string
 	 * @param templateDataTypes
 	 */
 	public static boolean createTableFromTemplate(Database db, String tableName,
 			HashMap<String, XDataType> templateDataTypes) {
-		return createTableFromTemplate(db, tableName, templateDataTypes, false);
+		return createTableFromTemplate(db, tableName, templateDataTypes, false, GeometryType.POINT_XY);
+	}
+	
+	/**
+	 * Creates a table with the given tableName and data types in the given db
+	 * Does not convert the table if already exists
+	 * @param db
+	 * @param string
+	 * @param templateDataTypes
+	 * @param geometryType the type geometry for the spatial column of the table 
+	 */
+	public static boolean createTableFromTemplate(Database db, String tableName,
+			HashMap<String, XDataType> templateDataTypes, GeometryType geometryType) {
+		return createTableFromTemplate(db, tableName, templateDataTypes, false, geometryType);
 	}
 	
 	/**
@@ -748,9 +764,10 @@ public class PersistenceUtils {
 	 * @param string
 	 * @param templateDataTypes
 	 * @param convertIfNeeded
+	 * @param geometryType the type geometry for the spatial column of the table 
 	 */
 	public static boolean createTableFromTemplate(Database db, String tableName,
-			HashMap<String, XDataType> templateDataTypes, boolean convertIfNeeded) {
+			HashMap<String, XDataType> templateDataTypes, boolean convertIfNeeded, final GeometryType geometryType) {
 		
 		if(tableName == null || tableName.isEmpty()){
 			Log.v(TAG, "No tableName, cannot create table");
@@ -862,8 +879,34 @@ public class PersistenceUtils {
     				return false;
     			}
             	
-            	// TODO: manage different geometry types and srid
-            	String add_geom_stmt = "SELECT AddGeometryColumn('"+tableName+"', 'GEOMETRY', 4326, 'POINT', 'XY');";
+            	// TODO: manage more geometry types and srid
+            	String add_geom_stmt = null;
+            	switch(geometryType){
+            		case POINT_XY :
+            			add_geom_stmt = "SELECT AddGeometryColumn('"+tableName+"', 'GEOMETRY', 4326, 'POINT', 'XY');";
+            			break;
+            		case LINESTRING_XY :
+            			add_geom_stmt = "SELECT AddGeometryColumn('"+tableName+"', 'GEOMETRY', 4326, 'LINESTRING', 'XY');";
+            			break;
+            		case MULTILINESTRING_XY :
+            			add_geom_stmt = "SELECT AddGeometryColumn('"+tableName+"', 'GEOMETRY', 4326, 'MULTILINESTRING', 'XY');";
+            			break;
+            		case POLYGON_XY :
+            			add_geom_stmt = "SELECT AddGeometryColumn('"+tableName+"', 'GEOMETRY', 4326, 'POLYGON', 'XY');";
+            			break;
+            		case MULTIPOINT_XY :
+            			add_geom_stmt = "SELECT AddGeometryColumn('"+tableName+"', 'GEOMETRY', 4326, 'MULTIPOINT', 'XY');";
+            			break;
+            		case MULTIPOLYGON_XY :
+            			add_geom_stmt = "SELECT AddGeometryColumn('"+tableName+"', 'GEOMETRY', 4326, 'MULTIPOLYGON', 'XY');";
+            			break;
+            		case GEOMETRY_XY :
+            			add_geom_stmt = "SELECT AddGeometryColumn('"+tableName+"', 'GEOMETRY', 4326, 'GEOMETRY', 'XY');";
+            			break;
+            		default:
+            			add_geom_stmt = "SELECT AddGeometryColumn('"+tableName+"', 'GEOMETRY', 4326, 'POINT', 'XY');";
+            			break;
+            	}
             	if(!Database.complete(add_geom_stmt)){
     				Log.w(TAG, "AddGeometryColumn statement is not complete:\n"+add_geom_stmt);
     				return false;

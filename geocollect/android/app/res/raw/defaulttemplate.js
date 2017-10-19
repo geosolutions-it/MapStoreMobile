@@ -1070,6 +1070,10 @@
 			}]
 	},
 	"config":{
+		"backgroundLayers": [
+		                     "genova_ctr",
+		                     "v_muri"
+		                 ],
 		"myAllowedValues1":["value1","value2","value3"],
 		"maxImageSize" : "1000",
 		"mapStartLat": "44.43140",
@@ -1080,7 +1084,13 @@
 	                    "content": [{
 	                            "file": "bg.map"
 	                        }]
-	               }]
+	               }],
+	    "overlays": [{
+	                     "name": "v_muri",
+	                     "version": "1",
+	                     "url": "http://geocollect.geo-solutions.it/geoserver/it.geosolutions/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=it.geosolutions:muro&maxFeatures=500&outputFormat=application%2Fjson&srsName=EPSG:4326",
+	                     "style":"http://bc3.antares.uberspace.de/maps/test.style"	
+	              }]
 	},
 	"priorityField":"GRAVITA",
 	"priorityValuesColors":{

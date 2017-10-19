@@ -40,6 +40,8 @@ public class MissionTemplate implements Serializable{
 	 */
 	public static final String BG_LAYERS_KEY = "backgroundLayers";
 	
+	public static final String OVERLAYS_KEY = "overlays";
+	
 	public static final String DEFAULT_TABLE_DATA_SUFFIX = "_data";
     
 	/**

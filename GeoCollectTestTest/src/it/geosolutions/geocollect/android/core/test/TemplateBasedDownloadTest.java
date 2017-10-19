@@ -35,7 +35,7 @@ public class TemplateBasedDownloadTest extends android.test.AndroidTestCase {
 		final String mount  = MapFilesProvider.getEnvironmentDirPath(getContext());
 		final String baseDir= MapFilesProvider.getBaseDir();
 		
-		final boolean bgExists = MissionUtils.checkTemplateForBackgroundData(getContext(), defaultTemplate);
+		final boolean bgExists = MissionUtils.checkTemplateForRasterBackgroundData(getContext(), defaultTemplate);
 		
 		final File bgFile = new File(mount + baseDir+ "/bg.map");
 		
