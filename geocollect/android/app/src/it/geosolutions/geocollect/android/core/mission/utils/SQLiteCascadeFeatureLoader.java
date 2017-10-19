@@ -58,6 +58,7 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 	public static String LAST_UPDATE_PREF = "LastUpdate";
 	public static String REVERSE_ORDER_PREF = "ReverseOrdering";
 	public static String ORDER_BY_DISTANCE = "OrderByDistance";
+	public static String PREFER_EDITED = "PreferEdited";
 	
 	/**
 	 * Preferences Strings for the Spatial Filter
@@ -469,54 +470,12 @@ public class SQLiteCascadeFeatureLoader extends AsyncTaskLoader<List<MissionFeat
 
         mData.addAll(missions);
         if(orderingField != null && !orderingField.isEmpty()){
+        	
             boolean reverse = mPrefs.getBoolean(REVERSE_ORDER_PREF, false);
             boolean useDistance = mPrefs.getBoolean(ORDER_BY_DISTANCE, false);
-            
-            if(useDistance){
-                Collections.sort(mData, new Comparator<MissionFeature>() {
-        
-                    @Override
-                    public int compare(MissionFeature lhs, MissionFeature rhs) {
-                        if(lhs.properties == null
-                                || !lhs.properties.containsKey(MissionFeature.DISTANCE_VALUE_ALIAS)
-                                || lhs.properties.get(MissionFeature.DISTANCE_VALUE_ALIAS)== null){
-                            return 1;
-                        }
-                        if(rhs.properties == null
-                                || !rhs.properties.containsKey(MissionFeature.DISTANCE_VALUE_ALIAS)
-                                || rhs.properties.get(MissionFeature.DISTANCE_VALUE_ALIAS)== null){
-                            return -1;
-                        }
-                        
-                        try{
-                            long ldistance = Math.round(Double.parseDouble(lhs.properties.get(MissionFeature.DISTANCE_VALUE_ALIAS).toString()));
-                            long rdistance = Math.round(Double.parseDouble(rhs.properties.get(MissionFeature.DISTANCE_VALUE_ALIAS).toString()));
-                            return (int) (rdistance-ldistance);
-                        }catch (NumberFormatException nfe){
-                            return 0;
-                        }
-                    }
-                } );
-            }else{
-                Collections.sort(mData, new Comparator<MissionFeature>() {
-                    
-                    @Override
-                    public int compare(MissionFeature lhs, MissionFeature rhs) {
-                        if(lhs.properties == null || !lhs.properties.containsKey(orderingField)){
-                            return 1;
-                        }
-                        if(rhs.properties == null || !rhs.properties.containsKey(orderingField)){
-                            return -1;
-                        }
-                        
-                        try{
-                            return lhs.properties.get(orderingField).toString().compareTo(rhs.properties.get(orderingField).toString());
-                        }catch (NullPointerException npe){
-                            return 0;
-                        }
-                    }
-                } );
-            }
+            boolean preferEdited = mPrefs.getBoolean(PREFER_EDITED, false);
+            	
+            Collections.sort(mData, new MissionFeatureSorter(orderingField, preferEdited, useDistance, reverse));
             
             if(reverse){
                 Collections.reverse(mData);

@@ -10,6 +10,7 @@
     <item type="id" name="overflow_order" />
     <item type="id" name="overflow_order_az" />
     <item type="id" name="overflow_order_distance" />
+    <item type="id" name="overflow_prefer_edited" />
     <item type="id" name="overflow_refresh" />
     
 </resources>

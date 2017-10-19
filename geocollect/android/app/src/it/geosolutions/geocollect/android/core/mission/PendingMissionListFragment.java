@@ -43,6 +43,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -587,6 +588,12 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
 
         // Creating the Overflow Menu
         SubMenu subMenu1 = menu.addSubMenu(0, R.id.overflow_menu, 90, "Overflow Menu");
+        
+        //add sort by edit item
+        MenuItem editItem = subMenu1.add(0, R.id.overflow_prefer_edited, Menu.NONE, R.string.prefer_edited);
+        editItem.setCheckable(true);
+        editItem.setChecked(sp.getBoolean(SQLiteCascadeFeatureLoader.PREFER_EDITED, false));
+        
         SubMenu subMenu2 = subMenu1.addSubMenu(0, R.id.overflow_order, Menu.NONE, R.string.order_by_ellipsis);
         subMenu2.setGroupCheckable(1, true, true);
 
@@ -669,6 +676,19 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
             item.setChecked(true);
             return true;
 
+        } else if (id == R.id.overflow_prefer_edited) {
+        	
+        	 //toggle current state
+        	 SharedPreferences sp = getActivity().getSharedPreferences(SQLiteCascadeFeatureLoader.PREF_NAME, Context.MODE_PRIVATE);
+        	 final boolean current = sp.getBoolean(SQLiteCascadeFeatureLoader.PREFER_EDITED, false);
+        	 Editor ed = sp.edit();
+        	 ed.putBoolean(SQLiteCascadeFeatureLoader.PREFER_EDITED, !current);
+        	 ed.apply();
+        	 //update menu item state
+        	 item.setChecked(!current);
+        	 // reload with this state
+        	 forceLoad();
+        	
         } else if (id == R.id.filter) {
 
             // Clear the Spatial Filter
