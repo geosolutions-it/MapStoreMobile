@@ -28,6 +28,7 @@ import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.android.core.mission.MissionFeature;
 import it.geosolutions.geocollect.android.core.mission.PendingMissionListActivity;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
+import it.geosolutions.geocollect.model.http.VectorLayer;
 import it.geosolutions.geocollect.model.source.XDataType;
 import it.geosolutions.geocollect.model.viewmodel.Field;
 import it.geosolutions.geocollect.model.viewmodel.Form;
@@ -677,7 +678,7 @@ public class MissionUtils {
      * @return true if all files are present - false otherwise
      */
     @SuppressWarnings("rawtypes")
-	public static boolean checkTemplateForBackgroundData(final Context context, final MissionTemplate t) {
+	public static boolean checkTemplateForRasterBackgroundData(final Context context, final MissionTemplate t) {
 		
     	final String mount   = MapFilesProvider.getEnvironmentDirPath(context);
     	final String baseDir = MapFilesProvider.getBaseDir();
@@ -710,6 +711,17 @@ public class MissionUtils {
     	
 		return true;
 	}
+    
+    /**
+     * checks if all vector layers which are defined in the config section of
+     * the template are present in the applications database
+     * @param t the template to check
+     * @return a list containing layers to download when which are not present or not up to date - a empty list if all is ip do date, null if an error occurred
+     */
+    public static ArrayList<VectorLayer> checkTemplateForVectorBackgroundData(Database db, final MissionTemplate t) {
+    	
+    	return new VectorLayerLoader(db).checkIfVectorLayersAreAvailable(t);
+    }
     /**
      * creates and returns a HashMap containing entries consisting of url to zip files and the amount of files
      * these zips contain

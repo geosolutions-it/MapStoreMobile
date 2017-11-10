@@ -110,6 +110,7 @@
         <item quantity="one">Do you want to download the background data for this mission ? %d file needs to be downloaded.</item>
         <item quantity="other">Do you want to download the background data for this mission ? %d files need to be downloaded.</item>
     </plurals>
+    <string name="download_message_vector">Do you want to download the vector background data ?</string>
 
     <string name="download_successfull">Download successful</string>
     <string name="reset_search_filter">Reset Search Filter</string>

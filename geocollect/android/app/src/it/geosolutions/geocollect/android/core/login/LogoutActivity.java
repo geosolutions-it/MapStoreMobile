@@ -272,7 +272,7 @@ public class LogoutActivity extends Activity {
         if(templates != null){
             for(MissionTemplate t : templates){
                 
-                boolean exists = MissionUtils.checkTemplateForBackgroundData(getBaseContext(), t);
+                boolean exists = MissionUtils.checkTemplateForRasterBackgroundData(getBaseContext(), t);
                 
                 downloads.put(t, exists);
                 

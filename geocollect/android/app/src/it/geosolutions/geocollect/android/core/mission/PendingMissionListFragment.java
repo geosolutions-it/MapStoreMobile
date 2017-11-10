@@ -22,15 +22,18 @@ import it.geosolutions.android.map.model.query.BaseFeatureInfoQuery;
 import it.geosolutions.android.map.utils.MapFilesProvider;
 import it.geosolutions.android.map.utils.ZipFileManager;
 import it.geosolutions.geocollect.android.app.BuildConfig;
-import it.geosolutions.geocollect.android.core.GeoCollectApplication;
 import it.geosolutions.geocollect.android.app.R;
+import it.geosolutions.geocollect.android.core.GeoCollectApplication;
 import it.geosolutions.geocollect.android.core.login.utils.NetworkUtil;
 import it.geosolutions.geocollect.android.core.mission.utils.MissionUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.PersistenceUtils;
 import it.geosolutions.geocollect.android.core.mission.utils.SQLiteCascadeFeatureLoader;
+import it.geosolutions.geocollect.android.core.mission.utils.VectorLayerLoader;
+import it.geosolutions.geocollect.android.core.mission.utils.VectorLayerLoader.VectorLayerLoaderListener;
 import it.geosolutions.geocollect.android.core.widgets.dialog.UploadDialog;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.http.CommitResponse;
+import it.geosolutions.geocollect.model.http.VectorLayer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,10 +42,12 @@ import java.util.List;
 import jsqlite.Database;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -175,6 +180,8 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
     private Button clearFilterBtn;
 
     private SearchView searchView;
+    
+    private ProgressDialog progressDialog;
 
     /**
      * A callback interface that all activities containing this fragment must implement. This mechanism allows activities to be notified of item
@@ -1041,53 +1048,163 @@ public class PendingMissionListFragment extends SherlockListFragment implements 
 
         // if this fragment is visible to the user, check if the background data for the current template is available
         if (getUserVisibleHint()) {
-            checkIfBackgroundIsAvailableForTemplate();
+            checkVectorDataDownload();
         }
     }
 
     /**
-     * checks if background data for the current template is available if not, the user is asked to download
+     * checks if vector background data for the current template is available and up to date 
+     * if so, the user is asked to download it
+     * if not, raster background data is checked
      */
-    private void checkIfBackgroundIsAvailableForTemplate() {
+    private void checkVectorDataDownload() {
+    	
+    	//when not online we cannot download anything
+		if (!NetworkUtil.isOnline(getSherlockActivity())) {
+			return;
+		}
 
-        boolean exists = MissionUtils.checkTemplateForBackgroundData(getActivity(), missionTemplate);
+    	final ArrayList<VectorLayer> vectorLayersToDownload = MissionUtils.checkTemplateForVectorBackgroundData(db, missionTemplate);
+        
+        if(vectorLayersToDownload != null && vectorLayersToDownload.size() > 0){
+        	//needs to download vector layers
+        	if(BuildConfig.DEBUG){
+				Log.d(TAG,"loading vector layers");
+			}
+        	
+        	//temporarily block screen orientation
+        	getSherlockActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+        	
+    		final AlertDialog vectorDownloadDialog = new AlertDialog.Builder(getSherlockActivity())
+    		.setTitle(R.string.dialog_title)
+    		.setMessage(R.string.download_message_vector)
+    		.setCancelable(false)
+    		.setPositiveButton(R.string.button_download, new DialogInterface.OnClickListener() {
+    			@Override
+    			public void onClick(DialogInterface dialog, int which) {	
+    				
+    				dialog.dismiss();
+    				
+    				//go, show progress
+    				showProgressDialog(getSherlockActivity().getString(R.string.progress_please_wait));
+    				//start vector download task
+    	        	final VectorLayerLoader vectorLayerLoader = new VectorLayerLoader(db);
+    	        	vectorLayerLoader.setListener(new VectorLayerLoaderListener() {
+    					
+    					@Override
+    					public void error(String errorMessage) {
 
-        if (!exists) {
+    						Log.e(TAG, "error downloading vector layers "+ errorMessage);
+    						getSherlockActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+    						hideProgress();
+    						
+    						checkRasterDataDownload();
+    					}
+    					
+    					@Override
+    					public void didLoadLayers() {
+    						
+    						getSherlockActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+    						hideProgress();
 
-            final HashMap<String, Integer> urls = MissionUtils.getContentUrlsAndFileAmountForTemplate(missionTemplate);
+    						if(BuildConfig.DEBUG){
+    							Log.d(TAG,"did load vector layers");
+    						}
+    						
+    						checkRasterDataDownload();
+    					}
+    				});
+    				vectorLayerLoader.loadLayers(vectorLayersToDownload);
+    			}
+    		})
+    		.setNegativeButton(R.string.button_undownload, new DialogInterface.OnClickListener() {		
+    			@Override
+    			public void onClick(DialogInterface dialog, int which) {
+    				
+    				getSherlockActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+    				dialog.dismiss();
+					checkRasterDataDownload();
+    			}
+    		})
+    		.create();
+    		
+    		//Show an alert dialog to ask user if wants to download data test archive from web
+    		vectorDownloadDialog.show();
+			
+        } else {
 
-            if (BuildConfig.DEBUG) {
-                Log.i(TAG, "downloading " + urls.toString());
-            }
-            
-            Resources res = getResources();
-            for (String url : urls.keySet()) {
-
-                final String mount = MapFilesProvider.getEnvironmentDirPath(getActivity());
-
-                String dialogMessage = res.getQuantityString(R.plurals.dialog_message_with_amount, urls.get(url),
-                        urls.get(url));
-                new ZipFileManager(getActivity(), mount, MapFilesProvider.getBaseDir(), url, null, dialogMessage) {
-                    @Override
-                    public void launchMainActivity(final boolean success) {
-
-                        // TODO apply ? this was earlier in StartupActivity
-                        // if (getActivity().getApplication() instanceof GeoCollectApplication) {
-                        // ((GeoCollectApplication) getActivity().getApplication()).setupMBTilesBackgroundConfiguration();
-                        // }
-                        // launch.putExtra(PendingMissionListFragment.INFINITE_SCROLL, false);
-                        if (success) {
-
-                            Toast.makeText(getActivity(), getString(R.string.download_successfull), Toast.LENGTH_SHORT)
-                                    .show();
-                        }
-
-                    }
-                };
-            }
-
+        	checkRasterDataDownload();
         }
 
+    }
+    /**
+     * checks if the download of raster background data is necessary and if so asks the user to download
+     */
+    private void checkRasterDataDownload(){
+    	
+    	 final boolean rasterExists = MissionUtils.checkTemplateForRasterBackgroundData(getActivity(), missionTemplate);
+    	 
+		if (!rasterExists) {
+
+			final HashMap<String, Integer> urls = MissionUtils.getContentUrlsAndFileAmountForTemplate(missionTemplate);
+
+			if (BuildConfig.DEBUG) {
+				Log.i(TAG, "downloading " + urls.toString());
+			}
+
+			Resources res = getResources();
+			for (String url : urls.keySet()) {
+
+				final String mount = MapFilesProvider.getEnvironmentDirPath(getActivity());
+
+				String dialogMessage = res.getQuantityString(R.plurals.dialog_message_with_amount, urls.get(url),urls.get(url));
+				new ZipFileManager(getActivity(), mount,MapFilesProvider.getBaseDir(), url, null, dialogMessage) {
+					@Override
+					public void launchMainActivity(final boolean success) {
+
+						// TODO apply ? this was earlier in StartupActivity
+						// if (getActivity().getApplication() instanceof
+						// GeoCollectApplication) {
+						// ((GeoCollectApplication)
+						// getActivity().getApplication()).setupMBTilesBackgroundConfiguration();
+						// }
+						// launch.putExtra(PendingMissionListFragment.INFINITE_SCROLL,
+						// false);
+						if (success) {
+
+							Toast.makeText(getActivity(),getString(R.string.download_successfull),Toast.LENGTH_SHORT).show();
+						}
+
+					}
+				};
+			}
+		}
+    }
+    
+    public void showProgressDialog(final String message) {
+        try{
+            if(progressDialog == null) {
+                LayoutInflater inflater = LayoutInflater.from(getSherlockActivity());
+                View progress = inflater.inflate(R.layout.progress_layout, null);
+                progressDialog = new ProgressDialog(getSherlockActivity());
+                progressDialog.setView(progress);
+            }
+            progressDialog.setMessage(message);
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }catch(Exception e){
+            Log.e(TAG, "error showing progress",e);
+        }
+    }
+
+    public void hideProgress(){
+        try {
+            if (progressDialog != null && progressDialog.isShowing()) {
+                progressDialog.dismiss();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "error hiding progress", e);
+        }
     }
 
     /*
