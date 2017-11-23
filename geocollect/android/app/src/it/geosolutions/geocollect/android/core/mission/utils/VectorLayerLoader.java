@@ -8,6 +8,7 @@ import it.geosolutions.geocollect.android.app.BuildConfig;
 import it.geosolutions.geocollect.android.core.mission.Mission;
 import it.geosolutions.geocollect.model.config.MissionTemplate;
 import it.geosolutions.geocollect.model.http.VectorLayer;
+import it.geosolutions.geocollect.model.source.XDataType;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ import com.vividsolutions.jts.geom.Polygon;
 import eu.geopaparazzi.spatialite.database.spatial.core.GeometryType;
 
 /**
- * class which handles the download and persistance of vector layers
+ * class which handles the download and persistence of vector layers
  * 
  * @author Robert Oehler
  */
@@ -63,7 +64,7 @@ public class VectorLayerLoader {
 	 * checks if the layers defined by @param missionTemplate are locally available and up to date
 	 * returns a list of vector layers which need an update
 	 * or an empty list if everything is up to date
-	 * or null if an error occurred / e.g. the missiontemplate does not define vector layers
+	 * or null if an error occurred / e.g. the MissionTemplate does not define vector layers
 	 * @param missionTemplate 
 	 * @return a list of vector layers to download or null
 	 */
@@ -296,7 +297,7 @@ public class VectorLayerLoader {
 		}
 		
 		//create table if necessary
-		if(!PersistenceUtils.createTableFromTemplate(db, vectorLayer.name, VectorLayer.getDatabaseSchema(), type)){
+		if(!PersistenceUtils.createTableFromTemplate(db, vectorLayer.name, getDatabaseSchema(features), type)){
 			Log.e(TAG, "error creating "+ vectorLayer.name +" table ");
 			return false;
 		}
@@ -339,7 +340,7 @@ public class VectorLayerLoader {
                  
                       if(feature.geometry instanceof Point){
                     	  
-                    	  columnValues.append( ", MakePoint(").append(((Point)feature.geometry).getX()).append(",").append(((Point)feature.geometry).getY()).append(", 4326)");
+                    	  columnValues.append(", MakePoint(").append(((Point)feature.geometry).getX()).append(",").append(((Point)feature.geometry).getY()).append(", 4326)");
                       }else if(feature.geometry instanceof MultiLineString){
                     	  
                     	  columnValues.append(", MultiLineStringFromText('").append(feature.geometry.toText()).append("', 4326)");
@@ -386,7 +387,15 @@ public class VectorLayerLoader {
                 	  Log.w(TAG, "geometry null - cannot import this feature");
                   }else{
                 	  
-                	  Log.w(TAG, "unsupported key "+ entry.getKey());
+                      for(String k : feature.properties.keySet()){
+                          
+                          if(entry.getKey().equals(k)){
+                              
+                              columnNames.append( ", " ).append( entry.getKey() );
+                              columnValues.append( ", '" ).append( feature.properties.get(k)).append("'") ;
+                          }
+
+                      }
                   }
               }
 
@@ -417,6 +426,33 @@ public class VectorLayerLoader {
 	}
 	
 	/**
+	 * Cycle on all features to get all properties
+	 * @param features
+	 * @return
+	 */
+	private HashMap<String, XDataType> getDatabaseSchema(ArrayList<Feature> features) {
+	    
+	    if(features == null){
+	        return null;
+	    }
+	    
+        HashMap<String, XDataType> map = new HashMap<String, XDataType>();
+        
+        for(Feature feature : features){
+            
+            for(String k : feature.properties.keySet()){
+                map.put(k , XDataType.text);
+            }
+        }
+        map.put(VectorLayer.URL , XDataType.text);
+        map.put(VectorLayer.VERSION, XDataType.integer);
+        map.put(VectorLayer.STYLE, XDataType.text);
+        
+        return map;
+    }
+
+
+    /**
 	 * reads the version column of the local vector layer table and returns it
 	 * @param tableName the name of the table
 	 * @return the version or -1 if the table does not exist
