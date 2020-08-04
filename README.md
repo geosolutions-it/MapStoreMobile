@@ -2,6 +2,7 @@
 MapStore Mobile is an Android native application based on MapStore to display MapStore maps, with offline data support.
 
 **--> This project has been abandoned <--**
+
 No further developments or updates are foreseen.
 
 ## Features
